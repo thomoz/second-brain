@@ -1,0 +1,32 @@
+# Local secrets and machine-specific config
+.env
+*.env
+master.env
+mcp-config.json
+.mcp.json
+.claude/settings.local.json
+
+# Runtime data and generated state
+.claude/data/
+.claude/memory/
+.claude/scripts/.env
+.claude/scripts/.venv/
+.claude/scripts/heartbeat_runs.log
+.claude/scripts/reflection_runs.log
+.claude/scripts/vault_sync_runs.log
+.claude/scripts/integrations/google_credentials.json
+.claude/scripts/integrations/google_token.json
+.claude/skills/pptx-generator/.tmp/
+
+# Temporary files and caches
+tmp/
+workspace/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# OS/editor artifacts
+NUL
+Thumbs.db
+.DS_Store
