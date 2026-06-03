@@ -8,7 +8,10 @@ Active as of: 2026-06-03
 - Proactivity: Advisor mode — draft for review, never act autonomously
 
 ## Active Projects
-(Populated during BOOTSTRAP.md onboarding)
+- **Hosting growth** — increase shows + find higher-paying venues; build cash buffer pre-crash
+- **SongbookDB** — reduce churn (AI onboarding idea); desktop app blocked by code signing issue; Mac AIR deprecation looming
+- **Karaoke Night app** — low priority; ToS concerns; early build with Victor Northhead
+- **Creative work** — FiNN TWiST music + Juno: Wonderdog film — on hold until income stable
 
 ## Key Decisions
 - Second Brain build started 2026-06-03
