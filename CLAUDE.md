@@ -44,8 +44,7 @@ all action requires Shaun's explicit review.
 - Build the complete Second Brain feature set from the original workshop, but adapt Claude-specific runtime pieces as they are built.
 - Use Cole's original repo as the feature reference: `O:\AI\Dynamous\Courses\workshops\claude-code-second-brain`.
 - Use Cole's architecture diagram as the visual component/data-flow reference: `O:\AI\Dynamous\Courses\workshops\claude-code-second-brain\SecondBrainArchitecture.excalidraw`.
-- Use the Pi migration PRD as the runtime adaptation reference: `O:\AI\Dynamous\Courses\workshops\off-claudes-leash\pi-migration-prd.md`.
-- Use the worked shim examples here: `O:\AI\Dynamous\Courses\workshops\off-claudes-leash\reference-implementation\`.
+- Phase 2 complete — shim files are in `.claude/scripts/`, no further reference to off-claudes-leash needed.
 - Preserve these behaviors across backends: context injection, memory flush, daily logs, tool safety, chat continuity, heartbeat, reflection, memory search, and deployment scripts.
 - Claude-specific names such as `CLAUDE.md` and `.claude/` may remain for workshop compatibility, but they must not imply a hard Claude runtime dependency.
 - When the diagram refers to Claude Code or Claude Agent SDK, implement the equivalent through `sdk_compat` and Pi unless explicitly building Claude compatibility.
