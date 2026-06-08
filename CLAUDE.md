@@ -51,7 +51,19 @@ all action requires Shaun's explicit review.
 - When the diagram refers to Claude Code or Claude Agent SDK, implement the equivalent through `sdk_compat` and Pi unless explicitly building Claude compatibility.
 
 ## Build Commands
-(Populated as phases complete)
+
+```powershell
+# Test hooks (pipe empty JSON to stdin via subprocess)
+python -c "import subprocess; subprocess.run(['python','.claude/hooks/session-start-context.py'],input=b'{}')"
+python -c "import subprocess; subprocess.run(['python','.claude/hooks/session-end-flush.py'],input=b'{}')"
+python -c "import subprocess; subprocess.run(['python','.claude/hooks/pre-compact-flush.py'],input=b'{}')"
+
+# Test context injection
+python -c "import sys; sys.path.insert(0,'.claude/scripts'); from session_context import build_context; print(build_context()[:500])"
+
+# Manual memory flush (replace paths as needed)
+python .claude/scripts/memory_flush.py <transcript_path> <session_id>
+```
 
 ## Completed Phases
 
@@ -59,3 +71,10 @@ all action requires Shaun's explicit review.
 Memory vault created at Memory/ with SOUL.md, USER.md, MEMORY.md, BOOTSTRAP.md,
 HEARTBEAT.md, HABITS.md. All subdirectory stubs created. BOOTSTRAP.md will run
 onboarding on first session to populate email accounts and active projects.
+
+### Phase 2: Model-Agnostic Hooks and Context Persistence (2026-06-08)
+Lifecycle hooks (SessionStart, SessionEnd, PreCompact, PreToolUse/soul-protect)
+wired via .claude/settings.json. Backend-agnostic shim layer: sdk_compat.py
+(selector) + pi_sdk_compat.py (Pi subprocess driver). Shared utilities in
+shared.py. Context builder in session_context.py. Background summarizer in
+memory_flush.py. Pi safety + memory-hooks TypeScript extensions in pi_ext/.
