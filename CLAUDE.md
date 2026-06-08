@@ -50,6 +50,21 @@ all action requires Shaun's explicit review.
 - Claude-specific names such as `CLAUDE.md` and `.claude/` may remain for workshop compatibility, but they must not imply a hard Claude runtime dependency.
 - When the diagram refers to Claude Code or Claude Agent SDK, implement the equivalent through `sdk_compat` and Pi unless explicitly building Claude compatibility.
 
+## Build Workflow (PIV Loop — Do Not Skip Steps)
+
+The PRD describes WHAT to build. It is not an implementation guide.
+Before implementing any phase, `/core_piv_loop:plan-feature` must be run first —
+it reads the PRD + Cole's reference code and produces a detailed plan with gotchas,
+validation commands, and per-task acceptance criteria.
+
+```
+/prime           → load context
+/plan-feature    → read PRD + reference code → create .agent/plans/phase-N-name.md
+/execute         → build from the detailed plan (never from the PRD directly)
+```
+
+Cole's reference code (Phases 3–9): `O:\AI\Dynamous\Courses\workshops\claude-code-second-brain\`
+
 ## Build Commands
 
 ```powershell
@@ -63,6 +78,17 @@ python -c "import sys; sys.path.insert(0,'.claude/scripts'); from session_contex
 
 # Manual memory flush (replace paths as needed)
 python .claude/scripts/memory_flush.py <transcript_path> <session_id>
+
+# Memory search (Phase 3)
+python .claude/scripts/memory_index.py              # Incremental re-index
+python .claude/scripts/memory_index.py --rebuild    # Force full reindex
+python .claude/scripts/memory_index.py --stats      # Show index statistics
+python .claude/scripts/memory_index.py --test       # Dry run (list files only)
+python .claude/scripts/memory_search.py "query"                           # Hybrid search (default)
+python .claude/scripts/memory_search.py "query" --mode keyword            # BM25 only
+python .claude/scripts/memory_search.py "query" --mode semantic           # Vector only
+python .claude/scripts/memory_search.py --path-prefix drafts/sent "query" # Voice-match search
+python .claude/scripts/memory_search.py --test                            # Run test queries
 ```
 
 ## Completed Phases
@@ -78,3 +104,10 @@ wired via .claude/settings.json. Backend-agnostic shim layer: sdk_compat.py
 (selector) + pi_sdk_compat.py (Pi subprocess driver). Shared utilities in
 shared.py. Context builder in session_context.py. Background summarizer in
 memory_flush.py. Pi safety + memory-hooks TypeScript extensions in pi_ext/.
+
+### Phase 3: Memory Search — Hybrid RAG (2026-06-08)
+SQLite + sqlite-vec + FTS5 hybrid search index over Memory/ vault.
+embeddings.py (FastEmbed/all-MiniLM-L6-v2, 384-dim), db.py (SQLite + Postgres
+abstraction, MemoryDB protocol), memory_index.py (incremental, content-hash
+change detection, 400-token chunks/80-token overlap), memory_search.py
+(keyword/semantic/hybrid modes, weighted fusion, --path-prefix for voice-matching).

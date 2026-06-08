@@ -26,6 +26,12 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
+# Phase 3: Memory Search
+.claude/data/memory.db
+.claude/data/memory.db-shm
+.claude/data/memory.db-wal
+.claude/data/models/
+
 # OS/editor artifacts
 NUL
 Thumbs.db
