@@ -8,6 +8,36 @@
 
 ---
 
+## Project-Wide Architecture Update: Model-Agnostic Runtime
+
+This project must be built as a model-agnostic Second Brain, not a Claude-dependent one.
+
+Cole's original Second Brain repo remains the feature-completeness reference for what the brain needs to include. The Off Claude's Leash Pi migration PRD and reference implementation define how Claude-specific runtime pieces should be adapted as each phase is built.
+
+### Required References
+
+- Feature reference: `O:\AI\Dynamous\Courses\workshops\claude-code-second-brain`
+- Architecture diagram reference: `O:\AI\Dynamous\Courses\workshops\claude-code-second-brain\SecondBrainArchitecture.excalidraw`
+- Pi migration PRD: `O:\AI\Dynamous\Courses\workshops\off-claudes-leash\pi-migration-prd.md`
+- Pi reference implementation: `O:\AI\Dynamous\Courses\workshops\off-claudes-leash\reference-implementation\`
+
+### Planning Rules
+
+- Build each workshop phase from Cole's original Second Brain behavior and file layout.
+- Use the Excalidraw diagram to understand the original component layout and data flow.
+- Whenever a phase uses Claude Agent SDK or Claude Code runtime behavior, apply the corresponding Pi adaptation immediately.
+- All LLM call sites must import through `.claude/scripts/sdk_compat.py`, not directly from `claude_agent_sdk`.
+- Pi is the primary backend for model/provider independence.
+- `pi_sdk_compat.py` and `sdk_compat.py` should be adapted from the Off Claude's Leash reference implementation, not invented from scratch.
+- `config.py`, `shared.py`, hooks, memory search, heartbeat, reflection, chat, scheduler scripts, and deployment pieces still come from the original Second Brain feature set.
+- Preserve behavior across backends: SessionStart context injection, PreCompact flush, SessionEnd flush, tool safety, memory search, heartbeat, reflection, chat continuity, and daily log persistence.
+- Claude-specific file and folder names may remain where the workshop expects them, but they are compatibility structure, not the runtime dependency.
+- Future phase plans that mention "Claude" or "Claude Agent SDK" should be implemented as "use the compatibility layer" unless the task is specifically documenting Claude compatibility.
+
+### Immediate Impact
+
+Phase 2 is the first affected implementation phase. It must build Cole's context-persistence feature set, but route LLM calls and Pi runtime parity through the model-agnostic compatibility layer.
+
 ## Prerequisites to Acquire Before Starting
 
 Before Phase 1 you can start immediately. These are needed later:
@@ -224,7 +254,7 @@ After completing Phase 1, add all `Memory/` subdirectory paths to CLAUDE.md's Ke
 
 ---
 
-## Phase 2: Hooks (Context Persistence)
+## Phase 2: Model-Agnostic Hooks and Context Persistence
 
 ### What to Build
 Three lifecycle hooks that automatically inject your memory context into every Claude Code session and intelligently summarize conversations to your daily log, plus `shared.py` — the shared utilities module for safe concurrent file access across all background processes.
@@ -242,6 +272,37 @@ Three lifecycle hooks that automatically inject your memory context into every C
 │   └── memory_flush.py           — Background Agent SDK summarizer
 └── settings.json                 — Hook configuration
 ```
+
+### Model-Agnostic Phase 2 Override
+
+The original Phase 2 text below describes the Claude Code implementation pattern. For this branch, implement the same behavior with a model-agnostic runtime layer.
+
+Build these from Cole's original repo as the feature reference:
+
+- `config.py`
+- `shared.py`
+- `memory_flush.py`
+- `.claude/hooks/session-start-context.py`
+- `.claude/hooks/session-end-flush.py`
+- `.claude/hooks/pre-compact-flush.py`
+- `.claude/hooks/soul-protect.py`
+- `.claude/settings.json`
+
+Add these from the Off Claude's Leash Pi reference as the runtime adaptation layer:
+
+- `sdk_compat.py`
+- `pi_sdk_compat.py`
+- `session_context.py`
+- `pi_ext/pi_safety.ts`
+- `pi_ext/pi_memory_hooks.ts`
+
+Required implementation rules:
+
+- `memory_flush.py` imports `query`, `ClaudeAgentOptions`, and message types from `sdk_compat`, not directly from `claude_agent_sdk`.
+- SessionStart context construction lives in reusable `session_context.py` so both Claude Code hooks and Pi runtime paths inject the same SOUL/USER/MEMORY/recent-log context.
+- PreCompact and SessionEnd memory flush behavior must exist under Pi through `pi_ext/pi_memory_hooks.ts` or equivalent Pi lifecycle wiring.
+- Tool safety must exist under Pi through `pi_ext/pi_safety.ts`, mirroring dangerous-command and protected-file rules.
+- Later phases follow the same rule: build Cole's feature set, but route model calls through `sdk_compat`.
 
 ### Implementation Details
 
@@ -291,12 +352,12 @@ print(json.dumps({
 **`.claude/scripts/memory_flush.py`**:
 ```python
 #!/usr/bin/env python3
-"""Background Agent SDK summarizer. Spawned by PreCompact/SessionEnd hooks.
+"""Background agent summarizer. Spawned by PreCompact/SessionEnd hooks.
 Reads conversation transcript, extracts worth-keeping items, writes to daily log."""
 import os, sys, asyncio, json
 from pathlib import Path
 
-os.environ["CLAUDE_INVOKED_BY"] = "memory_flush"  # CRITICAL: prevents recursion
+os.environ["AGENT_INVOKED_BY"] = "memory_flush"  # CRITICAL: prevents recursion
 
 DEDUP_FILE = Path(".claude/data/flush_dedup.json")
 
@@ -322,10 +383,10 @@ async def flush(transcript_path: str, session_id: str):
 
     transcript = Path(transcript_path).read_text()[:12000]  # Truncate large transcripts
 
-    from claude_agent_sdk import query, ClaudeAgentOptions
+    from sdk_compat import query, ClaudeAgentOptions
     result_text = ""
     async for msg in query(
-        prompt=f"""Review this Claude Code conversation and extract anything worth remembering:
+        prompt=f"""Review this conversation and extract anything worth remembering:
 decisions made, lessons learned, action items, key facts about the user's businesses or projects.
 Write a concise bullet-point summary (max 10 bullets, each under 100 chars).
 If nothing is worth remembering, output only: FLUSH_OK
@@ -499,11 +560,11 @@ DANGEROUS_BASH_PATTERNS = [
 }
 ```
 
-**Recursion prevention** — every Agent SDK script must set this before any Claude calls:
+**Recursion prevention** — every agent script must set this before any LLM calls:
 ```python
-os.environ["CLAUDE_INVOKED_BY"] = "memory_flush"  # or "heartbeat", "reflection", "chat"
+os.environ["AGENT_INVOKED_BY"] = "memory_flush"  # or "heartbeat", "reflection", "chat"
 ```
-The SessionEnd and PreCompact hooks check for this env var and exit immediately if set — otherwise every Agent SDK session exit triggers another flush, creating an infinite loop.
+The SessionEnd and PreCompact hooks check for this env var and exit immediately if set — otherwise every agent session exit triggers another flush, creating an infinite loop.
 
 ### Dependencies
 Phase 1 (Memory vault must exist before hooks try to read it)
@@ -1086,7 +1147,7 @@ Memory/
 **Stage 1 — Gather data** (Python only, no LLM):
 ```python
 import os
-os.environ["CLAUDE_INVOKED_BY"] = "heartbeat"  # Recursion prevention
+os.environ["AGENT_INVOKED_BY"] = "heartbeat"  # Recursion prevention
 
 gmail_messages = list_all_gmail_accounts(registry.GMAIL_ACCOUNTS)  # All accounts
 outlook_messages = outlook.list_unread()
@@ -1127,7 +1188,7 @@ Without state diffing, every 30-minute run re-surfaces the same unread emails an
 ```python
 async def run_preflight_guardrail(sanitized_context: str) -> dict:
     """Separate LLM call, no tools — checks for prompt injection before main agent."""
-    from claude_agent_sdk import query, ClaudeAgentOptions
+    from sdk_compat import query, ClaudeAgentOptions
     result = {}
     async for msg in query(
         prompt=f"""You are a security guardrail for an AI Second Brain system.
@@ -1158,9 +1219,9 @@ or {{"verdict": "suspicious", "reason": "..."}}
 - `"suspicious"` → proceed but prepend warning to daily log entry
 - `"pass"` → continue to Stage 4
 
-**Stage 4 — Main Claude reasoning** (Advisor-mode Agent SDK):
+**Stage 4 — Main agent reasoning** (Advisor-mode, model-agnostic):
 ```python
-from claude_agent_sdk import query, ClaudeAgentOptions
+from sdk_compat import query, ClaudeAgentOptions
 from pathlib import Path
 import datetime
 
@@ -1289,11 +1350,11 @@ Runs at 8 AM AEST via Windows Task Scheduler. Reviews yesterday's daily log and 
 
 ```python
 import os, asyncio
-from claude_agent_sdk import query, ClaudeAgentOptions
+from sdk_compat import query, ClaudeAgentOptions
 from pathlib import Path
 import datetime
 
-os.environ["CLAUDE_INVOKED_BY"] = "reflection"  # Recursion prevention
+os.environ["AGENT_INVOKED_BY"] = "reflection"  # Recursion prevention
 
 yesterday = (datetime.date.today() - datetime.timedelta(days=1)).isoformat()
 log = Path(f"Memory/daily/{yesterday}.md")
@@ -1303,7 +1364,7 @@ async def reflect():
         return
 
     async for msg in query(
-        prompt=f"""Review yesterday's daily log and identify any items that should be 
+        prompt=f"""Review yesterday's daily log and identify items that should be 
 promoted to MEMORY.md for long-term retention.
 
 Promote: key decisions, important lessons, facts about businesses/clients/projects,
@@ -1334,7 +1395,7 @@ asyncio.run(reflect())
 import json, sys, os
 
 data = json.load(sys.stdin)
-if os.environ.get("CLAUDE_INVOKED_BY") == "reflection":
+if os.environ.get("AGENT_INVOKED_BY") == "reflection":
     file_path = (data.get("tool_input") or {}).get("file_path", "")
     if "SOUL.md" in file_path:
         print(json.dumps({
@@ -1416,7 +1477,7 @@ Memory/HABITS.md                              # Daily habits tracker
 ## Phase 7: Chat Interface (WhatsApp Bot)
 
 ### What to Build
-A persistent conversational interface via WhatsApp — message yourself to query your Second Brain from anywhere, including CarPlay. The bot runs as a local server, receives messages via GREEN-API, and maintains conversation context across messages using the Claude Agent SDK's `ClaudeSDKClient`.
+A persistent conversational interface via WhatsApp — message yourself to query your Second Brain from anywhere, including CarPlay. The bot runs as a local server, receives messages via GREEN-API, and maintains conversation context across messages using `sdk_compat.query` with a deterministic `resume` session id — Pi persists full history on disk across separate one-shot calls.
 
 ### Key Files
 ```
@@ -1434,21 +1495,25 @@ A persistent conversational interface via WhatsApp — message yourself to query
 ```
 You (WhatsApp) → GREEN-API webhook → whatsapp_bot.py server
   → platform_adapter normalizes message
-  → ClaudeSDKClient (persistent, per-chat-thread context)
+  → sdk_compat.query(resume=session_id) (persistent context via Pi session tree)
   → response
   → GREEN-API send → You (WhatsApp/CarPlay)
 ```
 
 **`whatsapp_bot.py`**:
 ```python
-import os, asyncio, sqlite3
+import os, asyncio, re, sqlite3
 from pathlib import Path
 from flask import Flask, request, jsonify
-from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions
+from sdk_compat import query, ClaudeAgentOptions
 
-os.environ["CLAUDE_INVOKED_BY"] = "chat"  # Recursion prevention
+os.environ["AGENT_INVOKED_BY"] = "chat"  # Recursion prevention
 
 app = Flask(__name__)
+
+def make_session_id(chat_id: str) -> str:
+    """Deterministic Pi session id from chat_id. Pi resumes from disk on each call."""
+    return "sb-" + re.sub(r"[^A-Za-z0-9]+", "-", chat_id).strip("-")
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -1470,28 +1535,27 @@ def webhook():
     return jsonify({"status": "ok"})
 
 async def handle_message(chat_id: str, text: str):
-    session_id = get_or_create_session(chat_id)
+    session_id = make_session_id(chat_id)
     
-    async with ClaudeSDKClient(
+    response_parts = []
+    async for msg in query(
+        prompt=text,
         options=ClaudeAgentOptions(
             system_prompt=Path("Memory/SOUL.md").read_text(),
             allowed_tools=["Read"],   # Read-only: Memory/ files only
             permission_mode="dontAsk",
             setting_sources=["project"],
-            resume=session_id,        # Resumes existing conversation context
+            resume=session_id,        # Pi resumes full history from disk session tree
         )
-    ) as client:
-        await client.query(text)
-        response_parts = []
-        async for msg in client.receive_response():
-            if hasattr(msg, 'text') and msg.text:
-                response_parts.append(msg.text)
-        
-        response = "\n".join(response_parts).strip()
-        if response:
-            send_whatsapp_reply(chat_id, response)
-        
-        save_session(chat_id, client.session_id)  # Persist for next message
+    ):
+        if hasattr(msg, "content"):
+            for block in msg.content:
+                if hasattr(block, "text") and block.text:
+                    response_parts.append(block.text)
+    
+    response = "\n".join(response_parts).strip()
+    if response:
+        send_whatsapp_reply(chat_id, response)
 
 if __name__ == "__main__":
     app.run(port=int(os.environ.get("CHAT_PORT", 8765)))
