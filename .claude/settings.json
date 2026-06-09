@@ -43,6 +43,7 @@
           {
             "type": "command",
             "command": "python .claude/hooks/soul-protect.py",
+            "shell": "powershell",
             "timeout": 10
           }
         ]

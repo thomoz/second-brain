@@ -90,6 +90,29 @@ python .claude/scripts/memory_search.py --path-prefix drafts/sent "query" # Voic
 python .claude/scripts/memory_search.py --test                            # Run test queries
 ```
 
+## Integrations (Phase 4)
+```powershell
+# Auth setup (run once per account, then weekly due to Testing-mode token expiry)
+python .claude/scripts/integrations/setup_auth.py --check         # Check auth status
+python .claude/scripts/integrations/setup_auth.py                 # Run all auth flows
+
+# Gmail
+python .claude/scripts/integrations/query.py gmail list           # All accounts unread (last 24h)
+python .claude/scripts/integrations/query.py gmail list --account sbdb --hours 48  # Single account
+python .claude/scripts/integrations/query.py gmail unread         # Unread counts per account
+python .claude/scripts/integrations/query.py gmail urgent         # Urgent across all accounts
+
+# Calendar
+python .claude/scripts/integrations/query.py calendar all         # All 6 calendars (next 24h)
+python .claude/scripts/integrations/query.py calendar today       # Personal calendar today
+python .claude/scripts/integrations/query.py calendar today --calendar bgk  # Specific calendar
+
+# Outlook
+python .claude/scripts/integrations/query.py outlook list         # Outlook inbox
+python .claude/scripts/integrations/query.py outlook unread       # Unread count
+python .claude/scripts/integrations/query.py outlook urgent       # Unread last 2h
+```
+
 ## Completed Phases
 
 ### Phase 1: Memory Foundation (2026-06-03)
@@ -110,3 +133,14 @@ embeddings.py (FastEmbed/all-MiniLM-L6-v2, 384-dim), db.py (SQLite + Postgres
 abstraction, MemoryDB protocol), memory_index.py (incremental, content-hash
 change detection, 400-token chunks/80-token overlap), memory_search.py
 (keyword/semantic/hybrid modes, weighted fusion, --path-prefix for voice-matching).
+
+### Phase 4: Integrations — Gmail + Calendar + Outlook (2026-06-09)
+Multi-account Gmail (8 accounts, per-account token_gmail_{name}.json), 6 Google Calendars
+(single personal-account OAuth, calendar sharing required for non-personal), Outlook
+(MSAL device code flow, outlook_token.json). config.py: LOCAL_TZ alias, GMAIL_ACCOUNTS dict,
+GOOGLE_CALENDAR_IDS dict, google_token_file(), OUTLOOK_CLIENT_ID/TENANT_ID constants.
+auth.py: account_name param. gmail.py: list_all_accounts(). calendar_api.py:
+get_all_calendars_events() + format_all_calendars_for_context(). New: outlook.py,
+setup_auth.py, query.py (unified CLI), pyproject.toml, test_integrations.py.
+NOTE: OAuth app in Testing mode — tokens expire every 7 days, re-run setup_auth.py weekly.
+Calendar sharing (manual step): share non-personal calendars with shaunthommo10@gmail.com.

@@ -16,6 +16,8 @@ mcp-config.json
 .claude/scripts/vault_sync_runs.log
 .claude/scripts/integrations/google_credentials.json
 .claude/scripts/integrations/google_token.json
+.claude/scripts/integrations/token_gmail_*.json
+.claude/scripts/integrations/outlook_token.json
 .claude/skills/pptx-generator/.tmp/
 
 # Temporary files and caches

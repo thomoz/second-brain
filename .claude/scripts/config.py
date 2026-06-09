@@ -31,7 +31,7 @@ def now_local() -> datetime:
 # ---------------------------------------------------------------------------
 import os as _os
 from dotenv import load_dotenv as _load_dotenv
-_load_dotenv()
+_load_dotenv(Path(__file__).parent / ".env")
 
 # Database
 DATABASE_PATH = DATA_DIR / "memory.db"
@@ -49,6 +49,53 @@ SEARCH_VECTOR_WEIGHT = 0.7
 SEARCH_KEYWORD_WEIGHT = 0.3
 SEARCH_DEFAULT_LIMIT = 10
 SEARCH_MIN_SCORE = 0.2
+
+
+# ---------------------------------------------------------------------------
+# Phase 4: Integrations
+# ---------------------------------------------------------------------------
+
+# LOCAL_TZ alias — integration files import LOCAL_TZ; TZ is the canonical name
+LOCAL_TZ = TZ
+
+# Integration directory — absolute path derived from __file__ so CWD doesn't matter
+INTEGRATIONS_DIR = Path(__file__).resolve().parent / "integrations"
+
+# Google OAuth — shared credentials file, per-account token files
+GOOGLE_CREDENTIALS_FILE = INTEGRATIONS_DIR / "google_credentials.json"
+GOOGLE_SCOPES = [
+    "https://www.googleapis.com/auth/gmail.readonly",
+    "https://www.googleapis.com/auth/gmail.compose",
+    "https://www.googleapis.com/auth/calendar.readonly",
+]
+
+
+def google_token_file(account_name: str) -> Path:
+    """Return path to per-account Gmail token file."""
+    return INTEGRATIONS_DIR / f"token_gmail_{account_name}.json"
+
+
+# Gmail accounts — populated from GMAIL_ACCOUNT_* env vars
+# Maps account_name → email address (for display/logging only; auth uses token file)
+GMAIL_ACCOUNTS: dict[str, str] = {}
+for _key, _val in _os.environ.items():
+    if _key.startswith("GMAIL_ACCOUNT_") and _val:
+        _acct = _key[len("GMAIL_ACCOUNT_"):].lower()
+        GMAIL_ACCOUNTS[_acct] = _val
+
+# Google Calendar IDs — populated from GOOGLE_CALENDAR_ID_* env vars
+# Maps calendar_name → calendar_id
+GOOGLE_CALENDAR_IDS: dict[str, str] = {}
+for _key, _val in _os.environ.items():
+    if _key.startswith("GOOGLE_CALENDAR_ID_") and _val:
+        _cal = _key[len("GOOGLE_CALENDAR_ID_"):].lower()
+        GOOGLE_CALENDAR_IDS[_cal] = _val
+
+# Outlook (Microsoft Graph)
+OUTLOOK_CLIENT_ID = _os.getenv("OUTLOOK_CLIENT_ID", "")
+OUTLOOK_TENANT_ID = _os.getenv("OUTLOOK_TENANT_ID", "consumers")
+OUTLOOK_TOKEN_FILE = INTEGRATIONS_DIR / "outlook_token.json"
+OUTLOOK_SCOPES = ["Mail.Read"]
 
 
 def ensure_directories() -> None:

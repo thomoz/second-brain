@@ -1,0 +1,41 @@
+[project]
+name = "second-brain"
+version = "0.1.0"
+description = "Shaun Thomson's Second Brain"
+requires-python = ">=3.12"
+dependencies = [
+    "python-dotenv>=1.0.0",
+    "tzdata>=2024.1",
+    # Phase 3: Memory Search
+    "fastembed>=0.4.0",
+    "sqlite-vec>=0.1.6",
+    "numpy>=1.26.0",
+    "psycopg[binary]>=3.1.0",
+    "pgvector>=0.3.0",
+    # Phase 4: Integrations
+    "google-api-python-client>=2.100.0",
+    "google-auth-oauthlib>=1.2.0",
+    "google-auth-httplib2>=0.2.0",
+    "msal>=1.28.0",
+    "requests>=2.31.0",
+    # Phase 6: Notifications (Windows)
+    "win10toast-click>=0.1.2; sys_platform == 'win32'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.8.0",
+    "ruff>=0.2.0",
+    "pytest>=8.0.0",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true

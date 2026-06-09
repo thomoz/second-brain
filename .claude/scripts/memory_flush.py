@@ -44,7 +44,8 @@ async def flush(transcript: str, session_id: str) -> None:
     if _already_flushed_recently(session_id):
         return
 
-    transcript = transcript[:TRANSCRIPT_CHAR_LIMIT]
+    # Take the tail: most recent content is what needs summarising
+    transcript = transcript[-TRANSCRIPT_CHAR_LIMIT:]
 
     from sdk_compat import AgentOptions, query
 
