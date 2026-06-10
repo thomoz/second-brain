@@ -82,21 +82,15 @@ class TestPatternDetection:
 
     def test_ai_discussion_legit(self) -> None:
         """AI discussions about prompt injection are legitimate content."""
-        assert not check_injection_patterns(
-            "Great video about prompt injection defense techniques"
-        )
+        assert not check_injection_patterns("Great video about prompt injection defense techniques")
 
     def test_system_prompt_discussion(self) -> None:
         """Discussing system prompts is not injecting them."""
-        assert not check_injection_patterns(
-            "How do you write a good system prompt for Claude?"
-        )
+        assert not check_injection_patterns("How do you write a good system prompt for Claude?")
 
     def test_you_are_now_welcome(self) -> None:
         """Community notification: 'You are now a member' is not injection."""
-        assert not check_injection_patterns(
-            "You are now a member of the Dynamous community!"
-        )
+        assert not check_injection_patterns("You are now a member of the Dynamous community!")
 
     def test_you_are_now_invited(self) -> None:
         assert not check_injection_patterns("You are now invited to the workshop")
@@ -111,9 +105,7 @@ class TestPatternDetection:
         assert not check_injection_patterns("You are now enrolled in the course")
 
     def test_normal_slack_message(self) -> None:
-        assert not check_injection_patterns(
-            "Hey, can you review my PR when you get a chance?"
-        )
+        assert not check_injection_patterns("Hey, can you review my PR when you get a chance?")
 
     def test_code_discussion(self) -> None:
         assert not check_injection_patterns("The function returns the system prompt length")
@@ -308,9 +300,7 @@ class TestNonDisruption:
         """Sanitization of 100 emails should complete in < 100ms."""
         start = time.time()
         for _ in range(100):
-            sanitize_external_text(
-                "Normal email subject about budget meeting", "gmail"
-            )
+            sanitize_external_text("Normal email subject about budget meeting", "gmail")
         elapsed = time.time() - start
         assert elapsed < 0.1  # 100ms budget
 

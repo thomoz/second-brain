@@ -242,7 +242,11 @@ def main() -> None:
     )
     parser.add_argument("--limit", type=int, default=SEARCH_DEFAULT_LIMIT, help="Max results")
     parser.add_argument("--min-score", type=float, default=SEARCH_MIN_SCORE, help="Min score")
-    parser.add_argument("--path-prefix", default="", help="Filter results to files under this path prefix (e.g. 'drafts/sent')")
+    parser.add_argument(
+        "--path-prefix",
+        default="",
+        help="Filter results to files under this path prefix (e.g. 'drafts/sent')",
+    )
     parser.add_argument("--test", action="store_true", help="Run test queries")
     args = parser.parse_args()
 
@@ -253,7 +257,13 @@ def main() -> None:
     if not args.query:
         parser.error("query is required (or use --test)")
 
-    results = search(args.query, mode=args.mode, limit=args.limit, min_score=args.min_score, path_prefix=args.path_prefix)
+    results = search(
+        args.query,
+        mode=args.mode,
+        limit=args.limit,
+        min_score=args.min_score,
+        path_prefix=args.path_prefix,
+    )
     output = format_results(results)
     # Handle Windows console encoding issues with Unicode characters
     try:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PreToolUse hook: block reflection agent from editing SOUL.md."""
+"""PreToolUse hook: block all automated agents from editing SOUL.md."""
 from __future__ import annotations
 
 import json
@@ -8,7 +8,7 @@ import sys
 
 data = json.load(sys.stdin)
 
-if os.environ.get("AGENT_INVOKED_BY") == "reflection":
+if os.environ.get("AGENT_INVOKED_BY"):
     tool_input = data.get("tool_input") or {}
     file_path = tool_input.get("file_path", "")
     if "SOUL.md" in file_path:
@@ -17,7 +17,7 @@ if os.environ.get("AGENT_INVOKED_BY") == "reflection":
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "deny",
                 "permissionDecisionReason": (
-                    "SOUL.md is write-protected during reflection. "
+                    "SOUL.md is write-protected from all automated processes. "
                     "Log personality change suggestions to the daily log instead."
                 ),
             }

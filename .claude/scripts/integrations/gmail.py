@@ -93,15 +93,17 @@ def get_email_details(service: Any, msg_id: str, include_body: bool = False) -> 
     try:
         fmt = "full" if include_body else "metadata"
         msg: dict[str, Any] = with_retry(
-            lambda: service.users()
-            .messages()
-            .get(
-                userId="me",
-                id=msg_id,
-                format=fmt,
-                metadataHeaders=["From", "Subject", "Date"],
+            lambda: (
+                service.users()
+                .messages()
+                .get(
+                    userId="me",
+                    id=msg_id,
+                    format=fmt,
+                    metadataHeaders=["From", "Subject", "Date"],
+                )
+                .execute()
             )
-            .execute()
         )
 
         headers: dict[str, str] = {
@@ -171,10 +173,12 @@ def list_emails(
     full_query = " ".join(q_parts) if q_parts else None
 
     result: dict[str, Any] = with_retry(
-        lambda: service.users()
-        .messages()
-        .list(userId="me", maxResults=max_results, q=full_query)
-        .execute()
+        lambda: (
+            service.users()
+            .messages()
+            .list(userId="me", maxResults=max_results, q=full_query)
+            .execute()
+        )
     )
 
     messages: list[dict[str, str]] = result.get("messages", [])
@@ -193,10 +197,12 @@ def get_unread_count(account_name: str = "personal") -> int:
     service = get_gmail_service(account_name)
 
     result: dict[str, Any] = with_retry(
-        lambda: service.users()
-        .messages()
-        .list(userId="me", q="is:unread in:inbox", maxResults=1)
-        .execute()
+        lambda: (
+            service.users()
+            .messages()
+            .list(userId="me", q="is:unread in:inbox", maxResults=1)
+            .execute()
+        )
     )
 
     count: int = result.get("resultSizeEstimate", 0)
@@ -213,7 +219,9 @@ def check_for_urgent_emails(
 
     Flags emails from important senders or with urgent keywords in subject.
     """
-    recent = list_emails(max_results=20, unread_only=True, hours_ago=hours_ago, account_name=account_name)
+    recent = list_emails(
+        max_results=20, unread_only=True, hours_ago=hours_ago, account_name=account_name
+    )
 
     urgent_keywords = ["urgent", "asap", "important", "action required", "deadline"]
     urgent: list[Email] = []
@@ -258,10 +266,7 @@ def list_attachments(msg_id: str) -> list[Attachment]:
     service = get_gmail_service()
 
     msg: dict[str, Any] = with_retry(
-        lambda: service.users()
-        .messages()
-        .get(userId="me", id=msg_id, format="full")
-        .execute()
+        lambda: service.users().messages().get(userId="me", id=msg_id, format="full").execute()
     )
 
     attachments: list[Attachment] = []
@@ -272,12 +277,14 @@ def list_attachments(msg_id: str) -> list[Attachment]:
             attachment_id = body.get("attachmentId")
             filename = part.get("filename", "")
             if attachment_id and filename:
-                attachments.append(Attachment(
-                    id=attachment_id,
-                    filename=filename,
-                    mime_type=part.get("mimeType", "application/octet-stream"),
-                    size=body.get("size", 0),
-                ))
+                attachments.append(
+                    Attachment(
+                        id=attachment_id,
+                        filename=filename,
+                        mime_type=part.get("mimeType", "application/octet-stream"),
+                        size=body.get("size", 0),
+                    )
+                )
             # Recurse into nested multipart
             if part.get("parts"):
                 _walk_parts(part["parts"])
@@ -303,11 +310,13 @@ def download_attachment(msg_id: str, attachment_id: str, output_path: Path) -> P
     service = get_gmail_service()
 
     result: dict[str, Any] = with_retry(
-        lambda: service.users()
-        .messages()
-        .attachments()
-        .get(userId="me", messageId=msg_id, id=attachment_id)
-        .execute()
+        lambda: (
+            service.users()
+            .messages()
+            .attachments()
+            .get(userId="me", messageId=msg_id, id=attachment_id)
+            .execute()
+        )
     )
 
     file_data = base64.urlsafe_b64decode(result["data"])
@@ -321,10 +330,9 @@ def get_thread_id(msg_id: str) -> str | None:
     service = get_gmail_service()
     try:
         msg: dict[str, Any] = with_retry(
-            lambda: service.users()
-            .messages()
-            .get(userId="me", id=msg_id, format="minimal")
-            .execute()
+            lambda: (
+                service.users().messages().get(userId="me", id=msg_id, format="minimal").execute()
+            )
         )
         return msg.get("threadId")
     except Exception:
@@ -335,9 +343,7 @@ def delete_gmail_draft(draft_id: str) -> bool:
     """Delete a Gmail draft by its ID. Returns True if deleted, False on error."""
     service = get_gmail_service()
     try:
-        with_retry(
-            lambda: service.users().drafts().delete(userId="me", id=draft_id).execute()
-        )
+        with_retry(lambda: service.users().drafts().delete(userId="me", id=draft_id).execute())
         return True
     except Exception as e:
         print(f"Warning: failed to delete Gmail draft {draft_id}: {e}")
@@ -418,6 +424,7 @@ def create_gmail_draft(
                 att = email.mime.base.MIMEBase(main_type, sub_type)
                 att.set_payload(f.read())
             import email.encoders
+
             email.encoders.encode_base64(att)
             att.add_header("Content-Disposition", "attachment", filename=path.name)
             mime_msg.attach(att)
@@ -429,17 +436,21 @@ def create_gmail_draft(
     if message_id:
         try:
             original = with_retry(
-                lambda: service.users()
-                .messages()
-                .get(
-                    userId="me",
-                    id=message_id,
-                    format="metadata",
-                    metadataHeaders=["Message-ID", "From", "To", "Cc"],
+                lambda: (
+                    service.users()
+                    .messages()
+                    .get(
+                        userId="me",
+                        id=message_id,
+                        format="metadata",
+                        metadataHeaders=["Message-ID", "From", "To", "Cc"],
+                    )
+                    .execute()
                 )
-                .execute()
             )
-            headers = {h["name"]: h["value"] for h in original.get("payload", {}).get("headers", [])}
+            headers = {
+                h["name"]: h["value"] for h in original.get("payload", {}).get("headers", [])
+            }
 
             # Threading headers
             original_msg_id = headers.get("Message-ID")
@@ -448,9 +459,7 @@ def create_gmail_draft(
                 mime_msg["References"] = original_msg_id
 
             # Reply-All: gather all participants, exclude the authenticated user's email
-            profile = with_retry(
-                lambda: service.users().getProfile(userId="me").execute()
-            )
+            profile = with_retry(lambda: service.users().getProfile(userId="me").execute())
             my_email = profile.get("emailAddress", "").lower()
 
             # To = original sender (the person we're replying to)
@@ -569,10 +578,12 @@ def create_gmail_draft_from_file(filepath: str | Path) -> dict[str, str]:
         try:
             service = get_gmail_service()
             thread_data: dict[str, Any] = with_retry(
-                lambda: service.users()
-                .threads()
-                .get(userId="me", id=thread_id, format="minimal")
-                .execute()
+                lambda: (
+                    service.users()
+                    .threads()
+                    .get(userId="me", id=thread_id, format="minimal")
+                    .execute()
+                )
             )
             messages = thread_data.get("messages", [])
             if messages:
@@ -592,6 +603,7 @@ def create_gmail_draft_from_file(filepath: str | Path) -> dict[str, str]:
     # Write gmail_draft_id back into frontmatter
     if result.get("draft_id"):
         import re
+
         updated, count = re.subn(
             r"^(status:\s*(?:active|draft))",
             rf"\1\ngmail_draft_id: {result['draft_id']}",
@@ -610,10 +622,7 @@ def get_thread_messages(thread_id: str) -> list[Email]:
     service = get_gmail_service()
 
     thread_data: dict[str, Any] = with_retry(
-        lambda: service.users()
-        .threads()
-        .get(userId="me", id=thread_id, format="full")
-        .execute()
+        lambda: service.users().threads().get(userId="me", id=thread_id, format="full").execute()
     )
 
     emails: list[Email] = []
@@ -632,18 +641,20 @@ def get_thread_messages(thread_id: str) -> list[Email]:
         body = _extract_body(msg.get("payload", {}))
         label_ids: list[str] = msg.get("labelIds", [])
 
-        emails.append(Email(
-            id=msg["id"],
-            thread_id=msg["threadId"],
-            subject=headers.get("Subject", "(no subject)"),
-            sender=sender,
-            sender_email=sender_email,
-            date=date,
-            snippet=msg.get("snippet", ""),
-            body=body,
-            labels=label_ids,
-            is_unread="UNREAD" in label_ids,
-        ))
+        emails.append(
+            Email(
+                id=msg["id"],
+                thread_id=msg["threadId"],
+                subject=headers.get("Subject", "(no subject)"),
+                sender=sender,
+                sender_email=sender_email,
+                date=date,
+                snippet=msg.get("snippet", ""),
+                body=body,
+                labels=label_ids,
+                is_unread="UNREAD" in label_ids,
+            )
+        )
 
     # Sort chronologically (oldest first)
     emails.sort(key=lambda e: e.date)
@@ -701,10 +712,9 @@ def check_sent_reply(thread_id: str, after_timestamp: str) -> str | None:
 
     try:
         thread_data: dict[str, Any] = with_retry(
-            lambda: service.users()
-            .threads()
-            .get(userId="me", id=thread_id, format="full")
-            .execute()
+            lambda: (
+                service.users().threads().get(userId="me", id=thread_id, format="full").execute()
+            )
         )
     except Exception as e:
         print(f"Error fetching thread {thread_id}: {e}")
@@ -749,10 +759,9 @@ def _owner_replied_in_thread(service: Any, thread_id: str, after: datetime) -> b
     """Check if the authenticated user sent any reply in a thread after the given datetime."""
     try:
         thread_data: dict[str, Any] = with_retry(
-            lambda: service.users()
-            .threads()
-            .get(userId="me", id=thread_id, format="minimal")
-            .execute()
+            lambda: (
+                service.users().threads().get(userId="me", id=thread_id, format="minimal").execute()
+            )
         )
     except Exception:
         return False
@@ -767,7 +776,9 @@ def _owner_replied_in_thread(service: Any, thread_id: str, after: datetime) -> b
         if internal_date:
             msg_dt = datetime.fromtimestamp(int(internal_date) / 1000, tz=LOCAL_TZ)
             # Normalize both to LOCAL_TZ for comparison
-            after_tz = after.astimezone(LOCAL_TZ) if after.tzinfo else after.replace(tzinfo=LOCAL_TZ)
+            after_tz = (
+                after.astimezone(LOCAL_TZ) if after.tzinfo else after.replace(tzinfo=LOCAL_TZ)
+            )
             if msg_dt > after_tz:
                 return True
     return False
@@ -795,10 +806,9 @@ def get_important_unreplied_emails(
 
     try:
         result: dict[str, Any] = with_retry(
-            lambda: service.users()
-            .messages()
-            .list(userId="me", maxResults=max_results, q=q)
-            .execute()
+            lambda: (
+                service.users().messages().list(userId="me", maxResults=max_results, q=q).execute()
+            )
         )
     except Exception as e:
         print(f"Error listing unreplied emails: {e}")

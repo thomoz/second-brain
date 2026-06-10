@@ -58,6 +58,7 @@ def cmd_gmail(args: argparse.Namespace) -> None:
             urgent = check_for_urgent_emails(hours_ago=args.hours, account_name=account)
         else:
             from integrations.gmail import list_all_accounts as _all
+
             urgent = _all(max_per_account=20, unread_only=True, hours_ago=args.hours or 2)
         if urgent:
             print(f"Found {len(urgent)} potentially urgent emails:\n")
@@ -71,6 +72,7 @@ def cmd_gmail(args: argparse.Namespace) -> None:
         else:
             from config import GMAIL_ACCOUNTS
             from integrations.auth import is_google_authenticated
+
             for acct in GMAIL_ACCOUNTS:
                 if is_google_authenticated(acct):
                     count = get_unread_count(account_name=acct)
@@ -151,6 +153,7 @@ def cmd_calendar(args: argparse.Namespace) -> None:
     elif args.action == "today":
         if calendar_name:
             from config import GOOGLE_CALENDAR_IDS
+
             cal_id = GOOGLE_CALENDAR_IDS.get(calendar_name)
             if not cal_id:
                 print(f"Unknown calendar: {calendar_name}")
@@ -164,6 +167,7 @@ def cmd_calendar(args: argparse.Namespace) -> None:
     elif args.action == "upcoming":
         if calendar_name:
             from config import GOOGLE_CALENDAR_IDS
+
             cal_id = GOOGLE_CALENDAR_IDS.get(calendar_name)
             events = get_upcoming_events(hours_ahead=args.hours, calendar_id=cal_id)
         else:
@@ -173,6 +177,26 @@ def cmd_calendar(args: argparse.Namespace) -> None:
     elif args.action == "soon":
         events = check_for_upcoming_meetings(hours_ahead=4)
         print(format_events_for_context(events))
+
+
+def cmd_whatsapp(args: argparse.Namespace) -> None:
+    """Handle WhatsApp commands via GREEN-API."""
+    from config import WHATSAPP_MY_NUMBER
+    from integrations.whatsapp import format_messages_for_context, get_unread_messages, send_message
+
+    if args.action == "list":
+        msgs = get_unread_messages(limit=args.max)
+        print(format_messages_for_context(msgs))
+    elif args.action == "unread":
+        msgs = get_unread_messages(limit=50)
+        print(f"Unread WhatsApp messages: {len(msgs)}")
+    elif args.action == "send":
+        if not args.text:
+            print("Error: --text required for send command")
+            sys.exit(1)
+        chat_id = args.chat_id or f"{WHATSAPP_MY_NUMBER}@c.us"
+        ok = send_message(chat_id, args.text)
+        print("Sent" if ok else "Failed to send")
 
 
 def cmd_outlook(args: argparse.Namespace) -> None:
@@ -211,8 +235,11 @@ def main() -> None:
     gmail_parser.add_argument("--query", default=None)
     gmail_parser.add_argument("--hours", type=int, default=None)
     gmail_parser.add_argument("--unread", action="store_true")
-    gmail_parser.add_argument("--account", default=None,
-                              help="Account name (e.g. personal, sbdb, karaoke); defaults to all")
+    gmail_parser.add_argument(
+        "--account",
+        default=None,
+        help="Account name (e.g. personal, sbdb, karaoke); defaults to all",
+    )
     gmail_parser.add_argument("--from-file", default=None, dest="from_file")
     gmail_parser.add_argument("--to", default=None)
     gmail_parser.add_argument("--subject", dest="draft_subject", default=None)
@@ -223,14 +250,24 @@ def main() -> None:
     cal_parser = subparsers.add_parser("calendar", help="Calendar operations (6 calendars)")
     cal_parser.add_argument("action", choices=["all", "today", "upcoming", "soon"])
     cal_parser.add_argument("--hours", type=int, default=24)
-    cal_parser.add_argument("--calendar", default=None,
-                            help="Calendar name (e.g. personal, bgk, bingo); defaults to primary")
+    cal_parser.add_argument(
+        "--calendar",
+        default=None,
+        help="Calendar name (e.g. personal, bgk, bingo); defaults to primary",
+    )
 
     # Outlook
     outlook_parser = subparsers.add_parser("outlook", help="Outlook inbox operations")
     outlook_parser.add_argument("action", choices=["list", "unread", "urgent"])
     outlook_parser.add_argument("--max", type=int, default=10)
     outlook_parser.add_argument("--hours", type=int, default=None)
+
+    # WhatsApp
+    wa_parser = subparsers.add_parser("whatsapp", help="WhatsApp operations via GREEN-API")
+    wa_parser.add_argument("action", choices=["list", "unread", "send"])
+    wa_parser.add_argument("--max", type=int, default=10)
+    wa_parser.add_argument("--text", default=None)
+    wa_parser.add_argument("--chat-id", default=None, dest="chat_id")
 
     args = parser.parse_args()
 
@@ -241,6 +278,8 @@ def main() -> None:
             cmd_calendar(args)
         elif args.service == "outlook":
             cmd_outlook(args)
+        elif args.service == "whatsapp":
+            cmd_whatsapp(args)
     except Exception as e:
         print(json.dumps({"error": str(e), "type": "runtime"}, indent=2))
         sys.exit(1)

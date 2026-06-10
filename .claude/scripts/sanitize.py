@@ -16,57 +16,93 @@ import re
 # =============================================================================
 
 INJECTION_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
-    ("ignore_instructions", re.compile(
-        r"ignore\s+(all\s+)?(previous|prior|above|earlier|preceding)\s+"
-        r"(instructions|rules|directives|guidelines)",
-        re.IGNORECASE,
-    )),
-    ("forget_instructions", re.compile(
-        r"forget\s+(your|all|previous|prior)\s+(instructions|rules|directives|guidelines)",
-        re.IGNORECASE,
-    )),
-    ("new_identity", re.compile(
-        r"you\s+are\s+now\s+(?!welcome|invited|registered|subscribed|enrolled|a\s+member)",
-        re.IGNORECASE,
-    )),
-    ("new_instructions", re.compile(
-        r"(?:new|updated|revised|override)\s+instructions\s*:",
-        re.IGNORECASE,
-    )),
-    ("system_prompt_reveal", re.compile(
-        r"(reveal|output|print|show|display|repeat|echo)\s+(your|the)\s+"
-        r"(system\s+)?(prompt|instructions|rules|configuration|directives)",
-        re.IGNORECASE,
-    )),
-    ("disregard", re.compile(
-        r"disregard\s+(your\s+|all\s+|previous\s+|prior\s+|above\s+)+"
-        r"(instructions|rules|directives|guidelines)",
-        re.IGNORECASE,
-    )),
-    ("override_mode", re.compile(
-        r"(maintenance|debug|admin|developer|override|unrestricted|god)\s+mode",
-        re.IGNORECASE,
-    )),
-    ("dan_jailbreak", re.compile(
-        r"\bDAN\b|do\s+anything\s+now",
-        re.IGNORECASE,
-    )),
-    ("pretend_roleplay", re.compile(
-        r"(pretend|act\s+as\s+if)\s+(you\s+are|to\s+be)\s+",
-        re.IGNORECASE,
-    )),
-    ("translate_prompt", re.compile(
-        r"translate\s+(your|the)\s+(system\s+)?(prompt|instructions|rules)",
-        re.IGNORECASE,
-    )),
-    ("tool_instruction", re.compile(
-        r"use\s+the\s+(Edit|Write|Bash|Read)\s+tool\s+to",
-        re.IGNORECASE,
-    )),
-    ("xml_escape_attempt", re.compile(
-        r"</external_data>",
-        re.IGNORECASE,
-    )),
+    (
+        "ignore_instructions",
+        re.compile(
+            r"ignore\s+(all\s+)?(previous|prior|above|earlier|preceding)\s+"
+            r"(instructions|rules|directives|guidelines)",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "forget_instructions",
+        re.compile(
+            r"forget\s+(your|all|previous|prior)\s+(instructions|rules|directives|guidelines)",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "new_identity",
+        re.compile(
+            r"you\s+are\s+now\s+(?!welcome|invited|registered|subscribed|enrolled|a\s+member)",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "new_instructions",
+        re.compile(
+            r"(?:new|updated|revised|override)\s+instructions\s*:",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "system_prompt_reveal",
+        re.compile(
+            r"(reveal|output|print|show|display|repeat|echo)\s+(your|the)\s+"
+            r"(system\s+)?(prompt|instructions|rules|configuration|directives)",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "disregard",
+        re.compile(
+            r"disregard\s+(your\s+|all\s+|previous\s+|prior\s+|above\s+)+"
+            r"(instructions|rules|directives|guidelines)",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "override_mode",
+        re.compile(
+            r"(maintenance|debug|admin|developer|override|unrestricted|god)\s+mode",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "dan_jailbreak",
+        re.compile(
+            r"\bDAN\b|do\s+anything\s+now",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "pretend_roleplay",
+        re.compile(
+            r"(pretend|act\s+as\s+if)\s+(you\s+are|to\s+be)\s+",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "translate_prompt",
+        re.compile(
+            r"translate\s+(your|the)\s+(system\s+)?(prompt|instructions|rules)",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "tool_instruction",
+        re.compile(
+            r"use\s+the\s+(Edit|Write|Bash|Read)\s+tool\s+to",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "xml_escape_attempt",
+        re.compile(
+            r"</external_data>",
+            re.IGNORECASE,
+        ),
+    ),
 ]
 
 

@@ -21,7 +21,12 @@ from typing import Any
 # Add parent dir for config imports
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from config import ASANA_ACCESS_TOKEN, ASANA_WORKSPACE_ID, ASANA_PROJECT_ID, ASANA_USERS  # noqa: E402
+from config import (  # noqa: E402
+    ASANA_ACCESS_TOKEN,
+    ASANA_PROJECT_ID,
+    ASANA_USERS,
+    ASANA_WORKSPACE_ID,
+)
 from sanitize import sanitize_external_text  # noqa: E402
 from shared import with_retry  # noqa: E402
 
@@ -110,9 +115,7 @@ def resolve_assignee(name: str | None) -> str:
     # If it looks like a raw GID, pass through
     if key.isdigit():
         return key
-    raise ValueError(
-        f"Unknown Asana user '{name}'. Known users: {', '.join(ASANA_USERS.keys())}"
-    )
+    raise ValueError(f"Unknown Asana user '{name}'. Known users: {', '.join(ASANA_USERS.keys())}")
 
 
 def get_my_tasks(

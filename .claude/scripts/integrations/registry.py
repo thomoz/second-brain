@@ -63,6 +63,7 @@ _REGISTRY: dict[str, IntegrationInfo] = {
 def _has_google_token(account_name: str = "personal") -> bool:
     """Check if Google OAuth token file exists for the given account."""
     from config import google_token_file
+
     return google_token_file(account_name).exists()
 
 

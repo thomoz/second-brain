@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -49,6 +49,7 @@ class OutlookMessage:
 
 def _get_token_cache() -> Any:
     import msal
+
     cache = msal.SerializableTokenCache()
     if OUTLOOK_TOKEN_FILE.exists():
         cache.deserialize(OUTLOOK_TOKEN_FILE.read_text(encoding="utf-8"))
@@ -67,8 +68,7 @@ def get_access_token() -> str:
 
     if not OUTLOOK_CLIENT_ID:
         raise RuntimeError(
-            "OUTLOOK_CLIENT_ID not set in .env\n"
-            "Add: OUTLOOK_CLIENT_ID=<your-azure-app-client-id>"
+            "OUTLOOK_CLIENT_ID not set in .env\nAdd: OUTLOOK_CLIENT_ID=<your-azure-app-client-id>"
         )
 
     cache = _get_token_cache()
@@ -110,6 +110,7 @@ def is_outlook_authenticated() -> bool:
         return False
     try:
         import msal
+
         cache = _get_token_cache()
         app = msal.PublicClientApplication(
             OUTLOOK_CLIENT_ID,
@@ -158,8 +159,9 @@ def list_messages(
     if unread_only:
         filters.append("isRead eq false")
     if hours_ago:
-        from datetime import timedelta, timezone
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=hours_ago)
+        from datetime import timedelta
+
+        cutoff = datetime.now(UTC) - timedelta(hours=hours_ago)
         filters.append(f"receivedDateTime ge {cutoff.strftime('%Y-%m-%dT%H:%M:%SZ')}")
 
     params: dict[str, Any] = {
@@ -224,6 +226,7 @@ def format_messages_for_context(messages: list[OutlookMessage], max_chars: int =
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="Outlook integration")
     parser.add_argument("command", choices=["auth", "list", "unread"])
     parser.add_argument("--max", type=int, default=10)

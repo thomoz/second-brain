@@ -22,7 +22,7 @@ from typing import Any
 # Add parent dir for config imports
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from config import SLACK_BOT_TOKEN, SLACK_OWNER_USER_ID, SLACK_MONITORED_CHANNELS  # noqa: E402
+from config import SLACK_BOT_TOKEN, SLACK_MONITORED_CHANNELS, SLACK_OWNER_USER_ID  # noqa: E402
 from sanitize import sanitize_external_text  # noqa: E402
 from shared import with_retry  # noqa: E402
 
@@ -124,7 +124,9 @@ def get_recent_messages(
     oldest = str(time.time() - (hours_ago * 3600))
 
     try:
-        result = with_retry(lambda: client.conversations_history(channel=channel_id, oldest=oldest, limit=limit))
+        result = with_retry(
+            lambda: client.conversations_history(channel=channel_id, oldest=oldest, limit=limit)
+        )
         raw_messages: list[dict[str, Any]] = result.get("messages", [])
 
         messages: list[SlackMessage] = []
@@ -190,9 +192,7 @@ def send_notification(
         return None
 
 
-def update_message(
-    channel: str, ts: str, text: str
-) -> dict[str, Any] | None:
+def update_message(channel: str, ts: str, text: str) -> dict[str, Any] | None:
     """
     Update an existing Slack message.
 

@@ -18,7 +18,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from config import GMAIL_ACCOUNTS, GOOGLE_CALENDAR_IDS, GOOGLE_CREDENTIALS_FILE, ensure_directories  # noqa: E402
+from config import (  # noqa: E402
+    GMAIL_ACCOUNTS,
+    GOOGLE_CALENDAR_IDS,
+    GOOGLE_CREDENTIALS_FILE,
+    ensure_directories,
+)
 
 
 def print_header(title: str) -> None:
@@ -104,8 +109,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Set up Second Brain integrations")
     parser.add_argument("--check", action="store_true", help="Check status only (no auth flows)")
     parser.add_argument(
-        "--headless", action="store_true",
-        help="Use manual URL copy-paste flow (for remote/headless machines)"
+        "--headless",
+        action="store_true",
+        help="Use manual URL copy-paste flow (for remote/headless machines)",
     )
     args = parser.parse_args()
 
@@ -113,7 +119,11 @@ def main() -> None:
 
     print_header("Second Brain — Integrations Auth Setup")
     print(f"  Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    mode = "Status Check" if args.check else ("Headless Setup" if args.headless else "Interactive Setup")
+    mode = (
+        "Status Check"
+        if args.check
+        else ("Headless Setup" if args.headless else "Interactive Setup")
+    )
     print(f"  Mode: {mode}")
 
     results = {

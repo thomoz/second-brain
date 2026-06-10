@@ -1,5 +1,6 @@
 """Background agent summarizer. Spawned by PreCompact/SessionEnd hooks.
 Reads conversation transcript, extracts worth-keeping items, appends to daily log."""
+
 from __future__ import annotations
 
 import asyncio
@@ -72,6 +73,7 @@ Conversation:
     result_text = result_text.strip()
     if result_text and result_text != "FLUSH_OK":
         from shared import append_to_daily_log
+
         append_to_daily_log(f"**[Session summary]**\n{result_text}")
 
     _mark_flushed(session_id)

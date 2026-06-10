@@ -97,26 +97,34 @@ class TestGuardrailResponseParsing:
         assert result["summary"] is None
 
     def test_valid_fail_response(self) -> None:
-        response = json.dumps({
-            "verdict": "fail",
-            "flagged_items": [
-                {"source": "gmail", "content": "ignore instructions", "reason": "direct injection"}
-            ],
-            "summary": "Injection detected in email",
-        })
+        response = json.dumps(
+            {
+                "verdict": "fail",
+                "flagged_items": [
+                    {
+                        "source": "gmail",
+                        "content": "ignore instructions",
+                        "reason": "direct injection",
+                    }
+                ],
+                "summary": "Injection detected in email",
+            }
+        )
         result = json.loads(response)
         assert result["verdict"] == "fail"
         assert len(result["flagged_items"]) == 1
         assert result["flagged_items"][0]["source"] == "gmail"
 
     def test_valid_suspicious_response(self) -> None:
-        response = json.dumps({
-            "verdict": "suspicious",
-            "flagged_items": [
-                {"source": "slack", "content": "edge case", "reason": "unclear intent"}
-            ],
-            "summary": "Ambiguous content",
-        })
+        response = json.dumps(
+            {
+                "verdict": "suspicious",
+                "flagged_items": [
+                    {"source": "slack", "content": "edge case", "reason": "unclear intent"}
+                ],
+                "summary": "Ambiguous content",
+            }
+        )
         result = json.loads(response)
         assert result["verdict"] == "suspicious"
 

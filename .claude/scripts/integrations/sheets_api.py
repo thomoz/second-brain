@@ -67,9 +67,7 @@ def get_spreadsheet_info(spreadsheet_id: str) -> SpreadsheetData:
     service = get_sheets_service()
 
     result: dict[str, Any] = with_retry(
-        lambda: service.spreadsheets()
-        .get(spreadsheetId=spreadsheet_id)
-        .execute()
+        lambda: service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
     )
 
     sheets: list[SheetInfo] = []
@@ -116,10 +114,12 @@ def read_spreadsheet(
         range_notation = info.sheets[0].title
 
     result: dict[str, Any] = with_retry(
-        lambda: service.spreadsheets()
-        .values()
-        .get(spreadsheetId=spreadsheet_id, range=range_notation)
-        .execute()
+        lambda: (
+            service.spreadsheets()
+            .values()
+            .get(spreadsheetId=spreadsheet_id, range=range_notation)
+            .execute()
+        )
     )
 
     values: list[list[str]] = result.get("values", [])
@@ -154,15 +154,17 @@ def write_spreadsheet(
     body = {"values": values}
 
     result: dict[str, Any] = with_retry(
-        lambda: service.spreadsheets()
-        .values()
-        .update(
-            spreadsheetId=spreadsheet_id,
-            range=range_notation,
-            valueInputOption=input_option,
-            body=body,
+        lambda: (
+            service.spreadsheets()
+            .values()
+            .update(
+                spreadsheetId=spreadsheet_id,
+                range=range_notation,
+                valueInputOption=input_option,
+                body=body,
+            )
+            .execute()
         )
-        .execute()
     )
 
     return result
@@ -188,15 +190,17 @@ def append_to_spreadsheet(
     body = {"values": values}
 
     result: dict[str, Any] = with_retry(
-        lambda: service.spreadsheets()
-        .values()
-        .append(
-            spreadsheetId=spreadsheet_id,
-            range=range_notation,
-            valueInputOption=input_option,
-            body=body,
+        lambda: (
+            service.spreadsheets()
+            .values()
+            .append(
+                spreadsheetId=spreadsheet_id,
+                range=range_notation,
+                valueInputOption=input_option,
+                body=body,
+            )
+            .execute()
         )
-        .execute()
     )
 
     return result
@@ -214,9 +218,7 @@ def format_spreadsheet_for_context(data: SpreadsheetData, max_chars: int = 4000)
 
     # Sheet tabs
     if data.sheets:
-        tabs = ", ".join(
-            f"{s.title} ({s.row_count}x{s.col_count})" for s in data.sheets
-        )
+        tabs = ", ".join(f"{s.title} ({s.row_count}x{s.col_count})" for s in data.sheets)
         output.append(f"Sheets: {tabs}")
 
     # Values as markdown table
@@ -237,7 +239,7 @@ def format_spreadsheet_for_context(data: SpreadsheetData, max_chars: int = 4000)
         for row in data.values[1:]:
             # Pad row to match header length
             padded = row + [""] * (len(header) - len(row))
-            line = "| " + " | ".join(str(c) for c in padded[:len(header)]) + " |"
+            line = "| " + " | ".join(str(c) for c in padded[: len(header)]) + " |"
             if chars + len(line) > max_chars:
                 remaining = len(data.values) - len(output) + 3  # account for header lines
                 output.append(f"\n... {remaining} more rows truncated")
@@ -283,10 +285,14 @@ if __name__ == "__main__":
         parsed_values = json.loads(args.values)
         if args.command == "write":
             write_result = write_spreadsheet(
-                args.spreadsheet_id, args.range_notation, parsed_values,
+                args.spreadsheet_id,
+                args.range_notation,
+                parsed_values,
             )
         else:
             write_result = append_to_spreadsheet(
-                args.spreadsheet_id, args.range_notation, parsed_values,
+                args.spreadsheet_id,
+                args.range_notation,
+                parsed_values,
             )
         print(json.dumps(write_result, indent=2))

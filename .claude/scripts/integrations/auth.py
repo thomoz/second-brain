@@ -91,9 +91,7 @@ def run_initial_auth(account_name: str = "personal", headless: bool = False) -> 
     print(f"Authenticating account: {account_name}")
     token_file = google_token_file(account_name)
 
-    flow = InstalledAppFlow.from_client_secrets_file(
-        str(GOOGLE_CREDENTIALS_FILE), GOOGLE_SCOPES
-    )
+    flow = InstalledAppFlow.from_client_secrets_file(str(GOOGLE_CREDENTIALS_FILE), GOOGLE_SCOPES)
 
     if headless:
         flow.redirect_uri = "http://localhost:1"

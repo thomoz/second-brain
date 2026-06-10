@@ -114,14 +114,16 @@ def find_files(
     drive_query = " and ".join(q_parts)
 
     result: dict[str, Any] = with_retry(
-        lambda: service.files()
-        .list(
-            q=drive_query,
-            pageSize=max_results,
-            fields=DRIVE_FIELDS,
-            orderBy="modifiedTime desc",
+        lambda: (
+            service.files()
+            .list(
+                q=drive_query,
+                pageSize=max_results,
+                fields=DRIVE_FIELDS,
+                orderBy="modifiedTime desc",
+            )
+            .execute()
         )
-        .execute()
     )
 
     return [_parse_file(item) for item in result.get("files", [])]
@@ -153,14 +155,16 @@ def list_files(
     drive_query = " and ".join(q_parts)
 
     result: dict[str, Any] = with_retry(
-        lambda: service.files()
-        .list(
-            q=drive_query,
-            pageSize=max_results,
-            fields=DRIVE_FIELDS,
-            orderBy="modifiedTime desc",
+        lambda: (
+            service.files()
+            .list(
+                q=drive_query,
+                pageSize=max_results,
+                fields=DRIVE_FIELDS,
+                orderBy="modifiedTime desc",
+            )
+            .execute()
         )
-        .execute()
     )
 
     return [_parse_file(item) for item in result.get("files", [])]
@@ -172,12 +176,14 @@ def get_file_by_id(file_id: str) -> DriveFile | None:
 
     try:
         item: dict[str, Any] = with_retry(
-            lambda: service.files()
-            .get(
-                fileId=file_id,
-                fields="id,name,mimeType,webViewLink,modifiedTime,size,parents",
+            lambda: (
+                service.files()
+                .get(
+                    fileId=file_id,
+                    fields="id,name,mimeType,webViewLink,modifiedTime,size,parents",
+                )
+                .execute()
             )
-            .execute()
         )
         return _parse_file(item)
     except Exception as e:
@@ -211,8 +217,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Google Drive integration")
     parser.add_argument("command", choices=["find", "list", "get"])
     parser.add_argument("query", nargs="?", default=None)
-    parser.add_argument("--type", dest="file_type", default=None,
-                        choices=list(MIME_TYPES.keys()))
+    parser.add_argument("--type", dest="file_type", default=None, choices=list(MIME_TYPES.keys()))
     parser.add_argument("--max", type=int, default=10)
 
     args = parser.parse_args()

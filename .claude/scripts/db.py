@@ -26,7 +26,9 @@ class MemoryDB(Protocol):
     def close(self) -> None: ...
     def upsert_meta(self, key: str, value: str) -> None: ...
     def get_meta(self, key: str) -> str | None: ...
-    def upsert_file(self, path: str, content_hash: str, mtime_ns: int, size_bytes: int, epoch: int) -> None: ...
+    def upsert_file(
+        self, path: str, content_hash: str, mtime_ns: int, size_bytes: int, epoch: int
+    ) -> None: ...
     def get_file_hash(self, path: str) -> str | None: ...
     def get_all_file_paths(self) -> list[str]: ...
     def delete_file(self, path: str) -> None: ...
@@ -45,8 +47,12 @@ class MemoryDB(Protocol):
     ) -> int: ...
     def insert_vector(self, chunk_id: int, embedding: NDArray[np.float32]) -> None: ...
     def bulk_clear(self) -> None: ...
-    def keyword_search(self, query: str, limit: int, path_prefix: str = "") -> list[dict[str, Any]]: ...
-    def vector_search(self, embedding: NDArray[np.float32], limit: int, path_prefix: str = "") -> list[dict[str, Any]]: ...
+    def keyword_search(
+        self, query: str, limit: int, path_prefix: str = ""
+    ) -> list[dict[str, Any]]: ...
+    def vector_search(
+        self, embedding: NDArray[np.float32], limit: int, path_prefix: str = ""
+    ) -> list[dict[str, Any]]: ...
     def get_stats(self) -> dict[str, Any]: ...
     def commit(self) -> None: ...
 
@@ -54,6 +60,7 @@ class MemoryDB(Protocol):
 # ---------------------------------------------------------------------------
 # SQLite backend
 # ---------------------------------------------------------------------------
+
 
 def _embedding_to_bytes(embedding: NDArray[np.float32]) -> bytes:
     """Serialize numpy embedding to raw bytes for sqlite-vec."""
@@ -161,9 +168,7 @@ class SQLiteMemoryDB:
         )
 
     def get_meta(self, key: str) -> str | None:
-        row = self._get_conn().execute(
-            "SELECT value FROM meta WHERE key = ?", (key,)
-        ).fetchone()
+        row = self._get_conn().execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
         return row[0] if row else None
 
     def upsert_file(
@@ -176,9 +181,11 @@ class SQLiteMemoryDB:
         )
 
     def get_file_hash(self, path: str) -> str | None:
-        row = self._get_conn().execute(
-            "SELECT content_hash FROM files WHERE path = ?", (path,)
-        ).fetchone()
+        row = (
+            self._get_conn()
+            .execute("SELECT content_hash FROM files WHERE path = ?", (path,))
+            .fetchone()
+        )
         return row[0] if row else None
 
     def get_all_file_paths(self) -> list[str]:
@@ -189,9 +196,11 @@ class SQLiteMemoryDB:
         self._get_conn().execute("DELETE FROM files WHERE path = ?", (path,))
 
     def get_chunk_ids_for_file(self, path: str) -> list[int]:
-        rows = self._get_conn().execute(
-            "SELECT id FROM chunks WHERE file_path = ?", (path,)
-        ).fetchall()
+        rows = (
+            self._get_conn()
+            .execute("SELECT id FROM chunks WHERE file_path = ?", (path,))
+            .fetchall()
+        )
         return [r[0] for r in rows]
 
     def delete_chunks_for_file(self, path: str) -> None:
@@ -216,7 +225,15 @@ class SQLiteMemoryDB:
             """INSERT INTO chunks(file_path, start_line, end_line, section_title,
                                   content, content_hash, created_at_epoch)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (file_path, start_line, end_line, section_title, content, content_hash, created_at_epoch),
+            (
+                file_path,
+                start_line,
+                end_line,
+                section_title,
+                content,
+                content_hash,
+                created_at_epoch,
+            ),
         )
         chunk_id = cursor.lastrowid
         if chunk_id is None:
@@ -274,17 +291,21 @@ class SQLiteMemoryDB:
         for row in rows:
             bm25_rank = float(row["rank"])
             score = 1.0 / (1.0 + abs(bm25_rank))
-            results.append({
-                "file_path": row["file_path"],
-                "start_line": row["start_line"],
-                "end_line": row["end_line"],
-                "content": row["content"],
-                "section_title": row["section_title"] or "",
-                "score": score,
-            })
+            results.append(
+                {
+                    "file_path": row["file_path"],
+                    "start_line": row["start_line"],
+                    "end_line": row["end_line"],
+                    "content": row["content"],
+                    "section_title": row["section_title"] or "",
+                    "score": score,
+                }
+            )
         return results
 
-    def vector_search(self, embedding: NDArray[np.float32], limit: int, path_prefix: str = "") -> list[dict[str, Any]]:
+    def vector_search(
+        self, embedding: NDArray[np.float32], limit: int, path_prefix: str = ""
+    ) -> list[dict[str, Any]]:
         conn = self._get_conn()
         query_bytes = _embedding_to_bytes(embedding)
         # sqlite-vec doesn't support WHERE filters in MATCH queries,
@@ -309,14 +330,16 @@ class SQLiteMemoryDB:
                 continue
             distance = float(row["distance"])
             score = 1.0 / (1.0 + distance)
-            results.append({
-                "file_path": row["file_path"],
-                "start_line": row["start_line"],
-                "end_line": row["end_line"],
-                "content": row["content"],
-                "section_title": row["section_title"] or "",
-                "score": score,
-            })
+            results.append(
+                {
+                    "file_path": row["file_path"],
+                    "start_line": row["start_line"],
+                    "end_line": row["end_line"],
+                    "content": row["content"],
+                    "section_title": row["section_title"] or "",
+                    "score": score,
+                }
+            )
             if len(results) >= limit:
                 break
         return results
@@ -347,6 +370,7 @@ class SQLiteMemoryDB:
 # ---------------------------------------------------------------------------
 # Postgres backend
 # ---------------------------------------------------------------------------
+
 
 class PostgresMemoryDB:
     """PostgreSQL + pgvector backend."""
@@ -415,7 +439,7 @@ class PostgresMemoryDB:
         cur.execute("""
             CREATE INDEX IF NOT EXISTS idx_chunks_search_vector ON chunks USING GIN(search_vector)
         """)
-        cur.execute(f"""
+        cur.execute("""
             CREATE INDEX IF NOT EXISTS idx_chunks_embedding ON chunks
             USING hnsw(embedding vector_l2_ops)
             WHERE embedding IS NOT NULL
@@ -478,9 +502,7 @@ class PostgresMemoryDB:
         return [r[0] for r in cur.fetchall()]
 
     def delete_chunks_for_file(self, path: str) -> None:
-        self._get_conn().cursor().execute(
-            "DELETE FROM chunks WHERE file_path = %s", (path,)
-        )
+        self._get_conn().cursor().execute("DELETE FROM chunks WHERE file_path = %s", (path,))
 
     def delete_vectors_for_chunk_ids(self, ids: list[int]) -> None:
         # In Postgres, embedding is ON the chunks table — no separate delete needed.
@@ -503,7 +525,15 @@ class PostgresMemoryDB:
                                   content, content_hash, created_at_epoch)
                VALUES (%s, %s, %s, %s, %s, %s, %s)
                RETURNING id""",
-            (file_path, start_line, end_line, section_title, content, content_hash, created_at_epoch),
+            (
+                file_path,
+                start_line,
+                end_line,
+                section_title,
+                content,
+                content_hash,
+                created_at_epoch,
+            ),
         )
         row = cur.fetchone()
         if row is None:
@@ -551,17 +581,21 @@ class PostgresMemoryDB:
             )
         results: list[dict[str, Any]] = []
         for row in cur.fetchall():
-            results.append({
-                "file_path": row[0],
-                "start_line": row[1],
-                "end_line": row[2],
-                "content": row[3],
-                "section_title": row[4] or "",
-                "score": float(row[5]),
-            })
+            results.append(
+                {
+                    "file_path": row[0],
+                    "start_line": row[1],
+                    "end_line": row[2],
+                    "content": row[3],
+                    "section_title": row[4] or "",
+                    "score": float(row[5]),
+                }
+            )
         return results
 
-    def vector_search(self, embedding: NDArray[np.float32], limit: int, path_prefix: str = "") -> list[dict[str, Any]]:
+    def vector_search(
+        self, embedding: NDArray[np.float32], limit: int, path_prefix: str = ""
+    ) -> list[dict[str, Any]]:
         cur = self._get_conn().cursor()
         if path_prefix:
             cur.execute(
@@ -591,14 +625,16 @@ class PostgresMemoryDB:
         for row in cur.fetchall():
             distance = float(row[5])
             score = 1.0 / (1.0 + distance)
-            results.append({
-                "file_path": row[0],
-                "start_line": row[1],
-                "end_line": row[2],
-                "content": row[3],
-                "section_title": row[4] or "",
-                "score": score,
-            })
+            results.append(
+                {
+                    "file_path": row[0],
+                    "start_line": row[1],
+                    "end_line": row[2],
+                    "content": row[3],
+                    "section_title": row[4] or "",
+                    "score": score,
+                }
+            )
         return results
 
     def get_stats(self) -> dict[str, Any]:
@@ -628,6 +664,7 @@ class PostgresMemoryDB:
 # ---------------------------------------------------------------------------
 # Factory
 # ---------------------------------------------------------------------------
+
 
 def get_memory_db(database_url: str = "") -> SQLiteMemoryDB | PostgresMemoryDB:
     """Return the appropriate backend based on DATABASE_URL.

@@ -61,9 +61,7 @@ from typing import Any
 # ---------------------------------------------------------------------------
 
 _DEFAULT_CLI_JS = Path(
-    os.path.expandvars(
-        r"%APPDATA%\npm\node_modules\@earendil-works\pi-coding-agent\dist\cli.js"
-    )
+    os.path.expandvars(r"%APPDATA%\npm\node_modules\@earendil-works\pi-coding-agent\dist\cli.js")
 )
 
 
@@ -149,6 +147,7 @@ _TOOL_MAP = {
 #  Task = sub-agent spawning is handled by the Python orchestrator instead.
 #  NotebookEdit = unused in practice.)
 _TOOL_DROP = {"Skill", "Task", "NotebookEdit", "TodoWrite"}
+
 
 def _map_tools(tools: list[str]) -> list[str]:
     """Map Claude tool names to Pi tool names (drops unsupported ones)."""

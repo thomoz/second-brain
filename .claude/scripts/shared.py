@@ -1,26 +1,30 @@
 """Shared utilities: file locking, atomic writes, retry, daily log, bash patterns."""
+
 from __future__ import annotations
 
 import contextlib
-import datetime
+import json
 import os
-import re
 import time
 from pathlib import Path
 
 
 @contextlib.contextmanager
-def file_lock(path: Path):
+def file_lock(path: Path, timeout: float = 30.0):
     """Cross-platform exclusive file lock (Windows: msvcrt; POSIX: fcntl)."""
     lock_path = str(path) + ".lock"
     if os.name == "nt":
         import msvcrt
+
+        deadline = time.monotonic() + timeout
         with open(lock_path, "w") as f:
             while True:
                 try:
                     msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
                     break
                 except OSError:
+                    if time.monotonic() > deadline:
+                        raise TimeoutError(f"Could not acquire lock on {path} within {timeout}s")
                     time.sleep(0.05)
             try:
                 yield
@@ -31,6 +35,7 @@ def file_lock(path: Path):
                     pass
     else:
         import fcntl
+
         with open(lock_path, "w") as f:
             fcntl.flock(f, fcntl.LOCK_EX)
             try:
@@ -47,7 +52,7 @@ def with_retry(fn, max_retries: int = 3, base_delay: float = 1.0):
         except Exception:
             if attempt == max_retries - 1:
                 raise
-            time.sleep(base_delay * (2 ** attempt))
+            time.sleep(base_delay * (2**attempt))
 
 
 def atomic_write(path: Path, content: str) -> None:
@@ -60,6 +65,7 @@ def atomic_write(path: Path, content: str) -> None:
 def append_to_daily_log(text: str) -> None:
     """Append timestamped entry to today's daily log with file locking."""
     from config import DAILY_DIR, now_local
+
     DAILY_DIR.mkdir(parents=True, exist_ok=True)
     today = now_local().strftime("%Y-%m-%d")
     log_path = DAILY_DIR / f"{today}.md"
@@ -68,6 +74,25 @@ def append_to_daily_log(text: str) -> None:
     with file_lock(log_path):
         with open(log_path, "a", encoding="utf-8") as f:
             f.write(entry)
+
+
+def load_state(path: Path) -> dict:
+    """Load JSON state from path, returning {} if missing or invalid."""
+    try:
+        return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def save_state(path: Path, state: dict) -> None:
+    """Atomically write JSON state to path, creating parent dirs as needed."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write(path, json.dumps(state, indent=2, default=str))
+
+
+def log_hook_execution(hook_name: str, result: str) -> None:
+    """Append a hook execution summary to today's daily log."""
+    append_to_daily_log(f"**[Hook: {hook_name}]** {result}")
 
 
 # Dangerous bash patterns used by command-guard.py (Phase 8) and pi_safety.ts.
