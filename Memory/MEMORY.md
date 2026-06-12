@@ -7,6 +7,9 @@ Active as of: 2026-06-03
 - Show days: travel to venues to host karaoke/bingo/trivia nights
 - Proactivity: Advisor mode — draft for review, never act autonomously
 
+## Venues & Show Schedule
+- Billy Goat Karaoke — Boyles Hotel Sutherland — every Thursday at 8pm
+
 ## Active Projects
 - **Hosting growth** — increase shows + find higher-paying venues; build cash buffer pre-crash
 - **SongbookDB** — reduce churn (AI onboarding idea); desktop app blocked by code signing issue; Mac AIR deprecation looming

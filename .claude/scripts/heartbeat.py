@@ -167,6 +167,10 @@ def build_snapshot() -> dict[str, Any]:
     email_data = _gather_emails()
     cal_data = _gather_calendar()
     active_drafts = _gather_drafts()
+    # TODO Phase 7: WhatsApp inbound polling goes here.
+    # Guard required: check BOT_LOCK_FILE exists before calling get_unread_messages()
+    # from config import BOT_LOCK_FILE
+    # if not BOT_LOCK_FILE.exists(): whatsapp_data = get_unread_messages()
     habits_text = HABITS_FILE.read_text(encoding="utf-8") if HABITS_FILE.exists() else ""
     return {
         "timestamp": now_local().isoformat(),

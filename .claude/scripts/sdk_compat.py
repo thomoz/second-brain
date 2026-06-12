@@ -65,14 +65,25 @@ elif _BACKEND == "codex":
         query,
     )
 else:
-    from claude_agent_sdk import (
-        AssistantMessage,
-        ClaudeAgentOptions,
-        HookMatcher,
-        ResultMessage,
-        TextBlock,
-        query,
-    )
+    try:
+        from claude_agent_sdk import (
+            AssistantMessage,
+            ClaudeAgentOptions,
+            HookMatcher,
+            ResultMessage,
+            TextBlock,
+            query,
+        )
+    except ModuleNotFoundError:
+        # claude-code-sdk (PyPI) uses ClaudeCodeOptions; alias to keep call sites unchanged
+        from claude_code_sdk import (  # type: ignore[no-redef]
+            AssistantMessage,
+            HookMatcher,
+            ResultMessage,
+            TextBlock,
+            query,
+        )
+        from claude_code_sdk import ClaudeCodeOptions as ClaudeAgentOptions  # type: ignore[no-redef]
 
 
 async def run_text(prompt: str, options: ClaudeAgentOptions | None = None) -> str:

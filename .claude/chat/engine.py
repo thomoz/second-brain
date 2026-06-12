@@ -1,0 +1,147 @@
+"""Conversation engine: routes WhatsApp messages through sdk_compat with session persistence."""
+
+from __future__ import annotations
+
+import sys
+from collections.abc import AsyncIterator
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+_CHAT_DIR = Path(__file__).resolve().parent
+_SCRIPTS_DIR = _CHAT_DIR.parent / "scripts"
+sys.path.insert(0, str(_CHAT_DIR))
+sys.path.insert(0, str(_SCRIPTS_DIR))
+
+from models import IncomingMessage, OutgoingMessage  # noqa: E402
+from session import Session, SQLiteSessionStore  # noqa: E402
+
+from sanitize import TRUST_BOUNDARY_INSTRUCTION  # noqa: E402
+from sdk_compat import (  # noqa: E402
+    AssistantMessage,
+    ClaudeAgentOptions,
+    ResultMessage,
+    TextBlock,
+    query,
+)
+
+
+class ConversationEngine:
+    """Routes incoming messages to the LLM backend with session persistence.
+
+    Uses sdk_compat so the backend (Claude, Pi, Codex) is swappable by env var.
+    Read-only Memory access only: allowed_tools = ["Read", "Glob", "Grep"].
+    """
+
+    def __init__(
+        self,
+        session_store: SQLiteSessionStore,
+        project_root: Path,
+        max_turns: int = 20,
+        max_budget_usd: float = 0.50,
+    ) -> None:
+        self.session_store = session_store
+        self.project_root = project_root
+        self.max_turns = max_turns
+        self.max_budget_usd = max_budget_usd
+
+    async def handle_message(self, message: IncomingMessage) -> AsyncIterator[OutgoingMessage]:
+        """Process an incoming message and yield a single response OutgoingMessage."""
+        # WhatsApp has no threads — channel_id is the session key
+        thread_id = ""
+        platform_str = message.platform.value
+        channel_id = message.channel.platform_id
+
+        existing = self.session_store.get(platform_str, channel_id, thread_id)
+
+        # Build system prompt from SOUL.md + WhatsApp rules
+        try:
+            soul_text = (self.project_root / "Memory" / "SOUL.md").read_text(encoding="utf-8")
+        except Exception:
+            soul_text = "You are Shaun's Second Brain assistant."
+
+        system_prompt = (
+            soul_text
+            + "\n\n# WhatsApp Chat Bot Rules\n"
+            "You are responding via WhatsApp (possibly via CarPlay / Siri). "
+            "Be concise and use plain text only — no markdown headers, no bullet formatting "
+            "that sounds bad read aloud.\n"
+            "Give a single, complete answer. Do not split across multiple turns.\n"
+            "Keep answers short enough to read on a phone screen.\n"
+            f"\n\n{TRUST_BOUNDARY_INSTRUCTION}"
+        )
+
+        options_kwargs: dict[str, Any] = {
+            "cwd": str(self.project_root),
+            "system_prompt": system_prompt,
+            "allowed_tools": ["Read", "Glob", "Grep"],
+            "permission_mode": "dontAsk",
+            "max_turns": self.max_turns,
+        }
+        if existing:
+            options_kwargs["resume"] = existing.agent_session_id
+            print(f"[{datetime.now()}] Resuming session {existing.session_id}")
+        else:
+            print(f"[{datetime.now()}] New session for {platform_str}:{channel_id}:")
+
+        options = ClaudeAgentOptions(**options_kwargs)
+
+        response_text = ""
+        session_id_from_sdk: str | None = None
+        cost_usd: float = 0.0
+
+        try:
+            async for sdk_msg in query(prompt=message.text, options=options):
+                if isinstance(sdk_msg, AssistantMessage):
+                    response_text = ""
+                    for block in sdk_msg.content:
+                        if isinstance(block, TextBlock):
+                            response_text += block.text
+                elif isinstance(sdk_msg, ResultMessage):
+                    session_id_from_sdk = sdk_msg.session_id
+                    cost_usd = sdk_msg.total_cost_usd or 0.0
+                    cost_str = f"${cost_usd:.4f}"
+                    print(
+                        f"[{datetime.now()}] Agent done: "
+                        f"session={session_id_from_sdk}, cost={cost_str}"
+                    )
+        except Exception as e:
+            print(f"[{datetime.now()}] Agent error: {e}")
+            yield OutgoingMessage(
+                text=f"Sorry, I hit an error: {e}",
+                channel=message.channel,
+                thread=message.thread,
+            )
+            return
+
+        if response_text.strip():
+            yield OutgoingMessage(
+                text=response_text.strip(),
+                channel=message.channel,
+                thread=message.thread,
+            )
+
+        # Persist session
+        if session_id_from_sdk:
+            now = datetime.now()
+            if existing:
+                existing.agent_session_id = session_id_from_sdk
+                existing.message_count += 1
+                existing.total_cost_usd += cost_usd
+                existing.updated_at = now
+                self.session_store.update(existing)
+            else:
+                self.session_store.create(
+                    Session(
+                        session_id=f"{platform_str}:{channel_id}:{thread_id}",
+                        agent_session_id=session_id_from_sdk,
+                        platform=platform_str,
+                        channel_id=channel_id,
+                        thread_id=thread_id,
+                        user_id=message.user.platform_id,
+                        created_at=now,
+                        updated_at=now,
+                        message_count=1,
+                        total_cost_usd=cost_usd,
+                    )
+                )

@@ -157,6 +157,19 @@ def get_today_log_path() -> Path:
     return DAILY_DIR / f"{now_local().strftime('%Y-%m-%d')}.md"
 
 
+# ---------------------------------------------------------------------------
+# Phase 7: WhatsApp Chat Bot
+# ---------------------------------------------------------------------------
+
+CHAT_DB_PATH = DATA_DIR / "chat.db"
+CHAT_MAX_TURNS = int(_os.getenv("CHAT_MAX_TURNS", "20"))
+CHAT_MAX_BUDGET_USD = float(_os.getenv("CHAT_MAX_BUDGET_USD", "0.50"))
+WHATSAPP_POLL_INTERVAL = float(_os.getenv("WHATSAPP_POLL_INTERVAL", "1.0"))
+
+# Lock file: bot writes this on start, heartbeat checks it before WA polling
+BOT_LOCK_FILE = STATE_DIR / "whatsapp-bot.lock"
+
+
 def ensure_directories() -> None:
     """Ensure all Phase 1-3 runtime directories exist."""
     for d in [
