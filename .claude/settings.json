@@ -38,6 +38,26 @@
     ],
     "PreToolUse": [
       {
+        "matcher": "Read|Bash|Grep|Edit|Write|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/block-secrets.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/command-guard.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "Write|Edit",
         "hooks": [
           {

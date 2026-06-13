@@ -132,4 +132,13 @@ DANGEROUS_BASH_PATTERNS: list[str] = [
     r"\b(stripe|paypal|square)\b.*\b(charge|payment|transfer)\b",
     r"del\s+/[sqa]",
     r"Remove-Item.*\*",
+    # Social media / outbound POST guard (never auto-post)
+    r"curl\s+.*-X\s+POST.*(?:twitter|instagram|linkedin|facebook|tiktok|reddit|api\.openai)",
+    r"curl\s+.*(?:twitter|instagram|linkedin|facebook|tiktok).*-X\s+POST",
+    r"wget\s+.*--post-data.*(?:twitter|instagram|linkedin|facebook)",
+    # Git push guard (never push without explicit approval)
+    r"git\s+push\s+.*--force",
+    r"git\s+push\s+.*-f\b",
+    # Writes outside Memory/ vault (catches absolute path writes to system dirs)
+    r">\s*/(?!tmp|var/tmp)[a-z]",
 ]

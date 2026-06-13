@@ -1,4 +1,4 @@
-# Shaun Thomson's Second Brain
+﻿# Shaun Thomson's Second Brain
 
 ## Project Description
 AI Second Brain for a multi-business founder (SongbookDB, karaoke, music bingo, trivia).
@@ -57,12 +57,12 @@ it reads the PRD + Cole's reference code and produces a detailed plan with gotch
 validation commands, and per-task acceptance criteria.
 
 ```
-/prime           → load context
-/plan-feature    → read PRD + reference code → create .agent/plans/phase-N-name.md
-/execute         → build from the detailed plan (never from the PRD directly)
+/prime           â†’ load context
+/plan-feature    â†’ read PRD + reference code â†’ create .agent/plans/phase-N-name.md
+/execute         â†’ build from the detailed plan (never from the PRD directly)
 ```
 
-Cole's reference code (Phases 3–9): `O:\AI\Dynamous\Courses\workshops\claude-code-second-brain\`
+Cole's reference code (Phases 3â€“9): `O:\AI\Dynamous\Courses\workshops\claude-code-second-brain\`
 
 ## Build Commands
 
@@ -88,6 +88,31 @@ python .claude/scripts/memory_search.py "query" --mode keyword            # BM25
 python .claude/scripts/memory_search.py "query" --mode semantic           # Vector only
 python .claude/scripts/memory_search.py --path-prefix drafts/sent "query" # Voice-match search
 python .claude/scripts/memory_search.py --test                            # Run test queries
+```
+
+## Security (Phase 8)
+
+Three PreToolUse hooks protect every tool call:
+- `block-secrets.py` — blocks Read/Bash/Grep/Edit/Write/Glob on credential files + env-dumping
+  bash commands + write-time exfiltration scripts. Uses sys.exit(2).
+- `command-guard.py` — blocks destructive Bash commands (rm -rf, git push --force,
+  social media POSTs, package installs). Uses sys.exit(2).
+- `soul-protect.py` — blocks automated agents from editing SOUL.md. Uses JSON deny.
+
+All external data (Gmail, Calendar, Outlook, WhatsApp) is sanitized via
+`sanitize_external_text()` at the integration formatter level before reaching the LLM.
+Incoming WhatsApp bot messages are logged if injection patterns are detected.
+
+### Security Test Commands
+```powershell
+# Test block-secrets (expect exit 2 = blocked)
+echo '{"tool_name":"Read","tool_input":{"file_path":".env"}}' | python .claude/hooks/block-secrets.py
+
+# Test command-guard (expect exit 2 = blocked)
+echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf Memory/"}}' | python .claude/hooks/command-guard.py
+
+# Test soul-protect (expect JSON deny output)
+$env:AGENT_INVOKED_BY="heartbeat"; echo '{"tool_name":"Write","tool_input":{"file_path":"Memory/SOUL.md","content":"x"}}' | python .claude/hooks/soul-protect.py
 ```
 
 ## Integrations (Phase 4)
@@ -133,6 +158,17 @@ embeddings.py (FastEmbed/all-MiniLM-L6-v2, 384-dim), db.py (SQLite + Postgres
 abstraction, MemoryDB protocol), memory_index.py (incremental, content-hash
 change detection, 400-token chunks/80-token overlap), memory_search.py
 (keyword/semantic/hybrid modes, weighted fusion, --path-prefix for voice-matching).
+
+### Phase 8: Security Hardening (2026-06-13)
+Two new PreToolUse hooks (`block-secrets.py`, `command-guard.py`) wired into settings.json
+alongside soul-protect.py. block-secrets.py: credential file protection + bash exfiltration
+patterns + write-time two-step attack defense + Windows PowerShell additions + per-account
+Gmail/Outlook token patterns. command-guard.py: imports DANGEROUS_BASH_PATTERNS from shared.py,
+blocks rm -rf, package installs, git push --force, social media POST. shared.py extended with
+6 new patterns (social media POST, git push force, system dir writes). whatsapp.py
+format_messages_for_context() sanitizes text and sender via sanitize_external_text(). engine.py
+logs injection detections on incoming WhatsApp messages (never blocks). Tests: 41 new tests
+(test_block_secrets.py + test_command_guard.py), 155 total passing.
 
 ### Phase 4: Integrations — Gmail + Calendar + Outlook (2026-06-09)
 Multi-account Gmail (8 accounts, per-account token_gmail_{name}.json), 6 Google Calendars

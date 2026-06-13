@@ -16,7 +16,7 @@ sys.path.insert(0, str(_SCRIPTS_DIR))
 from models import IncomingMessage, OutgoingMessage  # noqa: E402
 from session import Session, SQLiteSessionStore  # noqa: E402
 
-from sanitize import TRUST_BOUNDARY_INSTRUCTION  # noqa: E402
+from sanitize import TRUST_BOUNDARY_INSTRUCTION, check_injection_patterns  # noqa: E402
 from sdk_compat import (  # noqa: E402
     AssistantMessage,
     ClaudeAgentOptions,
@@ -53,6 +53,12 @@ class ConversationEngine:
         channel_id = message.channel.platform_id
 
         existing = self.session_store.get(platform_str, channel_id, thread_id)
+
+        # Injection detection on incoming message (log only — never block Shaun)
+        injection_flags = check_injection_patterns(message.text)
+        if injection_flags:
+            names = ", ".join(f[0] for f in injection_flags)
+            print(f"[{datetime.now()}] [SECURITY] WhatsApp injection patterns detected: {names}")
 
         # Build system prompt from SOUL.md + WhatsApp rules
         try:

@@ -17,6 +17,8 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from sanitize import sanitize_external_text  # noqa: E402
+
 
 @dataclass
 class WhatsAppMessage:
@@ -119,4 +121,9 @@ def format_messages_for_context(messages: list[WhatsAppMessage]) -> str:
     """Format a list of WhatsApp messages for prompt context."""
     if not messages:
         return "No WhatsApp messages."
-    return "\n".join(f"[{m.timestamp.strftime('%H:%M')}] {m.sender}: {m.text}" for m in messages)
+    return "\n".join(
+        f"[{m.timestamp.strftime('%H:%M')}] "
+        f"{sanitize_external_text(m.sender, 'whatsapp')}: "
+        f"{sanitize_external_text(m.text, 'whatsapp')}"
+        for m in messages
+    )
