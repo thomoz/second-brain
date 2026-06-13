@@ -1,0 +1,18 @@
+# Normalize line endings to LF (prevents CRLF/LF conflicts between Windows and Linux)
+* text=auto eol=lf
+
+# Force binary handling for known binary types
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.pdf binary
+*.excalidraw binary
+
+# Use concat merge driver for append-only daily logs
+# Both machines append timestamped entries - concat instead of conflicting
+#
+# Adjust the path below to match where your daily log files live inside the vault.
+# Default assumes Memory/daily/*.md — change if your structure is different.
+Memory/daily/*.md merge=concat-both

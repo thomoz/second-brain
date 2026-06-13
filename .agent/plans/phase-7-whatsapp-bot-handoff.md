@@ -6,6 +6,43 @@ DO NOT implement from this doc — run `/plan-feature` first to generate the ful
 
 ---
 
+## Mutual Exclusion: Bot vs Heartbeat WhatsApp Polling
+
+**Decision (2026-06-12):** The GREEN-API notification queue is destructive — whoever calls
+`receiveNotification` first consumes the message. The heartbeat and the bot must never
+both poll the queue at the same time.
+
+**Implementation rule:**
+- The bot writes a **lock file** at `.claude/data/state/whatsapp-bot.lock` when it starts,
+  and deletes it on clean shutdown.
+- The heartbeat checks for this lock file before its WhatsApp polling step. If the lock
+  exists → skip WhatsApp polling entirely, log "bot running — WhatsApp polling skipped".
+- The bot's `_poll_once()` is the sole consumer of the queue while it is running.
+
+**Lock file approach** (simple, no IPC needed):
+```python
+# In chat/main.py — on startup:
+BOT_LOCK_FILE = Path(".claude/data/state/whatsapp-bot.lock")
+BOT_LOCK_FILE.write_text(str(os.getpid()))
+# On shutdown (finally block):
+BOT_LOCK_FILE.unlink(missing_ok=True)
+```
+
+```python
+# In heartbeat.py — before WhatsApp gather:
+BOT_LOCK_FILE = DATA_DIR / "state" / "whatsapp-bot.lock"
+if BOT_LOCK_FILE.exists():
+    print("[heartbeat] WhatsApp bot running — skipping WA polling")
+    whatsapp_data = []
+else:
+    whatsapp_data = get_unread_messages()
+```
+
+**Phase 6 code unchanged** — `get_unread_messages()` in `whatsapp.py` stays as-is.
+Heartbeat just gains the lock-check guard. Bot writes/deletes its own lock file.
+
+---
+
 ## What Phase 7 Builds
 
 A persistent conversational bot that lets Shaun query his Second Brain via WhatsApp,
@@ -59,6 +96,20 @@ Shaun speaks → Siri → WhatsApp message to "Second Brain" contact (own number
 
 Setup: Create a WhatsApp contact named "Second Brain" with Shaun's own mobile number.
 Siri can then be told "Message Second Brain: [query]".
+
+### Number Setup Note (as of 2026-06-12)
+
+GREEN-API is currently connected to Shaun's personal number (61410868612). This means
+WhatsApp notifications arrive from Shaun's own number — no push notification fires.
+
+A second SIM (Aldi prepaid) has been ordered. Once it arrives:
+1. Register WhatsApp on the Aldi number
+2. In GREEN-API: delete current instance → create new instance → scan QR with Aldi number
+3. Update `.env`: new `WHATSAPP_INSTANCE_ID`, `WHATSAPP_API_TOKEN`, and Aldi number for instance
+4. `WHATSAPP_MY_NUMBER` stays as `61410868612` (Shaun's personal number — used by security filter)
+5. Update "Second Brain" phone contact to point to the Aldi number
+
+After this, messages arrive FROM the bot number TO Shaun's personal number → normal notifications.
 
 ### Self-Message Security Filter
 

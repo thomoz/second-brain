@@ -1,0 +1,17 @@
+# Obsidian workspace state (machine-specific)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Obsidian trash
+.trash/
+
+# Lock files (ephemeral, created by file locking)
+*.lock
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Sync conflict files (legacy)
+*.sync-conflict-*

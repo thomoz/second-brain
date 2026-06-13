@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -16,6 +17,14 @@ if os.environ.get("AGENT_INVOKED_BY"):
 
 transcript_path = data.get("transcript_path", "")
 session_id = data.get("session_id", "unknown")
+
+# Fallback: if Claude Code didn't provide transcript_path, construct it from session_id.
+if (not transcript_path or not Path(transcript_path).exists()) and session_id != "unknown":
+    project_root = Path(__file__).resolve().parent.parent.parent
+    encoded = re.sub(r"[:\\/\s]", "-", str(project_root)).strip("-")
+    candidate = Path.home() / ".claude" / "projects" / encoded / f"{session_id}.jsonl"
+    if candidate.exists():
+        transcript_path = str(candidate)
 
 if not transcript_path or not Path(transcript_path).exists():
     sys.exit(0)

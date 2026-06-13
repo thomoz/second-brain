@@ -34,6 +34,9 @@ __pycache__/
 .claude/data/memory.db-wal
 .claude/data/models/
 
+# Memory vault runtime artifacts
+Memory/**/*.lock
+
 # OS/editor artifacts
 NUL
 Thumbs.db
