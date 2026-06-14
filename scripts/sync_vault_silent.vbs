@@ -1,0 +1,1 @@
+CreateObject("Wscript.Shell").Run "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File ""O:\AI\Dynamous\Courses\second-brain-workshop\scripts\sync_vault.ps1"" -ProjectPath ""O:\AI\Dynamous\Courses\second-brain-workshop""", 0, False

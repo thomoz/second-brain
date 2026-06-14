@@ -1854,7 +1854,7 @@ echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf /"}}' | python .claude
 ## Phase 9: Deployment (Windows + VPS)
 
 ### What to Build
-Automated scheduling on Windows Task Scheduler so the heartbeat and reflection run without manual intervention, then (once you have a VPS) vault synchronization using Git with a custom merge driver that prevents daily log conflicts between your two machines.
+Automated scheduling on Windows Task Scheduler so the heartbeat, reflection, and WhatsApp bot run without manual intervention. Then, once you have a VPS, migrate the automated processes (heartbeat, reflection, WhatsApp bot) to run there permanently so the brain stays active when your laptop is off. Vault synchronization via Git keeps `Memory/` in sync between both machines using a custom merge driver that prevents daily log conflicts.
 
 ### Key Files
 ```
@@ -1930,26 +1930,81 @@ Run once: `powershell -ExecutionPolicy Bypass -File scripts\setup_scheduler_wind
 
 ---
 
+### Process Ownership Model
+
+**Important**: Only one machine should run automated integrations at a time. GREEN-API dequeues notifications on receipt — if both laptop and VPS poll simultaneously, messages are consumed unpredictably and you may get duplicate heartbeat runs.
+
+| Process | Laptop (pre-VPS) | Laptop (post-VPS) | VPS |
+|---|---|---|---|
+| WhatsApp bot | On | **Off** | Always on |
+| Heartbeat | On | **Off** | Always on |
+| Reflection | On | **Off** | Always on |
+| VaultSync | On | On | Always on |
+| Claude Code sessions | On | On | No |
+
+**After the VPS is running**, disable three Windows scheduled tasks:
+```powershell
+Disable-ScheduledTask -TaskName "SecondBrain-Heartbeat"
+Disable-ScheduledTask -TaskName "SecondBrain-Reflection"
+Disable-ScheduledTask -TaskName "SecondBrain-WhatsAppBot"
+# Keep SecondBrain-VaultSync running on Windows
+```
+
+---
+
 ### VPS Setup (When You Acquire One)
 
 **Recommended**: DigitalOcean Basic Droplet (1GB RAM, Ubuntu 24.04) ~$6 USD/month  
-or Hetzner CX22 ~$4 USD/month (better value, EU-based)
+or Hetzner CX22 ~$4 USD/month (better value, EU-based)  
+Note: 1GB is sufficient for our SQLite-based implementation. Only upgrade to 2GB if you later add Postgres.
 
 **VPS setup steps**:
-1. `ssh root@your_vps_ip`
-2. `apt update && apt install -y python3.11 python3-pip git`
-3. `git clone <your_repo> ~/second-brain && cd ~/second-brain`
-4. `pip install -r requirements.txt`
-5. Copy `.env` file securely (never commit it): `scp .env user@vps:~/second-brain/`
-6. For Gmail OAuth on VPS (headless, no browser):
-   - Copy your token files from Windows machine: `scp .claude/data/token_gmail_*.json user@vps:~/second-brain/.claude/data/`
-   - Tokens refresh automatically via `google.auth.transport.requests.Request`
+1. Create a non-root user (never run the brain as root):
+   ```bash
+   adduser secondbrain && usermod -aG sudo secondbrain && su - secondbrain
+   ```
+2. Install dependencies and harden:
+   ```bash
+   sudo apt update && sudo apt install -y python3.12 python3-pip git ufw
+   sudo ufw allow OpenSSH && sudo ufw allow 8765/tcp && sudo ufw enable
+   ```
+3. Disable password SSH login — edit `/etc/ssh/sshd_config`, set `PasswordAuthentication no`, restart: `sudo systemctl restart sshd`
+4. Clone the repo and install Python packages:
+   ```bash
+   git clone <your_private_github_repo> ~/second-brain
+   cd ~/second-brain/.claude/scripts
+   pip install uv && uv sync
+   ```
+5. Copy all secrets securely from your Windows machine (run these from Windows):
+   ```bash
+   scp .env secondbrain@VPS_IP:~/second-brain/.env
+   scp .claude/data/gmail_credentials.json secondbrain@VPS_IP:~/second-brain/.claude/data/
+   scp .claude/data/token_gmail_*.json secondbrain@VPS_IP:~/second-brain/.claude/data/
+   scp .claude/data/outlook_token.json secondbrain@VPS_IP:~/second-brain/.claude/data/
+   ```
+6. Lock down secret file permissions on VPS:
+   ```bash
+   chmod 600 ~/second-brain/.env ~/second-brain/.claude/data/*.json
+   ```
+7. Gmail tokens refresh automatically via `google.auth.transport.requests.Request` — no browser needed after initial copy.
 
-**Systemd timers (VPS)**:
+**Systemd services and timers (VPS)**:
 ```ini
-# /etc/systemd/system/second-brain-heartbeat.timer
+# /etc/systemd/system/second-brain-heartbeat.service
 [Unit]
 Description=Second Brain Heartbeat
+After=network.target
+
+[Service]
+Type=oneshot
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain
+ExecStart=python3 .claude/scripts/heartbeat.py
+Environment=AGENT_INVOKED_BY=heartbeat
+
+# /etc/systemd/system/second-brain-heartbeat.timer
+[Unit]
+Description=Second Brain Heartbeat Timer
 
 [Timer]
 OnCalendar=*:0/30
@@ -1957,6 +2012,56 @@ Persistent=true
 
 [Install]
 WantedBy=timers.target
+```
+
+```ini
+# /etc/systemd/system/second-brain-whatsapp.service
+[Unit]
+Description=Second Brain WhatsApp Bot
+After=network.target
+
+[Service]
+Type=simple
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain
+ExecStart=python3 .claude/chat/whatsapp_bot.py
+Restart=always
+RestartSec=10
+Environment=AGENT_INVOKED_BY=chat
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```ini
+# /etc/systemd/system/second-brain-reflect.service
+[Unit]
+Description=Second Brain Daily Reflection
+
+[Service]
+Type=oneshot
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain
+ExecStart=python3 .claude/scripts/memory_reflect.py
+Environment=AGENT_INVOKED_BY=reflection
+
+# /etc/systemd/system/second-brain-reflect.timer
+[Unit]
+Description=Second Brain Reflection Timer
+
+[Timer]
+OnCalendar=*-*-* 08:00:00 Australia/Sydney
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+
+Enable all services:
+```bash
+sudo systemctl enable --now second-brain-heartbeat.timer
+sudo systemctl enable --now second-brain-reflect.timer
+sudo systemctl enable --now second-brain-whatsapp.service
 ```
 
 ---
@@ -1976,19 +2081,40 @@ Memory/daily/*.md merge=concat-both
 ```bash
 #!/usr/bin/env bash
 # Custom merge driver for append-only daily logs
-# $1 = ancestor (base), $2 = ours (local), $3 = theirs (remote)
+# Git calls this as: driver %O %A %B
+#   $1 = %O (ancestor/base version)
+#   $2 = %A (local version — also the output file Git reads result from)
+#   $3 = %B (remote version)
+# Exit 0 = merge succeeded; non-zero = conflict (Git falls back to default)
+
 ANCESTOR="$1"
 LOCAL="$2"
 REMOTE="$3"
 
-# Start from remote as the base
-cp "$REMOTE" "$LOCAL"
+# If no common ancestor, both sides created the file independently — concatenate and deduplicate
+if [ ! -s "$ANCESTOR" ]; then
+    cat "$LOCAL" "$REMOTE" | awk '!seen[$0]++' > "${LOCAL}.merged"
+    mv "${LOCAL}.merged" "$LOCAL"
+    exit 0
+fi
 
-# Append any lines from original local that aren't already in remote
-# comm -23: lines in sorted local only (not in remote)
-comm -23 <(sort "$2.orig" 2>/dev/null || sort "$ANCESTOR") \
-         <(sort "$REMOTE") >> "$LOCAL"
+# Extract lines LOCAL added that aren't in ANCESTOR (local-only additions, preserving order)
+grep -vFxf "$ANCESTOR" "$LOCAL" > "${LOCAL}.local_additions" 2>/dev/null || true
 
+# Start from REMOTE as base (preserves remote's additions in place)
+cp "$REMOTE" "${LOCAL}.merged"
+
+# Append local-only additions not already present in the remote version
+if [ -s "${LOCAL}.local_additions" ]; then
+    while IFS= read -r line; do
+        if ! grep -qFx "$line" "${LOCAL}.merged"; then
+            echo "$line" >> "${LOCAL}.merged"
+        fi
+    done < "${LOCAL}.local_additions"
+fi
+
+mv "${LOCAL}.merged" "$LOCAL"
+rm -f "${LOCAL}.local_additions"
 exit 0
 ```
 
@@ -2009,18 +2135,72 @@ git push
 ```
 Register: `New-ScheduledTaskTrigger -RepetitionInterval (New-TimeSpan -Minutes 2) -Once -At (Get-Date) -RepetitionDuration (New-TimeSpan -Days 3650)`
 
-**VPS sync** (systemd timer every 2 minutes, same pattern with `git pull && git push`).
+**VPS vault sync** (systemd timer every 2 minutes):
+```ini
+# /etc/systemd/system/second-brain-vaultsync.service
+[Unit]
+Description=Second Brain Vault Sync
+
+[Service]
+Type=oneshot
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain
+ExecStart=bash .claude/scripts/run_vault_sync.sh
+
+# /etc/systemd/system/second-brain-vaultsync.timer
+[Unit]
+Description=Second Brain Vault Sync Timer
+
+[Timer]
+OnCalendar=*:0/2
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+Enable: `sudo systemctl enable --now second-brain-vaultsync.timer`
+
+---
+
+### Starting From Zero (GitHub + DigitalOcean)
+
+This project currently has no GitHub remote and no VPS. Phase 9 must begin by setting these up before any scheduling or sync work.
+
+**Step A — Create private GitHub repo:**
+1. Go to github.com → New repository → name it `second-brain` → set **Private** → do not initialise with README
+2. Back on Windows, connect and push the local repo:
+   ```bash
+   git remote add origin git@github.com:<your-username>/second-brain.git
+   git push -u origin phase-2-pi-foundation
+   ```
+3. Verify: repo appears on GitHub with your commit history
+
+**Step B — Create DigitalOcean Droplet:**
+1. Sign up at digitalocean.com (or log in)
+2. Create Droplet → Ubuntu 24.04 → Basic plan → 1GB RAM / 1 vCPU (~$6/month) → Sydney region (closest to you)
+3. Authentication: add your SSH public key (`~/.ssh/id_rsa.pub` or generate one with `ssh-keygen`)
+4. Create Droplet → note the public IP address
+
+**Step C — Give the VPS access to the private GitHub repo:**
+1. SSH into the VPS: `ssh root@VPS_IP`
+2. Generate an SSH key on the VPS: `ssh-keygen -t ed25519 -C "second-brain-vps"`
+3. Copy the public key: `cat ~/.ssh/id_ed25519.pub`
+4. On GitHub → Settings → SSH and GPG keys → New SSH key → paste it
+5. Test: `ssh -T git@github.com` (should say "Hi username!")
+
+After Steps A–C, continue with the VPS Setup steps below.
 
 ---
 
 ### Prerequisites Checklist Before Phase 9
 
 - [ ] Obsidian installed and vault opened (free at obsidian.md → Open folder as vault → select `Memory/`)
+- [ ] Private GitHub repository created and repo pushed to it (`git remote add origin <url> && git push -u origin main`)
+- [ ] VPS SSH key generated and added to GitHub (so VPS can clone the private repo)
 - [ ] VPS acquired (DigitalOcean or Hetzner) — Ubuntu 24.04 recommended
-- [ ] VPS SSH key set up
-- [ ] Git repo initialized and pushed to GitHub (use your existing GitHub account)
-- [ ] `.gitignore` properly excluding `.env`, token files, `memory.db`
-- [ ] `git config merge.concat-both.driver` registered on both machines
+- [ ] `.gitignore` properly excluding `.env`, token files, `memory.db`, `chat.db`
+- [ ] `git config merge.concat-both.driver "scripts/git-merge-concat %O %A %B"` registered on both machines
+- [ ] After VPS is running: Windows scheduled tasks for Heartbeat, Reflection, WhatsApp disabled (keep only VaultSync)
 
 ---
 
