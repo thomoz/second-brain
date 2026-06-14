@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Custom merge driver for append-only daily logs.
+# Git calls: driver %O %A %B
+#   $1 = %O (ancestor/base)  $2 = %A (local — also output file)  $3 = %B (remote)
+# Exit 0 = merge succeeded.
+
+ANCESTOR="$1"
+LOCAL="$2"
+REMOTE="$3"
+
+# No common ancestor: both sides created the file fresh — concat and deduplicate
+if [ ! -s "$ANCESTOR" ]; then
+    cat "$LOCAL" "$REMOTE" | awk '!seen[$0]++' > "${LOCAL}.merged"
+    mv "${LOCAL}.merged" "$LOCAL"
+    exit 0
+fi
+
+# Lines LOCAL added that aren't in ANCESTOR (local-only new entries)
+grep -vFxf "$ANCESTOR" "$LOCAL" > "${LOCAL}.local_additions" 2>/dev/null || true
+
+# Start from REMOTE as base (keeps remote's entries in position)
+cp "$REMOTE" "${LOCAL}.merged"
+
+# Append local-only additions not already present in REMOTE
+if [ -s "${LOCAL}.local_additions" ]; then
+    while IFS= read -r line; do
+        if ! grep -qFx "$line" "${LOCAL}.merged"; then
+            echo "$line" >> "${LOCAL}.merged"
+        fi
+    done < "${LOCAL}.local_additions"
+fi
+
+mv "${LOCAL}.merged" "$LOCAL"
+rm -f "${LOCAL}.local_additions"
+exit 0

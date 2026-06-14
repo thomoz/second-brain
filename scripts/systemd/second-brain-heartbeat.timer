@@ -1,0 +1,10 @@
+[Unit]
+Description=Second Brain Heartbeat Timer
+Requires=second-brain-heartbeat.service
+
+[Timer]
+OnCalendar=*:0/30
+Persistent=true
+
+[Install]
+WantedBy=timers.target

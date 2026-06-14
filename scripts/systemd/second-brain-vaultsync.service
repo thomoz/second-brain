@@ -1,0 +1,8 @@
+[Unit]
+Description=Second Brain Vault Sync
+
+[Service]
+Type=oneshot
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain
+ExecStart=/bin/bash /home/secondbrain/second-brain/.claude/scripts/run_vault_sync.sh

@@ -1,0 +1,18 @@
+[Unit]
+Description=Second Brain WhatsApp Bot
+After=network.target
+
+[Service]
+Type=simple
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain
+ExecStart=/home/secondbrain/second-brain/.claude/scripts/.venv/bin/python /home/secondbrain/second-brain/.claude/chat/main.py
+EnvironmentFile=/home/secondbrain/second-brain/.claude/scripts/.env
+Environment=AGENT_INVOKED_BY=chat
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/secondbrain/second-brain/.claude/scripts/whatsapp_runs.log
+StandardError=append:/home/secondbrain/second-brain/.claude/scripts/whatsapp_runs.log
+
+[Install]
+WantedBy=multi-user.target

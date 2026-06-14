@@ -1,0 +1,10 @@
+[Unit]
+Description=Second Brain Vault Sync Timer
+Requires=second-brain-vaultsync.service
+
+[Timer]
+OnCalendar=*:0/2
+Persistent=true
+
+[Install]
+WantedBy=timers.target

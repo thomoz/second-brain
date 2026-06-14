@@ -1,0 +1,7 @@
+# Prevent merge conflicts in append-only daily logs
+Memory/daily/*.md merge=concat-both
+
+# Force LF on shell scripts executed on Linux VPS
+scripts/git-merge-concat text eol=lf
+scripts/setup_vps.sh text eol=lf
+.claude/scripts/run_vault_sync.sh text eol=lf

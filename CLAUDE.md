@@ -88,6 +88,26 @@ python .claude/scripts/memory_search.py "query" --mode keyword            # BM25
 python .claude/scripts/memory_search.py "query" --mode semantic           # Vector only
 python .claude/scripts/memory_search.py --path-prefix drafts/sent "query" # Voice-match search
 python .claude/scripts/memory_search.py --test                            # Run test queries
+
+# Windows Task Scheduler (run as Administrator once)
+powershell -ExecutionPolicy Bypass -File scripts\setup_scheduler_windows.ps1
+
+# Register vault merge driver (run once per machine)
+git config merge.concat-both.driver "scripts/git-merge-concat %O %A %B"
+
+# Check Windows scheduled tasks
+Get-ScheduledTask | Where-Object TaskName -like "SecondBrain-*" | Select-Object TaskName, State
+
+# After VPS live — disable Windows automation tasks
+Disable-ScheduledTask -TaskName "SecondBrain-Heartbeat"
+Disable-ScheduledTask -TaskName "SecondBrain-Reflection"
+Disable-ScheduledTask -TaskName "SecondBrain-WhatsAppBot"
+
+# VPS management (SSH in first)
+sudo systemctl status second-brain-heartbeat.timer
+sudo systemctl status second-brain-whatsapp.service
+tail -f .claude/scripts/heartbeat_runs.log
+tail -f .claude/scripts/vault_sync_runs.log
 ```
 
 ## Security (Phase 8)
@@ -180,3 +200,10 @@ get_all_calendars_events() + format_all_calendars_for_context(). New: outlook.py
 setup_auth.py, query.py (unified CLI), pyproject.toml, test_integrations.py.
 NOTE: OAuth app in Testing mode — tokens expire every 7 days, re-run setup_auth.py weekly.
 Calendar sharing (manual step): share non-personal calendars with shaunthommo10@gmail.com.
+
+### Phase 9: Deployment (Windows + VPS + Vault Sync) (2026-06-14)
+Windows Task Scheduler (4 tasks) + DigitalOcean VPS systemd (5 units) + git vault sync
+with concat-both merge driver for daily logs. Secrets copied via scp; Gmail tokens
+auto-refresh headlessly; Outlook MSAL SerializableTokenCache is headless-safe after
+initial copy. GREEN-API polling mutex via BOT_LOCK_FILE (machine-local, gitignored).
+After VPS live: disable Heartbeat, Reflection, WhatsAppBot Windows tasks; keep VaultSync.

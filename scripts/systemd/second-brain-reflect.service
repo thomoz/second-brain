@@ -1,0 +1,13 @@
+[Unit]
+Description=Second Brain Daily Reflection
+After=network.target
+
+[Service]
+Type=oneshot
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain
+ExecStart=/home/secondbrain/second-brain/.claude/scripts/.venv/bin/python /home/secondbrain/second-brain/.claude/scripts/memory_reflect.py
+EnvironmentFile=/home/secondbrain/second-brain/.claude/scripts/.env
+Environment=AGENT_INVOKED_BY=reflection
+StandardOutput=append:/home/secondbrain/second-brain/.claude/scripts/reflection_runs.log
+StandardError=append:/home/secondbrain/second-brain/.claude/scripts/reflection_runs.log
