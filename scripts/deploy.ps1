@@ -8,7 +8,7 @@ Write-Host "Stopping heartbeat timer..."
 ssh $VPS "sudo systemctl stop second-brain-heartbeat.timer"
 
 Write-Host "Pulling latest changes..."
-ssh $VPS "cd $REMOTE_DIR && chmod +x scripts/git-merge-concat && git stash && git pull && git stash pop"
+ssh $VPS "cd $REMOTE_DIR && git stash && git pull && chmod +x scripts/git-merge-concat && git stash pop"
 
 Write-Host "Restarting heartbeat timer..."
 ssh $VPS "sudo systemctl start second-brain-heartbeat.timer"
