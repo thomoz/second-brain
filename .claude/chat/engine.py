@@ -130,8 +130,8 @@ class ConversationEngine:
             # Write conversation turn to daily log (SessionEnd hook doesn't fire in headless mode)
             user_label = message.user.display_name or message.user.platform_id
             append_to_daily_log(
-                f"**[WhatsApp]** {user_label}: {message.text[:200]}\n"
-                f"**[Brain]** {response_text.strip()[:400]}"
+                f"**[WhatsApp]** {user_label}: {message.text}\n"
+                f"**[Brain]** {response_text.strip()}"
             )
 
         # Persist session
