@@ -6,16 +6,19 @@ import zoneinfo
 from datetime import datetime
 from pathlib import Path
 
-# Vault root (all Memory/ paths are relative to repo root)
-VAULT_DIR = Path("Memory")
+# Project root — absolute, CWD-independent (.claude/scripts → .claude → project root)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+# Vault root
+VAULT_DIR = PROJECT_ROOT / "Memory"
 MEMORY_DIR = VAULT_DIR
 DAILY_DIR = VAULT_DIR / "daily"
 DRAFTS_DIR = VAULT_DIR / "drafts"
 ACTIVE_DRAFTS_DIR = DRAFTS_DIR / "active"
 
 # Runtime dirs
-SCRIPTS_DIR = Path(".claude/scripts")
-DATA_DIR = Path(".claude/data")
+SCRIPTS_DIR = PROJECT_ROOT / ".claude/scripts"
+DATA_DIR = PROJECT_ROOT / ".claude/data"
 STATE_DIR = DATA_DIR / "state"
 
 # Timezone: all timestamps use Sydney local time
@@ -104,9 +107,6 @@ OUTLOOK_SCOPES = ["Mail.Read"]
 # ---------------------------------------------------------------------------
 # Phase 6: Proactive Systems
 # ---------------------------------------------------------------------------
-
-# Project root — absolute, so scripts can resolve paths regardless of CWD
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # Owner / active hours
 OWNER_NAME = _os.getenv("OWNER_NAME", "Shaun")

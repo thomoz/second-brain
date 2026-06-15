@@ -26,6 +26,7 @@ import re
 import shutil
 import sys
 import time
+import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -59,6 +60,7 @@ from config import (
 from notifications import send_toast_notification, send_whatsapp_notification
 from sanitize import TRUST_BOUNDARY_INSTRUCTION, wrap_external_data
 from sdk_compat import (
+    BACKEND,
     AssistantMessage,
     ClaudeAgentOptions,
     HookMatcher,
@@ -688,8 +690,13 @@ For unreplied important emails (per USER.md criteria):
     try:
         asyncio.run(_run())
     except Exception as e:
-        print(f"[{now_local()}] Heartbeat LLM error: {e}")
-        append_to_daily_log(f"**ERROR**: Heartbeat LLM failed — {e}")
+        _tb = traceback.format_exc()
+        print(f"[{now_local()}] Heartbeat LLM error ({BACKEND} backend): {e}", file=sys.stderr)
+        print(_tb, file=sys.stderr)
+        append_to_daily_log(
+            f"**ERROR**: Heartbeat LLM failed [{BACKEND} backend]\n"
+            f"{e}\n\n```\n{_tb[-800:]}\n```"
+        )
         return
 
     # Save state
