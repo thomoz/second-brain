@@ -1,21 +1,33 @@
-"""Unit tests for chat/session.py — uses :memory: SQLite."""
+"""Tests for PostgresSessionStore — skipped unless TEST_DATABASE_URL is set."""
 
 from __future__ import annotations
 
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "chat"))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import pytest
-from session import SQLiteSessionStore, Session, get_session_store
+TEST_DB_URL = os.getenv("TEST_DATABASE_URL", "")
+pytestmark = pytest.mark.skipif(not TEST_DB_URL, reason="TEST_DATABASE_URL not set")
+
+from session import PostgresSessionStore, Session  # noqa: E402
 
 
 @pytest.fixture
-def store(tmp_path):
-    return SQLiteSessionStore(tmp_path / "test_chat.db")
+def store():
+    s = PostgresSessionStore(TEST_DB_URL)
+    conn = s._get_conn()
+    conn.cursor().execute("DELETE FROM chat_sessions")
+    conn.commit()
+    yield s
+    conn = s._get_conn()
+    conn.cursor().execute("DELETE FROM chat_sessions")
+    conn.commit()
 
 
 def _make_session(session_id: str = "whatsapp:61410868612@c.us:") -> Session:
@@ -51,11 +63,11 @@ def test_update(store):
     s = _make_session()
     store.create(s)
     s.agent_session_id = "sdk-updated"
-    s.message_count = 2
+    s.message_count = 5
     store.update(s)
     result = store.get("whatsapp", "61410868612@c.us", "")
     assert result.agent_session_id == "sdk-updated"
-    assert result.message_count == 2
+    assert result.message_count == 5
 
 
 def test_list_active(store):
@@ -65,8 +77,16 @@ def test_list_active(store):
     assert len(active) == 2
 
 
-def test_get_session_store_returns_sqlite(tmp_path, monkeypatch):
-    import config
-    monkeypatch.setattr(config, "DATABASE_URL", "")
-    store = get_session_store(tmp_path / "chat.db")
-    assert isinstance(store, SQLiteSessionStore)
+def test_list_active_by_platform(store):
+    store.create(_make_session("whatsapp:a@c.us:"))
+    active = store.list_active(platform="whatsapp")
+    assert len(active) == 1
+    none = store.list_active(platform="slack")
+    assert len(none) == 0
+
+
+def test_get_session_store_returns_postgres():
+    from session import get_session_store
+
+    store = get_session_store()
+    assert isinstance(store, PostgresSessionStore)
