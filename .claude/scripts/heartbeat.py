@@ -194,6 +194,8 @@ def _gather_calendar() -> dict[str, Any]:
 
         show_keywords = {"karaoke", "bingo", "trivia", "show"}
         for ev in events:
+            if getattr(ev, "is_all_day", True):
+                continue  # all-day events are reminders/tasks, not scheduled shows
             summary = getattr(ev, "summary", "") or ""
             if any(kw in summary.lower() for kw in show_keywords):
                 result["has_show_today"] = True

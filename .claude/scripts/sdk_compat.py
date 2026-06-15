@@ -81,9 +81,100 @@ else:
             HookMatcher,
             ResultMessage,
             TextBlock,
-            query,
+            query as _raw_query,
         )
         from claude_code_sdk import ClaudeCodeOptions as ClaudeAgentOptions  # type: ignore[no-redef]
+        from claude_code_sdk._errors import MessageParseError as _MessageParseError  # type: ignore
+
+        def _patch_claude_sdk_message_parser() -> None:
+            """Monkeypatch the parse_message reference in client.py so unknown message
+            types (e.g. rate_limit_event) return None instead of raising.
+
+            client.py imports parse_message at module level (`from .message_parser
+            import parse_message`), so we must patch the name in the client module
+            namespace — not in message_parser — to intercept calls from process_query.
+
+            This lets the stream continue past the unknown event so that
+            AssistantMessage and ResultMessage still arrive. None values are filtered
+            out in query() below before being yielded to callers.
+
+            claude_code_sdk 0.0.25 crashes on rate_limit_event because the Claude CLI
+            started emitting it but the SDK doesn't yet know how to parse it.
+            """
+            try:
+                import claude_code_sdk._internal.client as _client
+                import claude_code_sdk._internal.message_parser as _mp
+                _orig = _mp.parse_message
+
+                def _safe_parse(data):  # type: ignore[no-untyped-def]
+                    try:
+                        return _orig(data)
+                    except _MessageParseError as exc:
+                        if "Unknown message type" in str(exc):
+                            return None  # skip; stream continues
+                        raise
+
+                # Patch in both places: the definition module AND the client's
+                # local import reference (the latter is what process_query actually calls).
+                _mp.parse_message = _safe_parse
+                _client.parse_message = _safe_parse  # type: ignore[attr-defined]
+            except Exception:
+                pass  # best-effort; original behaviour resumes if patching fails
+
+        def _patch_claude_cmd_windows() -> None:
+            """On Windows, rewire SubprocessCLITransport._find_cli to return the
+            claude.exe binary path instead of claude.CMD.
+
+            When the SDK invokes claude.CMD, Python subprocess wraps it with
+            `cmd.exe /C` which has an 8192-character command line limit. The
+            heartbeat prompt (~10K chars) exceeds this limit, causing
+            "Command failed with exit code 1" on every heartbeat run.
+
+            Calling claude.exe directly uses CreateProcess (32767-char limit)
+            and bypasses cmd.exe entirely.
+            """
+            import os
+            if os.name != "nt":
+                return
+            try:
+                import re
+                import shutil
+                from pathlib import Path as _Path
+                import claude_code_sdk._internal.transport.subprocess_cli as _cli_mod
+
+                _orig_find = _cli_mod.SubprocessCLITransport._find_cli
+
+                def _patched_find_cli(self_obj):  # type: ignore[no-untyped-def]
+                    result = _orig_find(self_obj)
+                    if result.lower().endswith((".cmd", ".bat")):
+                        try:
+                            content = _Path(result).read_text(encoding="utf-8", errors="replace")
+                            # Match: "...\claude.exe"   %* or "%dp0%\node_modules\...\claude.exe"
+                            m = re.search(
+                                r'"?%dp0%\\([^"\r\n%]+\.exe)"?\s*%\*', content
+                            )
+                            if m:
+                                rel = m.group(1).replace("/", "\\")
+                                dp0 = str(_Path(result).parent)
+                                exe = str(_Path(dp0) / rel)
+                                if _Path(exe).exists():
+                                    return exe
+                        except Exception:
+                            pass
+                    return result
+
+                _cli_mod.SubprocessCLITransport._find_cli = _patched_find_cli
+            except Exception:
+                pass
+
+        _patch_claude_sdk_message_parser()
+        _patch_claude_cmd_windows()
+
+        async def query(prompt: str, options: "ClaudeAgentOptions | None" = None):  # type: ignore[no-redef]
+            """Pass-through wrapper that filters None values emitted by the patched parser."""
+            async for msg in _raw_query(prompt=prompt, options=options):
+                if msg is not None:
+                    yield msg
 
 
 async def run_text(prompt: str, options: ClaudeAgentOptions | None = None) -> str:
