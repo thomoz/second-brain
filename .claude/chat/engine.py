@@ -17,6 +17,7 @@ from models import IncomingMessage, OutgoingMessage  # noqa: E402
 from session import Session, SQLiteSessionStore  # noqa: E402
 
 from sanitize import TRUST_BOUNDARY_INSTRUCTION, check_injection_patterns  # noqa: E402
+from shared import append_to_daily_log  # noqa: E402
 from sdk_compat import (  # noqa: E402
     AssistantMessage,
     ClaudeAgentOptions,
@@ -125,6 +126,12 @@ class ConversationEngine:
                 text=response_text.strip(),
                 channel=message.channel,
                 thread=message.thread,
+            )
+            # Write conversation turn to daily log (SessionEnd hook doesn't fire in headless mode)
+            user_label = message.user.display_name or message.user.platform_id
+            append_to_daily_log(
+                f"**[WhatsApp]** {user_label}: {message.text[:200]}\n"
+                f"**[Brain]** {response_text.strip()[:400]}"
             )
 
         # Persist session
