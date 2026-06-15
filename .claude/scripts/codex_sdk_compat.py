@@ -72,7 +72,9 @@ from typing import Any, cast
 # Locating the Codex binary
 # ---------------------------------------------------------------------------
 
-_DEFAULT_CLI_JS = Path(os.path.expandvars(r"%APPDATA%\npm\node_modules\@openai\codex\bin\codex.js"))
+_DEFAULT_CLI_JS = Path(
+    os.path.expandvars(r"%APPDATA%\npm\node_modules\@openai\codex\bin\codex.js")
+)
 
 
 def _codex_cmd_prefix() -> list[str]:
@@ -245,7 +247,9 @@ def _save_session(key: str, thread_id: str) -> None:
         _DATA_DIR.mkdir(parents=True, exist_ok=True)
         sessions = _load_sessions()
         sessions[key] = thread_id
-        _SESSIONS_FILE.write_text(json.dumps(sessions, indent=2), encoding="utf-8")
+        _SESSIONS_FILE.write_text(
+            json.dumps(sessions, indent=2), encoding="utf-8"
+        )
     except OSError:
         pass
 
@@ -310,7 +314,9 @@ def _skills_preamble(cwd: str) -> str:
     )
 
 
-def _compose_prompt(user_prompt: str, options: ClaudeAgentOptions, lean: bool) -> str:
+def _compose_prompt(
+    user_prompt: str, options: ClaudeAgentOptions, lean: bool
+) -> str:
     parts: list[str] = []
     append = _extract_append_prompt(options.system_prompt)
     if append:
