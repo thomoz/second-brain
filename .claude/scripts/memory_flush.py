@@ -61,8 +61,6 @@ Conversation:
 {transcript}""",
         options=AgentOptions(
             allowed_tools=[],
-            permission_mode="dontAsk",
-            setting_sources=[],
         ),
     ):
         if hasattr(msg, "content"):
