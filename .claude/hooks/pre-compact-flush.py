@@ -33,10 +33,24 @@ scripts_dir = Path(__file__).resolve().parent.parent / "scripts"
 venv_python = scripts_dir / ".venv" / "Scripts" / "python.exe"
 python_exe = str(venv_python) if venv_python.exists() else sys.executable
 
+flush_log = scripts_dir.parent / "data" / "flush_errors.log"
+try:
+    flush_log.parent.mkdir(parents=True, exist_ok=True)
+    stderr_target = open(flush_log, "a")
+except OSError:
+    stderr_target = subprocess.DEVNULL
+
+popen_kwargs: dict = {
+    "stdout": subprocess.DEVNULL,
+    "stderr": stderr_target,
+}
+if os.name == "nt":
+    popen_kwargs["creationflags"] = 0x00000008 | 0x08000000
+else:
+    popen_kwargs["start_new_session"] = True
+
 subprocess.Popen(
     [python_exe, str(scripts_dir / "memory_flush.py"), transcript_path, session_id],
-    start_new_session=True,
-    stdout=subprocess.DEVNULL,
-    stderr=subprocess.DEVNULL,
+    **popen_kwargs,
 )
 sys.exit(0)

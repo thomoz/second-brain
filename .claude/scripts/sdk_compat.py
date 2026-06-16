@@ -26,7 +26,16 @@ The default is Claude, so unset behavior is the original native SDK.
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING
+
+# Load .env so SB_AGENT_BACKEND is available even when spawned as a detached
+# background process (e.g. from the session-end hook) with no inherited env.
+try:
+    from dotenv import load_dotenv as _load_dotenv
+    _load_dotenv(Path(__file__).resolve().parent / ".env", override=False)
+except Exception:
+    pass
 
 _BACKEND = os.getenv("SB_AGENT_BACKEND", "claude").strip().lower()
 if _BACKEND not in ("claude", "pi", "codex"):
