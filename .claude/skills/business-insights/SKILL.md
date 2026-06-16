@@ -27,7 +27,7 @@ Surface actionable efficiency and investment insights across Shaun's 5 businesse
 
 ### 1. Show Efficiency
 
-Pull calendar data and cross-reference `Memory/Clients/venues.md` for pay rates and status.
+Pull calendar data and cross-reference `Memory/Businesses/Sole Trader/Hosting/venues_for_all_shows.md` for pay rates and status.
 
 Key questions:
 - Which shows have the best pay-to-effort ratio? (high pay + short drive = keep; low pay + long drive + struggling crowd = review)
@@ -104,7 +104,7 @@ Patterns worth flagging proactively:
 
 1. Run `query.py gmail unread` → email volume snapshot
 2. Run `query.py calendar all` → shows in next 24–48h
-3. Read `Memory/Clients/venues.md` → venue context and pay rates
+3. Read `Memory/Businesses/Sole Trader/Hosting/venues_for_all_shows.md` → venue context and pay rates
 4. Read `Memory/Wealth/` → investment context
 5. Synthesise into brief bullets: what's most actionable for Shaun today?
 
