@@ -34,5 +34,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 - Outlook: thomoz@outlook.com
 - Calendar: Google Calendar (primary)
 - WhatsApp: personal number (GREEN-API, Phase 4)
+
 ## 2026-06-16 Reflection
 - Prefer no closing summary sentences in tool output; Shaun reads the output directly
