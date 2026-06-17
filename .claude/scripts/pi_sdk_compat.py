@@ -354,7 +354,7 @@ async def query(
         prompt_file = Path(tmp.name)
 
         cmd = _build_cmd(prompt_file, options)
-        cwd = options.cwd or os.getcwd()
+        cwd = options.cwd or str(Path(__file__).resolve().parent.parent.parent)
 
         env = os.environ.copy()
         env.setdefault("PI_OFFLINE", env.get("PI_OFFLINE", ""))  # respect external setting

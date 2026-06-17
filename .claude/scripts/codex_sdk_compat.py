@@ -434,7 +434,7 @@ async def query(
     stream - they want the final answer/JSON).
     """
     options = options or ClaudeAgentOptions()
-    cwd = options.cwd or os.getcwd()
+    cwd = options.cwd or str(Path(__file__).resolve().parent.parent.parent)
 
     # A lean (pure-reasoning) call has allowed_tools explicitly empty.
     lean = options.allowed_tools is not None and len(options.allowed_tools) == 0

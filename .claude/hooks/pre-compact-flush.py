@@ -51,6 +51,7 @@ else:
 
 subprocess.Popen(
     [python_exe, str(scripts_dir / "memory_flush.py"), transcript_path, session_id],
+    cwd=str(scripts_dir.parent.parent),
     **popen_kwargs,
 )
 sys.exit(0)

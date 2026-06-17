@@ -1,5 +1,3 @@
-
-
 Start building "Ask Me Questions"
 
 Saved to .agent/plans/ask-me-questions-handoff.md.

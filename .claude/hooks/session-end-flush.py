@@ -56,13 +56,14 @@ popen_kwargs: dict = {
 if os.name == "nt":
     # DETACHED_PROCESS (0x8) + CREATE_NO_WINDOW (0x8000000): survives terminal close.
     # start_new_session alone only sets CREATE_NEW_PROCESS_GROUP and the process
-    # remains attached to the console — closing the window kills it.
+    # remains attached to the console â€” closing the window kills it.
     popen_kwargs["creationflags"] = 0x00000008 | 0x08000000
 else:
     popen_kwargs["start_new_session"] = True
 
 subprocess.Popen(
     [python_exe, str(scripts_dir / "memory_flush.py"), transcript_path, session_id],
+    cwd=str(scripts_dir.parent.parent),
     **popen_kwargs,
 )
 sys.exit(0)

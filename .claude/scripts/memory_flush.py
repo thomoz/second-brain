@@ -15,7 +15,7 @@ os.environ["AGENT_INVOKED_BY"] = "memory_flush"
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-DEDUP_FILE = Path(".claude/data/flush_dedup.json")
+DEDUP_FILE = Path(__file__).resolve().parent.parent / "data" / "flush_dedup.json"
 TRANSCRIPT_CHAR_LIMIT = 12_000
 
 
