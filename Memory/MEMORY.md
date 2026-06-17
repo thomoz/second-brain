@@ -20,3 +20,9 @@ Active as of: 2026-06-03
 - Second Brain build started 2026-06-03
 - Memory vault root: Memory/
 - Deployment target: Windows local + VPS (cloud sync)
+
+## 2026-06-16 Reflection
+- Second Brain now uses `codex` as the primary backend; Gemini was replaced due to quota limits
+- `/commit` now auto-pushes and deploys to VPS via `scripts/deploy.ps1`
+- VPS must track the same git branch as local; rerun `deploy.ps1` after any branch switch
+- Path handling is anchored to `__file__` to avoid wrong CWD writes from Task Scheduler

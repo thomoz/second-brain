@@ -1,4 +1,4 @@
-"""
+﻿"""
 Daily Reflection Script for Second Brain
 
 Reviews yesterday's daily log and calls the LLM once to update MEMORY.md
@@ -21,9 +21,10 @@ os.environ["AGENT_INVOKED_BY"] = "reflection"
 
 import argparse
 import asyncio
+import json
+import re
 import sys
 from pathlib import Path
-from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -33,6 +34,7 @@ from config import (
     OWNER_NAME,
     REFLECTION_STATE_FILE,
     USER_FILE,
+    VAULT_DIR,
     ensure_directories,
     get_today_log_path,
     now_local,
@@ -41,12 +43,11 @@ from sanitize import TRUST_BOUNDARY_INSTRUCTION, wrap_external_data
 from sdk_compat import (
     AssistantMessage,
     ClaudeAgentOptions,
-    HookMatcher,
     ResultMessage,
     TextBlock,
     query,
 )
-from shared import append_to_daily_log, file_lock, load_state, save_state
+from shared import append_to_daily_log, atomic_write, file_lock, load_state, save_state
 
 MAX_LOG_CHARS = 20_000
 
@@ -66,7 +67,7 @@ def get_yesterday_log() -> tuple[str, str] | None:
     if not log_path.exists():
         return None
     content = log_path.read_text(encoding="utf-8")
-    # Keep tail — freshest entries are most relevant
+    # Keep tail â€” freshest entries are most relevant
     if len(content) > MAX_LOG_CHARS:
         content = "... (truncated)\n\n" + content[-MAX_LOG_CHARS:]
     return date_str, content
@@ -86,7 +87,7 @@ def trim_memory_if_needed(max_lines: int = 200) -> bool:
         return False
 
     # Archive the overflow to Research/
-    archive_dir = Path("Memory/Research")
+    archive_dir = VAULT_DIR / "Research"
     archive_dir.mkdir(parents=True, exist_ok=True)
     date_str = now_local().strftime("%Y-%m-%d")
     archive_path = archive_dir / f"memory-archive-{date_str}.md"
@@ -103,20 +104,46 @@ def trim_memory_if_needed(max_lines: int = 200) -> bool:
 
 
 # =============================================================================
-# PRETOOLUSE HOOK — inline soul-protect
+# STRUCTURED OUTPUT HELPERS
 # =============================================================================
 
 
-async def protect_soul(event: Any) -> Any:
-    """Inline soul-protect: block any write to SOUL.md from automated reflection."""
-    tool_input = getattr(event, "tool_input", None) or {}
-    if isinstance(tool_input, dict) and "SOUL.md" in tool_input.get("file_path", ""):
-        return HookMatcher(
-            decision="deny",
-            reason="SOUL.md is write-protected from automated processes. "
-            "Log personality change suggestions to the daily log instead.",
-        )
-    return HookMatcher(decision="allow")
+def parse_reflection_response(text: str) -> dict:
+    """Extract JSON from LLM response. Returns dict with keys:
+    memory_additions, user_updates, nothing_to_update."""
+    m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+    raw = m.group(1) if m else text.strip()
+    try:
+        data = json.loads(raw)
+    except (json.JSONDecodeError, ValueError):
+        return {"memory_additions": [], "user_updates": [], "nothing_to_update": True, "_parse_error": True}
+    return {
+        "memory_additions": data.get("memory_additions") or [],
+        "user_updates": data.get("user_updates") or [],
+        "nothing_to_update": bool(data.get("nothing_to_update", False)),
+    }
+
+
+def apply_memory_additions(additions: list[str], date_str: str) -> bool:
+    """Append additions to MEMORY.md under a dated section. Returns True if wrote."""
+    if not additions:
+        return False
+    with file_lock(MEMORY_FILE):
+        current = MEMORY_FILE.read_text(encoding="utf-8") if MEMORY_FILE.exists() else "# Memory\n"
+        section = f"\n\n## {date_str} Reflection\n" + "\n".join(additions) + "\n"
+        atomic_write(MEMORY_FILE, current.rstrip() + section)
+    return True
+
+
+def apply_user_updates(updates: list[str], date_str: str) -> bool:
+    """Append updates to USER.md under a dated section. Returns True if wrote."""
+    if not updates:
+        return False
+    with file_lock(USER_FILE):
+        current = USER_FILE.read_text(encoding="utf-8") if USER_FILE.exists() else "# User\n"
+        section = f"\n\n## {date_str} Reflection\n" + "\n".join(updates) + "\n"
+        atomic_write(USER_FILE, current.rstrip() + section)
+    return True
 
 
 # =============================================================================
@@ -148,7 +175,7 @@ def run_reflection(dry_run: bool = False, force: bool = False) -> None:
 
     if log_result is None:
         print(f"[{now_local()}] No yesterday log found, skipping reflection")
-        append_to_daily_log("REFLECTION_SKIPPED — no yesterday log found")
+        append_to_daily_log("REFLECTION_SKIPPED â€” no yesterday log found")
         return
 
     date_str, log_content = log_result
@@ -159,7 +186,8 @@ def run_reflection(dry_run: bool = False, force: bool = False) -> None:
 
     reflection_prompt = f"""Daily memory reflection for {owner}'s Second Brain.
 
-Review yesterday's daily log and update long-term memory files.
+Review yesterday's daily log and decide what (if anything) should be added to
+long-term memory files. Respond with a single JSON block and nothing else.
 
 ## Current MEMORY.md
 {current_memory}
@@ -172,66 +200,69 @@ Review yesterday's daily log and update long-term memory files.
 
 {TRUST_BOUNDARY_INSTRUCTION}
 
-## Instructions
+## Output Format
 
-Review the daily log and update these files as needed:
+Respond with ONLY this JSON (no prose, no extra text):
 
-### 1. MEMORY.md ({MEMORY_FILE})
-Promote important items:
-- Key decisions and their rationale
-- Project status updates
-- Lessons learned
-- Important facts or configuration changes
+```json
+{{
+  "memory_additions": [
+    "- item worth adding to MEMORY.md"
+  ],
+  "user_updates": [
+    "- item worth adding to USER.md"
+  ],
+  "nothing_to_update": false
+}}
+```
 
-### 2. USER.md ({USER_FILE})
-Update when you notice patterns about {owner}:
-- Communication preferences
-- Schedule patterns
-- Tool/workflow preferences
-- New integrations or account info
+## Rules
 
-**Rules:**
-- Use the Edit tool to update files directly
-- Do NOT duplicate items already in a file
-- Keep entries concise
-- Only update USER.md when there is clear evidence (not one-off mentions)
-- NEVER edit SOUL.md — it is write-protected from all automated processes
-- Log what you changed to today's daily log ({get_today_log_path()})
-
-If nothing is worth updating, respond with exactly: REFLECTION_OK
+- Each item is a complete markdown bullet starting with `- `
+- memory_additions: key decisions, project status, config changes, lessons learned
+- user_updates: communication preferences, schedule patterns, tool preferences
+  (only when there is clear repeated evidence, not one-off mentions)
+- Do NOT add anything already in Current MEMORY.md or Current USER.md above
+- NEVER include SOUL.md content or personality changes
+- If nothing is worth adding set "nothing_to_update": true with empty lists
+- Keep items concise (under 120 chars each)
 """
 
     response_text = ""
 
     async def _run() -> None:
         nonlocal response_text
-        with file_lock(MEMORY_FILE):
-            async for message in query(
-                prompt=reflection_prompt,
-                options=ClaudeAgentOptions(
-                    allowed_tools=["Read", "Write", "Edit", "Glob", "Grep"],
-                    hooks={
-                        "PreToolUse": [
-                            HookMatcher(matcher="Write", hooks=[protect_soul]),
-                            HookMatcher(matcher="Edit", hooks=[protect_soul]),
-                        ]
-                    },
-                    max_turns=5,
-                ),
-            ):
-                if isinstance(message, AssistantMessage):
-                    for block in message.content:
-                        if isinstance(block, TextBlock):
-                            response_text += block.text
-                elif isinstance(message, ResultMessage):
-                    print(f"[{now_local()}] Reflection LLM completed: {message.subtype}")
+        async for message in query(
+            prompt=reflection_prompt,
+            options=ClaudeAgentOptions(
+                allowed_tools=[],   # lean -- Python writes files, not the LLM
+                max_turns=1,
+            ),
+        ):
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        response_text += block.text
+            elif isinstance(message, ResultMessage):
+                print(f"[{now_local()}] Reflection LLM completed: {message.subtype}")
 
     try:
         asyncio.run(_run())
     except Exception as e:
         print(f"[{now_local()}] Reflection error: {e}")
-        append_to_daily_log(f"**ERROR**: Reflection failed — {e}")
+        append_to_daily_log(f"**ERROR**: Reflection failed â€” {e}")
         return
+
+    # Parse structured output and apply changes
+    parsed = parse_reflection_response(response_text)
+
+    if parsed.get("_parse_error"):
+        print(f"[{now_local()}] Reflection: could not parse LLM response â€” skipping")
+        append_to_daily_log(f"**[Reflection]** Parse error â€” raw: {response_text[:200]}")
+        return
+
+    wrote_memory = apply_memory_additions(parsed["memory_additions"], date_str)
+    wrote_user = apply_user_updates(parsed["user_updates"], date_str)
 
     # Trim MEMORY.md if it grew too large
     trim_memory_if_needed()
@@ -239,16 +270,15 @@ If nothing is worth updating, respond with exactly: REFLECTION_OK
     # Save state
     state["last_run_date"] = today_str
     state["log_processed"] = date_str
-    state["result"] = "REFLECTION_OK" if "REFLECTION_OK" in response_text else "promoted"
+    state["result"] = "REFLECTION_OK" if parsed["nothing_to_update"] else "promoted"
     save_state(REFLECTION_STATE_FILE, state)
 
-    response_text = response_text.strip()
-    if "REFLECTION_OK" in response_text:
-        append_to_daily_log("REFLECTION_OK — nothing to promote from yesterday's log")
-        print(f"[{now_local()}] Reflection OK — nothing to promote")
+    if parsed["nothing_to_update"] and not (wrote_memory or wrote_user):
+        append_to_daily_log("REFLECTION_OK â€” nothing to promote from yesterday's log")
+        print(f"[{now_local()}] Reflection OK â€” nothing to promote")
     else:
         append_to_daily_log(f"**[Reflection]** Promoted items from {date_str} to MEMORY.md/USER.md")
-        print(f"[{now_local()}] Reflection complete — items promoted")
+        print(f"[{now_local()}] Reflection complete â€” items promoted")
 
 
 # =============================================================================
