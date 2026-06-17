@@ -1,3 +1,12 @@
+---
+title: Venues
+type: entity
+category: reference
+created: 2026-06-03
+updated: 2026-06-17
+related: [[billy-goat-karaoke]], [[dingos-music-bingo]], [[thommos-trivia]]
+tags: [venues, hosting, shows]
+---
 # Venues
 
 ## My Shows (Direct)

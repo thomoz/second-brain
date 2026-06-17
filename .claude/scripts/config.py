@@ -170,6 +170,15 @@ WHATSAPP_POLL_INTERVAL = float(_os.getenv("WHATSAPP_POLL_INTERVAL", "1.0"))
 BOT_LOCK_FILE = STATE_DIR / "whatsapp-bot.lock"
 
 
+# Structured memory directories
+ENTITIES_DIR = VAULT_DIR / "entities"
+TOPICS_DIR = VAULT_DIR / "topics"
+DECISIONS_DIR = VAULT_DIR / "decisions"
+PROFILE_DIR = VAULT_DIR / "Profile"
+CORE_MEMORIES_FILE = VAULT_DIR / "core-memories.md"
+GUIDE_FILE = VAULT_DIR / "GUIDE.md"
+
+
 def ensure_directories() -> None:
     """Ensure all Phase 1-3 runtime directories exist."""
     for d in [
@@ -180,5 +189,9 @@ def ensure_directories() -> None:
         ACTIVE_DRAFTS_DIR,
         DRAFTS_DIR / "sent",
         DRAFTS_DIR / "expired",
+        ENTITIES_DIR,
+        TOPICS_DIR,
+        DECISIONS_DIR,
+        PROFILE_DIR,
     ]:
         d.mkdir(parents=True, exist_ok=True)

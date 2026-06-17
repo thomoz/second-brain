@@ -8,16 +8,17 @@ all action requires Shaun's explicit review.
 
 ## Key Paths
 - Memory vault: Memory/
+- Entity pages: Memory/entities/
+- Topic pages: Memory/topics/
+- Decision archives: Memory/decisions/
+- Personal profile: Memory/Profile/
+- Core memories: Memory/core-memories.md
 - Daily logs: Memory/daily/
 - Active drafts: Memory/drafts/active/
 - Sent drafts: Memory/drafts/sent/
 - Expired drafts: Memory/drafts/expired/
-- Projects: Memory/Projects/
-- Clients: Memory/Clients/
-- Research: Memory/Research/
-- Goals: Memory/Goals/
-- Content: Memory/Content/
-- Wealth: Memory/Wealth/
+- External knowledge wiki: wiki/
+- Wiki skill: .claude/skills/llm-wiki/
 - Scripts: .claude/scripts/
 - Hooks: .claude/hooks/
 - Skills: .claude/skills/
@@ -157,6 +158,20 @@ python .claude/scripts/integrations/query.py outlook list         # Outlook inbo
 python .claude/scripts/integrations/query.py outlook unread       # Unread count
 python .claude/scripts/integrations/query.py outlook urgent       # Unread last 2h
 ```
+
+## External Knowledge Wiki
+
+Navigate via `wiki/index.md`. Use the `llm-wiki` skill to ingest, query, and lint the wiki.
+
+```powershell
+# Wiki operations
+python .claude/skills/llm-wiki/scripts/wiki_ops.py stats    # Page counts + last ingest
+python .claude/skills/llm-wiki/scripts/wiki_ops.py lint     # Health check (broken links, orphans)
+python .claude/skills/llm-wiki/scripts/wiki_ops.py validate entities/page-name.md  # Validate single page
+```
+
+To ingest new content: drop the source text or URL into the conversation and say "ingest this article".
+Raw sources go in `wiki/raw/` — the llm-wiki skill processes them into structured pages.
 
 ## Completed Phases
 

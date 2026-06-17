@@ -1,3 +1,11 @@
+---
+title: Hosting Growth Strategy
+type: topic
+created: 2026-06-03
+updated: 2026-06-17
+related: [[billy-goat-karaoke]], [[dingos-music-bingo]], [[thommos-trivia]]
+tags: [hosting, growth, venues, shows]
+---
 # Project: Hosting Business Growth
 
 ## Goal

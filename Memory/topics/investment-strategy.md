@@ -1,3 +1,11 @@
+---
+title: Investment Strategy
+type: topic
+created: 2026-06-03
+updated: 2026-06-17
+related: [[hosting-growth]]
+tags: [investment, wealth, portfolio, strategy]
+---
 # Investment Portfolio
 
 ## Strategy

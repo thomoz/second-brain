@@ -1,28 +1,46 @@
-# Memory
+# Memory Index
 
-Active as of: 2026-06-03
+_Active items and pointers to structured memory pages. Always loaded into sessions._
 
-## Key Facts
-- Five businesses: SongbookDB (SBDB Software Pty Ltd), Billy Goat Karaoke, Dingo's Music Bingo, Thommo's Trivia, Host Masters Entertainment
-- Show days: travel to venues to host karaoke/bingo/trivia nights
-- Proactivity: Advisor mode — draft for review, never act autonomously
+---
 
-## Venues & Show Schedule
-- Billy Goat Karaoke — Boyles Hotel Sutherland — every Thursday at 8pm
+## Active Items
 
-## Active Projects
-- **Hosting growth** — increase shows + find higher-paying venues; build cash buffer pre-crash
-- **SongbookDB** — reduce churn (AI onboarding idea); desktop app blocked by code signing issue; Mac AIR deprecation looming
-- **Karaoke Night app** — low priority; ToS concerns; early build with Victor Northhead
-- **Creative work** — FiNN TWiST music + Juno: Wonderdog film — on hold until income stable
+_Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here; archive to decisions/ when done._
 
-## Key Decisions
-- Second Brain build started 2026-06-03
-- Memory vault root: Memory/
-- Deployment target: Windows local + VPS (cloud sync)
+- (Jun 17) Second Brain nightly reflection running on VPS — structured output via Codex backend
+- (Jun 17) VPS: secondbrain@137.184.102.104, dir /home/secondbrain/second-brain
+- (Jun 17) Branch: post-creation-tweaks-20260617
 
-## 2026-06-16 Reflection
-- Second Brain now uses `codex` as the primary backend; Gemini was replaced due to quota limits
-- `/commit` now auto-pushes and deploys to VPS via `scripts/deploy.ps1`
-- VPS must track the same git branch as local; rerun `deploy.ps1` after any branch switch
-- Path handling is anchored to `__file__` to avoid wrong CWD writes from Task Scheduler
+## Entity Pages
+
+- [[songbookdb]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app
+- [[billy-goat-karaoke]] — hosted karaoke, Boyles Hotel Sutherland Thursdays 8pm
+- [[dingos-music-bingo]] — hosted music bingo
+- [[thommos-trivia]] — hosted trivia nights
+- [[host-masters-entertainment]] — umbrella entity for all live entertainment
+- [[karaoke-night-app]] — low priority, ToS concerns, early build with Victor Northhead
+- [[creative-work]] — FiNN TWiST music + Juno: Wonderdog film, on hold
+- [[venues]] — all show venues and distances
+
+## Topic Pages
+
+- [[investment-strategy]] — portfolio, crash-prep strategy, watchlist
+- [[hosting-growth]] — venue sales, show efficiency, ad creation bottleneck
+
+## Decision Archives
+
+- [[2026-Q2]] — Q2 2026 decisions (Apr–Jun 2026)
+
+## Preferences
+
+- Communication: brief bullets, no fluff, no end-of-turn recaps
+- Deploy target: Windows local + DigitalOcean VPS (cloud sync via git)
+- LLM backend: Codex (ChatGPT flat-rate) via codex_sdk_compat.py
+- Never auto-send emails, messages, or social posts
+
+---
+
+_Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_
+_Profile: Memory/Profile/{values,goals,history,personality,health,relationships,finances}.md_
+_Core permanent memories: Memory/core-memories.md_

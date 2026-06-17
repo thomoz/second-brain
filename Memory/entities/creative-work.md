@@ -1,3 +1,12 @@
+---
+title: Creative Work
+type: entity
+category: project
+created: 2026-06-03
+updated: 2026-06-17
+related: []
+tags: [music, film, finn-twist]
+---
 # Project: Creative Work (Long-term Goal)
 
 ## Goal

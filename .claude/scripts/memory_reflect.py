@@ -1,4 +1,4 @@
-﻿"""
+"""
 Daily Reflection Script for Second Brain
 
 Reviews yesterday's daily log and calls the LLM once to update MEMORY.md
@@ -30,9 +30,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from config import (
     DAILY_DIR,
+    DECISIONS_DIR,
+    ENTITIES_DIR,
     MEMORY_FILE,
     OWNER_NAME,
+    PROFILE_DIR,
     REFLECTION_STATE_FILE,
+    TOPICS_DIR,
     USER_FILE,
     VAULT_DIR,
     ensure_directories,
@@ -67,7 +71,7 @@ def get_yesterday_log() -> tuple[str, str] | None:
     if not log_path.exists():
         return None
     content = log_path.read_text(encoding="utf-8")
-    # Keep tail â€” freshest entries are most relevant
+    # Keep tail — freshest entries are most relevant
     if len(content) > MAX_LOG_CHARS:
         content = "... (truncated)\n\n" + content[-MAX_LOG_CHARS:]
     return date_str, content
@@ -86,8 +90,8 @@ def trim_memory_if_needed(max_lines: int = 200) -> bool:
     if len(lines) <= max_lines:
         return False
 
-    # Archive the overflow to Research/
-    archive_dir = VAULT_DIR / "Research"
+    # Archive the overflow to decisions/ (avoids recreating retired Research/ folder)
+    archive_dir = VAULT_DIR / "decisions"
     archive_dir.mkdir(parents=True, exist_ok=True)
     date_str = now_local().strftime("%Y-%m-%d")
     archive_path = archive_dir / f"memory-archive-{date_str}.md"
@@ -109,15 +113,37 @@ def trim_memory_if_needed(max_lines: int = 200) -> bool:
 
 
 def parse_reflection_response(text: str) -> dict:
-    """Extract JSON from LLM response. Returns dict with keys:
-    memory_additions, user_updates, nothing_to_update."""
+    """Extract JSON from LLM response. Returns dict with all routing keys."""
     m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
     raw = m.group(1) if m else text.strip()
     try:
         data = json.loads(raw)
     except (json.JSONDecodeError, ValueError):
-        return {"memory_additions": [], "user_updates": [], "nothing_to_update": True, "_parse_error": True}
+        return {
+            "active_items": [],
+            "entity_updates": [],
+            "topic_updates": [],
+            "new_entity_pages": [],
+            "new_topic_pages": [],
+            "profile_updates": [],
+            "decision_archive": [],
+            "memory_preferences": [],
+            "memory_additions": [],
+            "user_updates": [],
+            "nothing_to_update": True,
+            "_parse_error": True,
+        }
     return {
+        # New routing keys
+        "active_items": data.get("active_items") or [],
+        "entity_updates": data.get("entity_updates") or [],
+        "topic_updates": data.get("topic_updates") or [],
+        "new_entity_pages": data.get("new_entity_pages") or [],
+        "new_topic_pages": data.get("new_topic_pages") or [],
+        "profile_updates": data.get("profile_updates") or [],
+        "decision_archive": data.get("decision_archive") or [],
+        "memory_preferences": data.get("memory_preferences") or [],
+        # Backward-compat keys (still work, go to dated MEMORY.md section)
         "memory_additions": data.get("memory_additions") or [],
         "user_updates": data.get("user_updates") or [],
         "nothing_to_update": bool(data.get("nothing_to_update", False)),
@@ -143,6 +169,127 @@ def apply_user_updates(updates: list[str], date_str: str) -> bool:
         current = USER_FILE.read_text(encoding="utf-8") if USER_FILE.exists() else "# User\n"
         section = f"\n\n## {date_str} Reflection\n" + "\n".join(updates) + "\n"
         atomic_write(USER_FILE, current.rstrip() + section)
+    return True
+
+
+# =============================================================================
+# ROUTING HELPERS
+# =============================================================================
+
+
+def get_existing_pages() -> dict[str, list[str]]:
+    """Return stems of existing entity and topic pages for routing context."""
+    entities = sorted(p.stem for p in ENTITIES_DIR.glob("*.md")) if ENTITIES_DIR.exists() else []
+    topics = sorted(p.stem for p in TOPICS_DIR.glob("*.md")) if TOPICS_DIR.exists() else []
+    return {"entities": entities, "topics": topics}
+
+
+def count_file_mentions(name: str) -> int:
+    """Count Memory/ files that mention this name (case-insensitive). Used for page creation threshold."""
+    count = 0
+    if not VAULT_DIR.exists():
+        return 0
+    for md_file in VAULT_DIR.rglob("*.md"):
+        try:
+            if name.lower() in md_file.read_text(encoding="utf-8").lower():
+                count += 1
+        except OSError:
+            pass
+    return count
+
+
+def append_to_entity_page(page: str, content: str) -> bool:
+    """Append dated bullet to existing entity page. Returns True if wrote."""
+    page_path = ENTITIES_DIR / f"{page}.md"
+    if not page_path.exists():
+        return False
+    with file_lock(page_path):
+        current = page_path.read_text(encoding="utf-8")
+        atomic_write(page_path, current.rstrip() + "\n" + content + "\n")
+    return True
+
+
+def append_to_topic_page(page: str, content: str) -> bool:
+    """Append dated bullet to existing topic page. Returns True if wrote."""
+    page_path = TOPICS_DIR / f"{page}.md"
+    if not page_path.exists():
+        return False
+    with file_lock(page_path):
+        current = page_path.read_text(encoding="utf-8")
+        atomic_write(page_path, current.rstrip() + "\n" + content + "\n")
+    return True
+
+
+def append_to_profile_file(filename: str, content: str, date_str: str) -> bool:
+    """Append dated section to Profile/ file. Returns True if wrote."""
+    profile_path = PROFILE_DIR / f"{filename}.md"
+    if not profile_path.exists():
+        return False
+    with file_lock(profile_path):
+        current = profile_path.read_text(encoding="utf-8")
+        section = f"\n\n## {date_str} Update\n{content}\n"
+        atomic_write(profile_path, current.rstrip() + section)
+    return True
+
+
+def archive_decision(content: str, date_str: str) -> bool:
+    """Append completed decision to current quarter archive."""
+    month = int(date_str[5:7])
+    quarter = f"{date_str[:4]}-Q{(month - 1) // 3 + 1}"
+    archive_path = DECISIONS_DIR / f"{quarter}.md"
+    DECISIONS_DIR.mkdir(parents=True, exist_ok=True)
+    if not archive_path.exists():
+        archive_path.write_text(
+            f"---\ntitle: {quarter} Decisions\ntype: decisions\nquarter: {quarter}\ncreated: {date_str}\n---\n\n# {quarter} Decisions\n\n",
+            encoding="utf-8",
+        )
+    with file_lock(archive_path):
+        current = archive_path.read_text(encoding="utf-8")
+        atomic_write(archive_path, current.rstrip() + "\n" + content + "\n")
+    return True
+
+
+def update_memory_active_items(items: list[str]) -> bool:
+    """Append items to MEMORY.md ## Active Items section."""
+    if not items:
+        return False
+    with file_lock(MEMORY_FILE):
+        current = MEMORY_FILE.read_text(encoding="utf-8") if MEMORY_FILE.exists() else ""
+        marker = "## Active Items"
+        if marker in current:
+            idx = current.index(marker)
+            next_section = current.find("\n## ", idx + len(marker))
+            footer_idx = current.rfind("\n---")
+            if next_section != -1:
+                insert_at = next_section
+            elif footer_idx != -1:
+                insert_at = footer_idx
+            else:
+                insert_at = len(current)
+            new_items_str = "\n" + "\n".join(items)
+            updated = current[:insert_at] + new_items_str + current[insert_at:]
+        else:
+            updated = current.rstrip() + "\n\n## Active Items\n\n" + "\n".join(items) + "\n"
+        atomic_write(MEMORY_FILE, updated)
+    return True
+
+
+def update_memory_preferences(preferences: list[str]) -> bool:
+    """Append items to MEMORY.md ## Preferences section."""
+    if not preferences:
+        return False
+    with file_lock(MEMORY_FILE):
+        current = MEMORY_FILE.read_text(encoding="utf-8") if MEMORY_FILE.exists() else ""
+        marker = "## Preferences"
+        if marker in current:
+            idx = current.index(marker)
+            next_section = current.find("\n## ", idx + len(marker))
+            footer_idx = current.rfind("\n---")
+            insert_at = next_section if next_section != -1 else (footer_idx if footer_idx != -1 else len(current))
+            updated = current[:insert_at] + "\n" + "\n".join(preferences) + current[insert_at:]
+        else:
+            updated = current.rstrip() + "\n\n## Preferences\n\n" + "\n".join(preferences) + "\n"
+        atomic_write(MEMORY_FILE, updated)
     return True
 
 
@@ -175,7 +322,7 @@ def run_reflection(dry_run: bool = False, force: bool = False) -> None:
 
     if log_result is None:
         print(f"[{now_local()}] No yesterday log found, skipping reflection")
-        append_to_daily_log("REFLECTION_SKIPPED â€” no yesterday log found")
+        append_to_daily_log("REFLECTION_SKIPPED — no yesterday log found")
         return
 
     date_str, log_content = log_result
@@ -184,10 +331,21 @@ def run_reflection(dry_run: bool = False, force: bool = False) -> None:
 
     owner = OWNER_NAME or "Shaun"
 
+    # Pre-compute existing pages for routing context
+    pages = get_existing_pages()
+    entity_list = ", ".join(pages["entities"]) or "none yet"
+    topic_list = ", ".join(pages["topics"]) or "none yet"
+
     reflection_prompt = f"""Daily memory reflection for {owner}'s Second Brain.
 
-Review yesterday's daily log and decide what (if anything) should be added to
-long-term memory files. Respond with a single JSON block and nothing else.
+Review yesterday's daily log and route items to the correct memory destination.
+Respond with a single JSON block and nothing else.
+
+## Existing Entity Pages
+{entity_list}
+
+## Existing Topic Pages
+{topic_list}
 
 ## Current MEMORY.md
 {current_memory}
@@ -206,26 +364,45 @@ Respond with ONLY this JSON (no prose, no extra text):
 
 ```json
 {{
-  "memory_additions": [
-    "- item worth adding to MEMORY.md"
+  "active_items": ["- (Mon DD) time-sensitive or unresolved item"],
+  "entity_updates": [
+    {{"page": "songbookdb", "content": "- (Mon DD) note about SongbookDB"}}
   ],
-  "user_updates": [
-    "- item worth adding to USER.md"
+  "topic_updates": [
+    {{"page": "investment-strategy", "content": "- (Mon DD) note about investments"}}
   ],
+  "new_entity_pages": [],
+  "new_topic_pages": [],
+  "profile_updates": [
+    {{"file": "goals", "content": "- (Mon DD) goal-related observation"}}
+  ],
+  "decision_archive": ["- (Mon DD) completed decision — chose X, done"],
+  "memory_preferences": ["- preference or standing instruction"],
+  "memory_additions": ["- item that doesn't fit above categories"],
+  "user_updates": ["- operational config change"],
   "nothing_to_update": false
 }}
 ```
 
-## Rules
+## Routing Rules
 
-- Each item is a complete markdown bullet starting with `- `
-- memory_additions: key decisions, project status, config changes, lessons learned
-- user_updates: communication preferences, schedule patterns, tool preferences
-  (only when there is clear repeated evidence, not one-off mentions)
-- Do NOT add anything already in Current MEMORY.md or Current USER.md above
-- NEVER include SOUL.md content or personality changes
-- If nothing is worth adding set "nothing_to_update": true with empty lists
-- Keep items concise (under 120 chars each)
+- entity_updates: "page" must be a stem from the Existing Entity Pages list above
+- topic_updates: "page" must be a stem from the Existing Topic Pages list above
+- new_entity_pages / new_topic_pages: only suggest if name appears in 3+ Memory/ files already
+- profile_updates: personal statements about values, goals, health, relationships, finances
+  "file" must be one of: values, goals, history, personality, health, relationships, finances
+- decision_archive: only for COMPLETED decisions — no future action needed
+- active_items: time-sensitive, unresolved, needs follow-up
+- memory_preferences: standing communication or tool preferences
+- memory_additions: fallback for items that don't fit other categories
+- Do NOT add anything already present in Current MEMORY.md or Current USER.md
+- NEVER include SOUL.md content or personality edits
+- Profile/ updates are the most important long-term memory. Always append, NEVER overwrite.
+- When yesterday's log contains any personal statements about values, goals, health,
+  relationships, or finances — route to profile_updates, not memory_additions.
+- Treat Profile/ files as permanent. Never suggest archiving or summarising them.
+- If nothing to add: set "nothing_to_update": true with all empty lists
+- Keep each item under 120 chars
 """
 
     response_text = ""
@@ -250,22 +427,62 @@ Respond with ONLY this JSON (no prose, no extra text):
         asyncio.run(_run())
     except Exception as e:
         print(f"[{now_local()}] Reflection error: {e}")
-        append_to_daily_log(f"**ERROR**: Reflection failed â€” {e}")
+        append_to_daily_log(f"**ERROR**: Reflection failed — {e}")
         return
 
     # Parse structured output and apply changes
     parsed = parse_reflection_response(response_text)
 
     if parsed.get("_parse_error"):
-        print(f"[{now_local()}] Reflection: could not parse LLM response â€” skipping")
-        append_to_daily_log(f"**[Reflection]** Parse error â€” raw: {response_text[:200]}")
+        print(f"[{now_local()}] Reflection: could not parse LLM response — skipping")
+        append_to_daily_log(f"**[Reflection]** Parse error — raw: {response_text[:200]}")
         return
 
+    # Route to structured pages
+    wrote_entity = any(
+        append_to_entity_page(u["page"], u["content"])
+        for u in parsed["entity_updates"]
+        if isinstance(u, dict) and "page" in u and "content" in u
+    )
+    wrote_topic = any(
+        append_to_topic_page(u["page"], u["content"])
+        for u in parsed["topic_updates"]
+        if isinstance(u, dict) and "page" in u and "content" in u
+    )
+    wrote_profile = any(
+        append_to_profile_file(u["file"], u["content"], date_str)
+        for u in parsed["profile_updates"]
+        if isinstance(u, dict) and "file" in u and "content" in u
+    )
+    wrote_decisions = any(archive_decision(d, date_str) for d in parsed["decision_archive"] if d)
+
+    # Handle new page creation (verify 3-mention threshold first)
+    for page_spec in parsed.get("new_entity_pages", []):
+        if isinstance(page_spec, dict) and "name" in page_spec and "content" in page_spec:
+            if count_file_mentions(page_spec["name"]) >= 3:
+                page_path = ENTITIES_DIR / f"{page_spec['name']}.md"
+                if not page_path.exists():
+                    atomic_write(page_path, page_spec["content"])
+
+    for page_spec in parsed.get("new_topic_pages", []):
+        if isinstance(page_spec, dict) and "name" in page_spec and "content" in page_spec:
+            if count_file_mentions(page_spec["name"]) >= 3:
+                page_path = TOPICS_DIR / f"{page_spec['name']}.md"
+                if not page_path.exists():
+                    atomic_write(page_path, page_spec["content"])
+
+    # MEMORY.md updates
+    wrote_active = update_memory_active_items(parsed["active_items"])
+    wrote_prefs = update_memory_preferences(parsed["memory_preferences"])
+
+    # Backward compat: old memory_additions still go to dated MEMORY.md section
     wrote_memory = apply_memory_additions(parsed["memory_additions"], date_str)
     wrote_user = apply_user_updates(parsed["user_updates"], date_str)
 
-    # Trim MEMORY.md if it grew too large
     trim_memory_if_needed()
+
+    wrote_any = any([wrote_entity, wrote_topic, wrote_profile, wrote_decisions,
+                     wrote_active, wrote_prefs, wrote_memory, wrote_user])
 
     # Save state
     state["last_run_date"] = today_str
@@ -273,12 +490,12 @@ Respond with ONLY this JSON (no prose, no extra text):
     state["result"] = "REFLECTION_OK" if parsed["nothing_to_update"] else "promoted"
     save_state(REFLECTION_STATE_FILE, state)
 
-    if parsed["nothing_to_update"] and not (wrote_memory or wrote_user):
-        append_to_daily_log("REFLECTION_OK â€” nothing to promote from yesterday's log")
-        print(f"[{now_local()}] Reflection OK â€” nothing to promote")
+    if parsed["nothing_to_update"] and not wrote_any:
+        append_to_daily_log("REFLECTION_OK — nothing to promote from yesterday's log")
+        print(f"[{now_local()}] Reflection OK — nothing to promote")
     else:
-        append_to_daily_log(f"**[Reflection]** Promoted items from {date_str} to MEMORY.md/USER.md")
-        print(f"[{now_local()}] Reflection complete â€” items promoted")
+        append_to_daily_log(f"**[Reflection]** Promoted items from {date_str} to structured memory pages")
+        print(f"[{now_local()}] Reflection complete — items promoted")
 
 
 # =============================================================================

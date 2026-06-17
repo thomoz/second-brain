@@ -82,6 +82,26 @@ def build_context(source: str = "startup") -> str:
     if heartbeat:
         parts.append("## Heartbeat Monitoring\n" + heartbeat.strip())
 
+    # Core memories — permanent file, always inject if non-empty
+    core_mem_path = MEMORY_DIR / "core-memories.md"
+    if core_mem_path.exists():
+        core_mem = read_file_safe(core_mem_path)
+        if core_mem and "_(Empty" not in core_mem:
+            parts.append("## Core Memories\n" + core_mem.strip())
+
+    # Profile — inject non-placeholder files for key categories
+    profile_dir = MEMORY_DIR / "Profile"
+    if profile_dir.exists():
+        profile_parts = []
+        for fname in ["values.md", "goals.md", "personality.md", "health.md"]:
+            fpath = profile_dir / fname
+            if fpath.exists():
+                content = read_file_safe(fpath)
+                if content and "_(not yet" not in content:
+                    profile_parts.append(f"### {fname.replace('.md','').title()}\n{content.strip()}")
+        if profile_parts:
+            parts.append("## Profile\n" + "\n\n".join(profile_parts))
+
     daily_logs = get_recent_daily_log()
     for date, content in daily_logs:
         parts.append(f"## Daily log {date}\n" + content.strip())

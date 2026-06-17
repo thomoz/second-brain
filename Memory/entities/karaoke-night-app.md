@@ -1,3 +1,12 @@
+---
+title: Karaoke Night App
+type: entity
+category: project
+created: 2026-06-03
+updated: 2026-06-17
+related: [[songbookdb]]
+tags: [project, karaoke, app]
+---
 # Project: Karaoke Night App (Victor Northhead)
 
 ## What
