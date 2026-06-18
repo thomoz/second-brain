@@ -1,4 +1,4 @@
-"""Conversation engine: routes WhatsApp messages through sdk_compat with session persistence."""
+﻿"""Conversation engine: routes WhatsApp messages through sdk_compat with session persistence."""
 
 from __future__ import annotations
 
@@ -85,18 +85,34 @@ class ConversationEngine:
 
     async def handle_message(self, message: IncomingMessage) -> AsyncIterator[OutgoingMessage]:
         """Process an incoming message and yield a single response OutgoingMessage."""
-        # WhatsApp has no threads — channel_id is the session key
+        # WhatsApp has no threads â€” channel_id is the session key
         thread_id = ""
         platform_str = message.platform.value
         channel_id = message.channel.platform_id
 
         existing = self.session_store.get(platform_str, channel_id, thread_id)
 
-        # Injection detection on incoming message (log only — never block Shaun)
+        # Injection detection on incoming message (log only â€” never block Shaun)
         injection_flags = check_injection_patterns(message.text)
         if injection_flags:
             names = ", ".join(f[0] for f in injection_flags)
             print(f"[{datetime.now()}] [SECURITY] WhatsApp injection patterns detected: {names}")
+
+        # Conversation thread reset
+        _reset_phrases = ["new conversation thread", "start new conversation"]
+        if any(phrase in message.text.lower() for phrase in _reset_phrases):
+            if existing:
+                try:
+                    from codex_sdk_compat import reset_session
+                    reset_session(existing.agent_session_id)
+                except ImportError:
+                    pass
+            yield OutgoingMessage(
+                text="Conversation thread reset. Starting fresh â€” your vault memory is intact.",
+                channel=message.channel,
+                thread=message.thread,
+            )
+            return
 
         # Ask Me Questions profile-building mode detection
         _AQM_PHRASES = ["ask me questions", "ask me a question", "coaching session", "profile building", "build my profile"]
@@ -121,7 +137,7 @@ class ConversationEngine:
             soul_text
             + "\n\n# WhatsApp Chat Bot Rules\n"
             "You are responding via WhatsApp (possibly via CarPlay / Siri). "
-            "Be concise and use plain text only — no markdown headers, no bullet formatting "
+            "Be concise and use plain text only â€” no markdown headers, no bullet formatting "
             "that sounds bad read aloud.\n"
             "Give a single, complete answer. Do not split across multiple turns.\n"
             "Keep answers short enough to read on a phone screen.\n"

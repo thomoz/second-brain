@@ -254,6 +254,23 @@ def _save_session(key: str, thread_id: str) -> None:
         pass
 
 
+def reset_session(resume_key: str) -> bool:
+    """Remove a session mapping so the next call starts a fresh Codex thread.
+
+    Returns True if the key was found and removed, False if it wasn't present.
+    The vault (daily logs, MEMORY.md, entity pages) is unaffected.
+    """
+    sessions = _load_sessions()
+    if resume_key not in sessions:
+        return False
+    del sessions[resume_key]
+    try:
+        _SESSIONS_FILE.write_text(json.dumps(sessions, indent=2), encoding="utf-8")
+    except OSError:
+        return False
+    return True
+
+
 # ---------------------------------------------------------------------------
 # Prompt composition (Codex exec has no system-prompt flag)
 # ---------------------------------------------------------------------------

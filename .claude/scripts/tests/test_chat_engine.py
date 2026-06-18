@@ -1,4 +1,4 @@
-"""Unit tests for chat/engine.py — mocks sdk_compat.query."""
+﻿"""Unit tests for chat/engine.py â€” mocks sdk_compat.query."""
 
 from __future__ import annotations
 
@@ -77,3 +77,57 @@ async def test_handle_message_new_session(engine, store):
     session = store.get("whatsapp", "61410868612@c.us", "")
     assert session is not None
     assert session.agent_session_id == "sdk-session-abc"
+
+
+@pytest.mark.asyncio
+async def test_reset_no_existing_session(engine, store):
+    """Reset phrase with no prior session returns confirmation without calling the LLM."""
+    with patch("engine.query") as mock_query:
+        responses = []
+        async for msg in engine.handle_message(_make_incoming("new conversation thread")):
+            responses.append(msg)
+
+    assert len(responses) == 1
+    assert "reset" in responses[0].text.lower()
+    mock_query.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_reset_with_existing_session(engine, store):
+    """Reset phrase with a prior session calls reset_session and returns confirmation without LLM."""
+    from session import Session
+    store.create(Session(
+        session_id="whatsapp:61410868612@c.us:",
+        agent_session_id="codex-thread-xyz",
+        platform="whatsapp",
+        channel_id="61410868612@c.us",
+        thread_id="",
+        user_id="61410868612@c.us",
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        message_count=5,
+    ))
+
+    with patch("engine.query") as mock_query:
+        with patch("codex_sdk_compat.reset_session") as mock_reset:
+            responses = []
+            async for msg in engine.handle_message(_make_incoming("new conversation thread")):
+                responses.append(msg)
+
+    assert len(responses) == 1
+    assert "reset" in responses[0].text.lower()
+    mock_query.assert_not_called()
+    mock_reset.assert_called_once_with("codex-thread-xyz")
+
+
+@pytest.mark.asyncio
+async def test_reset_case_insensitive(engine, store):
+    """Reset phrase triggers regardless of capitalisation."""
+    with patch("engine.query") as mock_query:
+        responses = []
+        async for msg in engine.handle_message(_make_incoming("New Conversation Thread")):
+            responses.append(msg)
+
+    assert len(responses) == 1
+    assert "reset" in responses[0].text.lower()
+    mock_query.assert_not_called()
