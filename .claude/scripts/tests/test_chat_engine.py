@@ -109,7 +109,7 @@ async def test_reset_with_existing_session(engine, store):
     ))
 
     with patch("engine.query") as mock_query:
-        with patch("codex_sdk_compat.reset_session") as mock_reset:
+        with patch("engine.reset_session") as mock_reset:
             responses = []
             async for msg in engine.handle_message(_make_incoming("new conversation thread")):
                 responses.append(msg)
@@ -131,3 +131,48 @@ async def test_reset_case_insensitive(engine, store):
     assert len(responses) == 1
     assert "reset" in responses[0].text.lower()
     mock_query.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_ask_me_questions_resets_thread(engine, store):
+    """Ask Me Questions resets the existing thread before entering profile mode."""
+    from session import Session
+    store.create(Session(
+        session_id="whatsapp:61410868612@c.us:",
+        agent_session_id="codex-thread-xyz",
+        platform="whatsapp",
+        channel_id="61410868612@c.us",
+        thread_id="",
+        user_id="61410868612@c.us",
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        message_count=5,
+    ))
+
+    mock_assistant = MagicMock()
+    mock_assistant.__class__.__name__ = "AssistantMessage"
+    mock_text_block = MagicMock()
+    mock_text_block.__class__.__name__ = "TextBlock"
+    mock_text_block.text = "Great, let us begin."
+    mock_assistant.content = [mock_text_block]
+
+    mock_result = MagicMock()
+    mock_result.__class__.__name__ = "ResultMessage"
+    mock_result.session_id = "sdk-session-new"
+    mock_result.total_cost_usd = 0.005
+
+    async def mock_query(prompt, options=None):
+        yield mock_assistant
+        yield mock_result
+
+    with patch("engine.query", side_effect=mock_query):
+        with patch("engine.AssistantMessage", type(mock_assistant)):
+            with patch("engine.TextBlock", type(mock_text_block)):
+                with patch("engine.ResultMessage", type(mock_result)):
+                    with patch("engine.reset_session") as mock_reset:
+                        responses = []
+                        async for msg in engine.handle_message(_make_incoming("ask me questions")):
+                            responses.append(msg)
+
+    assert len(responses) == 1
+    mock_reset.assert_called_once_with("codex-thread-xyz")

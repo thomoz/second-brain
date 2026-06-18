@@ -63,6 +63,12 @@ from sdk_compat import (  # noqa: E402
     query,
 )
 
+try:
+    from codex_sdk_compat import reset_session  # noqa: E402
+except ImportError:
+    def reset_session(key: str) -> bool:  # type: ignore[misc]
+        return False
+
 
 class ConversationEngine:
     """Routes incoming messages to the LLM backend with session persistence.
@@ -102,11 +108,7 @@ class ConversationEngine:
         _reset_phrases = ["new conversation thread", "start new conversation"]
         if any(phrase in message.text.lower() for phrase in _reset_phrases):
             if existing:
-                try:
-                    from codex_sdk_compat import reset_session
-                    reset_session(existing.agent_session_id)
-                except ImportError:
-                    pass
+                reset_session(existing.agent_session_id)
             yield OutgoingMessage(
                 text="Conversation thread reset. Starting fresh â€” your vault memory is intact.",
                 channel=message.channel,
@@ -145,6 +147,8 @@ class ConversationEngine:
         )
 
         if _is_profile_mode:
+            if existing:
+                reset_session(existing.agent_session_id)
             skill_path = self.project_root / ".claude" / "skills" / "ask-me-questions" / "SKILL.md"
             try:
                 skill_text = skill_path.read_text(encoding="utf-8")
