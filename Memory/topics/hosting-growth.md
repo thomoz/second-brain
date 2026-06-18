@@ -25,3 +25,4 @@ Target: more cash to bank + capital ready to deploy into shares post-crash.
 
 ## Status
 Active
+- (Jun 17) Elanora Squash requested another banner colour option; follow-up needed

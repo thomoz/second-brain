@@ -12,6 +12,8 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Jun 17) VPS: secondbrain@137.184.102.104, dir /home/secondbrain/second-brain
 - (Jun 17) Branch: post-creation-tweaks-20260617
 
+- (Jun 17) Elanora Squash: send Nicky another banner colour option instead of yellow on red
+- (Jun 17) Verify nightly reflection auto-writes to MEMORY.md with correct blank lines
 ## Entity Pages
 
 - [[songbookdb]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app
@@ -44,3 +46,11 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_
 _Profile: Memory/Profile/{values,goals,history,personality,health,relationships,finances}.md_
 _Core permanent memories: Memory/core-memories.md_
+
+## 2026-06-17 Reflection
+- (Jun 17) SessionEnd hook now runs `memory_flush.py` detached so flush survives terminal close
+- (Jun 17) Reflection fix deployed; Codex structured output now writes to `MEMORY.md`
+- (Jun 17) Added reflection tests in `test_memory_reflect.py`
+- (Jun 17) `wiki_ops.py` supports `stats`, `lint`, and `validate <page>` for the project wiki
+- (Jun 17) Memory system upgrade plan saved with 23 tasks; each phase ends with VPS deploy
+- (Jun 17) Deploy script stashes and restores local changes during VPS pull
