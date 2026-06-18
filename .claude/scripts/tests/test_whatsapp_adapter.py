@@ -88,6 +88,20 @@ def test_poll_once_empty_queue(requests_mock):
     assert msg is None
 
 
+def test_poll_once_empty_my_number_blocks_all(requests_mock):
+    """Adapter with empty my_number is fail-closed — no sender is allowed through."""
+    adapter = WhatsAppPollingAdapter(INSTANCE, TOKEN, my_number="")
+    requests_mock.get(
+        f"https://api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
+        json=SAMPLE_PAYLOAD,
+    )
+    requests_mock.delete(
+        f"https://api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/12345"
+    )
+    msg = adapter._poll_once()
+    assert msg is None
+
+
 def test_poll_once_non_text_message(requests_mock):
     payload = {
         "receiptId": 200,

@@ -85,8 +85,8 @@ class WhatsAppPollingAdapter:
             sender_data = body.get("senderData", {})
             sender = sender_data.get("sender", "")
 
-            # Security filter: only respond to Shaun's own number
-            if self.my_number not in sender:
+            # Security filter: only respond to Shaun's own number (fail-closed: empty my_number blocks all)
+            if not self.my_number or self.my_number not in sender:
                 _ack()
                 return None
 
