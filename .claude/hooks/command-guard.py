@@ -9,7 +9,7 @@ from pathlib import Path
 
 # __file__-relative path — robust regardless of hook invocation CWD
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-from shared import DANGEROUS_BASH_PATTERNS
+from shared import DANGEROUS_BASH_PATTERNS, append_audit_log
 
 _COMPILED = [re.compile(p, re.IGNORECASE) for p in DANGEROUS_BASH_PATTERNS]
 
@@ -57,6 +57,7 @@ def main() -> None:
     reason = check_command(command)
 
     if reason:
+        append_audit_log("command-guard", "Bash", reason, command[:120])
         print(
             f"SECURITY: {reason}. This command matches a dangerous pattern and cannot "
             "be executed autonomously. Ask Shaun to run it manually if needed.",

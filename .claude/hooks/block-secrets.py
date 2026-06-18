@@ -12,6 +12,10 @@ Exit codes:
 import json
 import re
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+from shared import append_audit_log
 
 # --- Sensitive file patterns ---
 # Any file path matching these patterns should never be read or written by the LLM
@@ -332,6 +336,8 @@ def main() -> None:
             reason = "Blocked: Glob pattern targeting .env files"
 
     if reason:
+        payload = tool_input.get("file_path") or tool_input.get("command") or tool_input.get("pattern") or ""
+        append_audit_log("block-secrets", tool_name, reason, str(payload))
         print(
             f"SECURITY: {reason}. "
             "API keys and credentials must never enter the context window. "

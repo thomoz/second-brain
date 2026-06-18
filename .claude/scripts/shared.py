@@ -62,6 +62,29 @@ def atomic_write(path: Path, content: str) -> None:
     os.replace(tmp, str(path))
 
 
+def append_audit_log(hook_name: str, tool_name: str, reason: str, payload: str = "", _path: Path | None = None) -> None:
+    """Append a security block event to the persistent audit log.
+
+    Path is derived from __file__ so it works regardless of hook invocation CWD.
+    _path is for testing only — pass a tmp_path to redirect writes.
+    Uses plain open() (no lock) — append is atomic enough for a log file.
+    """
+    from datetime import datetime
+
+    if _path is None:
+        project_root = Path(__file__).resolve().parent.parent.parent
+        _path = project_root / ".claude" / "data" / "security_audit.log"
+    _path.parent.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+    snippet = payload[:120].replace("\n", " ") if payload else ""
+    line = f"{ts} | hook={hook_name} | tool={tool_name} | {reason} | {snippet}\n"
+    try:
+        with open(_path, "a", encoding="utf-8") as f:
+            f.write(line)
+    except OSError:
+        pass  # Never let audit log failure block a hook
+
+
 def append_to_daily_log(text: str) -> None:
     """Append timestamped entry to today's daily log with file locking."""
     from config import DAILY_DIR, now_local
