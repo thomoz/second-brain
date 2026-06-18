@@ -1,24 +1,10 @@
-Start building "Ask Me Questions"
+From Rahul:
 
-Saved to .agent/plans/ask-me-questions-handoff.md.
-
-Next session flow:
-1. /prime
-2. Tell me to read ask-me-questions-handoff.md
-3. Quick discussion to close the 6 open questions
-4. /plan-feature to build the implementation plan
-
-
+"use the Codex desktop app and enable the sync to mobile. This lets you access Codex via the ChatGPT phone app, so you can easily start individual conversation sessions just like you would on the Codex Desktop app or Codex CLI."
 
 
 
 ## Where we are up to:
-
-/prime, then paste this:
-
-Read .agent/plans/handoff-heartbeat-state-vps.md and fix the heartbeat state persistence issue on the VPS
-
-Also, check iof we need so many heartbeats per day, espeiclaly since I'm asleep 8 hours a day.
 
 
 
@@ -99,5 +85,13 @@ ANTHROPIC_MODEL=claude-haiku-4-5-20251001
 Though sdk_compat.py doesn't currently pass a model to ClaudeAgentOptions for the chat bot — that's a one-line add to engine.py if you want it.
 
 Alternative if API costs get high: SB_AGENT_BACKEND=pi is already built (Phase 2) — drives Pi which uses your OpenAI/Codex subscription instead. Pi isn't installed yet (npm install -g @earendil-works/pi-coding-agent would sort that), but the compat layer is ready.
+
+
+
+
+1. [IMPORTANT] Closing tag escaping in daily log writes (5.3) — append_to_daily_log() in shared.py writes raw external content straight to the log. A poisoned WhatsApp message containing </external_data> could break out of the trust boundary when reflection re-reads it. Cole calls this a "chain attack."
+2. [IMPORTANT] Central audit log (7.4) — blocks from block-secrets.py and command-guard.py print to stdout but aren't written to a persistent audit file. If something attacks the system overnight, there's no log to review.
+3. [CRITICAL] WhatsApp allowlist is fail-open (6.1) — there's no _is_allowed() check in the WhatsApp adapter at all. Anyone who gets your GREEN-API webhook URL can send messages to the bot.
+4. [NICE-TO-HAVE] Guardrail domain context (2.3) — the guardrail prompt doesn't include "this user is in AI/entertainment — discussion of prompt injection is legitimate." Low risk for your use case but easy to add.
 
 
