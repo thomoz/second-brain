@@ -70,7 +70,9 @@ def append_to_daily_log(text: str) -> None:
     today = now_local().strftime("%Y-%m-%d")
     log_path = DAILY_DIR / f"{today}.md"
     timestamp = now_local().strftime("%H:%M")
-    entry = f"\n## {timestamp}\n{text.strip()}\n"
+    # Escape trust-boundary tags so injected </external_data> can't break reflection's wrapper
+    safe_text = text.strip().replace("<external_data", "&lt;external_data").replace("</external_data>", "&lt;/external_data&gt;")
+    entry = f"\n## {timestamp}\n{safe_text}\n"
     with file_lock(log_path):
         with open(log_path, "a", encoding="utf-8") as f:
             f.write(entry)
