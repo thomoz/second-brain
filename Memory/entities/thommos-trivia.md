@@ -16,3 +16,4 @@ Hosted trivia nights at venues across Sydney.
 
 ## Status
 Active
+- (Jun 18) Nicky Haslam can cover the first trivia while you're away; July 15 still needs confirmation
