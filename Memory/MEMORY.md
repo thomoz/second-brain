@@ -14,6 +14,9 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 
 - (Jun 17) Elanora Squash: send Nicky another banner colour option instead of yellow on red
 - (Jun 17) Verify nightly reflection auto-writes to MEMORY.md with correct blank lines
+- (Jun 18) Confirm July 15 trivia coverage with Nicky Haslam; first away-date cover is tentatively handled
+- (Jun 18) Review unread SuperChoice tax invoice from 11:04am
+- (Jun 18) Check tenancy invoice status; Alison Bennett said payment method is unchanged
 ## Entity Pages
 
 - [[songbookdb]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app
@@ -47,6 +50,8 @@ _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memo
 _Profile: Memory/Profile/{values,goals,history,personality,health,relationships,finances}.md_
 _Core permanent memories: Memory/core-memories.md_
 
+- In ask-me-questions sessions, ask exactly one open-ended question per message
+- In ask-me-questions sessions, prioritise business and investment questions first
 ## 2026-06-17 Reflection
 - (Jun 17) SessionEnd hook now runs `memory_flush.py` detached so flush survives terminal close
 - (Jun 17) Reflection fix deployed; Codex structured output now writes to `MEMORY.md`
@@ -54,3 +59,7 @@ _Core permanent memories: Memory/core-memories.md_
 - (Jun 17) `wiki_ops.py` supports `stats`, `lint`, and `validate <page>` for the project wiki
 - (Jun 17) Memory system upgrade plan saved with 23 tasks; each phase ends with VPS deploy
 - (Jun 17) Deploy script stashes and restores local changes during VPS pull
+
+## 2026-06-18 Reflection
+- (Jun 18) Built WhatsApp thread reset so 'ask me questions' resets the conversation thread
+- (Jun 18) Security hardening deployed to VPS in commit c74f256; added security_audit.log

@@ -37,3 +37,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-06-16 Reflection
 - Prefer no closing summary sentences in tool output; Shaun reads the output directly
+
+## 2026-06-18 Reflection
+- ask-me-questions should end on stop words or after 10 minutes of WhatsApp silence
