@@ -62,13 +62,14 @@ async def test_handle_message_new_session(engine, store):
         yield mock_assistant
         yield mock_result
 
-    with patch("engine.query", side_effect=mock_query):
-        with patch("engine.AssistantMessage", type(mock_assistant)):
-            with patch("engine.TextBlock", type(mock_text_block)):
-                with patch("engine.ResultMessage", type(mock_result)):
-                    responses = []
-                    async for msg in engine.handle_message(_make_incoming()):
-                        responses.append(msg)
+    with patch("engine._check_and_clear_profile_timeout", return_value=False):
+        with patch("engine.query", side_effect=mock_query):
+            with patch("engine.AssistantMessage", type(mock_assistant)):
+                with patch("engine.TextBlock", type(mock_text_block)):
+                    with patch("engine.ResultMessage", type(mock_result)):
+                        responses = []
+                        async for msg in engine.handle_message(_make_incoming()):
+                            responses.append(msg)
 
     assert len(responses) == 1
     assert "3 events" in responses[0].text
