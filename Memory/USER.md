@@ -40,3 +40,7 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-06-18 Reflection
 - ask-me-questions should end on stop words or after 10 minutes of WhatsApp silence
+
+## 2026-06-19 Reflection
+- Next ask-me-questions session should resume at relationships
+- ask-me-questions reflection flow now scans profile files before choosing the first question

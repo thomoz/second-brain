@@ -31,3 +31,4 @@ Increase revenue. ~170 DJs on monthly/yearly subscriptions. Reduce churn.
 
 ## Status
 Active — desktop app blocker is highest priority technical issue
+- (Jun 19) Apple Developer sent revised Program License Agreement; review before macOS/iOS release work

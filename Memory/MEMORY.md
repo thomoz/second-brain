@@ -17,6 +17,9 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Jun 18) Confirm July 15 trivia coverage with Nicky Haslam; first away-date cover is tentatively handled
 - (Jun 18) Review unread SuperChoice tax invoice from 11:04am
 - (Jun 18) Check tenancy invoice status; Alison Bennett said payment method is unchanged
+- (Jun 19) Review Marilyn Dunn email about The Foundery First Floor Program opportunity
+- (Jun 19) Confirm whether Briefs Media $499 charge went through and fix any billing issue
+- (Jun 19) Review revised Apple Developer Program License Agreement before release work
 ## Entity Pages
 
 - [[songbookdb]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app
