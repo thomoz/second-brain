@@ -322,6 +322,93 @@ def diff_snapshot(prev: dict[str, Any], curr: dict[str, Any]) -> dict[str, Any]:
 # DRAFT LIFECYCLE
 # =============================================================================
 
+_DRAFTS_JSON_RE = re.compile(
+    r"DRAFTS_JSON:\s*```json\s*([\s\S]*?)```", re.IGNORECASE
+)
+
+
+def _slugify(text: str, maxlen: int = 40) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:maxlen]
+
+
+def _build_draft_content(draft: dict[str, Any], created: str) -> str:
+    return (
+        f"---\n"
+        f"type: email_draft\n"
+        f"source_id: {draft.get('source_id', '')}\n"
+        f"recipient: {draft.get('recipient', '')}\n"
+        f"subject: {draft.get('subject', '')}\n"
+        f"account: {draft.get('account', '')}\n"
+        f"context: {draft.get('context', '')}\n"
+        f"created: {created}\n"
+        f"status: active\n"
+        f"---\n\n"
+        f"## Draft Reply\n\n"
+        f"{draft.get('body', '').strip()}\n"
+    )
+
+
+def parse_and_write_drafts(
+    response_text: str,
+    active_dir: Path | None = None,
+) -> tuple[str, int]:
+    """Extract DRAFTS_JSON block from LLM response, write draft files, return (cleaned_text, count).
+
+    The LLM includes a DRAFTS_JSON block when it wants to create drafts:
+
+        DRAFTS_JSON:
+        ```json
+        [{"filename": "...", "recipient": "...", "subject": "...",
+          "source_id": "...", "account": "...", "context": "...", "body": "..."}]
+        ```
+
+    Python owns the write; the LLM only provides content.
+    The block is stripped from the returned notification text.
+    """
+    if active_dir is None:
+        active_dir = DRAFTS_ACTIVE_DIR
+
+    match = _DRAFTS_JSON_RE.search(response_text)
+    if not match:
+        return response_text, 0
+
+    cleaned = _DRAFTS_JSON_RE.sub("", response_text).strip()
+
+    raw_json = match.group(1).strip()
+    try:
+        drafts = json.loads(raw_json)
+    except json.JSONDecodeError as exc:
+        print(f"[{now_local()}] Draft JSON parse error: {exc} — skipping draft writes")
+        return cleaned, 0
+
+    if not isinstance(drafts, list):
+        print(f"[{now_local()}] Draft JSON is not a list — skipping")
+        return cleaned, 0
+
+    active_dir.mkdir(parents=True, exist_ok=True)
+    created_ts = now_local().isoformat()
+    written = 0
+
+    for draft in drafts:
+        if not isinstance(draft, dict):
+            continue
+        filename = draft.get("filename", "").strip()
+        if not filename:
+            slug = _slugify(draft.get("recipient", "unknown"))
+            filename = f"{now_local().strftime('%Y-%m-%d')}_email_{slug}.md"
+
+        filepath = active_dir / filename
+        if filepath.exists():
+            print(f"[{now_local()}] Draft already exists, skipping: {filename}")
+            continue
+
+        content = _build_draft_content(draft, created_ts)
+        filepath.write_text(content, encoding="utf-8")
+        print(f"[{now_local()}] Draft written: {filename}")
+        written += 1
+
+    return cleaned, written
+
 
 def expire_old_drafts() -> int:
     """Move drafts older than DRAFT_EXPIRY_HOURS from active/ to expired/. Returns count moved."""
@@ -606,10 +693,27 @@ Skip items already known (not new since last heartbeat).
 
 ### Priority 2: Draft Management
 For unreplied important emails (per USER.md criteria):
-- Check if a draft already exists in drafts/active/ or drafts/sent/
-- If no draft: create one in Memory/drafts/active/ with YAML frontmatter
-  (type, source_id, recipient, subject, created, status)
-- Filename: YYYY-MM-DD_email_<slugified-name>.md
+- Check if a draft already exists in the Active Drafts list above.
+- If a draft is needed, output a `DRAFTS_JSON:` block BEFORE your notification bullets
+  (Python will write the files — do NOT attempt to write files yourself):
+
+DRAFTS_JSON:
+```json
+[
+  {{
+    "filename": "YYYY-MM-DD_email_<recipient-slug>.md",
+    "recipient": "email@example.com",
+    "subject": "Re: Original subject",
+    "source_id": "<gmail or outlook message id>",
+    "account": "<account name e.g. sbdb, personal, karaoke>",
+    "context": "One-line summary of why this needs a reply",
+    "body": "Full draft reply text here"
+  }}
+]
+```
+
+Only include the DRAFTS_JSON block if you are creating at least one draft.
+Do not include it if no drafts are needed.
 
 ### Priority 3: Habits
 - Read habits state above
@@ -654,16 +758,6 @@ For unreplied important emails (per USER.md criteria):
                 heartbeat_prompt = _warning + heartbeat_prompt
                 print(f"[{now_local()}] Guardrail suspicious — warning prepended to prompt")
 
-    # Inline soul-protect hook — belt-and-suspenders on top of soul-protect.py
-    async def protect_soul(event: Any) -> Any:
-        tool_input = getattr(event, "tool_input", None) or {}
-        if isinstance(tool_input, dict) and "SOUL.md" in tool_input.get("file_path", ""):
-            return HookMatcher(
-                decision="deny",
-                reason="SOUL.md is write-protected from automated processes.",
-            )
-        return HookMatcher(decision="allow")
-
     response_text = ""
 
     async def _run() -> None:
@@ -671,14 +765,8 @@ For unreplied important emails (per USER.md criteria):
         async for message in query(
             prompt=heartbeat_prompt,
             options=ClaudeAgentOptions(
-                allowed_tools=["Read", "Write", "Edit", "Glob", "Grep"],
-                hooks={
-                    "PreToolUse": [
-                        HookMatcher(matcher="Write", hooks=[protect_soul]),
-                        HookMatcher(matcher="Edit", hooks=[protect_soul]),
-                    ]
-                },
-                max_turns=10,
+                allowed_tools=[],
+                max_turns=1,
             ),
         ):
             if isinstance(message, AssistantMessage):
@@ -712,6 +800,11 @@ For unreplied important emails (per USER.md criteria):
     save_state(HEARTBEAT_STATE_FILE, state)
 
     response_text = response_text.strip() or "HEARTBEAT_OK"
+
+    # Extract any DRAFTS_JSON block and write draft files (Python owns the write)
+    response_text, drafts_written = parse_and_write_drafts(response_text)
+    if drafts_written:
+        print(f"[{now_local()}] Wrote {drafts_written} draft(s) to {DRAFTS_ACTIVE_DIR}")
 
     if "HEARTBEAT_OK" in response_text:
         append_to_daily_log("HEARTBEAT_OK — nothing needs attention")
