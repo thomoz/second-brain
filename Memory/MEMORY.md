@@ -20,6 +20,8 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Jun 19) Review Marilyn Dunn email about The Foundery First Floor Program opportunity
 - (Jun 19) Confirm whether Briefs Media $499 charge went through and fix any billing issue
 - (Jun 19) Review revised Apple Developer Program License Agreement before release work
+- (Jun 20) Check Messenger and review Victor Northhead's message from 11:10
+- (Jun 20) Reply to Nicky to clarify which venue the demo video relates to
 ## Entity Pages
 
 - [[songbookdb]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app
