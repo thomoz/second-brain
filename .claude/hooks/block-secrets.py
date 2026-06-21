@@ -10,6 +10,7 @@ Exit codes:
 """
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -283,6 +284,24 @@ EXFILTRATION_CONTENT_PATTERNS: list[tuple[re.Pattern[str], str]] = [
 ]
 
 
+# Directories the WhatsApp bot is permitted to write into (relative to project root)
+_WHATSAPP_WRITE_ALLOWED = [".agent/plans", "Memory/drafts/active"]
+
+
+def check_whatsapp_write_path(file_path: str) -> str | None:
+    """Block Write calls from the WhatsApp bot unless the path is in an allowed directory."""
+    project_root = Path(__file__).resolve().parent.parent.parent
+    try:
+        target = Path(file_path).resolve()
+        for rel in _WHATSAPP_WRITE_ALLOWED:
+            if target.is_relative_to((project_root / rel).resolve()):
+                return None
+    except Exception:
+        pass
+    allowed = ", ".join(_WHATSAPP_WRITE_ALLOWED)
+    return f"Blocked: WhatsApp bot may only write to {allowed}. Got: '{file_path}'"
+
+
 def check_written_content(content: str) -> str | None:
     """Check if file content being written would exfiltrate secrets."""
     if not content:
@@ -324,6 +343,9 @@ def main() -> None:
     elif tool_name in ("Edit", "Write"):
         file_path = tool_input.get("file_path", "")
         reason = is_sensitive_file(file_path)
+        # WhatsApp bot: restrict writes to safe directories only
+        if not reason and os.environ.get("AGENT_INVOKED_BY") == "chat":
+            reason = check_whatsapp_write_path(file_path)
         # Two-step attack defense: check if content being written would
         # create a script that prints/exfiltrates environment variables
         if not reason:

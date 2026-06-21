@@ -202,6 +202,71 @@ class TestSafeWriteContent:
 
 
 # =============================================================================
+# WhatsApp Bot Write Path Whitelist (AGENT_INVOKED_BY=chat)
+# =============================================================================
+
+
+def _run_as_chat(tool_name: str, tool_input: dict) -> subprocess.CompletedProcess:
+    """Run the hook with AGENT_INVOKED_BY=chat to simulate WhatsApp bot context."""
+    import os
+    payload = json.dumps({"tool_name": tool_name, "tool_input": tool_input})
+    env = {**os.environ, "AGENT_INVOKED_BY": "chat"}
+    return subprocess.run(
+        [sys.executable, HOOK],
+        input=payload.encode(),
+        capture_output=True,
+        env=env,
+    )
+
+
+class TestWhatsAppWritePathWhitelist:
+    """WhatsApp bot (AGENT_INVOKED_BY=chat) may only write to allowed directories."""
+
+    def test_plans_dir_allowed(self) -> None:
+        result = _run_as_chat("Write", {
+            "file_path": str(Path(__file__).resolve().parent.parent.parent.parent / ".agent" / "plans" / "test-handoff.md"),
+            "content": "# Test Handoff\n",
+        })
+        assert result.returncode == 0
+
+    def test_drafts_active_dir_allowed(self) -> None:
+        result = _run_as_chat("Write", {
+            "file_path": str(Path(__file__).resolve().parent.parent.parent.parent / "Memory" / "drafts" / "active" / "draft-test.md"),
+            "content": "# Draft\n",
+        })
+        assert result.returncode == 0
+
+    def test_memory_root_blocked(self) -> None:
+        result = _run_as_chat("Write", {
+            "file_path": str(Path(__file__).resolve().parent.parent.parent.parent / "Memory" / "MEMORY.md"),
+            "content": "# Should be blocked\n",
+        })
+        assert result.returncode == 2
+
+    def test_daily_log_blocked(self) -> None:
+        result = _run_as_chat("Write", {
+            "file_path": str(Path(__file__).resolve().parent.parent.parent.parent / "Memory" / "daily" / "2026-06-21.md"),
+            "content": "injected content",
+        })
+        assert result.returncode == 2
+
+    def test_scripts_dir_blocked(self) -> None:
+        result = _run_as_chat("Write", {
+            "file_path": str(Path(__file__).resolve().parent.parent.parent / "scripts" / "evil.py"),
+            "content": "import os",
+        })
+        assert result.returncode == 2
+
+    def test_non_chat_context_allows_daily_log(self) -> None:
+        """Outside WhatsApp bot context the path whitelist does not apply."""
+        result = _run("Write", {
+            "file_path": str(Path(__file__).resolve().parent.parent.parent.parent / "Memory" / "daily" / "2026-06-21.md"),
+            "content": "## 09:00\nNormal heartbeat entry.",
+        })
+        assert result.returncode == 0
+
+
+# =============================================================================
 # Malformed Input (must allow -- fail open)
 # =============================================================================
 

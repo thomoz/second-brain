@@ -162,7 +162,7 @@ class ConversationEngine:
         options_kwargs: dict[str, Any] = {
             "cwd": str(self.project_root),
             "system_prompt": system_prompt,
-            "allowed_tools": ["Read", "Glob", "Grep"],
+            "allowed_tools": ["Read", "Glob", "Grep", "Write"],
             "permission_mode": "dontAsk",
             "max_turns": self.max_turns,
         }
