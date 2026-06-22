@@ -24,7 +24,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Jun 20) Reply to Nicky to clarify which venue the demo video relates to
 ## Entity Pages
 
-- [[songbookdb]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app
+- [[songbookdb/index]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app, PHP upgrade in progress
 - [[billy-goat-karaoke]] — hosted karaoke, Boyles Hotel Sutherland Thursdays 8pm
 - [[dingos-music-bingo]] — hosted music bingo
 - [[thommos-trivia]] — hosted trivia nights
