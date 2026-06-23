@@ -38,6 +38,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - [[host-masters-entertainment]] — umbrella entity for all live entertainment
 - [[karaoke-night-app]] — low priority, ToS concerns, early build with Victor Northhead
 - [[creative-work]] — FiNN TWiST music + Juno: Wonderdog film, on hold
+- [[juno-wonderdog/index]] — animated film project; characters, story, development log sub-pages
 - [[venues]] — all show venues and distances
 
 ## Topic Pages
