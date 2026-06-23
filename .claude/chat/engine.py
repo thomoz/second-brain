@@ -9,6 +9,23 @@ from pathlib import Path
 from typing import Any
 
 
+def _load_vault_context(project_root: Path) -> str:
+    """Pre-load core vault files for every WhatsApp message.
+
+    Gives the LLM basic memory of who Shaun is without needing Read tool calls,
+    which fail on VPS due to bwrap sandboxing restrictions.
+    """
+    lines = ["# Vault Memory (Pre-Loaded — do not re-read these files via Read tool)"]
+    for rel in ("Memory/MEMORY.md", "Memory/USER.md", "Memory/core-memories.md"):
+        fpath = project_root / rel
+        try:
+            content = fpath.read_text(encoding="utf-8")
+            lines.append(f"\n## {rel}\n{content}")
+        except OSError:
+            pass
+    return "\n".join(lines)
+
+
 def _load_profile_context(project_root: Path) -> str:
     """Pre-load profile files + last 3 daily logs into a string for system prompt injection.
 
@@ -163,12 +180,9 @@ class ConversationEngine:
 
         # Check for 10-min timeout on active profile session (BEFORE LLM call)
         if not _is_profile_mode and _check_and_clear_profile_timeout(self.project_root, channel_id):
-            yield OutgoingMessage(
-                text="Profile session ended (10 min timeout). I've saved everything we covered to your profile. Type 'ask me questions' any time to continue.",
-                channel=message.channel,
-                thread=message.thread,
-            )
-            return
+            if existing:
+                reset_session(existing.agent_session_id)
+            # Silent reset — no WhatsApp notification to avoid cluttering CarPlay unread queue
 
         # Build system prompt from SOUL.md + WhatsApp rules
         try:
@@ -185,6 +199,7 @@ class ConversationEngine:
             "Give a single, complete answer. Do not split across multiple turns.\n"
             "Keep answers short enough to read on a phone screen.\n"
             f"\n\n{TRUST_BOUNDARY_INSTRUCTION}"
+            f"\n\n{_load_vault_context(self.project_root)}"
         )
 
         if _is_profile_mode:
