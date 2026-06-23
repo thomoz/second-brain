@@ -22,6 +22,13 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Jun 19) Review revised Apple Developer Program License Agreement before release work
 - (Jun 20) Check Messenger and review Victor Northhead's message from 11:10
 - (Jun 20) Reply to Nicky to clarify which venue the demo video relates to
+- (Jun 22) Review SongbookDB admin password change and account lock alerts from 15:06-15:08
+- (Jun 22) Handle Facebook user data deletion request for SongbookDB from 17:19 AEST
+- (Jun 22) Check eBay message from rockstore2010 at 11:26 if tied to an active order or issue
+- (Jun 22) Check Pawshake review from Vivien and respond if appropriate
+- (Jun 22) Read laragon-setup-handoff.md before resuming SongbookDB PHP 8.0 upgrade
+- (Jun 22) Choose display format before executing the Briefs Finance tool plan
+- (Jun 22) Fix missing pre-compact hook target `.claude/hooks/pre-compact-flush.py`
 ## Entity Pages
 
 - [[songbookdb/index]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app, PHP upgrade in progress
@@ -57,6 +64,7 @@ _Core permanent memories: Memory/core-memories.md_
 
 - In ask-me-questions sessions, ask exactly one open-ended question per message
 - In ask-me-questions sessions, prioritise business and investment questions first
+- Use full file paths in commands when path ambiguity is likely
 ## 2026-06-17 Reflection
 - (Jun 17) SessionEnd hook now runs `memory_flush.py` detached so flush survives terminal close
 - (Jun 17) Reflection fix deployed; Codex structured output now writes to `MEMORY.md`
@@ -68,3 +76,7 @@ _Core permanent memories: Memory/core-memories.md_
 ## 2026-06-18 Reflection
 - (Jun 18) Built WhatsApp thread reset so 'ask me questions' resets the conversation thread
 - (Jun 18) Security hardening deployed to VPS in commit c74f256; added security_audit.log
+
+## 2026-06-22 Reflection
+- (Jun 22) Briefs Finance handoff plan file is `briefs-finance-investment-tool.md`
+- (Jun 22) Run Briefs Finance from `investments/briefs-finance` in its own `uv` env
