@@ -1,85 +1,83 @@
 # WhatsApp → Vault Pipeline — Discussion Handoff
 
-**Status:** Design phase — requirements captured, no plan yet
+**Status:** Scoped — previous premise was incorrect; see below
 **Created:** 2026-06-23
-**Next step:** Discuss requirements, then `/core_piv_loop:plan-feature`
+**Updated:** 2026-06-23
+**Next step:** Decide which of the remaining gaps are worth building
 
 ---
 
-## The Problem
+## What We Thought Was Wrong (Previous Session)
 
-WhatsApp chat sessions between Shaun and the VPS bot live in `chat.db` on the VPS and **never reach the vault**. The heartbeat and reflection scripts don't read `chat.db`. So:
+The previous session concluded that `chat.db → vault` was "completely unwired" and that
+WhatsApp conversations never reached the vault. This was incorrect.
 
-- Nothing said via WhatsApp filters into entity pages (businesses, investments, SongbookDB, etc.)
-- Nothing said via WhatsApp appears in daily logs or MEMORY.md
-- The whole point of having WhatsApp access to the Second Brain — that it learns about Shaun over time — isn't being fulfilled
+## What's Actually Happening
 
----
+The pipeline already exists and works:
 
-## Shaun's Requirements
+1. **WhatsApp message received** → `engine.py` calls `append_to_daily_log()` after every exchange
+2. **Daily log** (`Memory/daily/YYYY-MM-DD.md`) is written on the VPS immediately
+3. **Vault sync** runs every 2 min on both VPS and Windows → git push/pull via GitHub
+4. **Local machine** has the full conversation within ~4 minutes of it happening
+5. **Reflection** (`memory_reflect.py`) runs at 8am AEST, reads yesterday's daily log,
+   and promotes relevant content to entity pages, MEMORY.md, and profile files
 
-### 1. Fast sync (≤30 min)
-Shaun may have a conversation via WhatsApp while driving (CarPlay), then be home 30 minutes later wanting to access what was discussed. The current vault sync is every 2 minutes, but chat sessions never enter the vault at all. The pipeline needs to be fast enough that a conversation from the car is accessible in the local Claude Code session when he gets home.
-
-### 2. Full fidelity recording option (not just summaries)
-Shaun wants the ability to have whole ideas fully recorded — not just summarised — when he wants that. Examples:
-- Working on a novel idea
-- **Juno Wonder Dog** — an animation story idea Shaun is developing (a character/project he wants tracked in the vault)
-- Business ideas, show concepts, investment thoughts
-- Anything important he might dictate while driving
-
-The system should distinguish between:
-- Routine Q&A (summarise only)
-- "I want to remember this fully" (full fidelity capture to vault)
-
-### 3. Filtering to correct vault entities
-Content from WhatsApp should route to the right places:
-- Business discussions → relevant entity page (billy-goat-karaoke.md, songbookdb/, etc.)
-- Investment ideas → Memory/topics/investment-strategy.md or similar
-- Personal/creative → new entity or topic page (e.g. Memory/entities/creative-work.md)
-- General notes → daily log
-
-### 4. Trigger mechanism
-Shaun should be able to signal intent during a WhatsApp conversation:
-- Possibly a keyword or command like "save this" or "remember this" or "log to [entity]"
-- Or the bot should auto-detect important content and offer to save it
+Confirmed: full WhatsApp conversation content appeared in local daily logs on 2026-06-23.
 
 ---
 
-## Current Architecture (what exists)
+## What's Genuinely Still Missing (Smaller Scope)
 
-- `chat.db` — SQLite on VPS, stores full conversation sessions per user/channel
-- `whatsapp_runs.log` — bot activity log, VPS only
-- `Memory/daily/*.md` — vault daily logs, synced every 2 min via git
-- `memory_reflect.py` — runs 8am AEST, reads yesterday's daily log → promotes to MEMORY.md/entities
-- Heartbeat reads Gmail/Calendar/WhatsApp (unread messages only) → writes to daily log
-- Vault sync: `scripts/sync_vault.ps1` (Windows) + systemd timer (VPS) every 2 min
+### 1. Explicit in-conversation save commands
+The daily log → reflection pipeline has a lag: content from today's WhatsApp session
+won't be promoted to entity pages until 8am tomorrow. For high-value content dictated
+from the car (novel ideas, project concepts, investment thoughts), Shaun wants to be able
+to say "save this" or "remember this" and have the content written directly to the
+appropriate vault file immediately — not deferred to reflection.
 
-## The Gap
+**Possible trigger phrases:**
+- "save this" / "remember this" / "log this"
+- "log to [entity]" / "tag: juno" / "tag: billy goat"
 
-`chat.db` → vault is completely unwired. Reflection only reads daily logs, not chat history.
+**Routing:**
+- Named entity → `Memory/entities/[entity].md`
+- Investment → `Memory/topics/investment-strategy.md`
+- Personal/creative → appropriate profile or entity page
+- Unspecified → `Memory/daily/` with a prominent `## [SAVED]` heading
+
+### 2. Entity pages that don't exist yet
+- **Juno Wonder Dog** — animation/creative project Shaun is developing; needs a vault page
+  at `Memory/entities/creative-work.md` or a dedicated `Memory/entities/juno-wonder-dog.md`
+
+### 3. Reflection quality check (not a build task)
+Worth checking tomorrow's reflection output to confirm it correctly routes today's
+WhatsApp conversations to the right entity pages. If reflection is missing things,
+the prompt in `memory_reflect.py` may need tuning — but this is a tune, not a build.
 
 ---
 
-## Ideas to Discuss in Next Session
+## Current Architecture (confirmed correct)
 
-1. **Chat flush script** — after each WhatsApp session ends (or on a timer), extract the session from `chat.db`, run it through an LLM to classify and route content, write to appropriate vault files
-2. **In-conversation save command** — bot detects "save this" / "log this" / "remember this" and immediately writes full content to a vault file, committed and synced within minutes
-3. **Session tagging** — user can say "tag: juno" or "tag: billy goat" and the session gets routed to that entity's page
-4. **Near-realtime sync** — flush to vault at end of each bot response (not just end of session) so 30-min car trip content is available immediately on arrival home
-5. **Creative project pages** — Juno Wonder Dog needs its own entity page; others like it should be easy to create via WhatsApp ("start a new project called X")
+```
+WhatsApp message
+    └─ engine.py → append_to_daily_log()
+                        └─ Memory/daily/YYYY-MM-DD.md  (VPS)
+                                └─ vault sync (git, every 2 min)
+                                        └─ Memory/daily/YYYY-MM-DD.md  (local)
+                                                └─ memory_reflect.py (8am AEST)
+                                                        └─ entity pages / MEMORY.md
+```
 
----
-
-## New Entity Noted
-
-**Juno Wonder Dog** — animation story/creative project Shaun is developing. Needs a vault page at `Memory/entities/creative-work.md` or a dedicated page. Capture this in the next session.
+`chat.db` stores full session state for conversation continuity (resuming threads).
+It does not need to be separately piped to the vault — the daily log already captures
+the human-readable content.
 
 ---
 
 ## How to Resume
 
 1. Load this file: `.agent/plans/whatsapp-vault-pipeline-handoff.md`
-2. Discuss the requirements and approach with Shaun
-3. Agree on the design before running `/core_piv_loop:plan-feature`
-4. Plan should cover: flush trigger, routing logic, full-fidelity vs summary mode, in-conversation save command, vault entity creation flow
+2. Decide whether to build the in-conversation save commands (Gap #1)
+3. Create the Juno Wonder Dog entity page (Gap #2 — can be done any session)
+4. If building save commands: run `/core_piv_loop:plan-feature` with this doc as context
