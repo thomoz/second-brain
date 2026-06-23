@@ -9,6 +9,47 @@ from pathlib import Path
 from typing import Any
 
 
+def _load_profile_context(project_root: Path) -> str:
+    """Pre-load profile files + last 3 daily logs into a string for system prompt injection.
+
+    Runs in Python before the LLM call so the LLM never needs to use Read for this —
+    which fails on VPS due to bwrap sandboxing restrictions.
+    """
+    import datetime as _dt
+
+    lines = [
+        "# Profile Context (Pre-Loaded — do not re-read these files via Read tool)",
+        "The 7 profile files and last 3 daily logs are already below.",
+        "Use this content to determine which questions have been asked and answered.",
+        "A profile topic is 'covered' if its file has a dated ## YYYY-MM-DD Update section with real content.",
+    ]
+
+    for fname in ("values.md", "goals.md", "history.md", "personality.md", "health.md", "relationships.md", "finances.md"):
+        fpath = project_root / "Memory" / "Profile" / fname
+        try:
+            content = fpath.read_text(encoding="utf-8")
+        except OSError:
+            content = "_(not yet populated)_"
+        lines.append(f"\n## Memory/Profile/{fname}\n{content}")
+
+    lines.append("\n# Recent Daily Logs")
+    try:
+        from config import DAILY_DIR, now_local
+        today = now_local().date()
+        for i in range(3):
+            day = today - _dt.timedelta(days=i)
+            log_path = DAILY_DIR / f"{day.isoformat()}.md"
+            try:
+                content = log_path.read_text(encoding="utf-8")
+                lines.append(f"\n## Daily log {day.isoformat()}\n{content}")
+            except OSError:
+                pass
+    except Exception:
+        pass
+
+    return "\n".join(lines)
+
+
 def _profile_session_state_path(project_root: Path) -> Path:
     return project_root / ".claude" / "data" / "state" / "profile-session.json"
 
@@ -155,6 +196,7 @@ class ConversationEngine:
                 system_prompt += f"\n\n# Profile Building Mode\n{skill_text}"
             except OSError:
                 pass
+            system_prompt += f"\n\n{_load_profile_context(self.project_root)}"
             _save_profile_session_state(self.project_root, channel_id)
         else:
             _update_profile_session_timestamp(self.project_root, channel_id)
