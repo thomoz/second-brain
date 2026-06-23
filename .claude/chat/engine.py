@@ -26,6 +26,19 @@ def _load_vault_context(project_root: Path) -> str:
     return "\n".join(lines)
 
 
+def _load_assistant_commands(project_root: Path) -> str:
+    """Pre-load Memory/ASSISTANT.md into system prompt.
+
+    Loaded in Python before the LLM call so Write routing works without
+    a Read tool call (Read fails on VPS due to bwrap sandboxing).
+    """
+    fpath = project_root / "Memory" / "ASSISTANT.md"
+    try:
+        return fpath.read_text(encoding="utf-8")
+    except OSError:
+        return ""
+
+
 def _load_profile_context(project_root: Path) -> str:
     """Pre-load profile files + last 3 daily logs into a string for system prompt injection.
 
@@ -202,6 +215,10 @@ class ConversationEngine:
             f"\n\n{_load_vault_context(self.project_root)}"
         )
 
+        assistant_cmds = _load_assistant_commands(self.project_root)
+        if assistant_cmds:
+            system_prompt += f"\n\n{assistant_cmds}"
+
         if _is_profile_mode:
             if existing:
                 reset_session(existing.agent_session_id)
@@ -219,7 +236,7 @@ class ConversationEngine:
         options_kwargs: dict[str, Any] = {
             "cwd": str(self.project_root),
             "system_prompt": system_prompt,
-            "allowed_tools": ["Read", "Glob", "Grep", "Write"],
+            "allowed_tools": ["Read", "Glob", "Grep", "Write", "WebSearch"],
             "permission_mode": "dontAsk",
             "max_turns": self.max_turns,
         }

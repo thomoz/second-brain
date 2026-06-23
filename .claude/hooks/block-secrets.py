@@ -285,7 +285,7 @@ EXFILTRATION_CONTENT_PATTERNS: list[tuple[re.Pattern[str], str]] = [
 
 
 # Directories the WhatsApp bot is permitted to write into (relative to project root)
-_WHATSAPP_WRITE_ALLOWED = [".agent/plans", "Memory/drafts/active"]
+_WHATSAPP_WRITE_ALLOWED = [".agent/plans", "Memory/drafts/active", "Memory/entities", "Memory/topics", "Memory/bitza.md"]
 
 
 def check_whatsapp_write_path(file_path: str) -> str | None:

@@ -19,6 +19,7 @@ import pytest
 from models import Channel, IncomingMessage, Platform, User
 from session import SQLiteSessionStore
 from engine import ConversationEngine
+import engine as engine_module
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
@@ -177,3 +178,73 @@ async def test_ask_me_questions_resets_thread(engine, store):
 
     assert len(responses) == 1
     mock_reset.assert_called_once_with("codex-thread-xyz")
+
+
+# ---------------------------------------------------------------------------
+# _load_assistant_commands tests
+# ---------------------------------------------------------------------------
+
+def test_load_assistant_commands_returns_content(tmp_path):
+    """_load_assistant_commands returns file content when ASSISTANT.md exists."""
+    memory_dir = tmp_path / "Memory"
+    memory_dir.mkdir()
+    (memory_dir / "ASSISTANT.md").write_text("# Save Commands\nroute here", encoding="utf-8")
+    result = engine_module._load_assistant_commands(tmp_path)
+    assert "Save Commands" in result
+    assert "route here" in result
+
+
+def test_load_assistant_commands_missing_returns_empty(tmp_path):
+    """_load_assistant_commands returns empty string when ASSISTANT.md is absent."""
+    result = engine_module._load_assistant_commands(tmp_path)
+    assert result == ""
+
+
+@pytest.mark.asyncio
+async def test_system_prompt_includes_assistant_commands(engine, store):
+    """handle_message injects ASSISTANT.md into system_prompt when file exists."""
+    memory_dir = engine.project_root / "Memory"
+    assistant_file = memory_dir / "ASSISTANT.md"
+    original = assistant_file.read_text(encoding="utf-8") if assistant_file.exists() else None
+
+    sentinel = "SENTINEL_SAVE_COMMANDS_TEST"
+    assistant_file.write_text(sentinel, encoding="utf-8")
+
+    captured_options = {}
+
+    async def mock_query(prompt, options=None):
+        captured_options["system_prompt"] = options.system_prompt if options else ""
+        yield MagicMock(**{"__class__.__name__": "ResultMessage",
+                           "session_id": "s1", "total_cost_usd": 0.0})
+
+    try:
+        with patch("engine._check_and_clear_profile_timeout", return_value=False):
+            with patch("engine.query", side_effect=mock_query):
+                with patch("engine.ResultMessage"):
+                    async for _ in engine.handle_message(_make_incoming("test")):
+                        pass
+        assert sentinel in captured_options.get("system_prompt", "")
+    finally:
+        if original is not None:
+            assistant_file.write_text(original, encoding="utf-8")
+        elif assistant_file.exists():
+            assistant_file.unlink()
+
+
+@pytest.mark.asyncio
+async def test_allowed_tools_includes_websearch(engine, store):
+    """handle_message passes WebSearch in allowed_tools to the query call."""
+    captured_options = {}
+
+    async def mock_query(prompt, options=None):
+        captured_options["allowed_tools"] = options.allowed_tools if options else []
+        yield MagicMock(**{"__class__.__name__": "ResultMessage",
+                           "session_id": "s1", "total_cost_usd": 0.0})
+
+    with patch("engine._check_and_clear_profile_timeout", return_value=False):
+        with patch("engine.query", side_effect=mock_query):
+            with patch("engine.ResultMessage"):
+                async for _ in engine.handle_message(_make_incoming("test")):
+                    pass
+    assert "WebSearch" in captured_options.get("allowed_tools", [])
+    assert "Write" in captured_options.get("allowed_tools", [])

@@ -23,8 +23,3 @@ _(Half-formed thoughts, concepts, random sparks.)_
 
 ---
 
-## Unsorted
-
-_(Anything else.)_
-
----

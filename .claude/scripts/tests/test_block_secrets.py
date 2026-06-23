@@ -257,6 +257,31 @@ class TestWhatsAppWritePathWhitelist:
         })
         assert result.returncode == 2
 
+
+    def test_entities_dir_allowed(self) -> None:
+        """WhatsApp bot may write to Memory/entities/ for save commands."""
+        result = _run_as_chat("Write", {
+            "file_path": str(Path(__file__).resolve().parent.parent.parent.parent / "Memory" / "entities" / "juno-wonderdog" / "characters.md"),
+            "content": "## 2026-06-23 [WhatsApp save]\nTest character note.",
+        })
+        assert result.returncode == 0
+
+    def test_topics_dir_allowed(self) -> None:
+        """WhatsApp bot may write to Memory/topics/ for save commands."""
+        result = _run_as_chat("Write", {
+            "file_path": str(Path(__file__).resolve().parent.parent.parent.parent / "Memory" / "topics" / "investment-strategy.md"),
+            "content": "## 2026-06-23 [WhatsApp save]\nTest investment note.",
+        })
+        assert result.returncode == 0
+
+    def test_bitza_allowed(self) -> None:
+        """WhatsApp bot may write to Memory/bitza.md for reminders and ideas."""
+        result = _run_as_chat("Write", {
+            "file_path": str(Path(__file__).resolve().parent.parent.parent.parent / "Memory" / "bitza.md"),
+            "content": "## 2026-06-23 [WhatsApp save]\nTest idea.",
+        })
+        assert result.returncode == 0
+
     def test_non_chat_context_allows_daily_log(self) -> None:
         """Outside WhatsApp bot context the path whitelist does not apply."""
         result = _run("Write", {
