@@ -3,14 +3,48 @@ title: SongbookDB PHP Upgrade
 type: topic
 parent: [[index]]
 created: 2026-06-21
-updated: 2026-06-21
-tags: [php, upgrade, songbookdb]
+updated: 2026-06-23
+tags: [php, upgrade, songbookdb, laragon]
 ---
 # PHP Upgrade: 7.4 → 8.5
 
 Strategy: one major version at a time. Current target: **PHP 8.0**.
 
-## Status: In progress — hard breaks fixed, environment set up, testing underway
+**To resume:** Say "Continue the SongbookDB PHP 8.0 upgrade — read the php-upgrade doc first."
+
+## Status (2026-06-23)
+Hard breaks fixed. Local environment running PHP 8.0.30 at `https://songbookdb.test`. Login, Favs, and patron requests flow confirmed working locally. Several fixes uploaded to production.
+
+---
+
+## Local Environment
+
+- Repo: `O:\SBDB Software\SongbookDB\www\songbookdb-deep`
+- Laragon: Apache 2.4.66, MySQL 8.4.3, PHP 8.0.30
+- Site: `http://songbookdb.test` or `https://songbookdb.test` — both work now that `www="/"` is used in `js/pwa/js01.js`
+- Symlink: `C:\laragon\www\songbookdb` → `O:\SBDB Software\SongbookDB\www\songbookdb-deep\public_html`
+
+### Start Laragon each session
+- Open Laragon from Start menu → right-click tray → Start All
+- Confirm PHP 8.0.30: tray → PHP → Version
+- Site at `https://songbookdb.test` (accept cert warning or install `C:\laragon\etc\ssl\laragon.crt`)
+
+### MySQL local config
+- `C:\laragon\bin\mysql\mysql-8.4.3-winx64\my.ini` — `sql_mode=""` (strict mode off for import)
+- `C:\laragon\usr\laragon.ini` — `DataDir=O:\laragon\data` (moved from C: due to disk space)
+
+### Cookies / HTTPS
+- `base/base.php` detects `songbookdb.test` and sets `$base = ''` (empty domain) so cookies work locally
+- Must use `https://` not `http://` — `secure=1` flag on cookies requires HTTPS
+- `mobilePWA/getToken.php` has hardcoded `'songbookdb.com'` in two `setcookie()` calls (lines ~88 and ~139) — not yet fixed, low priority since login via `login.php` sets the initial cookie correctly
+
+### Do NOT upload these files to production via WinSCP
+- `getin/mysqliCon.php` — local DB credentials
+- `getin/mysqliCon-mod.php` — local DB credentials
+- `public_html/.htaccess` — local IP allowlist + SSL redirects commented out
+- `public_html/.htaccess.backup-2026-06-22` — local backup
+- `public_html/js/js01.js` — www variable (check before uploading; may still have local URL)
+- `base/base.php` — domain detection for local cookies
 
 ---
 
@@ -50,8 +84,12 @@ mcrypt path in the SDK is **safe** — factory checks `function_exists('random_b
 ### 4. `0 == "somestring"` → now `false` (was `true` in PHP 7.x)
 Loose integer/string comparisons throughout the codebase may silently change behavior. Only catchable via testing.
 
-### 5. `count(null)` → TypeError (was warning in PHP 7.x)
-- `public_html/affiliate/reconcile/index.php` — two `count()` calls on DB result variables
+### 5. `fgetcsv()` EOF bug → `strpos(null)` TypeError (was silent in PHP 7.x)
+- [x] `public_html/affiliate/reconcile/index.php` — `while(!feof())` loop pushed `false` into `$arrResult`; replaced with `while(($linearr = fgetcsv(...)) !== false)` — fixed and uploaded 2026-06-23
+- Note: the two `count()` calls in this file (lines 20/52) are on arrays from `explode()` and `[]` init — not a PHP 8.0 issue
+
+### 6. Undefined `$_FILES` key warning on page load
+- [x] `public_html/affiliate/reconcile/index.php` line 15 — added `isset($_FILES['csvfile']['type'])` guard — fixed and uploaded 2026-06-23
 
 ---
 
@@ -74,22 +112,41 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 ## Dead Code Removed
 
-- `dir/getTokenBU.php` — had `mcrypt_create_iv()`; deleted 2026-06-21
-- `facebookV4/` — orphaned legacy FB SDK folder; deleted locally 2026-06-21, **pending production delete**
-- `public_html/jwtTest.php` + `public_html/jwtTest/` — 2021 Apple Sign In JWT scratch test; deleted locally 2026-06-21, **pending production delete**
+- `dir/getTokenBU.php` — had `mcrypt_create_iv()`; deleted locally 2026-06-21
+- `facebookV4/` — orphaned legacy FB SDK folder; deleted locally 2026-06-21, deleted from production 2026-06-23
+- `public_html/jwtTest.php` + `public_html/jwtTest/` — 2021 Apple Sign In JWT scratch test; deleted locally 2026-06-21, deleted from production 2026-06-23
+
+---
+
+## All Fixes (uploaded to production unless noted)
+
+| File | Fix | Commit |
+|---|---|---|
+| `public_html/account/admin/receipt/index.php` | `money_format()` → `number_format()` | earlier |
+| `lib/logError.php` | Removed `= []` default from `$params` | earlier |
+| `public_html/account/admin/index.php` | Undefined variables `$results_message`, `$errorMessage` | earlier |
+| `funcs_lib/authenticate/djAdmin.php` | Lockout reset bug — DELETE instead of INSERT/UPDATE | earlier |
+| `funcs_lib/cryptomania.php` | Key path uses `dirname(__FILE__)` not `DOCUMENT_ROOT` | earlier |
+| `mobilePWA/login.php` | Removed dead code `$arr['djData'] = $row` | 41e37ea |
+| `mobilePWA/getToken.php` | Null guards, `?? ''` on cookie, `town_city` column fix | 94e5237 |
+| `public_html/affiliate/reconcile/index.php` | fgetcsv EOF bug — `while(!feof())` → `while(fgetcsv() !== false)` | uploaded 2026-06-23 |
+| `public_html/affiliate/reconcile/index.php` | `isset($_FILES['csvfile']['type'])` guard on line 15 | uploaded 2026-06-23 |
+| `mobilePWA/com.php` + 4 others | `antiXSS()` — added `?? ''` null coalescing on `$_POST['r']` and `$_SESSION['wipit']` to prevent PHP 8.0 warnings corrupting JSON | local only |
+| `public_html/js/pwa/js01.js` | `www="/"` (relative) — fixes session cookie loss when page loaded over HTTP while AJAX called HTTPS origin | upload safe |
+| `mobilePWA/login.php` | `townCity` key mismatch — `checkPublicLoginToken()` returns `town_city`, `logUserIn()` read `townCity`; fixed with `?? $user_details['town_city'] ?? ''` on lines 605 and 666 | uploaded 2026-06-23 |
+| `paypal/tipTheDJ/tipTheDJPay3.php` | `$_POST` undefined key guards — added `?? ''` on `$_POST['a']`, `djID`, `venue`, `rigID` | uploaded 2026-06-23 |
 
 ---
 
 ## Next Steps
 
-1. ~~Fix `money_format()` in the 3 receipt/invoice files~~ — done
+1. ~~Fix `money_format()` in receipt/invoice files~~ — done
 2. ~~Fix `logDatabaseError()` param ordering in `lib/logError.php`~~ — done
-3. Delete `facebookV4/` and `jwtTest/` from production
-4. Test login, payment, and requests flows on local PHP 8.0
-5. Test Facebook login and Apple Sign In on PHP 8.0
-6. Fix `count(null)` in `public_html/affiliate/reconcile/index.php`
-7. After PHP 8.0 stable → repeat scan for 8.1 → 8.2 → ... → 8.5
-
----
-
-
+3. ~~Fix fgetcsv EOF bug in `reconcile/index.php`~~ — done 2026-06-23
+4. ~~Fix `$_FILES` isset guard in `reconcile/index.php`~~ — done 2026-06-23
+5. ~~**Upload `reconcile/index.php`** fixes to production via WinSCP~~ — done 2026-06-23
+6. ~~**Delete `facebookV4/` and `jwtTest/`** from production~~ — done 2026-06-23
+7. ~~**Test requests flow** at `https://songbookdb.test`~~ — done 2026-06-23 (patron search → request → received in hoster)
+8. ~~**Test login and payment flows** locally~~ — done 2026-06-23
+9. **Test Facebook login and Apple Sign In** on local PHP 8.0
+10. After PHP 8.0 stable → repeat scan for 8.1 → 8.2 → ... → 8.5
