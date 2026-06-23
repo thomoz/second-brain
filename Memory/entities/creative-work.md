@@ -15,6 +15,7 @@ Free up 1-2 days/week for passion projects once income is stabilised.
 ## Projects
 - **Songwriting + music production** — releases under "FiNN TWiST"
 - **Juno: Wonderdog** — animated film concept (idea stage) → [[juno-wonderdog/index]]
+- **Simone Kensington** — story project (idea stage) → [[simone-kensington/index]]
 - Goal: eventually monetise creative output
 
 ## Status

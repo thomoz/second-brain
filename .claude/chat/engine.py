@@ -16,7 +16,7 @@ def _load_vault_context(project_root: Path) -> str:
     which fail on VPS due to bwrap sandboxing restrictions.
     """
     lines = ["# Vault Memory (Pre-Loaded — do not re-read these files via Read tool)"]
-    for rel in ("Memory/MEMORY.md", "Memory/USER.md", "Memory/core-memories.md"):
+    for rel in ("Memory/MEMORY.md", "Memory/USER.md"):
         fpath = project_root / rel
         try:
             content = fpath.read_text(encoding="utf-8")

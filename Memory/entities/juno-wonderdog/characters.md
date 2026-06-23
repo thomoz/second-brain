@@ -20,13 +20,30 @@ _(Description, personality, role in the story — to be filled in.)_
 
 ---
 
-## Jerry
+## Jerry (JR?)
 
 **Role:** Supporting cast — guard dog
 **Type:** Dog (cute and fluffy)
 **Trait:** Doesn't want to be a guard dog
 **Catchphrase:** "Wuffy wuf wuf wuffy wuf"
+**Notes:** May also go by "JR" — confirm if Jerry and JR are the same character.
 
 ---
 
+## Sally
 
+**Role:** Supporting cast
+**Type:** Dog (TBC)
+**Trait:** Easily startled, especially while eating
+**Scene ref:** Juno sneaks up on Sally while she's eating dinner, scares her, food goes everywhere
+
+---
+
+## JR
+
+_(If separate from Jerry — to be confirmed)_
+**Trait:** Sneaky/stealthy, but apologetic after causing chaos
+**Catchphrase:** "Sorry Sally, didn't mean to put you off your dinner."
+**Possible gag:** Sings a high note → chandelier shatters → "You're welcome!"
+
+---

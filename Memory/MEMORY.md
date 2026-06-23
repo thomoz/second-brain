@@ -39,6 +39,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - [[karaoke-night-app]] — low priority, ToS concerns, early build with Victor Northhead
 - [[creative-work]] — FiNN TWiST music + Juno: Wonderdog film, on hold
 - [[juno-wonderdog/index]] — animated film project; characters, story, development log sub-pages
+- [[simone-kensington/index]] — story project; characters, story, development log sub-pages
 - [[venues]] — all show venues and distances
 
 ## Topic Pages
@@ -61,7 +62,6 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_
 _Profile: Memory/Profile/{values,goals,history,personality,health,relationships,finances}.md_
-_Core permanent memories: Memory/core-memories.md_
 
 - In ask-me-questions sessions, ask exactly one open-ended question per message
 - In ask-me-questions sessions, prioritise business and investment questions first
