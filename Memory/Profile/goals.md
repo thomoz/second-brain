@@ -70,6 +70,11 @@ _(not yet populated — run "ask me questions" to build this)_
 - Also focused on learning investing and building cash aggressively
 - Expects a major market correction at some stage and wants capital ready to buy discounted assets
 
+### Main Bottleneck
+- The biggest constraint is time
+- Focus is split across multiple businesses, which slows progress in every area
+- Sees AI as a leverage tool that can speed up technical work, especially jobs like the SongbookDB PHP backend upgrade
+
 ## Wealth Goals
 _(not yet populated)_
 
