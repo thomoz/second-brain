@@ -81,6 +81,11 @@ _(not yet populated)_
 ## Lifestyle Goals
 _(not yet populated)_
 
+## 2026-06-24 Update
+
+- An ideal week includes a couple of days free to work on creative projects
+- Creative time is a meaningful quality-of-life goal, not just spare time
+
 ## 2026-06-17 Update
 
 ### Retirement Goal

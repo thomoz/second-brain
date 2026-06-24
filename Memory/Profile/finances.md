@@ -51,3 +51,7 @@ _(not yet populated)_
 - Current cash savings are about $15,000, built over the last 3 months
 - Sees the retirement position as urgent and underbuilt
 - Main financial priority is increasing income and investing capacity to improve retirement outcomes
+
+### 12-Month Financial Security
+- Would feel properly secure with $20,000 saved as an emergency fund
+- Also wants $50,000 ready to invest into the stock market at discounted rates
