@@ -1,4 +1,4 @@
-# Windows vault sync — runs every 2 minutes via Task Scheduler
+# Windows vault sync -- runs every 2 minutes via Task Scheduler
 # Update PROJECT_PATH to your actual repo path.
 param(
     [string]$ProjectPath = "O:\AI\Dynamous\Courses\second-brain-workshop"
@@ -24,7 +24,7 @@ $after = git rev-parse HEAD
 if ($before -ne $after) {
     $changed = git diff --name-only $before $after | Where-Object { $_ -match "^Memory/" }
     if ($changed) {
-        Add-Content -Path $log -Value "[$timestamp] Memory/ changed — reindexing..."
+        Add-Content -Path $log -Value "[$timestamp] Memory/ changed - reindexing..."
         $python = Join-Path $ProjectPath ".claude\scripts\.venv\Scripts\python.exe"
         & $python (Join-Path $ProjectPath ".claude\scripts\memory_index.py") 2>&1 | Add-Content -Path $log
     }
