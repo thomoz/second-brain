@@ -50,6 +50,26 @@ _(not yet populated — run "ask me questions" to build this)_
 - **Moss Vale Services Club** (Music Bingo, monthly): patron growth needed to secure ongoing bookings; management happy but numbers must improve
 - **Katoomba Family Hotel** (Karaoke, monthly): same situation — management happy, patron numbers need to grow to keep the booking
 
+## 2026-06-24 Update
+
+### Income Strategy
+- Does not want to start anything new; already has too many moving parts across the existing businesses
+- Plan is to increase income across SongbookDB, Billy Goat Karaoke, Dingo's Music Bingo, and Thommo's Trivia rather than add a fifth growth project
+
+### SongbookDB
+- Believes SongbookDB still has upside but underperforms because it has been in maintenance mode since burnout from the 2014 software push
+- Main churn issue is onboarding difficulty; long-term retention proves product value once DJs get through the learning curve
+- Current local Second Brain work is focused on upgrading the PHP backend first to PHP 8 and then PHP 8.3
+- After backend modernization, next major need is replacing desktop software tied to HARMAN AIR before Mac compatibility becomes a bigger problem
+- Wants to incorporate AI into DJ onboarding to reduce churn
+
+### Live Shows
+- Focus is on increasing venue patronage so venue rates can rise where pricing is currently tied to attendance
+
+### Wealth Building Context
+- Also focused on learning investing and building cash aggressively
+- Expects a major market correction at some stage and wants capital ready to buy discounted assets
+
 ## Wealth Goals
 _(not yet populated)_
 
