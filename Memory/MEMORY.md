@@ -36,6 +36,10 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Jun 23) Run Briefs Finance bulk ingest on 84 PDFs, then backtest
 - (Jun 23) Investigate repeated ask-me-questions prompts after memory/profile read failure
 - (Jun 23) Check app/SDK Facebook login code for PHP 8 issues
+- (Jun 24) Upload patched `mobilePWA/loginFacebookV5.php` to SongbookDB production
+- (Jun 24) Test SongbookDB Facebook login on production after the PHP 8 fix
+- (Jun 24) Check Nicole Wise email `Qr` and whether it needs action
+- (Jun 24) Send the drafted eSIM company message if the issue is still unresolved
 ## Entity Pages
 
 - [[songbookdb/index]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app, PHP upgrade in progress
@@ -74,6 +78,7 @@ _Profile: Memory/Profile/{values,goals,history,personality,health,relationships,
 - In ask-me-questions sessions, prioritise business and investment questions first
 - Use full file paths in commands when path ambiguity is likely
 - Use `Push-Location`/`Pop-Location`; leaving CWD changed breaks `.claude` hooks
+- In ask-me-questions sessions, keep replies short and plain text
 ## 2026-06-17 Reflection
 - (Jun 17) SessionEnd hook now runs `memory_flush.py` detached so flush survives terminal close
 - (Jun 17) Reflection fix deployed; Codex structured output now writes to `MEMORY.md`
@@ -89,3 +94,7 @@ _Profile: Memory/Profile/{values,goals,history,personality,health,relationships,
 ## 2026-06-22 Reflection
 - (Jun 22) Briefs Finance handoff plan file is `briefs-finance-investment-tool.md`
 - (Jun 22) Run Briefs Finance from `investments/briefs-finance` in its own `uv` env
+
+## 2026-06-24 Reflection
+- (Jun 24) Commit `0427a10` was confirmed live on the VPS
+- (Jun 24) Juno Wonderdog dialogue ideas saved: `dognity` and `wash away my dogness`

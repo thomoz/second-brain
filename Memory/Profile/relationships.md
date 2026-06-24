@@ -17,3 +17,6 @@ _(not yet populated)_
 
 ## Support Network
 _(not yet populated)_
+
+## 2026-06-24 Update
+- (Jun 24) Nicole Wise is Shaun's girlfriend; they have been together since February 2017
