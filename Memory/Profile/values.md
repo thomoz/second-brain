@@ -21,6 +21,16 @@ _(not yet populated — run "ask me questions" to build this)_
 - Filters opportunities through: "does this steal time from higher-leverage pursuits?"
 - Time poverty is the identified bottleneck across all businesses — this value is operationally real, not aspirational
 
+## 2026-06-24 Update
+
+### Long-term wealth over short-term consumption
+- Does not want to sacrifice long-term investing goals for short-term spending
+
+### No new business sprawl
+- Does not want to take on new business projects lightly because existing commitments already stretch time and focus
+- Still has occasional ideas, such as a BYO food/alcohol venue with karaoke and trivia plus door-charge revenue
+- Sees those ideas as potentially lucrative but also risky and time-heavy, so they sit in tension with the non-negotiable around focus
+
 ## What Matters Most
 
 ## 2026-06-18 Update
