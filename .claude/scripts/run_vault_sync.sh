@@ -19,7 +19,7 @@ fi
 
 # Pull remote changes; note which Memory/ files changed
 BEFORE=$(git rev-parse HEAD)
-git pull --no-rebase origin HEAD >> "$LOG" 2>&1
+git pull --no-rebase >> "$LOG" 2>&1
 AFTER=$(git rev-parse HEAD)
 
 # Re-index only if Memory/ changed in the pull

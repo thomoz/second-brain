@@ -17,7 +17,7 @@ if ($staged) {
 }
 
 $before = git rev-parse HEAD
-git pull --no-rebase origin HEAD 2>&1 | Add-Content -Path $log
+git pull --no-rebase 2>&1 | Add-Content -Path $log
 $after = git rev-parse HEAD
 
 # Reindex only if Memory/ changed
