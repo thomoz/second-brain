@@ -1,10 +1,10 @@
 ---
-title: Bitza
+title: Scratch
 type: scratch
 created: 2026-06-23
-updated: 2026-06-23
+updated: 2026-06-24
 ---
-# Bitza
+# Scratch
 
 Random thoughts, half-ideas, and things that don't have a home yet.
 Dump here first, file properly later.

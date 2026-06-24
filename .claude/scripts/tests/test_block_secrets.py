@@ -274,10 +274,10 @@ class TestWhatsAppWritePathWhitelist:
         })
         assert result.returncode == 0
 
-    def test_bitza_allowed(self) -> None:
-        """WhatsApp bot may write to Memory/bitza.md for reminders and ideas."""
+    def test_scratch_allowed(self) -> None:
+        """WhatsApp bot may write to Memory/scratch.md for reminders and ideas."""
         result = _run_as_chat("Write", {
-            "file_path": str(Path(__file__).resolve().parent.parent.parent.parent / "Memory" / "bitza.md"),
+            "file_path": str(Path(__file__).resolve().parent.parent.parent.parent / "Memory" / "scratch.md"),
             "content": "## 2026-06-23 [WhatsApp save]\nTest idea.",
         })
         assert result.returncode == 0

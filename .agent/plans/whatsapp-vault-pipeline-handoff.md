@@ -20,7 +20,7 @@
 
 - `Memory/entities/juno-wonderdog/` — index, characters, story, development log
 - `Memory/entities/simone-kensington/` — same structure
-- `Memory/bitza.md` — catch-all scratch file: Reminders, Ideas, Unsorted sections
+- `Memory/scratch.md` — catch-all scratch file: Reminders, Ideas, Unsorted sections
 - `core-memories.md` removed from session injection (not needed)
 
 ---
@@ -39,7 +39,7 @@ per command category so it grows naturally:
 
 ```
 ## Save & Notes       ← building now
-## Reminders          ← next natural add (already overlaps with bitza Reminders)
+## Reminders          ← next natural add (already overlaps with scratch Reminders)
 ## Email Drafting     ← Memory/drafts/active/ already wired
 ## Calendar           ← log-only for now, action later
 ## General Research   ← "look up X and save what you find"
@@ -69,8 +69,8 @@ Content is written directly to the right vault file immediately — not deferred
 
 **Trigger phrases:**
 - "save this" / "remember this" / "log this"
-- "save to [entity]" e.g. "save to Juno characters", "save to Simone", "save to bitza"
-- "remind me to [X]" → bitza.md Reminders section
+- "save to [entity]" e.g. "save to Juno characters", "save to Simone", "save to scratch"
+- "remind me to [X]" → scratch.md Reminders section
 
 **Routing logic:**
 | Phrase / keyword        | Target file                                           |
@@ -78,8 +78,8 @@ Content is written directly to the right vault file immediately — not deferred
 | "juno" / "wonderdog"    | `Memory/entities/juno-wonderdog/` (LLM picks sub-file) |
 | "simone" / "kensington" | `Memory/entities/simone-kensington/` (LLM picks sub-file) |
 | "investment" / "stocks" | `Memory/topics/investment-strategy.md`                |
-| "remind me"             | `Memory/bitza.md` → Reminders section                 |
-| no entity named         | `Memory/bitza.md` → Ideas section                     |
+| "remind me"             | `Memory/scratch.md` → Reminders section                 |
+| no entity named         | `Memory/scratch.md` → Ideas section                     |
 
 **Sub-file routing:** LLM picks based on content type (character description → characters.md,
 plot/narrative → story.md, general/development notes → development-log.md, etc.)
@@ -102,7 +102,7 @@ characters"). Ask a clarifying question if destination is ambiguous.
 [content]
 ```
 
-### 4. Clean up `Memory/bitza.md`
+### 4. Clean up `Memory/scratch.md`
 Remove the `## Unsorted` section — only Reminders + Ideas needed.
 
 ### 5. Write tool VPS test (discovery task)
@@ -122,7 +122,7 @@ Tune `memory_reflect.py` prompt if it misses things.
 - `.claude/chat/engine.py` — system prompt construction (line 193), allowed_tools (line 222),
   vault context loader pattern (`_load_vault_context`)
 - `.claude/scripts/codex_sdk_compat.py` — WebSearch support (lines 145–149, 377–383)
-- `Memory/bitza.md` — current structure (Reminders, Ideas, Unsorted — remove Unsorted)
+- `Memory/scratch.md` — current structure (Reminders, Ideas, Unsorted — remove Unsorted)
 - `Memory/entities/juno-wonderdog/` — existing sub-files to understand routing targets
 - `Memory/entities/simone-kensington/` — same
 - `.agent/plans/second-brain-prd.md` — for context on overall direction
@@ -135,7 +135,7 @@ Tune `memory_reflect.py` prompt if it misses things.
 WhatsApp message
     └─ engine.py
           ├─ ASSISTANT.md injected into system_prompt (always-on)
-          ├─ save intent detected → Write tool → entity page / bitza.md  (immediate)
+          ├─ save intent detected → Write tool → entity page / scratch.md  (immediate)
           │       └─ confirmation reply to Shaun
           └─ append_to_daily_log() → Memory/daily/YYYY-MM-DD.md
                     └─ vault sync (2 min) → local machine
@@ -152,7 +152,7 @@ WhatsApp message
 | Intent detection — Python or LLM | LLM via Write tool; ask for clarification if confused |
 | "Save this" — inline or previous message | LLM infers from conversation context |
 | Confirmation reply | Always; or ask if destination ambiguous |
-| bitza.md sections | Reminders + Ideas only — remove Unsorted |
+| scratch.md sections | Reminders + Ideas only — remove Unsorted |
 | Write tool VPS test | Discovery task within this plan |
 | Unknown entities | LLM suggests path → confirm → create |
 | Save command instruction location | `Memory/ASSISTANT.md`, loaded into system prompt |

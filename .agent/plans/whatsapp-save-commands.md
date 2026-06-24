@@ -35,7 +35,7 @@ answer live research questions.
 2. Add `_load_assistant_commands()` to `engine.py` following the exact pattern of
    `_load_vault_context()` (line 12). Inject its output into `system_prompt` always.
 3. Add `"WebSearch"` to `allowed_tools` in `engine.py:222`.
-4. Clean up `Memory/bitza.md` â€” remove `## Unsorted` section (only Reminders + Ideas needed).
+4. Clean up `Memory/scratch.md` â€” remove `## Unsorted` section (only Reminders + Ideas needed).
 5. Discovery task: verify Write tool works live on VPS under Codex's workspace-write sandbox.
 6. Add unit tests covering the new loader and the updated `allowed_tools`.
 
@@ -43,7 +43,7 @@ answer live research questions.
 
 **Feature Type**: Enhancement  
 **Estimated Complexity**: Low  
-**Primary Systems Affected**: `engine.py`, `Memory/ASSISTANT.md`, `Memory/bitza.md`  
+**Primary Systems Affected**: `engine.py`, `Memory/ASSISTANT.md`, `Memory/scratch.md`  
 **Dependencies**: None new â€” Write and WebSearch already wired in `codex_sdk_compat.py`
 
 ---
@@ -65,7 +65,7 @@ answer live research questions.
   `workspace-write` (not read-only), network access enabled. Write tool should work here.
 - `Memory/SOUL.md` â€” rule: "Never modify files outside Memory/". ASSISTANT.md must reinforce
   this â€” all save commands write to `Memory/` only.
-- `Memory/bitza.md` â€” current structure has Reminders, Ideas, Unsorted. Remove Unsorted.
+- `Memory/scratch.md` â€” current structure has Reminders, Ideas, Unsorted. Remove Unsorted.
 - `Memory/entities/juno-wonderdog/` â€” 4 sub-files: index.md, characters.md, story.md,
   development.md. LLM routes by content type.
 - `Memory/entities/simone-kensington/` â€” same 4 sub-files.
@@ -81,7 +81,7 @@ answer live research questions.
 
 - `.claude/chat/engine.py` â€” add `_load_assistant_commands()`, inject into system_prompt, add
   WebSearch to allowed_tools
-- `Memory/bitza.md` â€” remove `## Unsorted` section
+- `Memory/scratch.md` â€” remove `## Unsorted` section
 - `.claude/scripts/tests/test_chat_engine.py` â€” add tests for new loader and allowed_tools
 
 ### Patterns to Follow
@@ -139,7 +139,7 @@ Everything else is wired from here.
 Add the loader function and inject into system_prompt. Add WebSearch to allowed_tools.
 Two surgical edits to engine.py.
 
-### Phase 3: bitza.md cleanup
+### Phase 3: scratch.md cleanup
 
 Remove the `## Unsorted` section. One Edit call.
 
@@ -182,8 +182,8 @@ All writes must be to files inside `Memory/` only.
 
 ### Trigger Phrases
 - "save this" / "remember this" / "log this" / "note this"
-- "save to [entity]" â€” e.g. "save to Juno characters", "save to Simone", "save to bitza"
-- "remind me to [X]" â†’ `Memory/bitza.md` Reminders section
+- "save to [entity]" â€” e.g. "save to Juno characters", "save to Simone", "save to scratch"
+- "remind me to [X]" â†’ `Memory/scratch.md` Reminders section
 - "add to [section]" â€” route as per routing table below
 
 ### Routing Table
@@ -192,8 +192,8 @@ All writes must be to files inside `Memory/` only.
 | "juno" / "wonderdog"        | `Memory/entities/juno-wonderdog/` â€” pick sub-file        |
 | "simone" / "kensington"     | `Memory/entities/simone-kensington/` â€” pick sub-file     |
 | "investment" / "stocks"     | `Memory/topics/investment-strategy.md`                   |
-| "remind me"                 | `Memory/bitza.md` â†’ under `## Reminders`                 |
-| no entity named             | `Memory/bitza.md` â†’ under `## Ideas`                     |
+| "remind me"                 | `Memory/scratch.md` â†’ under `## Reminders`                 |
+| no entity named             | `Memory/scratch.md` â†’ under `## Ideas`                     |
 
 ### Sub-File Routing (for entity folders)
 Pick the sub-file based on content type â€” do not ask Shaun:
@@ -215,7 +215,7 @@ Do not overwrite existing content. Always append.
 ### Confirmation
 Always reply with a single short confirmation after saving:
 - "Saved to Juno characters."
-- "Reminder added to bitza."
+- "Reminder added to scratch."
 - "Saved to investment strategy."
 
 If the destination is genuinely ambiguous (two entities equally likely), ask one clarifying
@@ -224,7 +224,7 @@ question before writing. Do not ask if the context makes the destination clear.
 ### "Save this" â€” Infer from Context
 If Shaun says "save this" with no explicit entity, infer the subject from the most recent
 exchange in the conversation. If the last topic was Juno, route to Juno development.
-If the conversation has no clear subject, route to `Memory/bitza.md` Ideas section, or if in doubt, ask Shaun for clarification.
+If the conversation has no clear subject, route to `Memory/scratch.md` Ideas section, or if in doubt, ask Shaun for clarification.
 
 ### New Entity Flow
 If Shaun names an entity with no existing folder:
@@ -236,7 +236,7 @@ If Shaun names an entity with no existing folder:
 
 ## Reminders
 
-_(Future section â€” remind me to X commands will route here via bitza.md for now.)_
+_(Future section â€” remind me to X commands will route here via scratch.md for now.)_
 
 ---
 
@@ -333,15 +333,15 @@ def _load_assistant_commands(project_root: Path) -> str:
 
 ---
 
-### Task 5: REMOVE `## Unsorted` section from `Memory/bitza.md`
+### Task 5: REMOVE `## Unsorted` section from `Memory/scratch.md`
 
-- **IMPLEMENT**: Edit bitza.md â€” remove the `## Unsorted` section and its trailing `---`.
+- **IMPLEMENT**: Edit scratch.md â€” remove the `## Unsorted` section and its trailing `---`.
   Keep only: frontmatter, intro paragraph, `## Reminders`, `## Ideas`.
-- **CURRENT STATE** (bitza.md): Has `## Reminders`, `## Ideas`, `## Unsorted` (with trailing `---`)
+- **CURRENT STATE** (scratch.md): Has `## Reminders`, `## Ideas`, `## Unsorted` (with trailing `---`)
 - **RESULT**: File ends after `## Ideas` section with its `---` separator.
 - **GOTCHA**: Preserve the final `---` that closes the Ideas section. Only remove the
   Unsorted heading, its content `_(Anything else.)_`, and the final `---` line after it.
-- **VALIDATE**: `python -c "from pathlib import Path; t = Path('Memory/bitza.md').read_text(); assert 'Unsorted' not in t; print('ok')"`
+- **VALIDATE**: `python -c "from pathlib import Path; t = Path('Memory/scratch.md').read_text(); assert 'Unsorted' not in t; print('ok')"`
 
 ---
 
@@ -434,8 +434,8 @@ async def test_allowed_tools_includes_websearch(engine, store):
 
 - **IMPLEMENT**: This is a manual test task, not a code task. After deploying (Task 8),
   send a WhatsApp message that triggers a save. Check if the vault file is updated.
-- **TEST MESSAGE**: "save to bitza: Testing Write tool from CarPlay flow"
-- **EXPECTED RESULT**: Within 2 minutes, `Memory/bitza.md` should have a new entry under
+- **TEST MESSAGE**: "save to scratch: Testing Write tool from CarPlay flow"
+- **EXPECTED RESULT**: Within 2 minutes, `Memory/scratch.md` should have a new entry under
   `## Ideas` with today's date heading.
 - **IF WRITE FAILS** (bwrap permission denied in logs):
   - Check VPS logs: `tail -f .claude/scripts/whatsapp_runs.log`
@@ -447,7 +447,7 @@ async def test_allowed_tools_includes_websearch(engine, store):
 - **VALIDATE** (run on VPS after deploy):
 ```bash
 tail -20 .claude/scripts/whatsapp_runs.log
-python -c "from pathlib import Path; print(Path('Memory/bitza.md').read_text()[-500:])"
+python -c "from pathlib import Path; print(Path('Memory/scratch.md').read_text()[-500:])"
 ```
 
 ---
@@ -460,7 +460,7 @@ python -c "from pathlib import Path; print(Path('Memory/bitza.md').read_text()[-
 - **PRE-DEPLOY CHECKLIST**:
   - [ ] All tests pass: `python -m pytest .claude/scripts/tests/test_chat_engine.py -v`
   - [ ] ASSISTANT.md exists at `Memory/ASSISTANT.md`
-  - [ ] bitza.md has no `## Unsorted` section
+  - [ ] scratch.md has no `## Unsorted` section
   - [ ] engine.py has `_load_assistant_commands()` function
   - [ ] engine.py system_prompt block injects assistant_cmds
   - [ ] `"WebSearch"` in `allowed_tools`
@@ -491,8 +491,8 @@ python -m pytest .claude/scripts/tests/ -v
 
 ### Edge Cases
 
-- Save with no entity named â†’ routes to bitza.md Ideas
-- "remind me to X" â†’ bitza.md Reminders
+- Save with no entity named â†’ routes to scratch.md Ideas
+- "remind me to X" â†’ scratch.md Reminders
 - "save this" with ambiguous prior context â†’ LLM asks for clarification
 - Entity named doesn't exist â†’ LLM suggests path, waits for confirm
 - ASSISTANT.md missing from disk â†’ `_load_assistant_commands()` returns `""`, system_prompt unaffected
@@ -523,12 +523,12 @@ python -m pytest .claude/scripts/tests/ -v
 
 ### Level 4: Manual VPS Validation
 
-After deploy, send WhatsApp message: `"save to bitza: save command test"`
+After deploy, send WhatsApp message: `"save to scratch: save command test"`
 
 Check vault updated:
 ```bash
 # On VPS
-tail -20 Memory/bitza.md
+tail -20 Memory/scratch.md
 tail -10 .claude/scripts/whatsapp_runs.log
 ```
 
@@ -546,10 +546,10 @@ Check WebSearch works:
 - [ ] `engine.py` has `_load_assistant_commands()` function (after line 26)
 - [ ] `engine.py` system_prompt always includes ASSISTANT.md content when file exists
 - [ ] `"WebSearch"` in `allowed_tools` in `engine.py:222`
-- [ ] `Memory/bitza.md` has no `## Unsorted` section
+- [ ] `Memory/scratch.md` has no `## Unsorted` section
 - [ ] 4 new tests pass in `test_chat_engine.py`
 - [ ] Full test suite passes with zero regressions
-- [ ] Live VPS test: WhatsApp save command writes to `Memory/bitza.md` within 2 min
+- [ ] Live VPS test: WhatsApp save command writes to `Memory/scratch.md` within 2 min
 - [ ] Live VPS test: WebSearch question returns a real-time answer
 
 ---
@@ -560,7 +560,7 @@ Check WebSearch works:
 - [x] Task 2: `_load_assistant_commands()` added to engine.py
 - [x] Task 3: system_prompt injection added to engine.py
 - [x] Task 4: `"WebSearch"` added to `allowed_tools`
-- [x] Task 5: `## Unsorted` removed from bitza.md
+- [x] Task 5: `## Unsorted` removed from scratch.md
 - [x] Task 6: 7 unit tests added (4 engine + 3 block-secrets) — 265 passing
 - [ ] Task 7: VPS Write tool confirmed working (or fallback documented)
 - [ ] Task 8: Deployed to VPS, WhatsApp bot restarted
