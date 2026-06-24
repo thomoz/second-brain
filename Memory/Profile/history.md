@@ -54,3 +54,10 @@ _Built through "Ask Me Questions" sessions. Append with dates — history matter
 - Reluctant performer who used the stage to earn a living while always seeking something else
 - Software business (SongbookDB) born from GFC-era disruption and a movie that sparked an idea
 - Live entertainment businesses expanded out of the same original karaoke pivot in 2008
+
+## 2026-06-24 Update
+
+### Regrets / Missed Opportunities
+- Biggest regret is not investing when younger and not understanding the power of compounding early
+- Hearing how small early index fund contributions could grow by retirement triggered strong frustration at his younger self
+- Also feels he put too much time into romantic relationships over the years instead of investing more directly in himself and his businesses
