@@ -86,6 +86,11 @@ _(not yet populated)_
 - An ideal week includes a couple of days free to work on creative projects
 - Creative time is a meaningful quality-of-life goal, not just spare time
 
+### Person He Wants To Become
+- Wants to become someone who does not feel forced to work constantly just to maintain or reach financial goals
+- Currently feels creatively unsatisfied because there is no real time for music, story writing, or animation
+- Also feels the lack of recreation time as a meaningful quality-of-life gap
+
 ## 2026-06-17 Update
 
 ### Retirement Goal
