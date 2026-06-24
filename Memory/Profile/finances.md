@@ -41,3 +41,13 @@ _(not yet populated)_
 
 ### Key Constraint
 - Time poverty is the primary bottleneck — show hosting + travel + promotion consumes most available hours, limiting ability to build other income streams or invest time in higher-leverage activities
+
+## 2026-06-24 Update
+
+### Retirement Priority
+- Retirement target is at least $1.5 million by age 67
+- Almost 52 now
+- Current super is about $40,000
+- Current cash savings are about $15,000, built over the last 3 months
+- Sees the retirement position as urgent and underbuilt
+- Main financial priority is increasing income and investing capacity to improve retirement outcomes
