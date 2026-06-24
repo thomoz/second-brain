@@ -91,6 +91,11 @@ _(not yet populated)_
 - Currently feels creatively unsatisfied because there is no real time for music, story writing, or animation
 - Also feels the lack of recreation time as a meaningful quality-of-life gap
 
+### Recreation And Enjoyment
+- Recreation priorities include working on music, story ideas, and animation ideas
+- Enjoys watching movies
+- Would like enough time and money to organize the occasional date night with Nicole
+
 ## 2026-06-17 Update
 
 ### Retirement Goal
