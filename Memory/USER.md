@@ -44,3 +44,7 @@ Skip drafts for: Newsletters, automated notifications, spam
 ## 2026-06-19 Reflection
 - Next ask-me-questions session should resume at relationships
 - ask-me-questions reflection flow now scans profile files before choosing the first question
+
+## 2026-06-23 Reflection
+- Daily logs sync to the vault every 2 minutes via git and a VPS timer
+- `memory_reflect.py` runs at 8am AEST and currently ignores `chat.db` history

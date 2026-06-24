@@ -29,6 +29,13 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Jun 22) Read laragon-setup-handoff.md before resuming SongbookDB PHP 8.0 upgrade
 - (Jun 22) Choose display format before executing the Briefs Finance tool plan
 - (Jun 22) Fix missing pre-compact hook target `.claude/hooks/pre-compact-flush.py`
+- (Jun 23) Review WhatsApp verification code email for thomoz@outlook.com; secure if unsolicited
+- (Jun 23) Verify PayPal payment email from 14:06 matches an expected transaction
+- (Jun 23) Review ATO SBSCH closing-soon email and confirm business impact
+- (Jun 23) Check Sandra Goodwin's Facebook Messenger message
+- (Jun 23) Run Briefs Finance bulk ingest on 84 PDFs, then backtest
+- (Jun 23) Investigate repeated ask-me-questions prompts after memory/profile read failure
+- (Jun 23) Check app/SDK Facebook login code for PHP 8 issues
 ## Entity Pages
 
 - [[songbookdb/index]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app, PHP upgrade in progress
@@ -66,6 +73,7 @@ _Profile: Memory/Profile/{values,goals,history,personality,health,relationships,
 - In ask-me-questions sessions, ask exactly one open-ended question per message
 - In ask-me-questions sessions, prioritise business and investment questions first
 - Use full file paths in commands when path ambiguity is likely
+- Use `Push-Location`/`Pop-Location`; leaving CWD changed breaks `.claude` hooks
 ## 2026-06-17 Reflection
 - (Jun 17) SessionEnd hook now runs `memory_flush.py` detached so flush survives terminal close
 - (Jun 17) Reflection fix deployed; Codex structured output now writes to `MEMORY.md`

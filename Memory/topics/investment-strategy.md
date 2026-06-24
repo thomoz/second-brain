@@ -35,3 +35,4 @@ tags: [investment, wealth, portfolio, strategy]
 - Concerned about potential share market crash / recession / depression
 - Building cash reserves: a) emergency buffer, b) deployment capital post-crash
 - (Jun 22) Briefs Finance plan includes terminal, markdown, and HTML outputs
+- (Jun 23) Briefs Finance pipeline is tested; next step is bulk ingest of 84 PDFs
