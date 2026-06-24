@@ -48,3 +48,10 @@ Use WhatsApp "save this" or direct edit to capture ideas as they arrive.
 > Cavoodle Noodles — num-e-num
 
 > Vet visit 1 re multiple personalities
+
+## 2026-06-24 [WhatsApp save]
+
+- Dialogue ideas:
+  - `dognity`
+  - "wash away my dogness"
+- Note: wordplay on dignity/dogness for Juno dialogue.

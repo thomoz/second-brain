@@ -23,6 +23,8 @@ Dog-pun comedy. Humour style: dog-wordplay, physical comedy, absurdist one-liner
 - "Toe bean or not toe bean" _(Hamlet riff)_
 - "Stop in the name of dogs, so they can get across!"
 - "Cavoodle Noodles — num-e-num"
+- "dognity" _(dignity riff)_
+- "wash away my dogness"
 - "You looking at me, Panda? You're about to become an even more endangered species. Take that!"
 
 ## Themes
