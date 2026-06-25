@@ -40,6 +40,10 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Jun 24) Test SongbookDB Facebook login on production after the PHP 8 fix
 - (Jun 24) Check Nicole Wise email `Qr` and whether it needs action
 - (Jun 24) Send the drafted eSIM company message if the issue is still unresolved
+- (Jun 25) Open completed DocuSign work order from murray@solomonsreynella.com.au and confirm details
+- (Jun 25) Re-auth the personal Google Calendar token; calendar queries fail with invalid_grant
+- (Jun 25) Restore VPS SSH access for secondbrain@137.184.102.104; current key is rejected
+- (Jun 25) Ask Nick to ask her dad for investor introductions
 ## Entity Pages
 
 - [[songbookdb/index]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app, PHP upgrade in progress

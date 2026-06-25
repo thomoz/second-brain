@@ -107,3 +107,6 @@ _(not yet populated)_
 ### Current Frustrations (working against goals)
 - Time poverty from show hosting cycle (hosting + travel + promotion + social media) limits capacity to build wealth faster
 - Super gap is a known stressor — aware the current $40k is significantly behind where it needs to be
+
+## 2026-06-25 Update
+- (Jun 25) Sees SongbookDB as the fastest path to an extra $500-$1,000/week within 90 days
