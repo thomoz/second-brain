@@ -15,6 +15,9 @@ Dump here first, file properly later.
 
 _(Things to follow up on that don't belong in a specific entity yet.)_
 
+## 2026-06-25 [WhatsApp save]
+Ask Nick to ask her dad if he has any friends that are good investors so she can have a talk about things.
+
 ---
 
 ## Ideas
