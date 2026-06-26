@@ -25,3 +25,6 @@ Early coding/testing — successfully captured test singer data and uploaded to 
 
 ## Contact
 Victor Northhead — app developer
+
+## 2026-06-26 [WhatsApp save]
+Shaun had been working with Victor on the unreleased Karaoke Night app for the karaoke industry. Victor has most of the phone app completed. Shaun's add-on value was a desktop app to allow singer history and Karaoki song lists at shows to be uploaded to the app. Shaun spoke with Victor tonight and said he will not be able to keep working on it because he has overcommitted himself timewise and needs to focus on his other businesses.
