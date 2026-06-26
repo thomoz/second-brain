@@ -28,3 +28,4 @@ Active
 - (Jun 17) Elanora Squash requested another banner colour option; follow-up needed
 - (Jun 19) Marilyn Dunn reached out about a possible First Floor Program opportunity in Port Kembla
 - (Jun 25) SBDB growth likely comes faster from reducing onboarding churn than from new lead generation
+- (Jun 26) Onboarding focus: get a new DJ to first live request, not full-system redesign

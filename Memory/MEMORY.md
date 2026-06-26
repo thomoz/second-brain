@@ -40,6 +40,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Jun 24) Send the drafted eSIM company message if the issue is still unresolved
 - (Jun 25) Re-auth the personal Google Calendar token; calendar queries fail with invalid_grant
 - (Jun 25) Ask Nick to ask her dad for investor introductions
+- (Jun 26) Create SongbookDB First Win Onboarding v1 plan around first live request
 ## Entity Pages
 
 - [[songbookdb/index]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app, PHP upgrade in progress

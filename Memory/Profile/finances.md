@@ -75,3 +75,6 @@ _(not yet populated)_
 ### 12-Month Financial Security
 - Would feel properly secure with $20,000 saved as an emergency fund
 - Also wants $50,000 ready to invest into the stock market at discounted rates
+
+## 2026-06-26 Update
+- (Jun 26) Live work currently earns about $500/week after tax
