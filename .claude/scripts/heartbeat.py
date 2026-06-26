@@ -476,7 +476,7 @@ def auto_check_habits_show(has_show_today: bool) -> bool:
 
 
 def reset_habits_if_new_day(state: dict) -> bool:
-    """Archive and reset HABITS.md if it's a new day. Returns True if reset performed."""
+    """Archive today's pillar completion and reset checkboxes for the new day."""
     if not HABITS_FILE.exists():
         return False
     today_str = now_local().strftime("%Y-%m-%d")
@@ -485,10 +485,25 @@ def reset_habits_if_new_day(state: dict) -> bool:
         return False
 
     content = HABITS_FILE.read_text(encoding="utf-8")
-    # Archive yesterday's checked state and reset all checkboxes
-    archived = content.replace("- [x]", "- [ ]")
-    history_entry = f"\n\n## History — {last_reset or 'previous'}\n" + content if last_reset else ""
-    new_content = archived + history_entry
+
+    # Separate the template (static header + today's pillars) from existing dated history entries.
+    # Dated entries look like "\n\n## History — YYYY-MM-DD". The first match splits the file.
+    first_dated = re.search(r"\n\n## History — \d{4}-\d{2}-\d{2}", content)
+    template_part = content[: first_dated.start()] if first_dated else content
+    existing_history = content[first_dated.start() :] if first_dated else ""
+
+    # Extract only the "Today's Pillars" checkbox lines for the history entry.
+    # Archiving the whole file caused exponential doubling — only the pillar checkboxes matter.
+    pillars_match = re.search(r"## Today's Pillars\n((?:- \[.\] [^\n]+\n?)+)", template_part)
+    pillars_block = pillars_match.group(0).rstrip() if pillars_match else ""
+
+    new_history_entry = (
+        f"\n\n## History — {last_reset}\n{pillars_block}" if last_reset and pillars_block else ""
+    )
+
+    # Reset checkboxes in the template only, then append prior history + new entry.
+    fresh_template = template_part.replace("- [x]", "- [ ]")
+    new_content = fresh_template + existing_history + new_history_entry
     with file_lock(HABITS_FILE):
         HABITS_FILE.write_text(new_content, encoding="utf-8")
     state["last_habits_reset_date"] = today_str
@@ -577,7 +592,7 @@ def run_heartbeat(dry_run: bool = False, force: bool = False, skip_guardrail: bo
     if HEARTBEAT_FILE.exists():
         heartbeat_checklist = HEARTBEAT_FILE.read_text(encoding="utf-8")
     user_ctx = USER_FILE.read_text(encoding="utf-8") if USER_FILE.exists() else ""
-    habits_ctx = HABITS_FILE.read_text(encoding="utf-8") if HABITS_FILE.exists() else ""
+    habits_ctx = (HABITS_FILE.read_text(encoding="utf-8") if HABITS_FILE.exists() else "")[:20_000]
 
     # Format email context
     email_lines: list[str] = []
