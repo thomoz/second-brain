@@ -21,6 +21,15 @@ _(not yet populated)_
 ## Constraints
 _(not yet populated)_
 
+## 2026-06-26 Update
+
+### Concentration And Currency Risk
+- Feels fear around relying too heavily on SongbookDB as an income engine
+- Worries that if SongbookDB fails, there may not be enough alternative income to compensate
+- Sees diversification across the other businesses as a hedge against that risk
+- Also worries about SongbookDB's exposure to USD revenue
+- Concern: if the US dollar weakens sharply or collapses against AUD, SongbookDB income would become less valuable in local terms
+
 ## 2026-06-17 Update
 
 ### Current Position (age ~52)
