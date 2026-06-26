@@ -205,17 +205,17 @@ def render_terminal(assess_data: dict) -> None:
     # Principles
     principles = assess_data.get("principles") or []
     if principles:
-        pt = Table(title="Principles Evaluation", show_header=True)
-        pt.add_column("Framework", style="bold")
-        pt.add_column("Score", justify="right")
-        pt.add_column("Reasoning")
+        pt = Table(title="Principles Evaluation", show_header=True, expand=True)
+        pt.add_column("Framework", style="bold", no_wrap=True)
+        pt.add_column("Score", justify="right", no_wrap=True)
+        pt.add_column("Reasoning", ratio=1)
         for p in principles:
             score_val = p.get("score", 0)
             color = "green" if score_val >= 60 else ("yellow" if score_val >= 40 else "red")
             pt.add_row(
                 p["principle"].title(),
                 f"[{color}]{score_val}[/{color}]",
-                (p.get("reasoning") or "")[:80],
+                p.get("reasoning") or "",
             )
         console.print(pt)
 

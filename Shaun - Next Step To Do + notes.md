@@ -1,11 +1,6 @@
 ## Where we are up to:
 
-However — there's a gap worth knowing about: that dedup check covers MEMORY.md and USER.md, but not the Memory/Profile/ files. The reflection appends to profile files without reading their current content first (line 452-455 — append_to_profile_file just appends unconditionally). So tomorrow morning's reflection could write a second copy of today's answers into goals.md, values.md, etc. on top of what I already filed.
-
-It's a minor issue since the data will still be accurate — just duplicated — but worth fixing eventually. For now the profile files are already correct from this session.
-
-
-
+execute: O:\AI\Dynamous\Courses\second-brain-workshop\.agent\plans\reflection-tighten-and-memory-cleanup.md to help keep bloat down
 
 From Rahul:
 
