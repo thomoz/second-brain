@@ -36,6 +36,11 @@ _(not yet populated)_
 - Reason 2: giving up stronger current income would feel unwise unless SongbookDB became materially more lucrative
 - Current threshold thinking: only consider shutting down live work if SongbookDB grew enough that retirement within a couple of years became realistic
 
+### SongbookDB Income Threshold
+- Current after-tax income from SongbookDB is roughly $500 per week
+- To feel comfortable backing it completely, it would need to earn about 20 times that level
+- Implied comfort threshold is roughly $10,000 per week after tax
+
 ## 2026-06-17 Update
 
 ### Current Position (age ~52)
