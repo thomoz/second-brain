@@ -137,6 +137,9 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `paypal/tipTheDJ/tipTheDJPay3.php` | `$_POST` undefined key guards — added `?? ''` on `$_POST['a']`, `djID`, `venue`, `rigID` | bd77314 — uploaded 2026-06-23 |
 | `mobilePWA/loginFacebookV5.php` | CA bundle, SDK shims, curl fallback, token extractor — full PHP 8.0 rework | bd77314 — uploaded + tested 2026-06-23 ✓ |
 | `mobile/loginFacebookV5.php` | `$row !== null` null guard in `authenticate_facebook_user()` | bd77314 — uploaded + tested 2026-06-26 ✓ |
+| `mobilePWA/appleSignIn.php` | `HTTP_MOBILE` undefined key guard, `$_POST['sub'] ?? ''`, null guard on `$row` | pending commit |
+| `mobile/appleSignIn.php` | Same + `isset($postData['user']['name'])` guard in `createNewUser()` | pending commit |
+| `public_html/js/pwa/signInWithApple.js` | Add `r: RN` to POST data — `antiXSS()` was always blocking Apple Sign In on PWA | pending commit — uploaded + tested 2026-06-26 ✓ |
 
 ---
 
@@ -151,5 +154,5 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 7. ~~**Test requests flow** at `https://songbookdb.test`~~ — done 2026-06-23 (patron search → request → received in hoster)
 8. ~~**Test login and payment flows** locally~~ — done 2026-06-23
 9. ~~**Test Facebook login** on local PHP 8.0~~ — mobilePWA + mobile both uploaded and confirmed working in production 2026-06-26 ✓
-10. **Test Apple Sign In** on local PHP 8.0 (`mobilePWA/appleSignIn.php`, `mobile/appleSignIn.php`)
+10. ~~**Test Apple Sign In** on local PHP 8.0~~ — fixed and confirmed working 2026-06-26 ✓
 11. After PHP 8.0 stable → repeat scan for 8.1 → 8.2 → ... → 8.5
