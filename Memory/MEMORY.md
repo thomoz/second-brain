@@ -29,8 +29,6 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Jun 22) Read laragon-setup-handoff.md before resuming SongbookDB PHP 8.0 upgrade
 - (Jun 22) Choose display format before executing the Briefs Finance tool plan
 - (Jun 22) Fix missing pre-compact hook target `.claude/hooks/pre-compact-flush.py`
-- (Jun 23) Review WhatsApp verification code email for thomoz@outlook.com; secure if unsolicited
-- (Jun 23) Verify PayPal payment email from 14:06 matches an expected transaction
 - (Jun 23) Review ATO SBSCH closing-soon email and confirm business impact
 - (Jun 23) Check Sandra Goodwin's Facebook Messenger message
 - (Jun 23) Run Briefs Finance bulk ingest on 84 PDFs, then backtest
@@ -40,7 +38,6 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Jun 24) Test SongbookDB Facebook login on production after the PHP 8 fix
 - (Jun 24) Check Nicole Wise email `Qr` and whether it needs action
 - (Jun 24) Send the drafted eSIM company message if the issue is still unresolved
-- (Jun 25) Open completed DocuSign work order from murray@solomonsreynella.com.au and confirm details
 - (Jun 25) Re-auth the personal Google Calendar token; calendar queries fail with invalid_grant
 - (Jun 25) Ask Nick to ask her dad for investor introductions
 ## Entity Pages
@@ -82,22 +79,3 @@ _Profile: Memory/Profile/{values,goals,history,personality,health,relationships,
 - Use full file paths in commands when path ambiguity is likely
 - Use `Push-Location`/`Pop-Location`; leaving CWD changed breaks `.claude` hooks
 - In ask-me-questions sessions, keep replies short and plain text
-## 2026-06-17 Reflection
-- (Jun 17) SessionEnd hook now runs `memory_flush.py` detached so flush survives terminal close
-- (Jun 17) Reflection fix deployed; Codex structured output now writes to `MEMORY.md`
-- (Jun 17) Added reflection tests in `test_memory_reflect.py`
-- (Jun 17) `wiki_ops.py` supports `stats`, `lint`, and `validate <page>` for the project wiki
-- (Jun 17) Memory system upgrade plan saved with 23 tasks; each phase ends with VPS deploy
-- (Jun 17) Deploy script stashes and restores local changes during VPS pull
-
-## 2026-06-18 Reflection
-- (Jun 18) Built WhatsApp thread reset so 'ask me questions' resets the conversation thread
-- (Jun 18) Security hardening deployed to VPS in commit c74f256; added security_audit.log
-
-## 2026-06-22 Reflection
-- (Jun 22) Briefs Finance handoff plan file is `briefs-finance-investment-tool.md`
-- (Jun 22) Run Briefs Finance from `investments/briefs-finance` in its own `uv` env
-
-## 2026-06-24 Reflection
-- (Jun 24) Commit `0427a10` was confirmed live on the VPS
-- (Jun 24) Juno Wonderdog dialogue ideas saved: `dognity` and `wash away my dogness`

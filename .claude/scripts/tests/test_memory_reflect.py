@@ -13,6 +13,7 @@ from memory_reflect import (
     apply_memory_additions,
     apply_user_updates,
     parse_reflection_response,
+    remove_memory_active_items,
     trim_memory_if_needed,
 )
 
@@ -59,6 +60,8 @@ def test_parse_missing_keys_defaults_to_empty():
 # --- apply_memory_additions ---
 
 def test_apply_memory_additions_writes_section(tmp_path, monkeypatch):
+    # apply_memory_additions still works as a standalone function (backward compat)
+    # but run_reflection no longer calls it -- noise goes to daily log instead
     import memory_reflect
     mem_file = tmp_path / "MEMORY.md"
     mem_file.write_text("# Memory\n\n## Key Facts\n- existing\n", encoding="utf-8")
@@ -352,3 +355,59 @@ def test_count_file_mentions_zero(tmp_path, monkeypatch):
     (tmp_path / "a.md").write_text("something else", encoding="utf-8")
     count = memory_reflect.count_file_mentions("UnknownEntity")
     assert count == 0
+
+
+# --- remove_memory_active_items ---
+
+def test_remove_memory_active_items_removes_matching_line(tmp_path, monkeypatch):
+    import memory_reflect
+    mem_file = tmp_path / "MEMORY.md"
+    mem_file.write_text(
+        "# Memory\n\n## Active Items\n\n- (Jun 17) DocuSign work order\n- (Jun 18) real item\n\n## Preferences\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(memory_reflect, "MEMORY_FILE", mem_file)
+    result = memory_reflect.remove_memory_active_items(["DocuSign work order"])
+    assert result is True
+    content = mem_file.read_text(encoding="utf-8")
+    assert "DocuSign work order" not in content
+    assert "real item" in content
+
+
+def test_remove_memory_active_items_no_match_returns_false(tmp_path, monkeypatch):
+    import memory_reflect
+    mem_file = tmp_path / "MEMORY.md"
+    mem_file.write_text("# Memory\n\n## Active Items\n\n- (Jun 17) real item\n", encoding="utf-8")
+    monkeypatch.setattr(memory_reflect, "MEMORY_FILE", mem_file)
+    result = memory_reflect.remove_memory_active_items(["nonexistent fragment"])
+    assert result is False
+    assert "real item" in mem_file.read_text(encoding="utf-8")
+
+
+def test_remove_memory_active_items_empty_list_returns_false(tmp_path, monkeypatch):
+    import memory_reflect
+    mem_file = tmp_path / "MEMORY.md"
+    mem_file.write_text("# Memory\n\n## Active Items\n\n- real item\n", encoding="utf-8")
+    monkeypatch.setattr(memory_reflect, "MEMORY_FILE", mem_file)
+    result = memory_reflect.remove_memory_active_items([])
+    assert result is False
+
+
+# --- parse_reflection_response: new schema keys ---
+
+def test_parse_includes_resolved_items_and_daily_log_only():
+    payload = {
+        "active_items": [],
+        "resolved_items": ["DocuSign work order"],
+        "daily_log_only": ["- PayPal receipt noted"],
+        "nothing_to_update": False,
+    }
+    result = parse_reflection_response(json.dumps(payload))
+    assert result["resolved_items"] == ["DocuSign work order"]
+    assert result["daily_log_only"] == ["- PayPal receipt noted"]
+
+
+def test_parse_new_keys_default_to_empty_when_absent():
+    result = parse_reflection_response('{"nothing_to_update": false}')
+    assert result["resolved_items"] == []
+    assert result["daily_log_only"] == []

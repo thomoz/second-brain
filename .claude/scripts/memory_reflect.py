@@ -121,6 +121,8 @@ def parse_reflection_response(text: str) -> dict:
     except (json.JSONDecodeError, ValueError):
         return {
             "active_items": [],
+            "resolved_items": [],
+            "daily_log_only": [],
             "entity_updates": [],
             "topic_updates": [],
             "new_entity_pages": [],
@@ -136,6 +138,8 @@ def parse_reflection_response(text: str) -> dict:
     return {
         # New routing keys
         "active_items": data.get("active_items") or [],
+        "resolved_items": data.get("resolved_items") or [],
+        "daily_log_only": data.get("daily_log_only") or [],
         "entity_updates": data.get("entity_updates") or [],
         "topic_updates": data.get("topic_updates") or [],
         "new_entity_pages": data.get("new_entity_pages") or [],
@@ -143,7 +147,7 @@ def parse_reflection_response(text: str) -> dict:
         "profile_updates": data.get("profile_updates") or [],
         "decision_archive": data.get("decision_archive") or [],
         "memory_preferences": data.get("memory_preferences") or [],
-        # Backward-compat keys (still work, go to dated MEMORY.md section)
+        # Backward-compat keys (memory_additions redirected to daily log)
         "memory_additions": data.get("memory_additions") or [],
         "user_updates": data.get("user_updates") or [],
         "nothing_to_update": bool(data.get("nothing_to_update", False)),
@@ -293,6 +297,28 @@ def update_memory_preferences(preferences: list[str]) -> bool:
     return True
 
 
+def remove_memory_active_items(items_to_remove: list[str]) -> bool:
+    """Remove resolved active items from MEMORY.md Active Items section.
+    Matches by substring — each entry in items_to_remove is a unique fragment of the line to remove.
+    Returns True if any lines were removed."""
+    if not items_to_remove or not MEMORY_FILE.exists():
+        return False
+    with file_lock(MEMORY_FILE):
+        current = MEMORY_FILE.read_text(encoding="utf-8")
+        lines = current.splitlines(keepends=True)
+        new_lines = []
+        removed = 0
+        for line in lines:
+            if any(fragment.lower() in line.lower() for fragment in items_to_remove):
+                removed += 1
+            else:
+                new_lines.append(line)
+        if removed == 0:
+            return False
+        atomic_write(MEMORY_FILE, "".join(new_lines))
+    return True
+
+
 # =============================================================================
 # MAIN REFLECTION
 # =============================================================================
@@ -365,6 +391,8 @@ Respond with ONLY this JSON (no prose, no extra text):
 ```json
 {{
   "active_items": ["- (Mon DD) time-sensitive or unresolved item"],
+  "resolved_items": ["unique substring of existing active item that is now done"],
+  "daily_log_only": ["- routine note worth logging but not tracking across sessions"],
   "entity_updates": [
     {{"page": "songbookdb", "content": "- (Mon DD) note about SongbookDB"}}
   ],
@@ -378,7 +406,7 @@ Respond with ONLY this JSON (no prose, no extra text):
   ],
   "decision_archive": ["- (Mon DD) completed decision — chose X, done"],
   "memory_preferences": ["- preference or standing instruction"],
-  "memory_additions": ["- item that doesn't fit above categories"],
+  "memory_additions": [],
   "user_updates": ["- operational config change"],
   "nothing_to_update": false
 }}
@@ -386,23 +414,66 @@ Respond with ONLY this JSON (no prose, no extra text):
 
 ## Routing Rules
 
-- entity_updates: "page" must be a stem from the Existing Entity Pages list above
-- topic_updates: "page" must be a stem from the Existing Topic Pages list above
-- new_entity_pages / new_topic_pages: only suggest if name appears in 3+ Memory/ files already
-- profile_updates: personal statements about values, goals, health, relationships, finances
-  "file" must be one of: values, goals, history, personality, health, relationships, finances
-- decision_archive: only for COMPLETED decisions — no future action needed
-- active_items: time-sensitive, unresolved, needs follow-up
-- memory_preferences: standing communication or tool preferences
-- memory_additions: fallback for items that don't fit other categories
+### active_items -- STRICT BAR
+Only add if ALL of the following are true:
+  1. Requires action that cannot be completed in a single session
+  2. Relates to a named business, project, or person already tracked in the vault
+  3. Is NOT a routine notification, automated alert, or transactional email
+Target: under 20 total active items. Quality over quantity.
+
+### NEVER add to active_items:
+  - DocuSign / e-signature notifications
+  - PayPal / Stripe / bank transaction emails
+  - Automated security alerts (password change, login notification) unless the account is actively compromised
+  - Newsletters, subscription emails, marketing
+  - Emails from senders not already tracked as a contact or entity
+  - Items that can be handled in a single sitting
+  - Items already present in Current MEMORY.md
+
+### resolved_items
+List substrings (unique fragments) of existing active items in Current MEMORY.md that are now
+clearly resolved, stale (>14 days old with no follow-up), or irrelevant. Python will remove
+lines containing these substrings. Be conservative -- only include items you are confident are done.
+
+### daily_log_only
+Items worth noting briefly but not worth tracking across sessions. These go to the daily log.
+Use for: routine email follow-ups, one-off admin tasks, transactional notifications.
+
+### entity_updates
+"page" must be a stem from the Existing Entity Pages list. Facts about named businesses, people, venues.
+
+### topic_updates
+"page" must be a stem from the Existing Topic Pages list. Investment notes, growth strategy, etc.
+
+### new_entity_pages / new_topic_pages
+Only suggest if name appears in 3+ Memory/ files already.
+
+### profile_updates
+Personal statements about values, goals, health, relationships, finances.
+"file" must be one of: values, goals, history, personality, health, relationships, finances.
+Profile/ files are permanent -- never suggest archiving or summarising.
+
+### decision_archive
+Only for COMPLETED decisions -- no future action needed.
+
+### memory_preferences
+Standing communication or tool preferences only.
+
+### memory_additions -- REDIRECT, DO NOT USE FOR MEMORY.md
+This key is deprecated as a MEMORY.md destination. If you have items that don't fit the above
+categories, put them in daily_log_only instead. memory_additions is ignored.
+
+### nothing_to_update
+Set true with all empty lists if the log contains nothing worth promoting.
+
+### General
 - Do NOT add anything already present in Current MEMORY.md or Current USER.md
 - NEVER include SOUL.md content or personality edits
-- Profile/ updates are the most important long-term memory. Always append, NEVER overwrite.
-- When yesterday's log contains any personal statements about values, goals, health,
-  relationships, or finances — route to profile_updates, not memory_additions.
-- Treat Profile/ files as permanent. Never suggest archiving or summarising them.
-- If nothing to add: set "nothing_to_update": true with all empty lists
 - Keep each item under 120 chars
+- When yesterday's log contains any personal statements about values, goals, health,
+  relationships, or finances -- route to profile_updates
+- Treat Profile/ files as permanent. Never suggest archiving or summarising them.
+- When in doubt, use daily_log_only or nothing_to_update -- prefer a lean MEMORY.md
 """
 
     response_text = ""
@@ -471,18 +542,23 @@ Respond with ONLY this JSON (no prose, no extra text):
                 if not page_path.exists():
                     atomic_write(page_path, page_spec["content"])
 
-    # MEMORY.md updates
+    # MEMORY.md updates: prune resolved items first, then add new ones
+    wrote_pruned = remove_memory_active_items(parsed.get("resolved_items", []))
     wrote_active = update_memory_active_items(parsed["active_items"])
     wrote_prefs = update_memory_preferences(parsed["memory_preferences"])
 
-    # Backward compat: old memory_additions still go to dated MEMORY.md section
-    wrote_memory = apply_memory_additions(parsed["memory_additions"], date_str)
+    # memory_additions deprecated as MEMORY.md destination -- redirect noise to daily log
+    all_noise = parsed["memory_additions"] + parsed.get("daily_log_only", [])
+    if all_noise:
+        append_to_daily_log("[Reflection noise]\n" + "\n".join(all_noise))
+    wrote_memory = False  # no longer writes to MEMORY.md
+
     wrote_user = apply_user_updates(parsed["user_updates"], date_str)
 
     trim_memory_if_needed()
 
     wrote_any = any([wrote_entity, wrote_topic, wrote_profile, wrote_decisions,
-                     wrote_active, wrote_prefs, wrote_memory, wrote_user])
+                     wrote_active, wrote_prefs, wrote_pruned, wrote_user])
 
     # Save state
     state["last_run_date"] = today_str
