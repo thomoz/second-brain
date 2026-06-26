@@ -437,6 +437,31 @@ async def _feed_stdin(proc: asyncio.subprocess.Process, data: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Codex tmp cleanup (workaround for --ephemeral not flushing .tmp on VPS)
+# ---------------------------------------------------------------------------
+
+
+def _clear_codex_tmp() -> None:
+    """Delete ~/.codex/.tmp so Codex starts clean on every ephemeral call.
+
+    Despite --ephemeral, the Codex CLI accumulates plugin/context state in its
+    .tmp directory between runs on the VPS. Each run then inherits the previous
+    run's full context, causing the input to double every 30 minutes. Clearing
+    .tmp before each ephemeral call restores the intended stateless behaviour.
+    Only ephemeral calls are cleaned; session (chat-bot) calls are unaffected.
+    """
+    codex_tmp = Path.home() / ".codex" / ".tmp"
+    if not codex_tmp.is_dir():
+        return
+    try:
+        import shutil
+        shutil.rmtree(codex_tmp)
+        codex_tmp.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
+
+
+# ---------------------------------------------------------------------------
 # The query() entry point
 # ---------------------------------------------------------------------------
 
@@ -462,6 +487,8 @@ async def query(
     if resume_key:
         resume_thread_id = _load_sessions().get(resume_key)
     ephemeral = not resume_key  # truly stateless calls leave no session on disk
+    if ephemeral:
+        _clear_codex_tmp()
 
     # Wall-clock backstop: Codex exec has no turn cap, so a runaway tool loop
     # would otherwise never terminate. Scale a timeout off the original turn
