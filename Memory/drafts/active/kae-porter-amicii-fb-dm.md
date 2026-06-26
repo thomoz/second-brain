@@ -6,14 +6,17 @@ platform: Facebook DM
 subject: Partnership enquiry — entertainment for dining experiences
 created: 2026-06-26
 status: draft
+notes: No links, images, or videos in first message — send those only if she replies with interest
 ---
 
 Hi Kae,
 
-Saw your post on the Northern Beaches community page — love what Amicii is doing. Small group dining that actually gets people together properly is a great idea.
+Saw your post on the Northern Beaches community page — love what Amicii is doing. Small group dining that actually connects people is a great concept.
 
-I'm Shaun. I host music bingo, trivia nights, and karaoke shows across Sydney. I wondered if there might be a natural fit — particularly for team building or EOFY occasions where a hosted activity gives the evening a bit more energy alongside the meal. Groups of 4–8 people are honestly a sweet spot for that kind of thing.
+I'm Shaun. I host music bingo, trivia nights, and karaoke shows across Sydney. The music bingo show has side games built in — things like air guitar play-offs, tin foil dress-ups, and paper plane competitions — that tend to turn a group of strangers into a room of people laughing together pretty quickly. Groups of 4–8 are honestly the sweet spot for it.
 
-Worth a quick chat to see if it makes sense for some of your events?
+I've got a corporate team building event coming up for Wests Group, so the format does translate well beyond the usual pub night. Thought there might be a natural fit with some of your evenings.
+
+Worth a quick chat?
 
 Shaun
