@@ -12,8 +12,8 @@ Strategy: one major version at a time. Current target: **PHP 8.0**.
 
 **To resume:** Say "Continue the SongbookDB PHP 8.0 upgrade — read the php-upgrade doc first."
 
-## Status (2026-06-23)
-Hard breaks fixed. Local environment running PHP 8.0.30 at `https://songbookdb.test`. Login, Favs, and patron requests flow confirmed working locally. Several fixes uploaded to production.
+## Status (2026-06-26)
+Hard breaks fixed. Facebook login confirmed working on production (mobilePWA + mobile). Next: test Apple Sign In locally on PHP 8.0.
 
 ---
 
@@ -129,12 +129,14 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `funcs_lib/cryptomania.php` | Key path uses `dirname(__FILE__)` not `DOCUMENT_ROOT` | earlier |
 | `mobilePWA/login.php` | Removed dead code `$arr['djData'] = $row` | 41e37ea |
 | `mobilePWA/getToken.php` | Null guards, `?? ''` on cookie, `town_city` column fix | 94e5237 |
-| `public_html/affiliate/reconcile/index.php` | fgetcsv EOF bug — `while(!feof())` → `while(fgetcsv() !== false)` | uploaded 2026-06-23 |
-| `public_html/affiliate/reconcile/index.php` | `isset($_FILES['csvfile']['type'])` guard on line 15 | uploaded 2026-06-23 |
-| `mobilePWA/com.php` + 4 others | `antiXSS()` — added `?? ''` null coalescing on `$_POST['r']` and `$_SESSION['wipit']` to prevent PHP 8.0 warnings corrupting JSON | local only |
-| `public_html/js/pwa/js01.js` | `www="/"` (relative) — fixes session cookie loss when page loaded over HTTP while AJAX called HTTPS origin | upload safe |
-| `mobilePWA/login.php` | `townCity` key mismatch — `checkPublicLoginToken()` returns `town_city`, `logUserIn()` read `townCity`; fixed with `?? $user_details['town_city'] ?? ''` on lines 605 and 666 | uploaded 2026-06-23 |
-| `paypal/tipTheDJ/tipTheDJPay3.php` | `$_POST` undefined key guards — added `?? ''` on `$_POST['a']`, `djID`, `venue`, `rigID` | uploaded 2026-06-23 |
+| `public_html/affiliate/reconcile/index.php` | fgetcsv EOF bug — `while(!feof())` → `while(fgetcsv() !== false)` | bd77314 — uploaded 2026-06-23 |
+| `public_html/affiliate/reconcile/index.php` | `isset($_FILES['csvfile']['type'])` guard on line 15 | bd77314 — uploaded 2026-06-23 |
+| `mobilePWA/com.php` + 4 others | `antiXSS()` — added `?? ''` null coalescing on `$_POST['r']` and `$_SESSION['wipit']` | bd77314 |
+| `public_html/js/pwa/js01.js` | `www="/"` (relative) — fixes session cookie loss when page loaded over HTTP while AJAX called HTTPS origin | bd77314 |
+| `mobilePWA/login.php` | `townCity` key mismatch — `checkPublicLoginToken()` returns `town_city`, `logUserIn()` read `townCity`; fixed with `?? $user_details['town_city'] ?? ''` on lines 605 and 666 | bd77314 — uploaded 2026-06-23 |
+| `paypal/tipTheDJ/tipTheDJPay3.php` | `$_POST` undefined key guards — added `?? ''` on `$_POST['a']`, `djID`, `venue`, `rigID` | bd77314 — uploaded 2026-06-23 |
+| `mobilePWA/loginFacebookV5.php` | CA bundle, SDK shims, curl fallback, token extractor — full PHP 8.0 rework | bd77314 — uploaded + tested 2026-06-23 ✓ |
+| `mobile/loginFacebookV5.php` | `$row !== null` null guard in `authenticate_facebook_user()` | bd77314 — uploaded + tested 2026-06-26 ✓ |
 
 ---
 
@@ -148,5 +150,6 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 6. ~~**Delete `facebookV4/` and `jwtTest/`** from production~~ — done 2026-06-23
 7. ~~**Test requests flow** at `https://songbookdb.test`~~ — done 2026-06-23 (patron search → request → received in hoster)
 8. ~~**Test login and payment flows** locally~~ — done 2026-06-23
-9. **Test Facebook login and Apple Sign In** on local PHP 8.0
-10. After PHP 8.0 stable → repeat scan for 8.1 → 8.2 → ... → 8.5
+9. ~~**Test Facebook login** on local PHP 8.0~~ — mobilePWA + mobile both uploaded and confirmed working in production 2026-06-26 ✓
+10. **Test Apple Sign In** on local PHP 8.0 (`mobilePWA/appleSignIn.php`, `mobile/appleSignIn.php`)
+11. After PHP 8.0 stable → repeat scan for 8.1 → 8.2 → ... → 8.5
