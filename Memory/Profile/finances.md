@@ -30,6 +30,12 @@ _(not yet populated)_
 - Also worries about SongbookDB's exposure to USD revenue
 - Concern: if the US dollar weakens sharply or collapses against AUD, SongbookDB income would become less valuable in local terms
 
+### Live Work As Income Hedge
+- Does not feel comfortable letting go of the live businesses
+- Reason 1: the live work currently pays more than SongbookDB
+- Reason 2: giving up stronger current income would feel unwise unless SongbookDB became materially more lucrative
+- Current threshold thinking: only consider shutting down live work if SongbookDB grew enough that retirement within a couple of years became realistic
+
 ## 2026-06-17 Update
 
 ### Current Position (age ~52)
