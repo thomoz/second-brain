@@ -31,6 +31,9 @@ tags: [investment, wealth, portfolio, strategy]
 - Index funds (waiting for market dip)
 - Additional single stocks (TBD — waiting for dip)
 
+## Stocks of Interest
+- MCHI — fund for the Chinese market
+
 ## Notes
 - Concerned about potential share market crash / recession / depression
 - Building cash reserves: a) emergency buffer, b) deployment capital post-crash
