@@ -110,3 +110,11 @@ _(not yet populated)_
 
 ## 2026-06-25 Update
 - (Jun 25) Sees SongbookDB as the fastest path to an extra $500-$1,000/week within 90 days
+
+## 2026-06-27 Update
+
+### Focus And Fragmentation
+- The biggest recurring drain is having too many different facets of the businesses to look after
+- Tends to jump between maintaining different moving parts instead of building one thing deeply
+- Already understands the long-term answer is to focus more heavily on one or two areas
+- Wants fewer business fronts to actively manage so effort can compound into something more reliable
