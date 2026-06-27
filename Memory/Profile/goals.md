@@ -133,3 +133,13 @@ _(not yet populated)_
 - The main things that break up SongbookDB backend work at home are hosting-related business tasks that still need handling
 - Personal responsibilities also interrupt deep work, especially picking up his stepson from the bus
 - Currently does a fair amount of the cooking, including making dinner, which further cuts into uninterrupted work blocks
+
+### Second Brain Context Switching
+- Even while working on SongbookDB, often has other Second Brain sessions open for different projects
+- Tends to switch between them while waiting for one session to process tasks
+- This creates another layer of context switching on top of the business and household interruptions
+
+### Current SongbookDB Priority
+- The first SongbookDB priority is upgrading the PHP backend from PHP 7.4 to PHP 8.0
+- After that, the plan is to continue forward to the latest suitable PHP version
+- Estimates current progress on the first phase of the PHP upgrade at roughly 15 to 20 percent
