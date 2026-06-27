@@ -34,3 +34,7 @@ testing the b wrap fix
 testing 123456789
 
 ---
+## Reminders
+
+## 2026-06-27 [WhatsApp save]
+Figure out a way to make WhatsApp wait longer when I pause before it assumes I finished my message.
