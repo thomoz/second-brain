@@ -2,7 +2,7 @@
 title: Investment Strategy
 type: topic
 created: 2026-06-03
-updated: 2026-06-17
+updated: 2026-06-27
 related: [[hosting-growth]]
 tags: [investment, wealth, portfolio, strategy]
 ---
@@ -35,6 +35,7 @@ tags: [investment, wealth, portfolio, strategy]
 - MCHI — fund for the Chinese market
 - GRID — electric grid / smart grid exposure in America
 - XLU — utilities fund, with interest tied to expansion of America's grid
+- SCHD — Schwab U.S. Dividend Equity ETF
 
 ## Notes
 - Concerned about potential share market crash / recession / depression
