@@ -34,6 +34,7 @@ tags: [investment, wealth, portfolio, strategy]
 ## Stocks of Interest
 - MCHI — fund for the Chinese market
 - GRID — electric grid / smart grid exposure in America
+- XLU — utilities fund, with interest tied to expansion of America's grid
 
 ## Notes
 - Concerned about potential share market crash / recession / depression
