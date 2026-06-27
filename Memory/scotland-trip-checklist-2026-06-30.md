@@ -9,6 +9,7 @@ Trip date: Tuesday, 2026-06-30
 - [ ] Airport transport plan
 - [ ] Travel insurance
 - [ ] Phone roaming / eSIM
+- [ ] Water the plants
 - [ ] Wallet
 - [ ] Keys
 - [ ] Medications
@@ -30,4 +31,3 @@ Trip date: Tuesday, 2026-06-30
 - [ ] Show coverage / scheduling confirmed
 
 ## Notes
-
