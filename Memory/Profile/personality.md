@@ -31,6 +31,8 @@ _Built through "Ask Me Questions" sessions. Append with dates — history matter
 - Specific preferred work includes the Simone Kensington story, the Juno story, and music projects
 - Of those creative options, the Simone Kensington project currently has the strongest pull
 - Even so, it still feels "itchy" rather than fully settled or easy
+- Part of that itchiness is that the Simone project is quite sexual in nature
+- The intended sexuality level is comparable to the show Sex/Life
 
 ## What Drains Me
 
