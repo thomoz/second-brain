@@ -137,13 +137,31 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `paypal/tipTheDJ/tipTheDJPay3.php` | `$_POST` undefined key guards — added `?? ''` on `$_POST['a']`, `djID`, `venue`, `rigID` | bd77314 — uploaded 2026-06-23 |
 | `mobilePWA/loginFacebookV5.php` | CA bundle, SDK shims, curl fallback, token extractor — full PHP 8.0 rework | bd77314 — uploaded + tested 2026-06-23 ✓ |
 | `mobile/loginFacebookV5.php` | `$row !== null` null guard in `authenticate_facebook_user()` | bd77314 — uploaded + tested 2026-06-26 ✓ |
-| `mobilePWA/appleSignIn.php` | `HTTP_MOBILE` undefined key guard, `$_POST['sub'] ?? ''`, null guard on `$row` | pending commit |
-| `mobile/appleSignIn.php` | Same + `isset($postData['user']['name'])` guard in `createNewUser()` | pending commit |
-| `public_html/js/pwa/signInWithApple.js` | Add `r: RN` to POST data — `antiXSS()` was always blocking Apple Sign In on PWA | pending commit — uploaded + tested 2026-06-26 ✓ |
+| `mobilePWA/appleSignIn.php` | `HTTP_MOBILE` undefined key guard, `$_POST['sub'] ?? ''`, null guard on `$row` | 8fd9f18 — uploaded + tested 2026-06-26 ✓ |
+| `mobile/appleSignIn.php` | Same + `isset($postData['user']['name'])` guard in `createNewUser()` | 8fd9f18 — uploaded + tested 2026-06-26 ✓ |
+| `public_html/js/pwa/signInWithApple.js` | Add `r: RN` to POST data — `antiXSS()` was always blocking Apple Sign In on PWA | 8fd9f18 — uploaded + tested 2026-06-26 ✓ |
+| `dashboard/getMessages.php` | Removed debug file-logging code (debug artifact, not a PHP 8.0 fix) | 3ce21ec |
 
 ---
 
-## Next Steps
+## Remaining Folders — PHP 8.0 Audit Not Yet Started
+
+These are entire areas of the codebase that haven't been scanned or tested yet.
+Shaun will specify which folders to work through in order.
+
+### Desktop App Backends (3 apps)
+- [ ] **To be specified** — 3 desktop apps each have a backend; folders TBD by Shaun
+
+### Mobile Request Hoster
+- [ ] **Web app backend** — folder TBD by Shaun
+- [ ] **iOS/Android app backend** — folder TBD by Shaun
+
+### Other Root Folders
+- [ ] Full audit of remaining repo root folders not yet touched
+
+---
+
+## Next Steps (public_html area — in progress)
 
 1. ~~Fix `money_format()` in receipt/invoice files~~ — done
 2. ~~Fix `logDatabaseError()` param ordering in `lib/logError.php`~~ — done
@@ -155,4 +173,4 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 8. ~~**Test login and payment flows** locally~~ — done 2026-06-23
 9. ~~**Test Facebook login** on local PHP 8.0~~ — mobilePWA + mobile both uploaded and confirmed working in production 2026-06-26 ✓
 10. ~~**Test Apple Sign In** on local PHP 8.0~~ — fixed and confirmed working 2026-06-26 ✓
-11. After PHP 8.0 stable → repeat scan for 8.1 → 8.2 → ... → 8.5
+11. Work through remaining folders (see "Remaining Folders" section above) — not started
