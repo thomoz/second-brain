@@ -155,3 +155,10 @@ _(not yet populated)_
 - Does not want bulk fixes across many files followed by a commit request
 - Prefers to go through fixes one by one, upload them one by one, and test them one by one
 - Feels the local workflow has started to adapt to that preference, which is helping speed things up
+
+### Live Business Priority
+- Outside SongbookDB, karaoke is currently the strongest money-maker
+- Music Bingo is the second-strongest live business
+- Trivia is a current growth target rather than a current top earner
+- There is only one trivia gig per week at the moment and it is still on a trial run
+- Sees potential for trivia income to increase by about $200 per week
