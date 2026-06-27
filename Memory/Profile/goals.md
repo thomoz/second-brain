@@ -143,3 +143,8 @@ _(not yet populated)_
 - The first SongbookDB priority is upgrading the PHP backend from PHP 7.4 to PHP 8.0
 - After that, the plan is to continue forward to the latest suitable PHP version
 - Estimates current progress on the first phase of the PHP upgrade at roughly 15 to 20 percent
+
+### PHP 8.0 Completion Standard
+- Current upgrade process is to work folder by folder and breakpoint by breakpoint
+- Changes are upgraded and tested locally first, then uploaded and tested on production
+- Will only feel the PHP 8.0 phase is truly complete once production is switched from PHP 7.4 to PHP 8.0 and the live system proves it still works end to end
