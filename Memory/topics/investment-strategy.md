@@ -33,6 +33,7 @@ tags: [investment, wealth, portfolio, strategy]
 
 ## Stocks of Interest
 - MCHI — fund for the Chinese market
+- GRID — electric grid / smart grid exposure in America
 
 ## Notes
 - Concerned about potential share market crash / recession / depression
