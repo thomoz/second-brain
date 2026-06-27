@@ -6,3 +6,4 @@
 - (Jun 24) PHP 8 fix added in `mobilePWA/loginFacebookV5.php` for `$row['user_id']` null handling
 - (Jun 25) Biggest product weakness is onboarding friction; first-win setup should get one live request fast
 - (Jun 26) Likely retention pattern: hard to adopt, sticky once embedded in show workflow
+- (Jun 27) PHP 8 upgrade work should stay file-by-file with each upload and test done one by one

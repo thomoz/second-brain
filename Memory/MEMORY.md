@@ -70,6 +70,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - LLM backend: Codex (ChatGPT flat-rate) via codex_sdk_compat.py
 - Never auto-send emails, messages, or social posts
 
+- For SongbookDB upgrade work, make and test changes one by one; avoid bulk uploads or commits
 ---
 
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_

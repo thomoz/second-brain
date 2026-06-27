@@ -167,3 +167,6 @@ _(not yet populated)_
 - If forced to protect only two income engines for the next 12 months, they would be SongbookDB and karaoke
 - The choice is based on current lucrativeness, not enjoyment
 - Does not particularly enjoy either of them, but sees them as the strongest current earners
+
+## 2026-06-27 Update
+- (Jun 27) Long-term goal is to narrow focus to one or two business areas

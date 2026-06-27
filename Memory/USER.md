@@ -51,3 +51,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-06-24 Reflection
 - (Jun 24) Next ask-me-questions session should resume at relationship patterns to improve
+
+## 2026-06-27 Reflection
+- WhatsApp message-end detection should wait longer before treating a pause as finished
