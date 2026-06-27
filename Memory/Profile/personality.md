@@ -25,6 +25,11 @@ _Built through "Ask Me Questions" sessions. Append with dates — history matter
 - Solo creative work: songwriting, music recording, animation/storytelling projects
 - Building things (software, creative projects) that exist independently of his physical presence
 
+## 2026-06-27 Update
+
+- If money were equal, would choose to spend more time on creative work
+- Specific preferred work includes the Simone Kensington story, the Juno story, and music projects
+
 ## What Drains Me
 
 ## 2026-06-18 Update

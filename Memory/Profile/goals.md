@@ -162,3 +162,8 @@ _(not yet populated)_
 - Trivia is a current growth target rather than a current top earner
 - There is only one trivia gig per week at the moment and it is still on a trial run
 - Sees potential for trivia income to increase by about $200 per week
+
+### Two Income Engines To Protect
+- If forced to protect only two income engines for the next 12 months, they would be SongbookDB and karaoke
+- The choice is based on current lucrativeness, not enjoyment
+- Does not particularly enjoy either of them, but sees them as the strongest current earners
