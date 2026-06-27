@@ -15,7 +15,7 @@ Ideas for increasing patronage at karaoke shows and improving pricing power.
 - 
 
 ## Promotion Ideas
-- 
+- Have "5 stars plus over 76 reviews" on all promo.
 
 ## In-Show Experience Ideas
 - 
