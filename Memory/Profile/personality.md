@@ -29,6 +29,8 @@ _Built through "Ask Me Questions" sessions. Append with dates — history matter
 
 - If money were equal, would choose to spend more time on creative work
 - Specific preferred work includes the Simone Kensington story, the Juno story, and music projects
+- Of those creative options, the Simone Kensington project currently has the strongest pull
+- Even so, it still feels "itchy" rather than fully settled or easy
 
 ## What Drains Me
 
