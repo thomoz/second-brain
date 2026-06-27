@@ -11,7 +11,7 @@ tags: [php, upgrade, songbookdb, laragon]
 Strategy: one major version at a time. Current target: **PHP 8.0**.
 
 ## Process Rule
-**Do NOT auto-apply fixes.** For each folder: read all files, list every issue found, then wait. Shaun reviews the list and we work through fixes one at a time together.
+**Do NOT auto-apply fixes.** For each folder: read all files, list the next issue found, then wait. Shaun reviews the issue and we work through fixes one at a time together.
 
 **To resume:** Say "Continue the SongbookDB PHP 8.0 upgrade — read the php-upgrade doc first."
 
