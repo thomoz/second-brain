@@ -148,3 +148,10 @@ _(not yet populated)_
 - Current upgrade process is to work folder by folder and breakpoint by breakpoint
 - Changes are upgraded and tested locally first, then uploaded and tested on production
 - Will only feel the PHP 8.0 phase is truly complete once production is switched from PHP 7.4 to PHP 8.0 and the live system proves it still works end to end
+
+### What Makes The Upgrade Feel Slow
+- One pain point is simply the size of the repo and the number of files that need to be worked through
+- Another is needing the assistant to match his preferred working style during the upgrade
+- Does not want bulk fixes across many files followed by a commit request
+- Prefers to go through fixes one by one, upload them one by one, and test them one by one
+- Feels the local workflow has started to adapt to that preference, which is helping speed things up
