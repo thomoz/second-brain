@@ -36,6 +36,7 @@ tags: [investment, wealth, portfolio, strategy]
 - GRID — electric grid / smart grid exposure in America
 - XLU — utilities fund, with interest tied to expansion of America's grid
 - SCHD — Schwab U.S. Dividend Equity ETF
+- XLP — consumer staples fund
 
 ## Notes
 - Concerned about potential share market crash / recession / depression
