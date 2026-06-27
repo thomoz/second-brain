@@ -128,3 +128,8 @@ _(not yet populated)_
 - If low-value promo posting were reduced, the preferred use of that freed-up time would be SongbookDB PHP backend upgrade work
 - SongbookDB backend modernization is a surface-level priority when at home
 - Main exception is urgent hosting-side tasks that need immediate attention for the live businesses
+
+### Blockers To Deep Work At Home
+- The main things that break up SongbookDB backend work at home are hosting-related business tasks that still need handling
+- Personal responsibilities also interrupt deep work, especially picking up his stepson from the bus
+- Currently does a fair amount of the cooking, including making dinner, which further cuts into uninterrupted work blocks
