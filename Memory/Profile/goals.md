@@ -118,3 +118,13 @@ _(not yet populated)_
 - Tends to jump between maintaining different moving parts instead of building one thing deeply
 - Already understands the long-term answer is to focus more heavily on one or two areas
 - Wants fewer business fronts to actively manage so effort can compound into something more reliable
+
+### Low-Leverage Promotion Work
+- A specific weekly time drain is spending roughly 30 to 60 minutes posting ads and Facebook posts into third-party groups for shows
+- Would like to reduce or automate this promotional posting work to free up time
+- Sees this category as low-leverage compared with deeper business-building work
+
+### Best Use Of Freed Time
+- If low-value promo posting were reduced, the preferred use of that freed-up time would be SongbookDB PHP backend upgrade work
+- SongbookDB backend modernization is a surface-level priority when at home
+- Main exception is urgent hosting-side tasks that need immediate attention for the live businesses
