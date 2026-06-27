@@ -144,6 +144,22 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 ---
 
+## Folder Audit Log
+
+### `emailAdmin/` — audited 2026-06-27 ✓
+5 PHP files. 2 fixes applied (commit `d5fb618`).
+
+| File | Issue | Fix |
+|---|---|---|
+| `emailCampaigns_CheckAndProcessEmailQueue_DJs_CronJob.php` | `mysqli_num_rows()` on potentially-false result → TypeError in PHP 8.0 | Added `!$result \|\|` guard |
+| `emailCampaigns_PopulateEmailQueue_DJs_CronJob.php` | Undefined `$stmt`/`$params` passed to `logDatabaseError()` in error branch | Replaced with `null` |
+| `webhookSendgrid.php` | Clean | — |
+| `populate_email_campaign_recipients_with_active_djs.php` | Clean (one-off admin script, TESTING=true intentional) | — |
+| `webhookSendgridGetsIndividual.php` | Dev diagnostic tool, not a production endpoint. Has hardcoded Sendgrid API key (pre-existing, not a PHP 8 issue) | — |
+| `webhookSendgridBU.php` | Backup file, not in production path | — |
+
+---
+
 ## Remaining Folders — PHP 8.0 Audit Not Yet Started
 
 These are entire areas of the codebase that haven't been scanned or tested yet.
