@@ -2,7 +2,7 @@
 title: Scratch
 type: scratch
 created: 2026-06-23
-updated: 2026-06-24
+updated: 2026-06-28
 ---
 # Scratch
 
@@ -38,3 +38,6 @@ testing 123456789
 
 ## 2026-06-27 [WhatsApp save]
 Figure out a way to make WhatsApp wait longer when I pause before it assumes I finished my message.
+
+## 2026-06-28 [WhatsApp save]
+Check Facebook Messenger in case Kave Parker replied.
