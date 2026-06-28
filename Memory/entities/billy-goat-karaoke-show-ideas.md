@@ -33,4 +33,5 @@ Ideas for increasing patronage at karaoke shows and improving pricing power.
 - 
 
 ## Notes
-- 
+-
+- (Jun 28) Added promo idea: feature '5 stars plus over 76 reviews' on all promo

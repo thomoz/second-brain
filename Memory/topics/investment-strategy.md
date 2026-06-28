@@ -46,3 +46,4 @@ tags: [investment, wealth, portfolio, strategy]
 - (Jun 23) Briefs Finance pipeline is tested; next step is bulk ingest of 84 PDFs
 - (Jun 24) Built SPY walk-forward backtest tool in `investments/backtest` with Streamlit UI
 - (Jun 27) Stocks of interest added: MCHI, GRID, XLU
+- (Jun 28) Added SCHD to the investment watchlist
