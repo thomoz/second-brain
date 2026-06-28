@@ -2,7 +2,7 @@
 title: Investment Strategy
 type: topic
 created: 2026-06-03
-updated: 2026-06-27
+updated: 2026-06-28
 related: [[hosting-growth]]
 tags: [investment, wealth, portfolio, strategy]
 ---
@@ -37,6 +37,7 @@ tags: [investment, wealth, portfolio, strategy]
 - XLU — utilities fund, with interest tied to expansion of America's grid
 - SCHD — Schwab U.S. Dividend Equity ETF
 - XLP — consumer staples fund
+- VT — Vanguard Total World Stock ETF for broad world economy exposure
 
 ## Notes
 - Concerned about potential share market crash / recession / depression
