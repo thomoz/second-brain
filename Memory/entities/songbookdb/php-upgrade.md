@@ -15,6 +15,8 @@ Strategy: one major version at a time. Current target: **PHP 8.0**.
 
 **Open files in VS Code.** When discussing a specific file, open it in VS Code with `code <path>` so Shaun can follow along.
 
+**Check production before editing.** When moving to each new file, remind Shaun: "Before we edit this — does your local copy match production? You sometimes tweak files locally without uploading them. If the local version has unrelated local changes, you may want to download the production version first and use that as the base for this PHP 8.0 fix."
+
 **To resume:** Say "Continue the SongbookDB PHP 8.0 upgrade — read the php-upgrade doc first."
 
 ## Status (2026-06-26)
