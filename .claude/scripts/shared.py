@@ -33,6 +33,10 @@ def file_lock(path: Path, timeout: float = 30.0):
                     msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
                 except OSError:
                     pass
+        try:
+            Path(lock_path).unlink(missing_ok=True)
+        except OSError:
+            pass
     else:
         import fcntl
 
@@ -42,6 +46,10 @@ def file_lock(path: Path, timeout: float = 30.0):
                 yield
             finally:
                 fcntl.flock(f, fcntl.LOCK_UN)
+        try:
+            Path(lock_path).unlink(missing_ok=True)
+        except OSError:
+            pass
 
 
 def with_retry(fn, max_retries: int = 3, base_delay: float = 1.0):
