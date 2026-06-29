@@ -13,6 +13,8 @@ Strategy: one major version at a time. Current target: **PHP 8.0**.
 ## Process Rule
 **Do NOT auto-apply fixes.** For each folder: read all files, list the next issue found, then wait. Shaun reviews the issue and we work through fixes one at a time together.
 
+**Open files in VS Code.** When discussing a specific file, open it in VS Code with `code <path>` so Shaun can follow along.
+
 **To resume:** Say "Continue the SongbookDB PHP 8.0 upgrade — read the php-upgrade doc first."
 
 ## Status (2026-06-26)
