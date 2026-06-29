@@ -153,6 +153,27 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 ## Folder Audit Log
 
+### `mobile/` — audit IN PROGRESS 2026-06-29
+
+76 PHP files. 8 fixes applied so far. **Next file: `registerPublic.php` line 122** — unguarded `$total = mysqli_query(...)` before `mysqli_result($total, 0)` in `emailExists()`. Same pattern as the batch below.
+
+**Fixes this session:**
+
+| File | Issue | Commit |
+|---|---|---|
+| `getTokenAdmin.php` | Unguarded `$result->fetch_assoc()` on venueAdmin query (lines 33-34) | `c186a39` |
+| `accountSettings.php` | Unguarded `mysqli_result($t, 0)` — added `if (!$t) return false` | `341d08f` |
+| `registerDJ.php` | Same in both branches of `exists()` | `1dc1897` |
+| `registerVenue.php` | Same in `exists()` | `5520b8c` |
+| `djAdmin/updateAccount.php` | Same in `exists()` + removed debug `$_POST` file logger | `27cd85d` |
+| `venueAdmin/updateVenue.php` | Same in `exists()` | `d54b5bf` |
+
+**Files confirmed clean (guarded):** `djSearch.php`, `search.php`, `searchFavs.php`, `poll.php`, `adImageUploader.php`, `deleteAccountPasswordCheck.php`, `noSongHit.php`, `getKioskVenues.php`, `djAdmin/getVenues.php`, `setKioskVenue.php`, `setVenue.php`, `getDJ.php`, `getToken.php`, `searchJustAdded.php`, `gigGuide.php`, `showRot.php`, `checkIfDJHasThisSong.php`, `reqAdd.php`, `login.php`, `loginVenue.php`, `djAdmin/getStats.php`, `registerVenue.php` (line 269 inside else), `reqDel.php`, `venueAdmin/updateAd.php`, `venueAdmin/updateVenue.php` (line 115).
+
+**Files NOT yet checked:** `registerPublic.php` (NEXT — has issue), `favAdd.php`, `favNoteAdd.php`, `deleteAccount.php`, `searchDuets.php`, `searchLetter.php`, `searchRequests.php`, `searchV2.php`, `searchKeyword.php`, `searchFavsV3-1.php`, `activateEmail.php`, `sendLockoutEmail.php`, `sendLockoutVenueEmail.php`, `logout.php`, `logoutAdmin.php`, `updatePushCredentials.php`, `djAdmin/activateEmail.php`, `djAdmin/sendLockoutEmail.php`, `djAdmin/logout.php`, `venueAdmin/activateVenueEmail.php`, `venueAdmin/deleteAd.php`.
+
+---
+
 ### `emailAdmin/` — audited 2026-06-27 ✓
 5 PHP files. 2 fixes applied (commit `d5fb618`).
 
