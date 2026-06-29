@@ -21,7 +21,7 @@ _CHAT_DIR = _SCRIPTS_DIR.parent / "chat"
 sys.path.insert(0, str(_SCRIPTS_DIR))
 sys.path.insert(0, str(_CHAT_DIR))
 
-from config import CHAT_DB_PATH, DAILY_DIR, PROJECT_ROOT, now_local  # noqa: E402
+from config import CHAT_DB_PATH, DAILY_DIR, PROJECT_ROOT, get_today_log_path, now_local  # noqa: E402
 from engine import ConversationEngine  # noqa: E402
 from models import Channel, IncomingMessage, Platform, Thread, User  # noqa: E402
 from session import get_session_store  # noqa: E402
@@ -62,7 +62,7 @@ async def run() -> None:
     await asyncio.sleep(3)
 
     # Check today's daily log for evidence of the conversation
-    today_log = DAILY_DIR / f"{now_local().strftime('%Y-%m-%d')}.md"
+    today_log = get_today_log_path()
     if today_log.exists():
         content = today_log.read_text(encoding="utf-8")
         if "FLUSH_TEST_OK" in content or "flush" in content.lower() or "whatsapp" in content.lower():

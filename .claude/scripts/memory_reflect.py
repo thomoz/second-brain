@@ -40,6 +40,7 @@ from config import (
     USER_FILE,
     VAULT_DIR,
     ensure_directories,
+    get_log_path_for_date,
     get_today_log_path,
     now_local,
 )
@@ -67,7 +68,7 @@ def get_yesterday_log() -> tuple[str, str] | None:
 
     yesterday = now_local().date() - timedelta(days=1)
     date_str = yesterday.strftime("%Y-%m-%d")
-    log_path = DAILY_DIR / f"{date_str}.md"
+    log_path = get_log_path_for_date(yesterday)
     if not log_path.exists():
         return None
     content = log_path.read_text(encoding="utf-8")

@@ -1,5 +1,5 @@
 # Prevent merge conflicts in append-only daily logs
-Memory/daily/*.md merge=concat-both
+Memory/daily/**/*.md merge=concat-both
 
 # Force LF on shell scripts executed on Linux VPS
 scripts/git-merge-concat text eol=lf

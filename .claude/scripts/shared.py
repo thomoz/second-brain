@@ -87,11 +87,9 @@ def append_audit_log(hook_name: str, tool_name: str, reason: str, payload: str =
 
 def append_to_daily_log(text: str) -> None:
     """Append timestamped entry to today's daily log with file locking."""
-    from config import DAILY_DIR, now_local
+    from config import get_today_log_path, now_local
 
-    DAILY_DIR.mkdir(parents=True, exist_ok=True)
-    today = now_local().strftime("%Y-%m-%d")
-    log_path = DAILY_DIR / f"{today}.md"
+    log_path = get_today_log_path()  # creates year/month dirs
     timestamp = now_local().strftime("%H:%M")
     # Escape trust-boundary tags so injected </external_data> can't break reflection's wrapper
     safe_text = text.strip().replace("<external_data", "&lt;external_data").replace("</external_data>", "&lt;/external_data&gt;")

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import zoneinfo
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 # Project root — absolute, CWD-independent (.claude/scripts → .claude → project root)
@@ -152,9 +152,17 @@ def is_within_active_hours() -> bool:
     return ACTIVE_HOURS_START <= hour < ACTIVE_HOURS_END
 
 
+def get_log_path_for_date(d: date) -> Path:
+    """Return daily log path for a given date (Memory/daily/YYYY/MM/YYYY-MM-DD.md)."""
+    return DAILY_DIR / d.strftime("%Y") / d.strftime("%m") / f"{d.strftime('%Y-%m-%d')}.md"
+
+
 def get_today_log_path() -> Path:
-    """Return path to today's daily log file."""
-    return DAILY_DIR / f"{now_local().strftime('%Y-%m-%d')}.md"
+    """Return path to today's daily log, creating the year/month directory if needed."""
+    today = now_local().date()
+    path = get_log_path_for_date(today)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 # ---------------------------------------------------------------------------

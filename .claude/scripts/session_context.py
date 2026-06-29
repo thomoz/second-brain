@@ -18,7 +18,7 @@ from __future__ import annotations
 from datetime import timedelta
 from pathlib import Path
 
-from config import DAILY_DIR, MEMORY_DIR, now_local
+from config import DAILY_DIR, MEMORY_DIR, get_log_path_for_date, now_local
 
 MAX_DAILY_LOG_LINES = 30
 # ~15,000 tokens. SOUL.md + USER.md + MEMORY.md + HEARTBEAT.md + recent logs
@@ -41,8 +41,9 @@ def get_recent_daily_log(max_lines: int = MAX_DAILY_LOG_LINES) -> list[tuple[str
     """Read the last 3 days of daily logs. Returns list of (date, content) pairs."""
     results = []
     for i in range(3):
-        d = (now_local() - timedelta(days=i)).strftime("%Y-%m-%d")
-        content = read_file_safe(DAILY_DIR / f"{d}.md")
+        day = (now_local() - timedelta(days=i)).date()
+        d = day.strftime("%Y-%m-%d")
+        content = read_file_safe(get_log_path_for_date(day))
         if content:
             lines = content.strip().splitlines()
             if len(lines) > max_lines:

@@ -194,7 +194,7 @@ def cmd_stats() -> None:
     print(f"  Profile: {profile_count} files")
 
     daily_dir = VAULT_DIR / "daily"
-    daily_count = len(list(daily_dir.glob("*.md"))) if daily_dir.exists() else 0
+    daily_count = len(list(daily_dir.glob("**/*.md"))) if daily_dir.exists() else 0
     print(f"  daily logs: {daily_count} files")
 
     if MEMORY_FILE.exists():
