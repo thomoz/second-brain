@@ -24,3 +24,7 @@ _(not yet populated)_
 ## 2026-06-27 Update
 - A key discomfort around the Simone Kensington project is not the writing itself but eventually putting it out into the world
 - Main concern is potential anger or negative reaction from partner Nicole because of the project's sexual nature
+
+## 2026-06-30 Update
+- Feels an unresolved gap in self-knowledge
+- Understands his "kælder" much better now
