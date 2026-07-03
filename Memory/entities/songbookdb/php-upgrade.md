@@ -153,9 +153,9 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 ## Folder Audit Log
 
-### `mobile/` — audit IN PROGRESS 2026-06-29
+### `mobile/` — audit COMPLETE 2026-07-03
 
-76 PHP files. 11 fixes applied so far. **Next file: `sendLockoutEmail.php`**
+76 PHP files. All files audited.
 
 **Fixes this session:**
 
@@ -170,10 +170,14 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `registerPublic.php` | `emailExists()` unguarded `$total` + honeypot `?? ''` guards | `2960b53` |
 | `searchV2.php` | `$_POST['tags']` unguarded — `?? '[]'` null coalescing | `b7ab5f4` |
 | `activateEmail.php` | `err()` inject `$mysqli` param instead of undefined global | `b7ab5f4` |
+| `sendLockoutEmail.php`, `sendLockoutVenueEmail.php`, `djAdmin/sendLockoutEmail.php` | `- 9995` typo → `= -9995`; djAdmin version also had active debug file-logger removed | `bd0ab6f` |
+| `logout.php`, `logoutAdmin.php`, `djAdmin/logout.php` | `$_SESSION['wipit']` unguarded — added `?? ''` | `bd0ab6f` |
+| `updatePushCredentials.php` | `$_POST['subscribeOrUnsubscribe']` and `$_POST['r']` unguarded — added `?? ''` | `bd0ab6f` |
+| `djAdmin/activateEmail.php`, `venueAdmin/activateVenueEmail.php` | `err()` inject `$mysqli` param | `bd0ab6f` |
 
 **Files confirmed clean (guarded):** `favAdd.php`, `favNoteAdd.php`, `deleteAccount.php`, `searchDuets.php`, `searchLetter.php`, `searchRequests.php`, `searchKeyword.php`, `searchFavsV3-1.php`, `djSearch.php`, `search.php`, `searchFavs.php`, `poll.php`, `adImageUploader.php`, `deleteAccountPasswordCheck.php`, `noSongHit.php`, `getKioskVenues.php`, `djAdmin/getVenues.php`, `setKioskVenue.php`, `setVenue.php`, `getDJ.php`, `getToken.php`, `searchJustAdded.php`, `gigGuide.php`, `showRot.php`, `checkIfDJHasThisSong.php`, `reqAdd.php`, `login.php`, `loginVenue.php`, `djAdmin/getStats.php`, `registerVenue.php` (line 269 inside else), `reqDel.php`, `venueAdmin/updateAd.php`, `venueAdmin/updateVenue.php` (line 115).
 
-**Files NOT yet checked:** `sendLockoutEmail.php` (NEXT), `sendLockoutVenueEmail.php`, `logout.php`, `logoutAdmin.php`, `updatePushCredentials.php`, `djAdmin/activateEmail.php`, `djAdmin/sendLockoutEmail.php`, `djAdmin/logout.php`, `venueAdmin/activateVenueEmail.php`, `venueAdmin/deleteAd.php`.
+**All files checked.** `venueAdmin/deleteAd.php` confirmed clean.
 
 ---
 
