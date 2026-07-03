@@ -57,3 +57,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-06-29 Reflection
 - Daily logs now use `Memory/daily/YYYY/MM/YYYY-MM-DD.md` paths
+
+## 2026-07-03 Reflection
+- (Jul 03) Outlook retrieval uses Microsoft Graph app registration with tenant `consumers`

@@ -8,9 +8,7 @@ _Active items and pointers to structured memory pages. Always loaded into sessio
 
 _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here; archive to decisions/ when done._
 
-- (Jun 17) Second Brain nightly reflection running on VPS — structured output via Codex backend
 - (Jun 17) VPS: secondbrain@137.184.102.104, dir /home/secondbrain/second-brain
-- (Jun 17) Branch: post-creation-tweaks-20260617
 
 - (Jun 25) Re-auth the personal Google Calendar token; calendar queries fail with invalid_grant
 - (Jun 25) Ask Nick to ask her dad for investor introductions
