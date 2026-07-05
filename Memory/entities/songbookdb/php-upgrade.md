@@ -188,7 +188,7 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 **Files skipped (debug-logger-only, live on production):**
 `login.php` (user fixed loggers themselves), `convertToFullAccount*.php`, `getMessages.php`, `loginFacebookV5chat.php`
 
-**Fixes applied (commits `5fd87e4` + pending re-commit):**
+**Fixes applied (commit `5fd87e4` + pending commit — registerDJ.php, registerVenue.php, loginVenue.php not yet committed):**
 
 | File | Fix |
 |---|---|
@@ -198,12 +198,12 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `registerPublic.php` | Honeypot `?? ''`; `if (!$total) return false` in `emailExists()` |
 | `registerDJ.php` | Honeypot `?? ''`; `if (!$total) return false` in `exists()` |
 | `registerVenue.php` | Honeypot `?? ''`; `$_POST['businessName'] ?? ''`; `$_POST['address2'] ?? ''`; email body uses `$firstName` (was wrong `$_POST['djName']`); `if (!$total) return false` in `exists()` |
+| `loginVenue.php` | `$_POST['accountType'] ?? ''`; `$venueID` → `$userID` in `checkPublicLoginToken()` ads query (ads were never loading on cookie login) |
 
-**Remaining files with fixes needed (in order):**
+**Remaining files with fixes needed (in order) — next up: `searchV2.php`:**
 
 | File | Issue |
 |---|---|
-| `loginVenue.php` | `$_POST['accountType'] ?? ''`; `$venueID` → `$userID` logic bug |
 | `searchV2.php` | `$_POST['tags'] ?? '[]'` |
 | `searchRequests.php` | `$_SESSION['usxerxid'] ?? ''` |
 | `favAdd.php` | `$_SESSION['usxerxid'] ?? ''` |
