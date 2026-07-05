@@ -43,6 +43,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - Never auto-send emails, messages, or social posts
 
 - For SongbookDB upgrade work, make and test changes one by one; avoid bulk uploads or commits
+- No em dashes in drafted content
 ---
 
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_

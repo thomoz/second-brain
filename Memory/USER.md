@@ -60,3 +60,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-07-03 Reflection
 - (Jul 03) Outlook retrieval uses Microsoft Graph app registration with tenant `consumers`
+
+## 2026-07-05 Reflection
+- SongbookDB Windows repo path: `O:\SBDB Software\SongbookDB\www\songbookdb-deep`

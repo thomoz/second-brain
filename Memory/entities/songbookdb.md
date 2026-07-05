@@ -9,3 +9,4 @@
 - (Jun 27) PHP 8 upgrade work should stay file-by-file with each upload and test done one by one
 - (Jun 29) PHP 8 audit found `emailSettings/getToken.php` line 68 may call `fetch_assoc()` on false
 - (Jul 03) FB SDK `/me` fails with SSL error 20 on server; `graphMeCurl` works
+- (Jul 05) PHP upgrade path is 7.4 to 8.5, one major version at a time
