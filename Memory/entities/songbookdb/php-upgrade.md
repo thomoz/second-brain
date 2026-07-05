@@ -188,7 +188,7 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 **Files skipped (debug-logger-only, live on production):**
 `login.php` (user fixed loggers themselves), `convertToFullAccount*.php`, `getMessages.php`, `loginFacebookV5chat.php`
 
-**Fixes applied (commit `5fd87e4` + pending commit — registerDJ.php, registerVenue.php, loginVenue.php not yet committed):**
+**Fixes applied (commits `5fd87e4`, `5f169e7`):**
 
 | File | Fix |
 |---|---|
