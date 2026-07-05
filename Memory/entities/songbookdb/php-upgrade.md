@@ -181,6 +181,54 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 ---
 
+### `mobilePWA/` — audit IN PROGRESS (2026-07-03)
+
+~83 PHP files total. Full scan complete. Working through fixes in order.
+
+**Files skipped (debug-logger-only, live on production):**
+`login.php` (user fixed loggers themselves), `convertToFullAccount*.php`, `getMessages.php`, `loginFacebookV5chat.php`
+
+**Fixes applied (commits `5fd87e4` + pending re-commit):**
+
+| File | Fix |
+|---|---|
+| `activateEmail.php` | `err()` — inject `$mysqli` as param instead of undefined global |
+| `updatePushCredentials.php` | `$_POST['subscribeOrUnsubscribe'] ?? ''` |
+| `accountSettings.php` | Honeypot `?? ''`; `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['userEmail_S'] ?? ''`; `if (!$t) return false` in `exists()` |
+| `registerPublic.php` | Honeypot `?? ''`; `if (!$total) return false` in `emailExists()` |
+| `registerDJ.php` | Honeypot `?? ''`; `if (!$total) return false` in `exists()` |
+| `registerVenue.php` | Honeypot `?? ''`; `$_POST['businessName'] ?? ''`; `$_POST['address2'] ?? ''`; email body uses `$firstName` (was wrong `$_POST['djName']`); `if (!$total) return false` in `exists()` |
+
+**Remaining files with fixes needed (in order):**
+
+| File | Issue |
+|---|---|
+| `loginVenue.php` | `$_POST['accountType'] ?? ''`; `$venueID` → `$userID` logic bug |
+| `searchV2.php` | `$_POST['tags'] ?? '[]'` |
+| `searchRequests.php` | `$_SESSION['usxerxid'] ?? ''` |
+| `favAdd.php` | `$_SESSION['usxerxid'] ?? ''` |
+| `favDel.php` | `$_SESSION['usxerxid'] ?? ''` |
+| `deleteAccount.php` | `$_SESSION['usxerxid'] ?? ''` |
+| `deleteAccountPasswordCheck.php` | `$_SESSION['usxerxid'] ?? ''` |
+| `adImageUploader.php` | `$_SESSION['userIDAdmin'] ?? ''`; `$linkTo = ''` init |
+| `noSongHit.php` | `$_SESSION['venueName_S'] ?? ''`; `$_SESSION['rig_id_S'] ?? ''` |
+| `setKioskVenue.php` | Multiple unguarded POST/SESSION vars |
+| `setVenue.php` | `$_SESSION['djID_S']`; `$_POST['rig']`; `$_POST['vName']` unguarded |
+| `reqAdd.php` | `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['venueID_S'] ?? ''` |
+| `reqDel.php` | `$_SESSION['usxerxid'] ?? ''` (2 places) |
+| `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` |
+| `reqAddLogoutFix.php` | `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['venueID_S'] ?? ''` |
+| `comUserObjectReload.php` | `$_POST['r'] ?? ''` |
+| `updateMessageStatus.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` |
+| `deleteMessage.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` |
+| `mailOptIn.php` | Remove no-op `$_SESSION['djEmail_S'];` bare statement |
+| `search.php` | `$_POST['tags'] ?? '[]'`; `$_SESSION['_actualVenueID'] ?? ''` |
+| `contact.php` | Honeypot `?? ''`; `$_POST['n']`/`$_POST['e']`/`$_POST['m']` unguarded |
+| `venueAdmin/contact.php` | Same as `contact.php` |
+| `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''` |
+
+---
+
 ### `emailAdmin/` — audited 2026-06-27 ✓
 5 PHP files. 2 fixes applied (commit `d5fb618`).
 
