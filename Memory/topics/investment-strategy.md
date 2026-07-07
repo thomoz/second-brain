@@ -31,6 +31,11 @@ tags: [investment, wealth, portfolio, strategy]
 - Index funds (waiting for market dip)
 - Additional single stocks (TBD — waiting for dip)
 
+## Stocks To Buy In A Crash
+- VRTX — Vertex Pharmaceuticals
+- V — Visa Inc.
+- WM — Waste Management, Inc.
+
 ## Stocks of Interest
 - MCHI — fund for the Chinese market
 - GRID — electric grid / smart grid exposure in America
@@ -48,3 +53,4 @@ tags: [investment, wealth, portfolio, strategy]
 - (Jun 27) Stocks of interest added: MCHI, GRID, XLU
 - (Jun 28) Added SCHD to the investment watchlist
 - (Jul 06) Created my-trader ideas file with: sustainable, competitive edge
+- (Jul 07) Added VRTX, V, and WM to stocks to buy in a crash
