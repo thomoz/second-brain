@@ -181,7 +181,7 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 ---
 
-### `mobilePWA/` — audit IN PROGRESS (2026-07-03)
+### `mobilePWA/` — audit COMPLETE 2026-07-08
 
 ~83 PHP files total. Full scan complete. Working through fixes in order.
 
@@ -251,9 +251,9 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 | `mailOptIn.php` | Removed no-op `$_SESSION['djEmail_S'];` bare statement; also added `fetch_assoc()` guard on DJ email lookup (not in original scan) — fixed & committed `c821183` 2026-07-08, uploaded to production 2026-07-08 |
 
-| `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` — fixed locally 2026-07-08, not yet committed/uploaded |
+| `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` — fixed & committed `ce3db53` 2026-07-08, uploaded to production 2026-07-08 |
 
-| `venueAdmin/contact.php` | Honeypot `?? ''`; `$_POST['as']`, `$_POST['n']`, `$_POST['e']`, `$_POST['m']` unguarded (same pattern as `contact.php`) — fixed locally 2026-07-08, not yet committed/uploaded |
+| `venueAdmin/contact.php` | Honeypot `?? ''`; `$_POST['as']`, `$_POST['n']`, `$_POST['e']`, `$_POST['m']` unguarded (same pattern as `contact.php`) — fixed & committed `ce3db53` 2026-07-08, uploaded to production 2026-07-08 |
 
 **`mobilePWA/` folder audit: all queued files done.** Remaining before folder is fully complete: commit/upload the last 2 files above, then move to the Desktop App / Mobile Request Hoster folders (see "Remaining Folders" section below) — TBD by Shaun.
 
