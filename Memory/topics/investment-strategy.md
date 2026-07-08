@@ -52,5 +52,5 @@ tags: [investment, wealth, portfolio, strategy]
 - (Jun 24) Built SPY walk-forward backtest tool in `investments/backtest` with Streamlit UI
 - (Jun 27) Stocks of interest added: MCHI, GRID, XLU
 - (Jun 28) Added SCHD to the investment watchlist
-- (Jul 06) Created my-trader ideas file with: sustainable, competitive edge
+- (Jul 06) Created my-trader ideas file with: sustainable, competitive edge with ability to increase their prices without losing customers
 - (Jul 07) Added VRTX, V, and WM to stocks to buy in a crash

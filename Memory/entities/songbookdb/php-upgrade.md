@@ -226,7 +226,23 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 | `search.php` | `$_POST['tags'] ?? '[]'`; `$_SESSION['_actualVenueID'] ?? ''` — fixed & committed `4a8a047` 2026-07-08, uploaded to production 2026-07-08. (Checked `searchBU.php`: stale unreferenced backup, one 'Charts' case older, not part of scope) |
 
-**Remaining files with fixes needed — next up: `setUpGuestAccount.php`:**
+**Gap found 2026-07-08:** the original "full scan" of `mobilePWA/` missed a block of files alphabetically between `search.php` and `setUpGuestAccount.php`. Adding them to the queue now, unaudited — need individual review, not assumed clean:
+
+| File | Status |
+|---|---|
+| `searchCharts.php` | not yet audited |
+| `searchDuets.php` | not yet audited |
+| `searchFavs.php` | not yet audited |
+| `searchFavsV3-1.php` | not yet audited |
+| `searchJustAdded.php` | not yet audited |
+| `searchKeyword.php` | not yet audited |
+| `searchLetter.php` | not yet audited |
+| `searchLetterBU.php` | not yet audited — name suggests backup, unconfirmed |
+| `searchLetterKarafunTest.php` | not yet audited — name suggests test file, unconfirmed |
+| `sendLockoutEmail.php` (mobilePWA copy, distinct from the already-fixed `mobile/sendLockoutEmail.php`) | not yet audited |
+| `sendLockoutVenueEmail.php` (mobilePWA copy, distinct from the already-fixed `mobile/sendLockoutVenueEmail.php`) | not yet audited |
+
+**Remaining files with fixes needed — next up: `searchCharts.php`:**
 
 | File | Issue |
 |---|---|
