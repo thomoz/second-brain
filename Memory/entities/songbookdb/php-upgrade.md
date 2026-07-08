@@ -241,6 +241,8 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `searchLetterKarafunTest.php` | audited — dead, unreferenced, not even valid PHP (bare SQL outside strings, uninitialized var) — abandoned scratch work |
 | `sendLockoutEmail.php` (mobilePWA copy, distinct from the already-fixed `mobile/sendLockoutEmail.php`) | audited — clean, status-typo bug already correct here |
 | `sendLockoutVenueEmail.php` (mobilePWA copy, distinct from the already-fixed `mobile/sendLockoutVenueEmail.php`) | audited — clean, same |
+| `showRot.php` (mobilePWA copy, distinct from the already-fixed `mobile/showRot.php`) | audited — clean, all `$_POST`/`$_SESSION` reads properly guarded |
+| `TZcalc.php` | audited — clean, only uses parent-scope vars passed in from `gigGuide.php` (`require_once`'d at line 95 there) |
 
 | `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''`; also `$_POST['r'] ?? ''` in edit-account branch (not in original scan) — fixed & committed `9449dc7` 2026-07-08, uploaded to production 2026-07-08 |
 
