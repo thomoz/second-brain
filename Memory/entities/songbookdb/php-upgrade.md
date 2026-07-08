@@ -251,9 +251,11 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 | `mailOptIn.php` | Removed no-op `$_SESSION['djEmail_S'];` bare statement; also added `fetch_assoc()` guard on DJ email lookup (not in original scan) — fixed & committed `c821183` 2026-07-08, uploaded to production 2026-07-08 |
 
-**Remaining files with fixes needed — next up: `venueAdmin/toggleAd.php`:**
-| `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` |
-| `venueAdmin/contact.php` | Same as `contact.php` |
+| `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` — fixed locally 2026-07-08, not yet committed/uploaded |
+
+| `venueAdmin/contact.php` | Honeypot `?? ''`; `$_POST['as']`, `$_POST['n']`, `$_POST['e']`, `$_POST['m']` unguarded (same pattern as `contact.php`) — fixed locally 2026-07-08, not yet committed/uploaded |
+
+**`mobilePWA/` folder audit: all queued files done.** Remaining before folder is fully complete: commit/upload the last 2 files above, then move to the Desktop App / Mobile Request Hoster folders (see "Remaining Folders" section below) — TBD by Shaun.
 
 ---
 
