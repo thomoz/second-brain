@@ -243,6 +243,7 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `sendLockoutVenueEmail.php` (mobilePWA copy, distinct from the already-fixed `mobile/sendLockoutVenueEmail.php`) | audited — clean, same |
 | `showRot.php` (mobilePWA copy, distinct from the already-fixed `mobile/showRot.php`) | audited — clean, all `$_POST`/`$_SESSION` reads properly guarded |
 | `TZcalc.php` | audited — clean, only uses parent-scope vars passed in from `gigGuide.php` (`require_once`'d at line 95 there) |
+| `updatePushCredentials.php` (mobilePWA copy, distinct from the already-fixed `mobile/updatePushCredentials.php`, commit `bd0ab6f`) | already had `subscribeOrUnsubscribe ?? ''` from an earlier commit; found one more unguarded `$_POST['r']` (auth token) not caught originally — fixed & committed `0129ddc` 2026-07-08, uploaded to production 2026-07-08. Checked `updatePushCredentialsBU.php`: confirmed stale unreferenced pre-fix backup |
 
 | `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''`; also `$_POST['r'] ?? ''` in edit-account branch (not in original scan) — fixed & committed `9449dc7` 2026-07-08, uploaded to production 2026-07-08 |
 
