@@ -242,7 +242,7 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `sendLockoutEmail.php` (mobilePWA copy, distinct from the already-fixed `mobile/sendLockoutEmail.php`) | audited — clean, status-typo bug already correct here |
 | `sendLockoutVenueEmail.php` (mobilePWA copy, distinct from the already-fixed `mobile/sendLockoutVenueEmail.php`) | audited — clean, same |
 
-| `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''`; also `$_POST['r'] ?? ''` in edit-account branch (not in original scan) — fixed locally 2026-07-08, not yet committed/uploaded |
+| `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''`; also `$_POST['r'] ?? ''` in edit-account branch (not in original scan) — fixed & committed `9449dc7` 2026-07-08, uploaded to production 2026-07-08 |
 
 **Remaining files with fixes needed — next up: `updateMessageStatus.php`:**
 | `updateMessageStatus.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` |
