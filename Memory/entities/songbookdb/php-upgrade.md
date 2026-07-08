@@ -220,11 +220,12 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 | `reqAdd.php` | `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['venueID_S'] ?? ''`; also `fetch_assoc()` guard on cookie-relogin lookup (not in original scan). Note: local copy was re-downloaded from production mid-session — had a stray `TO DO` comment block removed that wasn't in our git history, so git was slightly behind production for this file (now caught up) — fixed & committed `aec9034` 2026-07-08, uploaded to production 2026-07-08 |
 
-**Remaining files with fixes needed (in order) — next up: `reqDel.php`:**
+| `reqDel.php` | `$_SESSION['usxerxid'] ?? ''` (2 places) — fixed locally 2026-07-08, not yet committed/uploaded |
+
+**Remaining files with fixes needed (in order) — next up: `venueAdmin/toggleAd.php`:**
 
 | File | Issue |
 |---|---|
-| `reqDel.php` | `$_SESSION['usxerxid'] ?? ''` (2 places) |
 | `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` |
 | `updateMessageStatus.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` |
 | `mailOptIn.php` | Remove no-op `$_SESSION['djEmail_S'];` bare statement |
