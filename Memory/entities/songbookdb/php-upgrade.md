@@ -215,9 +215,9 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 | `setKioskVenue.php` | `$_POST['venueObj']['rig']` (x2); `$_SESSION['kioskDJID_S']`; `$_POST['rig']` unguarded — fixed & committed `b59ccbe` 2026-07-08, uploaded to production 2026-07-08, tested working |
 
-| `setVenue.php` | `$_SESSION['djID_S']`; `$_POST['rig']`; `$_POST['vName']` unguarded; also `fetch_assoc()` guard on venue lookup (not in original scan) — fixed locally 2026-07-08, not yet committed/uploaded |
+| `setVenue.php` | `$_SESSION['djID_S']`; `$_POST['rig']`; `$_POST['vName']` unguarded; also `fetch_assoc()` guard on venue lookup (not in original scan) — fixed & committed `aec9034` 2026-07-08, not yet uploaded to production |
 
-| `reqAdd.php` | `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['venueID_S'] ?? ''`; also `fetch_assoc()` guard on cookie-relogin lookup (not in original scan). Note: local copy was re-downloaded from production mid-session — had a stray `TO DO` comment block removed that wasn't in our git history, so git is slightly behind production for this file — fixed locally 2026-07-08, not yet committed/uploaded |
+| `reqAdd.php` | `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['venueID_S'] ?? ''`; also `fetch_assoc()` guard on cookie-relogin lookup (not in original scan). Note: local copy was re-downloaded from production mid-session — had a stray `TO DO` comment block removed that wasn't in our git history, so git was slightly behind production for this file (now caught up) — fixed & committed `aec9034` 2026-07-08, not yet uploaded to production |
 
 **Remaining files with fixes needed (in order) — next up: `reqDel.php`:**
 
