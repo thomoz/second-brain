@@ -215,11 +215,12 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 | `setKioskVenue.php` | `$_POST['venueObj']['rig']` (x2); `$_SESSION['kioskDJID_S']`; `$_POST['rig']` unguarded — fixed & committed `b59ccbe` 2026-07-08, uploaded to production 2026-07-08, tested working |
 
-**Remaining files with fixes needed (in order) — next up: `setVenue.php`:**
+| `setVenue.php` | `$_SESSION['djID_S']`; `$_POST['rig']`; `$_POST['vName']` unguarded; also `fetch_assoc()` guard on venue lookup (not in original scan) — fixed locally 2026-07-08, not yet committed/uploaded |
+
+**Remaining files with fixes needed (in order) — next up: `reqAdd.php`:**
 
 | File | Issue |
 |---|---|
-| `setVenue.php` | `$_SESSION['djID_S']`; `$_POST['rig']`; `$_POST['vName']` unguarded |
 | `reqAdd.php` | `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['venueID_S'] ?? ''` |
 | `reqDel.php` | `$_SESSION['usxerxid'] ?? ''` (2 places) |
 | `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` |
