@@ -201,16 +201,20 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `loginVenue.php` | `$_POST['accountType'] ?? ''`; `$venueID` → `$userID` in `checkPublicLoginToken()` ads query (ads were never loading on cookie login) |
 | `searchV2.php` | `$_POST['tags'] ?? '[]'` — fixed & committed `e65e70e` 2026-07-08, not yet uploaded to production |
 | `searchRequests.php` | `$_SESSION['usxerxid'] ?? ''` — fixed & committed `e65e70e` 2026-07-08, not yet uploaded to production |
+| `favAdd.php` | `$_SESSION['usxerxid'] ?? ''` — fixed & committed `9185317` 2026-07-08, not yet uploaded |
+| `favDel.php` | `$_SESSION['usxerxid'] ?? ''` — fixed & committed `9185317` 2026-07-08, not yet uploaded |
+| `deleteAccount.php` | `$_SESSION['usxerxid'] ?? ''` + replaced undefined-function `back('error', ...)` calls with the file's own ROLLBACK+send() pattern (was a pre-existing fatal-error bug, unrelated to PHP 8) — fixed & committed `1c2d1f0` 2026-07-08, not yet uploaded |
+| `deleteAccountPasswordCheck.php` | `$_SESSION['usxerxid'] ?? ''` + `fetch_assoc()` guard — fixed & committed `9185317` 2026-07-08, not yet uploaded |
+| `adImageUploader.php` | `$_SESSION['userIDAdmin'] ?? ''`; `$linkTo = ''` init; `getimagesize()` false guard — fixed & committed `9185317` 2026-07-08, not yet uploaded |
+| `comUserObjectReload.php` | `$_POST['r'] ?? ''` + `fetch_assoc()` guard — fixed & committed `9185317` 2026-07-08, not yet uploaded |
+| `deleteMessage.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` — fixed & committed `9185317` 2026-07-08, not yet uploaded |
+| `contact.php` | Honeypot `?? ''`; `$_POST['n']`/`$_POST['e']`/`$_POST['m']` unguarded — fixed & committed `9185317` 2026-07-08, not yet uploaded |
+| `getTokenAdmin.php` (mobilePWA copy — missed in original scan) | `fetch_assoc()` guard + `?? ''` on several `$_SESSION` DJ-account keys — fixed & committed `1c2d1f0` 2026-07-08, not yet uploaded |
 
-**Remaining files with fixes needed (in order) — next up: `favAdd.php`:**
+**Remaining files with fixes needed (in order) — next up: `noSongHit.php`:**
 
 | File | Issue |
 |---|---|
-| `favAdd.php` | `$_SESSION['usxerxid'] ?? ''` |
-| `favDel.php` | `$_SESSION['usxerxid'] ?? ''` |
-| `deleteAccount.php` | `$_SESSION['usxerxid'] ?? ''` |
-| `deleteAccountPasswordCheck.php` | `$_SESSION['usxerxid'] ?? ''` |
-| `adImageUploader.php` | `$_SESSION['userIDAdmin'] ?? ''`; `$linkTo = ''` init |
 | `noSongHit.php` | `$_SESSION['venueName_S'] ?? ''`; `$_SESSION['rig_id_S'] ?? ''` |
 | `setKioskVenue.php` | Multiple unguarded POST/SESSION vars |
 | `setVenue.php` | `$_SESSION['djID_S']`; `$_POST['rig']`; `$_POST['vName']` unguarded |
@@ -218,12 +222,9 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `reqDel.php` | `$_SESSION['usxerxid'] ?? ''` (2 places) |
 | `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` |
 | `reqAddLogoutFix.php` | `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['venueID_S'] ?? ''` |
-| `comUserObjectReload.php` | `$_POST['r'] ?? ''` |
 | `updateMessageStatus.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` |
-| `deleteMessage.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` |
 | `mailOptIn.php` | Remove no-op `$_SESSION['djEmail_S'];` bare statement |
 | `search.php` | `$_POST['tags'] ?? '[]'`; `$_SESSION['_actualVenueID'] ?? ''` |
-| `contact.php` | Honeypot `?? ''`; `$_POST['n']`/`$_POST['e']`/`$_POST['m']` unguarded |
 | `venueAdmin/contact.php` | Same as `contact.php` |
 | `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''` |
 
