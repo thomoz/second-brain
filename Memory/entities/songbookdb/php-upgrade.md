@@ -199,8 +199,8 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `registerDJ.php` | Honeypot `?? ''`; `if (!$total) return false` in `exists()` |
 | `registerVenue.php` | Honeypot `?? ''`; `$_POST['businessName'] ?? ''`; `$_POST['address2'] ?? ''`; email body uses `$firstName` (was wrong `$_POST['djName']`); `if (!$total) return false` in `exists()` |
 | `loginVenue.php` | `$_POST['accountType'] ?? ''`; `$venueID` → `$userID` in `checkPublicLoginToken()` ads query (ads were never loading on cookie login) |
-| `searchV2.php` | `$_POST['tags'] ?? '[]'` — fixed locally 2026-07-08, not yet committed/uploaded |
-| `searchRequests.php` | `$_SESSION['usxerxid'] ?? ''` — fixed locally 2026-07-08, not yet committed/uploaded |
+| `searchV2.php` | `$_POST['tags'] ?? '[]'` — fixed & committed `e65e70e` 2026-07-08, not yet uploaded to production |
+| `searchRequests.php` | `$_SESSION['usxerxid'] ?? ''` — fixed & committed `e65e70e` 2026-07-08, not yet uploaded to production |
 
 **Remaining files with fixes needed (in order) — next up: `favAdd.php`:**
 
