@@ -225,7 +225,6 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 |---|---|
 | `reqDel.php` | `$_SESSION['usxerxid'] ?? ''` (2 places) |
 | `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` |
-| `reqAddLogoutFix.php` | `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['venueID_S'] ?? ''` |
 | `updateMessageStatus.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` |
 | `mailOptIn.php` | Remove no-op `$_SESSION['djEmail_S'];` bare statement |
 | `search.php` | `$_POST['tags'] ?? '[]'`; `$_SESSION['_actualVenueID'] ?? ''` |
