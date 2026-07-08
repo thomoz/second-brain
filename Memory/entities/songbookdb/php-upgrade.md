@@ -249,8 +249,9 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 | `updateMessageStatus.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` (2 places) — fixed & committed `bd89532` 2026-07-08, uploaded to production 2026-07-08 |
 
-**Remaining files with fixes needed — next up: `mailOptIn.php`:**
-| `mailOptIn.php` | Remove no-op `$_SESSION['djEmail_S'];` bare statement |
+| `mailOptIn.php` | Removed no-op `$_SESSION['djEmail_S'];` bare statement; also added `fetch_assoc()` guard on DJ email lookup (not in original scan) — fixed & committed `c821183` 2026-07-08, uploaded to production 2026-07-08 |
+
+**Remaining files with fixes needed — next up: `venueAdmin/toggleAd.php`:**
 | `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` |
 | `venueAdmin/contact.php` | Same as `contact.php` |
 
