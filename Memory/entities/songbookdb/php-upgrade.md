@@ -220,18 +220,20 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 | `reqAdd.php` | `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['venueID_S'] ?? ''`; also `fetch_assoc()` guard on cookie-relogin lookup (not in original scan). Note: local copy was re-downloaded from production mid-session — had a stray `TO DO` comment block removed that wasn't in our git history, so git was slightly behind production for this file (now caught up) — fixed & committed `aec9034` 2026-07-08, uploaded to production 2026-07-08 |
 
-| `reqDel.php` | `$_SESSION['usxerxid'] ?? ''` (2 places) — fixed & committed `bdf6b03` 2026-07-08, not yet uploaded to production |
+| `reqDel.php` | `$_SESSION['usxerxid'] ?? ''` (2 places) — fixed & committed `bdf6b03` 2026-07-08, uploaded to production 2026-07-08 |
 
-**Remaining files with fixes needed (in order) — next up: `venueAdmin/toggleAd.php`:**
+**Order note (2026-07-08):** staying in `mobilePWA/` root alphabetically before moving into `venueAdmin/` subfolder. Order now: `search.php` → `setUpGuestAccount.php` → `updateMessageStatus.php`, then circle back to `mailOptIn.php` and `venueAdmin/toggleAd.php` + `venueAdmin/contact.php`.
+
+**Remaining files with fixes needed — next up: `search.php`:**
 
 | File | Issue |
 |---|---|
-| `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` |
+| `search.php` | `$_POST['tags'] ?? '[]'`; `$_SESSION['_actualVenueID'] ?? ''` |
+| `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''` |
 | `updateMessageStatus.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` |
 | `mailOptIn.php` | Remove no-op `$_SESSION['djEmail_S'];` bare statement |
-| `search.php` | `$_POST['tags'] ?? '[]'`; `$_SESSION['_actualVenueID'] ?? ''` |
+| `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` |
 | `venueAdmin/contact.php` | Same as `contact.php` |
-| `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''` |
 
 ---
 
