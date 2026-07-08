@@ -224,7 +224,7 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 **Order note (2026-07-08):** staying in `mobilePWA/` root alphabetically before moving into `venueAdmin/` subfolder. Order now: `search.php` → `setUpGuestAccount.php` → `updateMessageStatus.php`, then circle back to `mailOptIn.php` and `venueAdmin/toggleAd.php` + `venueAdmin/contact.php`.
 
-| `search.php` | `$_POST['tags'] ?? '[]'`; `$_SESSION['_actualVenueID'] ?? ''` — fixed locally 2026-07-08, not yet committed/uploaded. (Checked `searchBU.php`: stale unreferenced backup, one 'Charts' case older, not part of scope) |
+| `search.php` | `$_POST['tags'] ?? '[]'`; `$_SESSION['_actualVenueID'] ?? ''` — fixed & committed `4a8a047` 2026-07-08, uploaded to production 2026-07-08. (Checked `searchBU.php`: stale unreferenced backup, one 'Charts' case older, not part of scope) |
 
 **Remaining files with fixes needed — next up: `setUpGuestAccount.php`:**
 
