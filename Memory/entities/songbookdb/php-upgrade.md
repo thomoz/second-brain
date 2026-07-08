@@ -210,6 +210,7 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `deleteMessage.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` — fixed & committed `9185317` 2026-07-08, uploaded to production 2026-07-08 |
 | `contact.php` | Honeypot `?? ''`; `$_POST['n']`/`$_POST['e']`/`$_POST['m']` unguarded — fixed & committed `9185317` 2026-07-08, uploaded to production 2026-07-08 |
 | `getTokenAdmin.php` (mobilePWA copy — missed in original scan) | `fetch_assoc()` guard + `?? ''` on several `$_SESSION` DJ-account keys — fixed & committed `1c2d1f0` 2026-07-08, uploaded to production 2026-07-08 |
+| `reqAddLogoutFix.php` (fixed out of queue order — user asked about it directly) | `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['venueID_S'] ?? ''`; also `$_POST['kiosk'] ?? ''` guard on an earlier unguarded read (not in original scan) — fixed locally 2026-07-08, not yet committed/uploaded. Note: a second copy exists at `public_html/pwa/reqAddLogoutFix.php`, outside mobilePWA scope, not yet audited |
 
 | `noSongHit.php` | `$_SESSION['venueName_S'] ?? ''`; `$_SESSION['rig_id_S'] ?? ''`; also added `fetch_assoc()` guard on DJ email lookup (not in original scan) — fixed & committed `0745b1b` 2026-07-08, uploaded to production 2026-07-08 |
 
