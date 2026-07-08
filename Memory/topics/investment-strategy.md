@@ -54,3 +54,4 @@ tags: [investment, wealth, portfolio, strategy]
 - (Jun 28) Added SCHD to the investment watchlist
 - (Jul 06) Created my-trader ideas file with: sustainable, competitive edge with ability to increase their prices without losing customers
 - (Jul 07) Added VRTX, V, and WM to stocks to buy in a crash
+- (Jul 08) Crash-buy watchlist added: VRTX, V, WM
