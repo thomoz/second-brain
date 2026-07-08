@@ -246,7 +246,7 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 | `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''`; also `$_POST['r'] ?? ''` in edit-account branch (not in original scan) — fixed & committed `9449dc7` 2026-07-08, uploaded to production 2026-07-08 |
 
-| `updateMessageStatus.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` (2 places) — fixed locally 2026-07-08, not yet committed/uploaded |
+| `updateMessageStatus.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` (2 places) — fixed & committed `bd89532` 2026-07-08, uploaded to production 2026-07-08 |
 
 **Remaining files with fixes needed — next up: `mailOptIn.php`:**
 | `mailOptIn.php` | Remove no-op `$_SESSION['djEmail_S'];` bare statement |
