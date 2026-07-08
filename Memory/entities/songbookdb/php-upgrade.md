@@ -199,17 +199,17 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `registerDJ.php` | Honeypot `?? ''`; `if (!$total) return false` in `exists()` |
 | `registerVenue.php` | Honeypot `?? ''`; `$_POST['businessName'] ?? ''`; `$_POST['address2'] ?? ''`; email body uses `$firstName` (was wrong `$_POST['djName']`); `if (!$total) return false` in `exists()` |
 | `loginVenue.php` | `$_POST['accountType'] ?? ''`; `$venueID` → `$userID` in `checkPublicLoginToken()` ads query (ads were never loading on cookie login) |
-| `searchV2.php` | `$_POST['tags'] ?? '[]'` — fixed & committed `e65e70e` 2026-07-08, not yet uploaded to production |
-| `searchRequests.php` | `$_SESSION['usxerxid'] ?? ''` — fixed & committed `e65e70e` 2026-07-08, not yet uploaded to production |
-| `favAdd.php` | `$_SESSION['usxerxid'] ?? ''` — fixed & committed `9185317` 2026-07-08, not yet uploaded |
-| `favDel.php` | `$_SESSION['usxerxid'] ?? ''` — fixed & committed `9185317` 2026-07-08, not yet uploaded |
-| `deleteAccount.php` | `$_SESSION['usxerxid'] ?? ''` + replaced undefined-function `back('error', ...)` calls with the file's own ROLLBACK+send() pattern (was a pre-existing fatal-error bug, unrelated to PHP 8) — fixed & committed `1c2d1f0` 2026-07-08, not yet uploaded |
-| `deleteAccountPasswordCheck.php` | `$_SESSION['usxerxid'] ?? ''` + `fetch_assoc()` guard — fixed & committed `9185317` 2026-07-08, not yet uploaded |
-| `adImageUploader.php` | `$_SESSION['userIDAdmin'] ?? ''`; `$linkTo = ''` init; `getimagesize()` false guard — fixed & committed `9185317` 2026-07-08, not yet uploaded |
-| `comUserObjectReload.php` | `$_POST['r'] ?? ''` + `fetch_assoc()` guard — fixed & committed `9185317` 2026-07-08, not yet uploaded |
-| `deleteMessage.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` — fixed & committed `9185317` 2026-07-08, not yet uploaded |
-| `contact.php` | Honeypot `?? ''`; `$_POST['n']`/`$_POST['e']`/`$_POST['m']` unguarded — fixed & committed `9185317` 2026-07-08, not yet uploaded |
-| `getTokenAdmin.php` (mobilePWA copy — missed in original scan) | `fetch_assoc()` guard + `?? ''` on several `$_SESSION` DJ-account keys — fixed & committed `1c2d1f0` 2026-07-08, not yet uploaded |
+| `searchV2.php` | `$_POST['tags'] ?? '[]'` — fixed & committed `e65e70e` 2026-07-08, uploaded to production 2026-07-08 |
+| `searchRequests.php` | `$_SESSION['usxerxid'] ?? ''` — fixed & committed `e65e70e` 2026-07-08, uploaded to production 2026-07-08 |
+| `favAdd.php` | `$_SESSION['usxerxid'] ?? ''` — fixed & committed `9185317` 2026-07-08, uploaded to production 2026-07-08 |
+| `favDel.php` | `$_SESSION['usxerxid'] ?? ''` — fixed & committed `9185317` 2026-07-08, uploaded to production 2026-07-08 |
+| `deleteAccount.php` | `$_SESSION['usxerxid'] ?? ''` + replaced undefined-function `back('error', ...)` calls with the file's own ROLLBACK+send() pattern (was a pre-existing fatal-error bug, unrelated to PHP 8) — fixed & committed `1c2d1f0` 2026-07-08, uploaded to production 2026-07-08 |
+| `deleteAccountPasswordCheck.php` | `$_SESSION['usxerxid'] ?? ''` + `fetch_assoc()` guard — fixed & committed `9185317` 2026-07-08, uploaded to production 2026-07-08 |
+| `adImageUploader.php` | `$_SESSION['userIDAdmin'] ?? ''`; `$linkTo = ''` init; `getimagesize()` false guard — fixed & committed `9185317` 2026-07-08, uploaded to production 2026-07-08 |
+| `comUserObjectReload.php` | `$_POST['r'] ?? ''` + `fetch_assoc()` guard — fixed & committed `9185317` 2026-07-08, uploaded to production 2026-07-08 |
+| `deleteMessage.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` — fixed & committed `9185317` 2026-07-08, uploaded to production 2026-07-08 |
+| `contact.php` | Honeypot `?? ''`; `$_POST['n']`/`$_POST['e']`/`$_POST['m']` unguarded — fixed & committed `9185317` 2026-07-08, uploaded to production 2026-07-08 |
+| `getTokenAdmin.php` (mobilePWA copy — missed in original scan) | `fetch_assoc()` guard + `?? ''` on several `$_SESSION` DJ-account keys — fixed & committed `1c2d1f0` 2026-07-08, uploaded to production 2026-07-08 |
 
 **Remaining files with fixes needed (in order) — next up: `noSongHit.php`:**
 
