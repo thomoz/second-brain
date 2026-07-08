@@ -224,11 +224,12 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 **Order note (2026-07-08):** staying in `mobilePWA/` root alphabetically before moving into `venueAdmin/` subfolder. Order now: `search.php` → `setUpGuestAccount.php` → `updateMessageStatus.php`, then circle back to `mailOptIn.php` and `venueAdmin/toggleAd.php` + `venueAdmin/contact.php`.
 
-**Remaining files with fixes needed — next up: `search.php`:**
+| `search.php` | `$_POST['tags'] ?? '[]'`; `$_SESSION['_actualVenueID'] ?? ''` — fixed locally 2026-07-08, not yet committed/uploaded. (Checked `searchBU.php`: stale unreferenced backup, one 'Charts' case older, not part of scope) |
+
+**Remaining files with fixes needed — next up: `setUpGuestAccount.php`:**
 
 | File | Issue |
 |---|---|
-| `search.php` | `$_POST['tags'] ?? '[]'`; `$_SESSION['_actualVenueID'] ?? ''` |
 | `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''` |
 | `updateMessageStatus.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` |
 | `mailOptIn.php` | Remove no-op `$_SESSION['djEmail_S'];` bare statement |
