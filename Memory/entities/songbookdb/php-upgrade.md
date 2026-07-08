@@ -211,11 +211,12 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 | `contact.php` | Honeypot `?? ''`; `$_POST['n']`/`$_POST['e']`/`$_POST['m']` unguarded — fixed & committed `9185317` 2026-07-08, uploaded to production 2026-07-08 |
 | `getTokenAdmin.php` (mobilePWA copy — missed in original scan) | `fetch_assoc()` guard + `?? ''` on several `$_SESSION` DJ-account keys — fixed & committed `1c2d1f0` 2026-07-08, uploaded to production 2026-07-08 |
 
-**Remaining files with fixes needed (in order) — next up: `noSongHit.php`:**
+| `noSongHit.php` | `$_SESSION['venueName_S'] ?? ''`; `$_SESSION['rig_id_S'] ?? ''`; also added `fetch_assoc()` guard on DJ email lookup (not in original scan) — fixed locally 2026-07-08, not yet committed/uploaded |
+
+**Remaining files with fixes needed (in order) — next up: `setKioskVenue.php`:**
 
 | File | Issue |
 |---|---|
-| `noSongHit.php` | `$_SESSION['venueName_S'] ?? ''`; `$_SESSION['rig_id_S'] ?? ''` |
 | `setKioskVenue.php` | Multiple unguarded POST/SESSION vars |
 | `setVenue.php` | `$_SESSION['djID_S']`; `$_POST['rig']`; `$_POST['vName']` unguarded |
 | `reqAdd.php` | `$_SESSION['usxerxid'] ?? ''`; `$_SESSION['venueID_S'] ?? ''` |
