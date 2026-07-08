@@ -230,23 +230,21 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 | File | Status |
 |---|---|
-| `searchCharts.php` | not yet audited |
-| `searchDuets.php` | not yet audited |
-| `searchFavs.php` | not yet audited |
-| `searchFavsV3-1.php` | not yet audited |
-| `searchJustAdded.php` | not yet audited |
-| `searchKeyword.php` | not yet audited |
-| `searchLetter.php` | not yet audited |
-| `searchLetterBU.php` | not yet audited — name suggests backup, unconfirmed |
-| `searchLetterKarafunTest.php` | not yet audited — name suggests test file, unconfirmed |
-| `sendLockoutEmail.php` (mobilePWA copy, distinct from the already-fixed `mobile/sendLockoutEmail.php`) | not yet audited |
-| `sendLockoutVenueEmail.php` (mobilePWA copy, distinct from the already-fixed `mobile/sendLockoutVenueEmail.php`) | not yet audited |
+| `searchCharts.php` | audited — clean, uses only parent-scope vars from `search.php`, no direct `$_POST`/`$_SESSION` reads |
+| `searchDuets.php` | audited — clean, same pattern |
+| `searchFavs.php` | audited — clean, same pattern |
+| `searchFavsV3-1.php` | audited — clean, same pattern |
+| `searchJustAdded.php` | audited — clean; one `fetch_assoc()` is on a `COUNT(*)` query, always returns 1 row, safe |
+| `searchKeyword.php` | audited — clean, same pattern |
+| `searchLetter.php` | audited — clean, same pattern |
+| `searchLetterBU.php` | audited — byte-identical dead backup of `searchLetter.php`, unreferenced |
+| `searchLetterKarafunTest.php` | audited — dead, unreferenced, not even valid PHP (bare SQL outside strings, uninitialized var) — abandoned scratch work |
+| `sendLockoutEmail.php` (mobilePWA copy, distinct from the already-fixed `mobile/sendLockoutEmail.php`) | audited — clean, status-typo bug already correct here |
+| `sendLockoutVenueEmail.php` (mobilePWA copy, distinct from the already-fixed `mobile/sendLockoutVenueEmail.php`) | audited — clean, same |
 
-**Remaining files with fixes needed — next up: `searchCharts.php`:**
+| `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''`; also `$_POST['r'] ?? ''` in edit-account branch (not in original scan) — fixed locally 2026-07-08, not yet committed/uploaded |
 
-| File | Issue |
-|---|---|
-| `setUpGuestAccount.php` | `$_POST['editOrSetup'] ?? ''` |
+**Remaining files with fixes needed — next up: `updateMessageStatus.php`:**
 | `updateMessageStatus.php` | `$_POST['messageID'] ?? ''`; `$_SESSION['usxerxid'] ?? ''` |
 | `mailOptIn.php` | Remove no-op `$_SESSION['djEmail_S'];` bare statement |
 | `venueAdmin/toggleAd.php` | `$_SESSION['userIDAdmin'] ?? ''` |
