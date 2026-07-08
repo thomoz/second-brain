@@ -213,7 +213,7 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 | `noSongHit.php` | `$_SESSION['venueName_S'] ?? ''`; `$_SESSION['rig_id_S'] ?? ''`; also added `fetch_assoc()` guard on DJ email lookup (not in original scan) — fixed & committed `0745b1b` 2026-07-08, uploaded to production 2026-07-08 |
 
-| `setKioskVenue.php` | `$_POST['venueObj']['rig']` (x2); `$_SESSION['kioskDJID_S']`; `$_POST['rig']` unguarded — fixed locally 2026-07-08, not yet committed/uploaded |
+| `setKioskVenue.php` | `$_POST['venueObj']['rig']` (x2); `$_SESSION['kioskDJID_S']`; `$_POST['rig']` unguarded — fixed & committed `b59ccbe` 2026-07-08, uploaded to production 2026-07-08, tested working |
 
 **Remaining files with fixes needed (in order) — next up: `setVenue.php`:**
 
