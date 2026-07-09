@@ -11,3 +11,4 @@
 - (Jul 03) FB SDK `/me` fails with SSL error 20 on server; `graphMeCurl` works
 - (Jul 05) PHP upgrade path is 7.4 to 8.5, one major version at a time
 - (Jul 07) Facebook developer notification: user data deletion request needs review/action
+- (Jul 09) PHP upgrade path is 7.4 -> 8.0 first, then one major version at a time
