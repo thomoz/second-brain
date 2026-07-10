@@ -1,3 +1,6 @@
-## 2026-07-06 [WhatsApp save]
-- sustainable
-- competitive edge
+## Companies must have the following:
+- be sustainable
+- have a competitive edge
+- be able to increase their prices without losing customers
+
+
