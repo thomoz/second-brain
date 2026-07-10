@@ -25,10 +25,11 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - [[juno-wonderdog/index]] — animated film project; characters, story, development log sub-pages
 - [[simone-kensington/index]] — story project; characters, story, development log sub-pages
 - [[venues]] — all show venues and distances
+- [[my-trader/investment-strategy]] — portfolio, crash-prep strategy, watchlist
+- [[my-trader/ideas]] — my-trader business ideas
 
 ## Topic Pages
 
-- [[investment-strategy]] — portfolio, crash-prep strategy, watchlist
 - [[hosting-growth]] — venue sales, show efficiency, ad creation bottleneck
 
 ## Decision Archives

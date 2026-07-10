@@ -23,7 +23,7 @@ All writes must be to files inside `Memory/` only — never modify files outside
 |-----------------------------|----------------------------------------------------------|
 | "juno" / "wonderdog"        | `Memory/entities/juno-wonderdog/` — pick sub-file        |
 | "simone" / "kensington"     | `Memory/entities/simone-kensington/` — pick sub-file     |
-| "investment" / "stocks"     | `Memory/topics/investment-strategy.md`                   |
+| "investment" / "stocks"     | `Memory/entities/my-trader/investment-strategy.md`       |
 | "remind me"                 | `Memory/scratch.md` → under `## Reminders`                 |
 | no entity named             | `Memory/scratch.md` → under `## Ideas`                     |
 

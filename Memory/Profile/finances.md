@@ -46,7 +46,7 @@ _(not yet populated)_
 ### Current Position (age ~52)
 - Cash savings: ~$15,000
 - Superannuation: ~$40,000
-- Small share portfolio (see investment-strategy topic page)
+- Small share portfolio (see my-trader/investment-strategy page)
 - Actively saving — describes current savings rate as "decent"
 
 ### Savings Strategy

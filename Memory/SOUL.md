@@ -44,6 +44,6 @@ without explicit instruction from Shaun.
 
 **Examples:**
 - "What's going on with SongbookDB?" → read `Memory/entities/songbookdb.md`
-- "What's the investment strategy?" → read `Memory/topics/investment-strategy.md`
+- "What's the investment strategy?" → read `Memory/entities/my-trader/investment-strategy.md`
 - "What happened last Tuesday?" → search daily logs
 - "What are Shaun's core values?" → read `Memory/Profile/values.md`
