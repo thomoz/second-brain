@@ -26,7 +26,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - [[simone-kensington/index]] — story project; characters, story, development log sub-pages
 - [[venues]] — all show venues and distances
 - [[my-trader/investment-strategy]] — portfolio, crash-prep strategy, watchlist
-- [[my-trader/ideas]] — my-trader business ideas
+- [[my-trader/investment-ideas]] — my-trader business ideas
 
 ## Topic Pages
 

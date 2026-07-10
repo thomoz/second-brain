@@ -57,3 +57,8 @@ tags: [investment, wealth, portfolio, strategy]
 - (Jul 08) Crash-buy watchlist added: VRTX, V, WM
 - GDX VanEck Gold Miners ETF (to buy before a crash?)
 - LND or FPI Farmland (to buy before a crash?)
+
+## Companies must have the following:
+- be sustainable
+- have a competitive edge
+- be able to increase their prices without losing customers
