@@ -25,8 +25,8 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - [[juno-wonderdog/index]] — animated film project; characters, story, development log sub-pages
 - [[simone-kensington/index]] — story project; characters, story, development log sub-pages
 - [[venues]] — all show venues and distances
-- [[my-trader/investment-strategy]] — portfolio, crash-prep strategy, watchlist
-- [[my-trader/investment-ideas]] — my-trader business ideas
+- [[investing/investment-ideas]] — WhatsApp-captured investment ideas inbox (feeds into investments/ tools)
+- my-trader notes (portfolio, strategy, transcripts) live at `investments/my-trader/` — outside the vault, not auto-synced by VPS
 
 ## Topic Pages
 
