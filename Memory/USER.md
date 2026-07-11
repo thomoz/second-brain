@@ -63,3 +63,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-07-05 Reflection
 - SongbookDB Windows repo path: `O:\SBDB Software\SongbookDB\www\songbookdb-deep`
+
+## 2026-07-09 Reflection
+- Shaun handles SongbookDB production uploads via WinSCP
