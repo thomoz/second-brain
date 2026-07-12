@@ -10,7 +10,6 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 
 - (Jun 17) VPS: secondbrain@137.184.102.104, dir /home/secondbrain/second-brain
 
-- (Jun 25) Re-auth the personal Google Calendar token; calendar queries fail with invalid_grant
 - (Jun 25) Ask Nick to ask her dad for investor introductions
 - (Jun 26) Create SongbookDB First Win Onboarding v1 plan around first live request
 ## Entity Pages
