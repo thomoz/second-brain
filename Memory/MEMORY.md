@@ -10,8 +10,6 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 
 - (Jun 17) VPS: secondbrain@137.184.102.104, dir /home/secondbrain/second-brain
 
-- (Jun 25) Ask Nick to ask her dad for investor introductions
-- (Jun 26) Create SongbookDB First Win Onboarding v1 plan around first live request
 ## Entity Pages
 
 - [[songbookdb/index]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app, PHP upgrade in progress
