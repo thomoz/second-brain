@@ -158,6 +158,18 @@ Berkshire Hathaway Inc holdings).
   accepted knowingly: two `pyproject.toml`/lockfiles to maintain, in exchange for
   keeping the tools genuinely separable if one is ever split off or open-sourced
   independently later.
+- **Confirmed 2026-07-19 — coupling mechanism (resolves "decided at build time"
+  above)**: root-level **uv workspace**, my-trader imports briefs-finance's
+  `db.py`/`config.py` directly as a path dependency — not subprocess/CLI calls into
+  briefs-finance, not duplicating constants like `DEFENSE_TICKERS`. Cleanest reuse;
+  accepted trade-off that the two projects' environments/schemas are now coupled.
+- **Confirmed 2026-07-19 — Monitor alert signal**: alongside the standalone output
+  file (no daily-log/WhatsApp push, per "output channel" above), Monitor reuses the
+  existing `send_toast_notification` (`.claude/scripts/notifications.py`, already
+  wired into `heartbeat.py`) for a bare "N items flagged, check my-trader" ping.
+  Pure silent-file-only was considered and rejected — a high-bar "material changes
+  only" alert nobody gets pinged about defeats the point of Monitor running
+  unattended.
 - **Confirmed 2026-07-19 — Briefs Finance report integration**: when a new Briefs
   Finance report is ingested (`investments/briefs-finance` `ingest` command),
   the tickers/theses it extracts should automatically flow into my-trader as new
@@ -454,5 +466,40 @@ on demand once built, not vetted here first.
 question (both permanent core and timed tactical, two tracked positions, same
 PMGOLD vehicle — see Bucket 3 above).
 
-No blockers left. Whenever Shaun is ready, run `/plan-feature` with this file as
-input to produce a real plan in `.agent/plans/`.
+No blockers left. **Confirmed 2026-07-19 — plan scope: phased, not one comprehensive
+plan.** Mirrors how the core Second Brain was built (Phases 1-9) — each phase gets its
+own `/plan-feature` + `/execute` pass rather than one giant plan document.
+
+**Phase A scope finalized 2026-07-19** (revised after spotting that Find and Monitor
+share one assessment engine per the "tool architecture" decision above, so the
+Assessment Checks can't cleanly split across phases the way scheduling/alerting can):
+- **Phase A**:
+  - uv workspace wiring (my-trader imports briefs-finance's `db.py`/`config.py`
+    directly, per "coupling mechanism" above)
+  - DB schema: holdings, watchlist/candidates, alert history
+  - The **full shared assessment engine** — all 7 Assessment Checks (dividend-cut,
+    per-holding valuation, balance sheet/leverage, FX exposure, portfolio
+    concentration, sector/geopolitical exposure, ETF mechanics drift) — built
+    completely now rather than split, since Find needs the same engine Monitor will
+    call in Phase B
+  - Conversational Find (Shaun's own criteria primary, briefs-finance's likelihood
+    score layered on top per "Find/scoring workflow" above), with **two distinct
+    actions**: an ephemeral "what do you think of TICKER" lookup that persists
+    nothing, vs. an explicit "add TICKER to the watchlist" that writes a DB row —
+    mirrors `potential-holdings.md`'s existing raw-vs-discussed distinction and keeps
+    Monitor's later watchlist job (Phase B) scoped to things Shaun actually chose to
+    track, not every idle check
+  - One-time seed/migration loading the already-confirmed rows from this file's
+    Confirmed So Far table (VRTX, PMGOLD core+tactical, BRK.B, HDV, SCHD, ASML as
+    watchlist; LLY, LYV, V from `holdings.md` as holdings) into the new DB — that
+    reasoning took multiple real sessions to produce, re-deriving it conversationally
+    afterward would be pure busywork
+  - `holdings.md`/`potential-holdings.md` auto-regeneration from the DB
+- **Phase B** — Monitor as a scheduled job (heartbeat-style), calling the same
+  assessment engine built in Phase A; alert thresholds; toast+file output (reuses
+  `send_toast_notification` per "Monitor alert signal" above).
+- **Phase C** — the 5 Monitoring Indicators (macro), Briefs Finance ingest→candidate
+  data-flow integration.
+
+Run `/plan-feature` with this file as input, scoped to Phase A as defined above, to
+produce a real plan in `.agent/plans/`.
