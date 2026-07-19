@@ -4,17 +4,17 @@ from mytrader import engine
 from mytrader.market_data import TickerData
 
 
-def test_run_assessment_includes_all_eight_checks(db_conn, monkeypatch):
+def test_run_assessment_includes_all_nine_checks(db_conn, monkeypatch):
     monkeypatch.setattr(
         "mytrader.market_data.fetch_ticker_data",
         lambda ticker: TickerData(ticker=ticker, info={"sector": "Healthcare", "trailingPE": 20.0}, dividends=None),
     )
     result = engine.run_assessment("VRTX", db_conn)
     assert result["ticker"] == "VRTX"
-    assert len(result["checks"]) == 8
+    assert len(result["checks"]) == 9
     assert {c.name for c in result["checks"]} == {
         "dividend", "valuation", "balance_sheet", "fx", "concentration",
-        "sector_risk", "etf_mechanics", "opportunity",
+        "sector_risk", "etf_mechanics", "opportunity", "price_action",
     }
     assert result["excluded"] is False
     assert result["data_available"] is True
@@ -148,6 +148,28 @@ def test_run_assessment_opportunity_suppressed_when_valuation_flags(db_conn, mon
     opp = next(c for c in result["checks"] if c.name == "opportunity")
     assert opp.verdict == "ok"
     assert "Active risk flag" in opp.detail
+
+
+def test_run_assessment_fetches_distinct_1mo_and_3mo_returns_for_price_action(db_conn, monkeypatch):
+    """Real gap caught 2026-07-19: DG was up +11.4% over 1 month but only -0.1% over
+    3 months (the whole move happened recently) -- a single 3-month window hides
+    this. price_action now gets both windows fetched independently."""
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(ticker=ticker, info={"trailingPE": 17.8}, dividends=None),
+    )
+
+    def _fake_recent_return(ticker, period="3mo"):
+        return {"1mo": 11.4, "3mo": -0.1}[period]
+
+    monkeypatch.setattr("mytrader.engine.return_data.fetch_recent_return_pct", _fake_recent_return)
+
+    result = engine.run_assessment("DG", db_conn)
+
+    price_action_check = next(c for c in result["checks"] if c.name == "price_action")
+    assert price_action_check.verdict == "info"
+    assert "1mo +11.4%" in price_action_check.detail
+    assert "3mo -0.1%" in price_action_check.detail
 
 
 def test_run_assessment_score_stays_none_when_no_recommendation_exists(db_conn, monkeypatch):

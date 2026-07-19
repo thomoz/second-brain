@@ -77,9 +77,9 @@ Note: use `uv run --directory <path> ...` rather than `cd`-ing into the director
   until explicitly promoted).
 - Strategy/criteria reference: `investments/my-trader/investment-strategy.md`
 
-## The 8 Assessment Checks
+## The 9 Assessment Checks
 
-Every `find` / `watchlist-add` runs all 8:
+Every `find` / `watchlist-add` runs all 9:
 
 | Check | What it looks at |
 |-------|-------------------|
@@ -90,7 +90,8 @@ Every `find` / `watchlist-add` runs all 8:
 | Concentration | Berkshire 13F overlap + candidate's sector vs. existing holdings |
 | Sector/geopolitical risk | Sector/industry vs. known active flashpoints |
 | ETF mechanics | Expense ratio baseline / drift (drift only detectable after a repeat check) |
-| Opportunity | Cheap valuation, strong 3-month momentum, or high Briefs Finance score — `verdict="interesting"` when any fire. Added 2026-07-19 (see "Opportunity Signal" below) |
+| Opportunity | Grounded in real investor-principle criteria — `verdict="interesting"` when any fire, gated on no active flags elsewhere. Added 2026-07-19 (see "Opportunity Signal" below) |
+| Price action | Plain 1-month + 3-month price return, `verdict` always `"info"` — never a signal, just the fact. Added 2026-07-19 (see below) |
 
 Also, on every `run_assessment()` call (Find or Monitor): a ticker-scoped
 `scripts.backtest.run_backtest(ticker_filter=...)` refresh (cheap — yfinance price
@@ -101,10 +102,22 @@ everything you have at assessing it."
 
 ## Two Distinct Find Actions
 
-- **Ephemeral lookup** ("what do you think of TICKER") — runs the 8 checks, reports
+- **Ephemeral lookup** ("what do you think of TICKER") — runs the 9 checks, reports
   back, persists nothing.
 - **Explicit watchlist-add** ("add TICKER to the watchlist") — same checks, plus writes
   a `watchlist` row (`status="discussed"`) and regenerates the markdown snapshots.
+
+## Price Action Check
+
+`checks/price_action.py` — confirmed 2026-07-19, same day as the opportunity check
+rebuild. Shaun caught a real gap: DG was up +11.4% over 1 month but only -0.1% over 3
+months (the whole move happened recently, invisible in a single 3-month window) —
+Find showed nothing about it at all, since the opportunity check's 3-month figure
+never gets displayed unless it crosses a threshold. This check always shows both
+`fetch_recent_return_pct(ticker, period="1mo")` and `period="3mo"` as plain fact —
+`verdict` is always `"info"`, never `"flag"` or `"interesting"`. Deliberately not a
+signal: Graham's own principle file states "price momentum does not [matter]" for
+value signals, and that's still true here — this check reports, it doesn't judge.
 
 ## Opportunity Signal
 
@@ -160,7 +173,7 @@ watchlist after you give results - it's up to me to tell you to delete a stock."
 Runs daily on a schedule (no chat trigger needed — it's automated, see "Setup" for the
 scheduler entries). Re-checks every `holdings` row and every `watchlist` row with
 `status="discussed"` (never `status="raw"` — Monitor doesn't discover new candidates,
-that stays a Find/conversation action). Reuses the same 8-check engine as Find.
+that stays a Find/conversation action). Reuses the same 9-check engine as Find.
 
 High-bar alerting: a check's first `flag` verdict for a given ticker/check creates one
 alert; repeated flags on later runs stay quiet (already open); a check clearing back to

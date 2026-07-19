@@ -2,6 +2,17 @@
 
 ## Status: Portfolio triage in progress; Phase A + B + C tool build COMPLETE (2026-07-19)
 
+**2026-07-19, same day — price_action check (9th check), plain informational price
+context**: Shaun asked about DG and noted "its gone up 11% in a month" — Find had
+shown nothing about it. Root cause: DG was +11.4% over 1 month but only -0.1% over 3
+months (the whole move happened recently, then partially reversed within the window)
+— the opportunity check's 3-month figure never gets displayed unless it crosses a
+threshold, so a real move was completely invisible. New `checks/price_action.py`:
+always shows both 1mo and 3mo returns, `verdict` always `"info"` — never a buy/sell
+signal (Graham's "price momentum does not matter" still holds; this just reports).
+170 tests passing, ruff/mypy clean. Verified live on DG: "1mo +11.4%, 3mo -0.1%" now
+shows correctly, opportunity correctly stays suppressed (balance sheet flag active).
+
 **2026-07-19, same day — opportunity check rebuilt from real investing frameworks**:
 Shaun called out the first version directly: "You need to research a bunch of tests
 and mental models that expert and successful traders use, otherwise this whole tool
