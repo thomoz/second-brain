@@ -66,3 +66,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-07-09 Reflection
 - Shaun handles SongbookDB production uploads via WinSCP
+
+## 2026-07-19 Reflection
+- (Jul 19) GREEN-API recovery may require full logout and fresh QR relink after LID issues
