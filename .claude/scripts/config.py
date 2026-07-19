@@ -102,6 +102,8 @@ OUTLOOK_CLIENT_ID = _os.getenv("OUTLOOK_CLIENT_ID", "")
 OUTLOOK_TENANT_ID = _os.getenv("OUTLOOK_TENANT_ID", "consumers")
 OUTLOOK_TOKEN_FILE = INTEGRATIONS_DIR / "outlook_token.json"
 OUTLOOK_SCOPES = ["Mail.Read"]
+OUTLOOK_JUNK_FOLDER = "junkemail"  # Graph API well-known folder id
+OUTLOOK_JUNK_RULES_FILE = DATA_DIR / "outlook_junk_rules.json"
 
 
 # ---------------------------------------------------------------------------

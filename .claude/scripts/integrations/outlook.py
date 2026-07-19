@@ -12,6 +12,7 @@ Usage:
 
 from __future__ import annotations
 
+import json
 import sys
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -23,6 +24,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import (  # noqa: E402
     LOCAL_TZ,
     OUTLOOK_CLIENT_ID,
+    OUTLOOK_JUNK_FOLDER,
+    OUTLOOK_JUNK_RULES_FILE,
     OUTLOOK_SCOPES,
     OUTLOOK_TENANT_ID,
     OUTLOOK_TOKEN_FILE,
@@ -183,6 +186,79 @@ def list_messages(
     return [_parse_outlook_message(m) for m in result.get("value", [])]
 
 
+def list_folder_messages(
+    folder: str = OUTLOOK_JUNK_FOLDER,
+    max_results: int = 50,
+) -> list[OutlookMessage]:
+    """List messages in a specific mail folder (default: Junk Email)."""
+    import requests
+
+    token = get_access_token()
+    headers = {"Authorization": f"Bearer {token}"}
+    params: dict[str, Any] = {
+        "$top": max_results,
+        "$select": "id,subject,from,receivedDateTime,bodyPreview,isRead,conversationId",
+        "$orderby": "receivedDateTime desc",
+    }
+    result: dict[str, Any] = with_retry(
+        lambda: requests.get(
+            f"{GRAPH_BASE}/me/mailFolders/{folder}/messages",
+            headers=headers,
+            params=params,
+        ).json()
+    )
+    return [_parse_outlook_message(m) for m in result.get("value", [])]
+
+
+def load_junk_rules() -> dict[str, list[str]]:
+    """Load keyword rules from OUTLOOK_JUNK_RULES_FILE.
+
+    Returns empty lists for both keys if the file is missing, so callers
+    don't need to special-case first-run.
+    """
+    if not OUTLOOK_JUNK_RULES_FILE.exists():
+        return {"subject_contains": [], "sender_contains": []}
+    data = json.loads(OUTLOOK_JUNK_RULES_FILE.read_text(encoding="utf-8"))
+    return {
+        "subject_contains": data.get("subject_contains", []),
+        "sender_contains": data.get("sender_contains", []),
+    }
+
+
+def find_rule_match(msg: OutlookMessage, rules: dict[str, list[str]]) -> str | None:
+    """Return the first matching keyword for a message, or None.
+
+    Case-insensitive substring match: subject_contains checks the subject line;
+    sender_contains checks both the sender's display name and email address.
+    """
+    subject_lower = msg.subject.lower()
+    for keyword in rules.get("subject_contains", []):
+        if keyword.lower() in subject_lower:
+            return keyword
+
+    sender_blob = f"{msg.sender} {msg.sender_email}".lower()
+    for keyword in rules.get("sender_contains", []):
+        if keyword.lower() in sender_blob:
+            return keyword
+
+    return None
+
+
+def scan_junk_folder(max_results: int = 50) -> list[tuple[OutlookMessage, str]]:
+    """Scan the Junk folder against configured keyword rules.
+
+    Read-only — reports matches for review, does not delete or move anything.
+    """
+    messages = list_folder_messages(OUTLOOK_JUNK_FOLDER, max_results=max_results)
+    rules = load_junk_rules()
+    matches: list[tuple[OutlookMessage, str]] = []
+    for msg in messages:
+        keyword = find_rule_match(msg, rules)
+        if keyword:
+            matches.append((msg, keyword))
+    return matches
+
+
 def get_unread_count() -> int:
     """Get count of unread messages in Outlook inbox."""
     import requests
@@ -228,7 +304,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Outlook integration")
-    parser.add_argument("command", choices=["auth", "list", "unread"])
+    parser.add_argument("command", choices=["auth", "list", "unread", "junk-scan"])
     parser.add_argument("--max", type=int, default=10)
     parser.add_argument("--hours", type=int, default=None)
     args = parser.parse_args()
@@ -241,3 +317,16 @@ if __name__ == "__main__":
         print(format_messages_for_context(msgs))
     elif args.command == "unread":
         print(f"Unread Outlook messages: {get_unread_count()}")
+    elif args.command == "junk-scan":
+        matches = scan_junk_folder(max_results=args.max)
+        if not matches:
+            print("No Junk folder messages matched the configured rules.")
+        else:
+            print(f"{len(matches)} match(es) — review only, nothing deleted:\n")
+            for msg, keyword in matches:
+                print(f"- [{keyword}] {msg.subject}")
+                print(f"  From: {msg.sender} <{msg.sender_email}>")
+        print(
+            f"\nRules file: {OUTLOOK_JUNK_RULES_FILE}"
+            " — edit subject_contains / sender_contains to tune matches."
+        )

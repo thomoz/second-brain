@@ -74,3 +74,48 @@ class TestOutlookFormatting:
         from integrations.outlook import format_messages_for_context
 
         assert format_messages_for_context([]) == "No Outlook messages found."
+
+
+class TestOutlookJunkRules:
+    def _make_message(self, subject: str = "", sender: str = "", sender_email: str = ""):
+        from datetime import datetime, timezone
+
+        from integrations.outlook import OutlookMessage
+
+        return OutlookMessage(
+            id="1",
+            subject=subject,
+            sender=sender,
+            sender_email=sender_email,
+            date=datetime.now(timezone.utc),
+            snippet="",
+            is_unread=False,
+            thread_id="t1",
+        )
+
+    def test_load_junk_rules_missing_file_returns_empty(self, monkeypatch, tmp_path) -> None:
+        import integrations.outlook as outlook
+
+        monkeypatch.setattr(outlook, "OUTLOOK_JUNK_RULES_FILE", tmp_path / "does-not-exist.json")
+        assert outlook.load_junk_rules() == {"subject_contains": [], "sender_contains": []}
+
+    def test_find_rule_match_subject_keyword(self) -> None:
+        from integrations.outlook import find_rule_match
+
+        msg = self._make_message(subject="Claim your FREE prize now")
+        rules = {"subject_contains": ["free prize"], "sender_contains": []}
+        assert find_rule_match(msg, rules) == "free prize"
+
+    def test_find_rule_match_sender_keyword(self) -> None:
+        from integrations.outlook import find_rule_match
+
+        msg = self._make_message(subject="Hello", sender="Spammy Co", sender_email="x@spam.example.com")
+        rules = {"subject_contains": [], "sender_contains": ["spam.example.com"]}
+        assert find_rule_match(msg, rules) == "spam.example.com"
+
+    def test_find_rule_match_no_match_returns_none(self) -> None:
+        from integrations.outlook import find_rule_match
+
+        msg = self._make_message(subject="Invoice attached", sender="Real Vendor", sender_email="x@vendor.com")
+        rules = {"subject_contains": ["free prize"], "sender_contains": ["spam.example.com"]}
+        assert find_rule_match(msg, rules) is None

@@ -24,7 +24,7 @@ So that MEMORY.md stays lean, loads fast, and contains only genuinely actionable
 
 ## Solution Statement
 
-1. **Eliminate `memory_additions` as a MEMORY.md destination** — redirect these to the daily log (where they belong as ephemeral noise) or drop them entirely.
+1. **Eliminate `memory_additions` as a MEMORY.md destination** — redirect these to the daily log (where they belong as ephemeral noise) or drop them entirely, unless they inform the second brain about essential data that will help you to better understand Shaun and help you to help him.
 2. **Tighten the reflection prompt** — add explicit exclusion rules (notifications, unknown senders, resolved items, transactional emails) and a strict bar for active_items.
 3. **Add active item pruning** — in the same LLM call, ask the model to identify which existing active items are now resolved/stale so Python can remove them.
 4. **Manual cleanup** — remove existing dated Reflection sections from MEMORY.md and prune spam active items.
@@ -292,6 +292,8 @@ def test_parse_includes_resolved_items_and_daily_log_only():
   - `(Jun 25) Open completed DocuSign work order from murray@solomonsreynella.com.au and confirm details`
   - Review and prune any other items clearly resolved or transactional
 
+- **VALIDATE**: Line count of `Memory/MEMORY.md` is under 100 lines after cleanup.
+
 ### Task 7: Run full test suite
 
 - **VALIDATE**: `cd .claude/scripts && uv run pytest -v`
@@ -367,6 +369,7 @@ python .claude/scripts/memory_reflect.py --force
 - [ ] All existing tests pass (no regressions in 155+ tests)
 - [ ] New tests for `remove_memory_active_items` and new schema keys pass
 - [ ] `memory_reflect.py --force` on VPS produces no dated section in MEMORY.md
+- [ ] MEMORY.md remains under 120 lines after a fresh reflection run
 
 ---
 
