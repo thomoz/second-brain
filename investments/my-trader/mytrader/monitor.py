@@ -2,14 +2,24 @@
 
 Runs Find's same assessment engine against every current holding and every watchlist
 row marked status="discussed" (never "raw" — Monitor doesn't proactively discover new
-candidates, per tool-preplan.md's "Monitor's scope" decision). High-bar alerting: a
-check flipping to verdict="flag" for the first time (no existing open alert of that
-check_name for that ticker) creates a new alert and is surfaced; repeat runs of an
-already-flagged condition stay quiet. When a previously flagged check stops flagging,
-its open alert is auto-acknowledged so a future re-flag raises a fresh one. Output is
-a standalone file only (monitor-report.md) plus a bare toast notification when there's
-at least one new alert — no Second Brain daily-log or WhatsApp push, per
-tool-preplan.md's "output channel" decision.
+candidates via the assessment engine, per tool-preplan.md's "Monitor's scope"
+decision). High-bar alerting: a check flipping to verdict="flag" for the first time
+(no existing open alert of that check_name for that ticker) creates a new alert and
+is surfaced; repeat runs of an already-flagged condition stay quiet. When a
+previously flagged check stops flagging, its open alert is auto-acknowledged so a
+future re-flag raises a fresh one. Output is a standalone file only
+(monitor-report.md) plus a bare toast notification when there's at least one new
+alert — no Second Brain daily-log or WhatsApp push, per tool-preplan.md's "output
+channel" decision.
+
+Also runs candidate_sync.sync_new_candidates() once per run (re-added 2026-07-19,
+same day it was first removed) -- this is safe to run unattended because it only
+ever writes to the separate pending_candidates staging table/
+synced-candidates-pending-review.md, never to watchlist.md
+directly. The original "turn off automatic candidate_sync" complaint was about it
+silently polluting Shaun's curated watchlist, not about automation itself -- once the
+target became the pending-review staging area, running it unattended stopped being a
+problem.
 """
 
 from __future__ import annotations
@@ -142,10 +152,14 @@ def render_report(result: dict[str, Any]) -> str:
     else:
         lines.append("Unavailable this run.")
 
-    lines += ["", "### New Candidates Synced From Briefs Finance"]
+    lines += ["", "### New Candidates Synced (Pending Review)"]
     if result["synced_candidates"]:
         for cand in result["synced_candidates"]:
             lines.append(f"- **{cand['ticker']}** — {cand['company_name'] or '(no name)'}")
+        lines.append(
+            "See synced-candidates-pending-review.md — promote-candidate or "
+            "dismiss-candidate each one. Not added to the watchlist automatically."
+        )
     else:
         lines.append("None this run.")
 

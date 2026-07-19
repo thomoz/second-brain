@@ -206,7 +206,10 @@ def test_run_monitor_macro_alert_stays_quiet_on_repeat_flag(db_conn, monkeypatch
     assert len(result["open_alerts"]) == 1
 
 
-def test_run_monitor_includes_synced_candidates_in_result(db_conn, monkeypatch):
+def test_run_monitor_calls_candidate_sync_and_includes_result(db_conn, monkeypatch):
+    """candidate_sync now runs automatically once per Monitor run again (re-added
+    2026-07-19, same day it was first removed) — safe because it only ever writes to
+    the separate pending_candidates staging area, never to the watchlist directly."""
     monkeypatch.setattr(
         "mytrader.monitor.candidate_sync.sync_new_candidates",
         lambda conn: [{"ticker": "NVDA", "company_name": "NVIDIA Corp"}],
@@ -215,7 +218,7 @@ def test_run_monitor_includes_synced_candidates_in_result(db_conn, monkeypatch):
     assert result["synced_candidates"] == [{"ticker": "NVDA", "company_name": "NVIDIA Corp"}]
 
 
-def test_render_report_includes_macro_and_candidate_sections():
+def test_render_report_includes_macro_and_synced_candidates_sections():
     result = {
         "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
         "macro_checks": [{"name": "move_index", "verdict": "ok", "detail": "MOVE index at 90.0"}],
@@ -224,8 +227,9 @@ def test_render_report_includes_macro_and_candidate_sections():
     report = monitor.render_report(result)
     assert "### Macro Indicators (this run)" in report
     assert "move_index" in report
-    assert "### New Candidates Synced From Briefs Finance" in report
+    assert "### New Candidates Synced (Pending Review)" in report
     assert "NVDA" in report
+    assert "synced-candidates-pending-review.md" in report
 
     empty = {
         "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],

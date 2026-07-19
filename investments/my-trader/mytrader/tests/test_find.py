@@ -6,7 +6,7 @@ from mytrader import find
 def _patch_snapshot(monkeypatch, tmp_path):
     import mytrader.config as mt_config
     monkeypatch.setattr(mt_config, "HOLDINGS_MD_PATH", tmp_path / "holdings.md")
-    monkeypatch.setattr(mt_config, "WATCHLIST_MD_PATH", tmp_path / "potential-holdings.md")
+    monkeypatch.setattr(mt_config, "WATCHLIST_MD_PATH", tmp_path / "watchlist.md")
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
 
 
@@ -25,7 +25,7 @@ def test_add_to_watchlist_persists_row(db_conn, monkeypatch, tmp_path):
     assert row is not None
     assert row["status"] == "discussed"
     assert row["notes"] == "test notes"
-    assert (tmp_path / "potential-holdings.md").exists()
+    assert (tmp_path / "watchlist.md").exists()
 
 
 def test_add_to_watchlist_upserts_not_duplicates(db_conn, monkeypatch, tmp_path):

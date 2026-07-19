@@ -8,8 +8,16 @@ from scripts.config import DB_PATH  # noqa: F401  (re-exported for mytrader call
 
 MY_TRADER_DIR = Path(__file__).resolve().parent.parent  # mytrader -> my-trader
 HOLDINGS_MD_PATH = MY_TRADER_DIR / "holdings.md"
-WATCHLIST_MD_PATH = MY_TRADER_DIR / "potential-holdings.md"
+WATCHLIST_MD_PATH = MY_TRADER_DIR / "watchlist.md"
 MONITOR_REPORT_PATH = MY_TRADER_DIR / "monitor-report.md"
+PENDING_CANDIDATES_MD_PATH = MY_TRADER_DIR / "synced-candidates-pending-review.md"
+
+AI_POSTCRASH_BUCKET = "ai_postcrash"  # watchlist bucket for major AI-boom names
+                                       # (chip/foundry monopoly, hyperscaler platform
+                                       # dominance) deliberately not bought at current
+                                       # AI-bubble valuations — revisit if/when the
+                                       # sector corrects. Rendered as its own section
+                                       # in watchlist.md by snapshot.py.
 
 BERKSHIRE_HOLDINGS: frozenset[str] = frozenset({
     # Manually maintained — update periodically from Berkshire's 13F filings

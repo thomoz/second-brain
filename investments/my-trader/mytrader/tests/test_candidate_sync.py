@@ -21,7 +21,7 @@ def _seed_recommendation(
     )
 
 
-def test_sync_new_candidates_inserts_new_watchlist_row(db_conn):
+def test_sync_new_candidates_inserts_pending_candidate(db_conn):
     report_id = _seed_report(db_conn)
     _seed_recommendation(db_conn, report_id)
 
@@ -29,11 +29,12 @@ def test_sync_new_candidates_inserts_new_watchlist_row(db_conn):
 
     assert len(added) == 1
     assert added[0]["ticker"] == "NVDA"
-    row = db.get_watchlist_row(db_conn, "NVDA")
+    row = db.get_pending_candidate(db_conn, "NVDA")
     assert row is not None
-    assert row["status"] == "raw"
+    assert row["company_name"] == "NVIDIA Corp"
+    assert row["buy_thesis"] == "AI chip demand"
     assert row["source"] == "briefs_finance_ingest"
-    assert row["bucket"] == "unassigned"
+    assert db.get_watchlist_row(db_conn, "NVDA") is None
 
 
 def test_sync_new_candidates_skips_excluded_recommendations(db_conn):
@@ -43,7 +44,7 @@ def test_sync_new_candidates_skips_excluded_recommendations(db_conn):
     added = candidate_sync.sync_new_candidates(db_conn)
 
     assert added == []
-    assert db.get_watchlist_row(db_conn, "LMT") is None
+    assert db.get_pending_candidate(db_conn, "LMT") is None
 
 
 def test_sync_new_candidates_skips_ticker_already_in_holdings(db_conn):
@@ -57,7 +58,7 @@ def test_sync_new_candidates_skips_ticker_already_in_holdings(db_conn):
     added = candidate_sync.sync_new_candidates(db_conn)
 
     assert added == []
-    assert db.get_watchlist_row(db_conn, "NVDA") is None
+    assert db.get_pending_candidate(db_conn, "NVDA") is None
 
 
 def test_sync_new_candidates_skips_ticker_already_in_watchlist(db_conn):
@@ -71,6 +72,21 @@ def test_sync_new_candidates_skips_ticker_already_in_watchlist(db_conn):
     added = candidate_sync.sync_new_candidates(db_conn)
 
     assert added == []
+
+
+def test_sync_new_candidates_skips_ticker_already_pending(db_conn):
+    report_id = _seed_report(db_conn)
+    _seed_recommendation(db_conn, report_id)
+    candidate_sync.sync_new_candidates(db_conn)
+
+    # A second report recommending the same ticker (id > watermark from the first
+    # call already advanced) should not create a duplicate pending row.
+    report_id_2 = _seed_report(db_conn, content_hash="hash2")
+    _seed_recommendation(db_conn, report_id_2, ticker="NVDA", company_name="NVIDIA Corp")
+    added = candidate_sync.sync_new_candidates(db_conn)
+
+    assert added == []
+    assert len(db.get_all_pending_candidates(db_conn)) == 1
 
 
 def test_sync_new_candidates_advances_watermark_and_does_not_reprocess(db_conn):
@@ -97,11 +113,11 @@ def test_sync_new_candidates_only_processes_rows_after_watermark(db_conn):
     assert second[0]["ticker"] == "MSFT"
 
 
-def test_sync_new_candidates_uses_empty_notes_when_buy_thesis_is_none(db_conn):
+def test_sync_new_candidates_preserves_none_buy_thesis(db_conn):
     report_id = _seed_report(db_conn)
     _seed_recommendation(db_conn, report_id, buy_thesis=None)
 
     candidate_sync.sync_new_candidates(db_conn)
 
-    row = db.get_watchlist_row(db_conn, "NVDA")
-    assert row["notes"] == ""
+    row = db.get_pending_candidate(db_conn, "NVDA")
+    assert row["buy_thesis"] is None

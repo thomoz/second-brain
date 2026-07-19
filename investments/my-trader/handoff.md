@@ -2,6 +2,15 @@
 
 ## Status: Portfolio triage in progress; Phase A + B + C tool build COMPLETE (2026-07-19)
 
+**2026-07-19, same day — renamed potential-holdings.md to watchlist.md**: Shaun asked
+for the file to be renamed. `config.WATCHLIST_MD_PATH` now points to `watchlist.md`;
+updated all references across `mytrader/*.py`, `SKILL.md`, `instructions.md`,
+`CLAUDE.md`, and test files (git-mv preserved history on the file itself). Historical
+docs (`tool-preplan.md`'s dated entries, completed `.agent/plans/*.md` phase docs,
+and this file's own older dated entries below) were left untouched — they're accurate
+records of what the file was called at the time, not meant to be retroactively
+"corrected." 136 tests passing, ruff/mypy clean.
+
 **Phase C (macro indicators + Briefs Finance ingest→candidate data-flow) is built** —
 see `.agent/plans/my-trader-phase-c-macro-and-briefs-sync.md` for the full plan. New
 `macro_indicators.py` (4 portfolio-wide checks: MOVE index, housing price-to-income,
@@ -34,6 +43,94 @@ Live validation against the real shared DB:
   triaged** — they sit as raw candidates until Shaun/Find reviews and either promotes
   (`watchlist-add`, flips to `"discussed"`) or ignores them. Not a Phase C gap; no
   "un-sync"/reject action exists by design (see plan's NOTES).
+
+**2026-07-19, same day — AI watchlist cleanup**: Shaun reviewed the 270 newly-synced
+candidates and confirmed he doesn't want tech/AI-boom exposure at current valuations.
+Curated the batch: stripped 44 rows entirely (smaller/speculative AI plays,
+robotics/quantum ETFs, cybersecurity, and the AI-infrastructure-demand
+utilities/REITs/industrials that only made the list via the AI/data-center wave — e.g.
+NEE, CEG, EQIX, DLR, CRWD, BOTZ, PLTR; also dropped a duplicate GOOG row). Moved 12
+major AI-boom names with genuine moats (chip/foundry monopoly, hyperscaler platform
+dominance) into a new `bucket="ai_postcrash"` instead of deleting them — NVDA, AMZN,
+ASML, SNDK, MSFT, GOOGL, AVGO, TSM, MU, IBM, BABA, ISRG — deliberately not being
+bought at current AI-bubble valuations, kept for reconsideration if/when the sector
+corrects. `snapshot.py`'s `regenerate_watchlist_md()` now renders `potential-holdings.md`
+as two sections ("Watchlist" + "Post-Crash AI Watch") based on this bucket. Watchlist
+went from 308 → 264 rows.
+
+**2026-07-19, same day — candidate_sync architecture change**: Shaun flagged that
+auto-syncing straight into `potential-holdings.md` wasn't smart — most of the 270
+backlog picks were from old reports and no longer relevant as live recommendations
+(several were literally Briefs Finance's own "bottom performer" tracking notes or
+explicit sell/closed-position calls, not real theses). Decision: `candidate_sync`
+still runs, but (1) it's manual/on-demand only now — the automatic call was removed
+from `monitor.run_monitor()` entirely, so a new Briefs Finance report ingestion no
+longer silently adds to the watchlist on the next scheduled Monitor run; (2) synced
+candidates land in a new `pending_candidates` table / `synced-candidates-pending-review.md`
+file, never directly in `watchlist`/`potential-holdings.md`. New `promote-candidate`
+and `dismiss-candidate` CLI commands move a pending row into the real watchlist or
+discard it. Also added `watchlist-remove` and `watchlist-move-bucket` (there was
+previously no way to remove or re-bucket a watchlist row without a one-off script —
+today's AI cleanup needed one; won't need to again). `potential-holdings.md` is now
+guaranteed to only ever change via an explicit action (watchlist-add/-remove/-move,
+holding buy/sell, or promote-candidate) — never a silent bulk sync. 126 tests passing,
+ruff/mypy clean.
+
+Not yet done: the deeper fix belongs one level up, in `briefs-finance`'s own
+report-extraction step (`investments/briefs-finance/scripts/ingest.py`), which is
+currently treating "bottom performer" tracking callouts as recommendations in the
+first place — a separate subsystem, not touched today.
+
+**2026-07-19, same day — Dividend/10Y Return columns wired up**: These were
+placeholder columns since Phase A (hardcoded "—", per the file's own header note).
+New `mytrader/return_data.py`: `fetch_dividend_yield_pct`/`fetch_ten_year_return_pct`
+(yfinance, 10Y Return = adjusted-close cumulative return as a total-return
+approximation), `refresh_watchlist_return_data(conn)` iterates every watchlist row.
+New DB columns on `watchlist` (additive `ALTER TABLE` migration, safe on the existing
+real data): `dividend_yield_pct`, `ten_year_return_pct`, `return_data_updated_at`.
+New `refresh-watchlist-data` CLI command — on-demand only, not run automatically
+(a 10Y history fetch per ticker is too expensive to redo on every snapshot regen).
+Ran once against the real shared DB: 45/49 rows got at least one value.
+**Data-quality issue hit, root-caused, and properly fixed**: yfinance's `dividendYield`
+field returned clearly-wrong values for several tickers in the real run (GDX 84%,
+GRID 75%, ASML 52%, BABA 91%, MSFT 92%, TSM 95%, NVDA 49%, GOOGL 25%). First pass
+added a plausibility filter (`MAX_PLAUSIBLE_DIVIDEND_YIELD_PCT = 15.0`) that caught
+the extreme cases but left MU's 6.00% (still wrong) undetected. Shaun pushed back
+("are you sure you're targeting the correct data") — root-caused it properly by
+reading yfinance's own source (`scrapers/quote.py`'s `_fetch_info` — confirmed
+yfinance applies zero scaling itself, just passes through Yahoo's raw value) and
+cross-checking real info dicts: `info["dividendYield"]` is already a direct percent
+number (0.92 means 0.92%, verified against MSFT's dividendRate/price), while
+`info["trailingAnnualDividendYield"]` is a genuine fraction needing `*100` and is far
+more precise for individual stocks but comes back 0.0 for most ETFs. `return_data.py`
+now prefers the trailing fraction when populated, falls back to the direct-percent
+forward figure for ETFs. Re-ran the real refresh: NVDA corrected from a filtered "—"
+to an accurate 0.02%, MU from a wrong-but-plausible 6.00% to an accurate 0.06%, and
+GDX/GRID/GOOGL/ASML recovered from filtered "—" to real plausible values. Plausibility
+filter kept as a safety net for any remaining bad data. 136 tests passing, ruff/mypy
+clean.
+
+**2026-07-19, same day — candidate_sync re-enabled automatically (safely this time)**:
+Shaun asked for Briefs Finance picks to auto-land in `synced-candidates-pending-review.md`
+again. Re-added `candidate_sync.sync_new_candidates(conn)` to `run_monitor()` (removed
+earlier the same day) — safe now because the target is the pending-review staging
+area, not the watchlist. `render_report()` gained a "New Candidates Synced (Pending
+Review)" section. The original "turn off automatic sync" complaint was specifically
+about it silently writing into `potential-holdings.md`; once that path was closed off,
+running it unattended on Monitor's daily schedule stopped being a problem. 135 tests
+passing, ruff/mypy clean.
+
+**2026-07-19, same day — watchlist cull to tool-preplan.md's vetted set**: Shaun
+decided the main Watchlist section should only contain tickers actually vetted/
+discussed in `tool-preplan.md` (the "Confirmed So Far" table + Bucket 1/2 raw
+candidate lists), not the leftover Briefs Finance backlog. Removed 215 rows, kept 37
+(36 unique tickers — PMGOLD occupies two rows for its 3a/3b buckets): AEM, BRK-B, DG,
+DLTR, DOLLARAMA, FIVE, FPI, GDX, GOLD, GRID, HDV, IXI.AX, JOBY, KO, LAND, MCD, MCHI,
+NEM, OLLI, PALI, PMGOLD, SCHD, TLT, TSLA, UBER, VAS, VDC, VGS, VOO, VRTX, VT, VTI,
+WFC, WM, XLP, XLU. Post-Crash AI Watch section left completely untouched (still 12
+rows). Shaun also considered adding BYD, IVV, ARKG, ARKQ, CRISPR (CRSP), ARKVX but
+decided against it — none were added; ARKVX specifically dropped as not a
+confidently-identified ticker.
 
 **Phase A (shared assessment engine + conversational Find) is built** — see
 `.agent/plans/my-trader-phase-a-find-engine.md` for the full plan. Root-level uv

@@ -28,6 +28,8 @@ all action requires Shaun's explicit review.
 - Chat sessions: .claude/data/chat.db
 - Phase plans: .agent/plans/
 - Project PRD: .agent/plans/second-brain-prd.md
+- Investments tool: investments/ (my-trader + briefs-finance, uv workspace; skills: .claude/skills/my-trader/, .claude/skills/investments/)
+- Investments DB: investments/briefs-finance/data/investments.db (shared SQLite — generates investments/my-trader/holdings.md, watchlist.md, monitor-report.md)
 
 ## Project Conventions
 - Timezone: Australia/Sydney (AEST UTC+10 / AEDT UTC+11)

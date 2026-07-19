@@ -32,7 +32,7 @@ uv run --directory investments/my-trader python -m mytrader.main watchlist-add -
 uv run --directory investments/my-trader python -m mytrader.main holding-buy --ticker V --bucket 1 --qty 0.1 --price 340
 uv run --directory investments/my-trader python -m mytrader.main holding-sell --ticker V --bucket 1 --qty 0.05 --price 350
 
-# Regenerate holdings.md / potential-holdings.md from the DB
+# Regenerate holdings.md / watchlist.md from the DB
 uv run --directory investments/my-trader python -m mytrader.main snapshot
 
 # One-time migration of the already-confirmed rows (VRTX, PMGOLD core+tactical, BRK-B,
@@ -43,9 +43,17 @@ uv run --directory investments/my-trader python -m mytrader.main seed
 # see scripts/setup_scheduler_windows.ps1 / scripts/systemd/second-brain-mytrader-monitor.timer)
 uv run --directory investments/my-trader python -m mytrader.main monitor
 
-# Pull new Briefs Finance recommendations into the watchlist as raw candidates
-# (also runs automatically as part of `monitor`, this is for manual/ad-hoc triggering)
+# Pull new Briefs Finance recommendations into synced-candidates-pending-review.md
+# right now (also runs automatically once a day as part of `monitor`)
 uv run --directory investments/my-trader python -m mytrader.main sync-candidates
+
+# Review synced-candidates-pending-review.md, then promote or dismiss each one
+uv run --directory investments/my-trader python -m mytrader.main promote-candidate --ticker VRTX --bucket 1 --status raw
+uv run --directory investments/my-trader python -m mytrader.main dismiss-candidate --ticker XYZ
+
+# Remove a ticker from the watchlist, or move it to a different bucket
+uv run --directory investments/my-trader python -m mytrader.main watchlist-remove --ticker XYZ
+uv run --directory investments/my-trader python -m mytrader.main watchlist-move-bucket --ticker XYZ --to-bucket 2
 ```
 
 Note: use `uv run --directory <path> ...` rather than `cd`-ing into the directory first —
@@ -57,8 +65,16 @@ Note: use `uv run --directory <path> ...` rather than `cd`-ing into the director
 - Shared database: `investments/briefs-finance/data/investments.db` (`holdings`,
   `watchlist`, `alert_history` tables — owned by my-trader; `reports`,
   `recommendations`, `likelihood_scores` etc. — owned by briefs-finance)
-- Snapshots: `investments/my-trader/holdings.md`, `investments/my-trader/potential-holdings.md`
-  (auto-regenerated after every write — never hand-edit these once the tool is in use)
+- Snapshots: `investments/my-trader/holdings.md`, `investments/my-trader/watchlist.md`
+  (auto-regenerated after every write — never hand-edit these once the tool is in use).
+  `watchlist.md` renders two sections: "Watchlist" (everything else) and
+  "Post-Crash AI Watch" (watchlist rows with `bucket="ai_postcrash"` — major AI-boom
+  names with real moats that Shaun has deliberately chosen not to buy at current
+  AI-bubble valuations, kept for reconsideration if/when the sector corrects; see
+  `config.AI_POSTCRASH_BUCKET`).
+- Pending synced candidates: `investments/my-trader/synced-candidates-pending-review.md`
+  (auto-regenerated from the `pending_candidates` table — separate from the watchlist
+  until explicitly promoted).
 - Strategy/criteria reference: `investments/my-trader/investment-strategy.md`
 
 ## The 7 Assessment Checks
@@ -115,13 +131,24 @@ recession) degrade to `"unknown"` if `FRED_API_KEY` is unset.
 
 ## Briefs Finance Candidate Sync
 
-Every `monitor` run also pulls new, non-excluded `briefs-finance` `recommendations`
-rows (from that tool's `ingest` command) into my-trader's `watchlist` as
-`status="raw"`, `bucket="unassigned"`, `source="briefs_finance_ingest"` — never
-`status="discussed"`, since a human still needs to actually vet a candidate via Find
-before Monitor's assessment loop picks it up. Watermarked (`sync_state` table) so
-re-runs don't reprocess the same recommendations. Also triggerable standalone via the
-`sync-candidates` CLI subcommand, independent of a full `monitor` run.
+**Runs automatically once a day as part of `monitor`** (re-enabled 2026-07-19, same
+day it was first turned off — the original problem was the first backlog sync
+flooding `watchlist.md` with 270 stale/AI-hype picks in one shot by writing
+directly into the watchlist; once the target became the separate pending-review
+staging area below, running it unattended stopped being a problem). Also runnable
+on-demand via the `sync-candidates` CLI subcommand.
+
+New, non-excluded `briefs-finance` `recommendations` rows land in a separate
+`pending_candidates` table, rendered as `investments/my-trader/synced-candidates-pending-review.md`
+— never written directly into the watchlist/`watchlist.md`, which stays
+exactly what Shaun has explicitly curated. Watermarked (`sync_state` table) so re-runs
+don't reprocess the same recommendations. `monitor-report.md` shows a "New Candidates
+Synced (Pending Review)" section every run.
+
+Review the pending file and either:
+- `promote-candidate --ticker X [--bucket unassigned] [--asset-type stock] [--status raw]`
+  — moves it into the real watchlist
+- `dismiss-candidate --ticker X` — discards it without adding to the watchlist
 
 ## Relationship to the `investments` Skill
 

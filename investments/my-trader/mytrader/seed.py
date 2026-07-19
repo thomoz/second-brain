@@ -47,7 +47,7 @@ _WATCHLIST: list[dict[str, Any]] = [
                "semiconductor capex cyclicality, customer concentration"),
 ]
 
-# Raw/not-yet-discussed candidates carried over from potential-holdings.md's Raw tier
+# Raw/not-yet-discussed candidates carried over from watchlist.md's Raw tier
 # (2026-07-19 snapshot) — status="raw" preserves the discussed-vs-raw distinction the
 # manual file used. Dual-ticker rows (VOO/VTI, VGS/VAS) are split into separate rows
 # since the DB schema is one ticker per row. Bucket "unassigned" mirrors the manual

@@ -6,7 +6,7 @@ from mytrader import db, seed
 def _patch(monkeypatch, tmp_path):
     import mytrader.config as mt_config
     monkeypatch.setattr(mt_config, "HOLDINGS_MD_PATH", tmp_path / "holdings.md")
-    monkeypatch.setattr(mt_config, "WATCHLIST_MD_PATH", tmp_path / "potential-holdings.md")
+    monkeypatch.setattr(mt_config, "WATCHLIST_MD_PATH", tmp_path / "watchlist.md")
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
 
 

@@ -85,6 +85,64 @@ def test_upsert_watchlist_row_upserts_by_natural_key(db_conn):
     assert rows[0]["notes"] == "updated notes"
 
 
+def test_insert_pending_candidate_then_get_finds_it(db_conn):
+    db.insert_pending_candidate(
+        db_conn, ticker="NVDA", company_name="Nvidia", buy_thesis="AI chip demand",
+    )
+    row = db.get_pending_candidate(db_conn, "NVDA")
+    assert row is not None
+    assert row["company_name"] == "Nvidia"
+    assert row["source"] == "briefs_finance_ingest"
+
+
+def test_insert_pending_candidate_ignores_duplicate_ticker(db_conn):
+    db.insert_pending_candidate(db_conn, ticker="NVDA", company_name="Nvidia", buy_thesis="first")
+    db.insert_pending_candidate(db_conn, ticker="NVDA", company_name="Nvidia", buy_thesis="second")
+    assert len(db.get_all_pending_candidates(db_conn)) == 1
+    row = db.get_pending_candidate(db_conn, "NVDA")
+    assert row["buy_thesis"] == "first"
+
+
+def test_delete_pending_candidate_removes_it(db_conn):
+    db.insert_pending_candidate(db_conn, ticker="NVDA", company_name="Nvidia", buy_thesis=None)
+    count = db.delete_pending_candidate(db_conn, "NVDA")
+    assert count == 1
+    assert db.get_pending_candidate(db_conn, "NVDA") is None
+
+
+def test_delete_pending_candidate_returns_zero_when_not_found(db_conn):
+    assert db.delete_pending_candidate(db_conn, "NOPE") == 0
+
+
+def test_delete_watchlist_row_removes_specific_bucket(db_conn):
+    db.upsert_watchlist_row(
+        db_conn, ticker="PMGOLD", name="Perth Mint Gold", asset_type="etf", bucket="3a",
+    )
+    db.upsert_watchlist_row(
+        db_conn, ticker="PMGOLD", name="Perth Mint Gold", asset_type="etf", bucket="3b",
+    )
+    count = db.delete_watchlist_row(db_conn, "PMGOLD", "3a")
+    assert count == 1
+    assert db.get_watchlist_row(db_conn, "PMGOLD", "3a") is None
+    assert db.get_watchlist_row(db_conn, "PMGOLD", "3b") is not None
+
+
+def test_delete_watchlist_row_removes_all_buckets_when_bucket_omitted(db_conn):
+    db.upsert_watchlist_row(
+        db_conn, ticker="PMGOLD", name="Perth Mint Gold", asset_type="etf", bucket="3a",
+    )
+    db.upsert_watchlist_row(
+        db_conn, ticker="PMGOLD", name="Perth Mint Gold", asset_type="etf", bucket="3b",
+    )
+    count = db.delete_watchlist_row(db_conn, "PMGOLD")
+    assert count == 2
+    assert db.get_watchlist_row(db_conn, "PMGOLD") is None
+
+
+def test_delete_watchlist_row_returns_zero_when_not_found(db_conn):
+    assert db.delete_watchlist_row(db_conn, "NOPE") == 0
+
+
 def test_get_open_alert_returns_none_when_no_alert(db_conn):
     assert db.get_open_alert(db_conn, "VRTX", "holdings", "dividend") is None
 

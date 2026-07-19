@@ -10,6 +10,20 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _ensure_watchlist_return_columns(conn: sqlite3.Connection) -> None:
+    """Additive migration for the dividend-yield/10Y-return enrichment columns —
+    ALTER TABLE ADD COLUMN rather than a CREATE TABLE change, so it's safe to run
+    against a watchlist table that already has real rows."""
+    cols = {row["name"] for row in conn.execute("PRAGMA table_info(watchlist)")}
+    with conn:
+        if "dividend_yield_pct" not in cols:
+            conn.execute("ALTER TABLE watchlist ADD COLUMN dividend_yield_pct REAL")
+        if "ten_year_return_pct" not in cols:
+            conn.execute("ALTER TABLE watchlist ADD COLUMN ten_year_return_pct REAL")
+        if "return_data_updated_at" not in cols:
+            conn.execute("ALTER TABLE watchlist ADD COLUMN return_data_updated_at TEXT")
+
+
 def init_mytrader_tables(conn: sqlite3.Connection) -> None:
     with conn:
         conn.executescript("""
@@ -57,7 +71,16 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 key             TEXT PRIMARY KEY,
                 value           TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS pending_candidates (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticker          TEXT NOT NULL UNIQUE,
+                company_name    TEXT,
+                buy_thesis      TEXT,
+                source          TEXT NOT NULL DEFAULT 'briefs_finance_ingest',
+                synced_at       TEXT NOT NULL
+            );
         """)
+    _ensure_watchlist_return_columns(conn)
 
 
 def get_holding_row(conn: sqlite3.Connection, ticker: str, bucket: str | None = None) -> sqlite3.Row | None:
@@ -161,6 +184,60 @@ def upsert_watchlist_row(
                 (ticker, name, asset_type, bucket, status, notes, source,
                  last_expense_ratio, now, now),
             )
+
+
+def get_pending_candidate(conn: sqlite3.Connection, ticker: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT * FROM pending_candidates WHERE ticker = ?", (ticker,)
+    ).fetchone()
+
+
+def get_all_pending_candidates(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute("SELECT * FROM pending_candidates ORDER BY ticker").fetchall()
+
+
+def insert_pending_candidate(
+    conn: sqlite3.Connection, *, ticker: str, company_name: str | None,
+    buy_thesis: str | None, source: str = "briefs_finance_ingest",
+) -> None:
+    with conn:
+        conn.execute(
+            """INSERT OR IGNORE INTO pending_candidates
+               (ticker, company_name, buy_thesis, source, synced_at)
+               VALUES (?, ?, ?, ?, ?)""",
+            (ticker, company_name, buy_thesis, source, _now()),
+        )
+
+
+def delete_pending_candidate(conn: sqlite3.Connection, ticker: str) -> int:
+    with conn:
+        cur = conn.execute("DELETE FROM pending_candidates WHERE ticker = ?", (ticker,))
+        return cur.rowcount
+
+
+def delete_watchlist_row(conn: sqlite3.Connection, ticker: str, bucket: str | None = None) -> int:
+    """Delete a watchlist row by ticker (and bucket, if given). bucket=None deletes
+    every row for that ticker across all buckets. Returns the number of rows deleted."""
+    with conn:
+        if bucket is not None:
+            cur = conn.execute(
+                "DELETE FROM watchlist WHERE ticker = ? AND bucket = ?", (ticker, bucket)
+            )
+        else:
+            cur = conn.execute("DELETE FROM watchlist WHERE ticker = ?", (ticker,))
+        return cur.rowcount
+
+
+def update_watchlist_return_data(
+    conn: sqlite3.Connection, ticker: str, bucket: str,
+    dividend_yield_pct: float | None, ten_year_return_pct: float | None,
+) -> None:
+    with conn:
+        conn.execute(
+            """UPDATE watchlist SET dividend_yield_pct = ?, ten_year_return_pct = ?,
+               return_data_updated_at = ? WHERE ticker = ? AND bucket = ?""",
+            (dividend_yield_pct, ten_year_return_pct, _now(), ticker, bucket),
+        )
 
 
 def get_open_alert(

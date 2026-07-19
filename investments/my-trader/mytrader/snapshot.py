@@ -1,4 +1,4 @@
-"""Regenerate holdings.md / potential-holdings.md from the shared DB.
+"""Regenerate holdings.md / watchlist.md from the shared DB.
 
 The database (shared with briefs-finance) is the source of truth for current holdings
 and the watchlist; these files are a glanceable markdown snapshot Shaun actually reads —
@@ -58,29 +58,89 @@ def _format_status(row: sqlite3.Row) -> str:
     return "Not yet discussed" if row["status"] == "raw" else "Discussed"
 
 
+def _format_dividend(value: float | None) -> str:
+    return "—" if value is None else f"{value:.2f}%"
+
+
+def _format_ten_year_return(value: float | None) -> str:
+    return "—" if value is None else f"{value:+.0f}%"
+
+
+def _watchlist_table(rows: list[sqlite3.Row]) -> list[str]:
+    lines = [
+        "| Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |",
+        "|--------|------|------|--------|----------|------------|--------|",
+    ]
+    for row in rows:
+        dividend = _format_dividend(row["dividend_yield_pct"])
+        ten_year = _format_ten_year_return(row["ten_year_return_pct"])
+        lines.append(
+            f"| {row['ticker']} | {row['name'] or ''} | {row['asset_type']} | {row['bucket']} "
+            f"| {dividend} | {ten_year} | {_format_status(row)} |"
+        )
+    return lines
+
+
 def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
     rows = db.get_all_watchlist(conn)
+    postcrash = [r for r in rows if r["bucket"] == config.AI_POSTCRASH_BUCKET]
+    main_rows = [r for r in rows if r["bucket"] != config.AI_POSTCRASH_BUCKET]
+
     lines = [
         "# Potential Holdings (Watchlist)",
         "",
         "Not currently owned — see `holdings.md` for what's actually held. "
         "Auto-generated from the shared database by my-trader — edits here are "
-        "overwritten on the next run. Dividend/10Y Return columns are not yet "
-        "captured by the DB schema in Phase A — see Status for what's actually known.",
+        "overwritten on the next run. Dividend/10Y Return columns are fetched via "
+        "yfinance and cached on refresh-watchlist-data (not live-updated every run) "
+        "— 10Y Return is an adjusted-close approximation of total return, not a "
+        "precise dividend-reinvestment calculation.",
         "",
-        "| Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |",
-        "|--------|------|------|--------|----------|------------|--------|",
+        "## Watchlist",
+        "",
     ]
-    for row in rows:
-        lines.append(
-            f"| {row['ticker']} | {row['name'] or ''} | {row['asset_type']} | {row['bucket']} "
-            f"| — | — | {_format_status(row)} |"
-        )
+    lines += _watchlist_table(main_rows)
+    lines += [
+        "",
+        "## Post-Crash AI Watch",
+        "",
+        "Major AI-boom names with real moats (chip/foundry monopoly, hyperscaler "
+        "platform dominance) — deliberately not buying at current AI-bubble "
+        "valuations. Revisit if/when the sector corrects.",
+        "",
+    ]
+    lines += _watchlist_table(postcrash)
     lines.append("")
     lines.append(f"Last auto-generated: {date.today().isoformat()}.")
     config.WATCHLIST_MD_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def regenerate_pending_candidates_md(conn: sqlite3.Connection) -> None:
+    rows = db.get_all_pending_candidates(conn)
+    lines = [
+        "# Synced Candidates — Pending Review",
+        "",
+        "Auto-generated from Briefs Finance's `recommendations` table by "
+        "`sync-candidates` (runs automatically once a day as part of Monitor, also "
+        "runnable on demand). Nothing here is part of the real watchlist yet. Review "
+        "each one and either `promote-candidate` (moves it into `watchlist.md`) or "
+        "`dismiss-candidate` (discards it). Edits here are overwritten on the next "
+        "`sync-candidates`/`snapshot`/`monitor` run.",
+        "",
+        "| Ticker | Company | Thesis | Synced |",
+        "|--------|---------|--------|--------|",
+    ]
+    for row in rows:
+        lines.append(
+            f"| {row['ticker']} | {row['company_name'] or ''} | {row['buy_thesis'] or ''} "
+            f"| {row['synced_at'][:10]} |"
+        )
+    lines.append("")
+    lines.append(f"Last auto-generated: {date.today().isoformat()}.")
+    config.PENDING_CANDIDATES_MD_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def regenerate_all(conn: sqlite3.Connection) -> None:
     regenerate_holdings_md(conn)
     regenerate_watchlist_md(conn)
+    regenerate_pending_candidates_md(conn)

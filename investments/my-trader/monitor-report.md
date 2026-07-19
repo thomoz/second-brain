@@ -23,7 +23,7 @@ No new material changes.
 - **consumer_sentiment** [unknown] — FRED UMich consumer sentiment data unavailable (FRED_API_KEY not set, or series unavailable)
 - **recession_signal** [unknown] — FRED yield-curve / recession-probability data unavailable (FRED_API_KEY not set, or series unavailable)
 
-### New Candidates Synced From Briefs Finance
+### New Candidates Synced (Pending Review)
 None this run.
 
 Last auto-generated: 2026-07-19.
