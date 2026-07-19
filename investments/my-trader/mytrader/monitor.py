@@ -18,10 +18,13 @@ import sqlite3
 from datetime import date
 from typing import Any
 
-from . import config, db, engine, market_data, snapshot
+from . import candidate_sync, config, db, engine, macro_indicators, market_data, snapshot
 
 SEVERITY = "flag"  # Phase B keeps severity simple: every alert comes from a
                     # "flag" verdict. Refining severity tiers is a later tuning task.
+
+MACRO_TICKER = "MACRO"
+MACRO_SOURCE_TABLE = "macro"
 
 
 def _reconcile_alerts(
@@ -61,6 +64,12 @@ def _process_row(
 
 
 def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
+    try:
+        synced_candidates = candidate_sync.sync_new_candidates(conn)
+    except Exception as e:
+        print(f"[monitor] error syncing briefs-finance candidates: {e}")
+        synced_candidates = []
+
     holdings = db.get_all_holdings(conn)
     watchlist = [w for w in db.get_all_watchlist(conn) if w["status"] == "discussed"]
 
@@ -77,6 +86,13 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
             except Exception as e:
                 print(f"[monitor] error checking watchlist {row['ticker']}: {e}")
 
+    try:
+        macro_checks = macro_indicators.run_all()
+    except Exception as e:
+        print(f"[monitor] error running macro indicators: {e}")
+        macro_checks = []
+    new_alerts.extend(_reconcile_alerts(MACRO_TICKER, MACRO_SOURCE_TABLE, macro_checks, conn))
+
     snapshot.regenerate_all(conn)
 
     return {
@@ -84,6 +100,10 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
         "checked_watchlist": len(watchlist),
         "new_alerts": new_alerts,
         "open_alerts": [dict(a) for a in db.get_open_alerts(conn)],
+        "macro_checks": [
+            {"name": c.name, "verdict": c.verdict, "detail": c.detail} for c in macro_checks
+        ],
+        "synced_candidates": synced_candidates,
     }
 
 
@@ -114,6 +134,21 @@ def render_report(result: dict[str, Any]) -> str:
             )
     else:
         lines.append("None.")
+
+    lines += ["", "### Macro Indicators (this run)"]
+    if result["macro_checks"]:
+        for c in result["macro_checks"]:
+            lines.append(f"- **{c['name']}** [{c['verdict']}] — {c['detail']}")
+    else:
+        lines.append("Unavailable this run.")
+
+    lines += ["", "### New Candidates Synced From Briefs Finance"]
+    if result["synced_candidates"]:
+        for cand in result["synced_candidates"]:
+            lines.append(f"- **{cand['ticker']}** — {cand['company_name'] or '(no name)'}")
+    else:
+        lines.append("None this run.")
+
     lines += ["", f"Last auto-generated: {date.today().isoformat()}."]
     return "\n".join(lines) + "\n"
 

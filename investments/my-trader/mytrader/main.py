@@ -90,6 +90,18 @@ def cmd_seed(args) -> None:
     print("Seeded confirmed holdings/watchlist into the shared DB.")
 
 
+def cmd_sync_candidates(args) -> None:
+    from .candidate_sync import sync_new_candidates
+    from .snapshot import regenerate_all
+
+    conn = _open_conn()
+    added = sync_new_candidates(conn)
+    if added:
+        regenerate_all(conn)
+    conn.close()
+    print(f"Synced {len(added)} new candidate(s) from Briefs Finance recommendations.")
+
+
 def cmd_monitor(args) -> None:
     from .monitor import maybe_notify, run_monitor, write_report
 
@@ -133,6 +145,7 @@ def main() -> None:
     subparsers.add_parser("snapshot", help="Regenerate holdings.md / potential-holdings.md from the DB")
     subparsers.add_parser("seed", help="One-time migration of Confirmed So Far rows into the DB")
     subparsers.add_parser("monitor", help="Scheduled re-check of all holdings + vetted watchlist")
+    subparsers.add_parser("sync-candidates", help="Pull new Briefs Finance recommendations into the watchlist")
 
     args = parser.parse_args()
 
@@ -144,6 +157,7 @@ def main() -> None:
         "snapshot": cmd_snapshot,
         "seed": cmd_seed,
         "monitor": cmd_monitor,
+        "sync-candidates": cmd_sync_candidates,
     }
 
     if args.command in dispatch:

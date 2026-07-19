@@ -42,6 +42,10 @@ uv run --directory investments/my-trader python -m mytrader.main seed
 # Scheduled re-check of all holdings + vetted watchlist (also runs automatically —
 # see scripts/setup_scheduler_windows.ps1 / scripts/systemd/second-brain-mytrader-monitor.timer)
 uv run --directory investments/my-trader python -m mytrader.main monitor
+
+# Pull new Briefs Finance recommendations into the watchlist as raw candidates
+# (also runs automatically as part of `monitor`, this is for manual/ad-hoc triggering)
+uv run --directory investments/my-trader python -m mytrader.main sync-candidates
 ```
 
 Note: use `uv run --directory <path> ...` rather than `cd`-ing into the directory first —
@@ -96,6 +100,29 @@ notification fires only when there's at least one new alert (reuses
 and no WhatsApp push — Monitor is a quieter, separate channel by design. Like Find,
 Monitor never suggests a specific trade action — advisor notes only.
 
+## Macro Monitoring Indicators
+
+Every `monitor` run also runs 4 portfolio-wide checks (not per-ticker), once per run:
+MOVE index (bond-market stress), housing price-to-income ratio, University of
+Michigan Consumer Sentiment Index, and a recession-probability check whose detail
+text also classifies bull vs. bear yield-curve steepening (a refinement folded into
+that check, not a separate 5th check). These reuse the same high-bar alert-dedup
+mechanism as the per-ticker checks, via a `"MACRO"`/`"macro"` sentinel ticker/
+source_table pair in `alert_history`. Shown in `monitor-report.md`'s "Macro
+Indicators" section every run regardless of flag status (unlike per-ticker checks,
+which are only shown when flagged/open). FRED-backed checks (housing, sentiment,
+recession) degrade to `"unknown"` if `FRED_API_KEY` is unset.
+
+## Briefs Finance Candidate Sync
+
+Every `monitor` run also pulls new, non-excluded `briefs-finance` `recommendations`
+rows (from that tool's `ingest` command) into my-trader's `watchlist` as
+`status="raw"`, `bucket="unassigned"`, `source="briefs_finance_ingest"` — never
+`status="discussed"`, since a human still needs to actually vet a candidate via Find
+before Monitor's assessment loop picks it up. Watermarked (`sync_state` table) so
+re-runs don't reprocess the same recommendations. Also triggerable standalone via the
+`sync-candidates` CLI subcommand, independent of a full `monitor` run.
+
 ## Relationship to the `investments` Skill
 
 `investments` (briefs-finance) does PDF ingestion, backtesting, and a 0-100% likelihood
@@ -104,7 +131,7 @@ additional input — Shaun's own criteria (sustainable, competitive edge, pricin
 plus the 7 checks above are the primary basis. Find never triggers a fresh briefs-finance
 scoring run as a side effect — it only reads whatever score already exists for that ticker.
 
-## Known Limitations (Phase A)
+## Known Limitations
 
 - `BERKSHIRE_HOLDINGS` starts empty in `mytrader/config.py` — no free API for 13F data;
   manually maintained, update periodically from Berkshire's 13F filings.
@@ -112,8 +139,16 @@ scoring run as a side effect — it only reads whatever score already exists for
   USD/AUD holdings) — matches the previous hand-maintained holdings.md.
 - ETF expense-ratio drift can only be detected once a ticker has been checked twice —
   Monitor's repeated daily runs are what make this detection real in practice.
-- Monitor is now built (Phase B). Phase C (macro indicators, Briefs Finance
-  ingest→candidate data-flow) is still pending, not yet planned.
+- Monitor (Phase B) and macro indicators + candidate sync (Phase C) are now built.
+- Phase C's 4 macro threshold constants (`MOVE_INDEX_FLAG_LEVEL`,
+  `HOUSING_P2I_FLAG_RATIO`, `CONSUMER_SENTIMENT_FLAG_LEVEL`, `RECESSION_PROB_FLAG_PCT`)
+  are best-guess defaults set without live data access — tune after real output is
+  observed.
+- `candidate_sync` hardcodes `asset_type="stock"` since briefs-finance's
+  `recommendations` table has no asset-type column — a rare mislabeled ETF
+  recommendation is a cosmetic snapshot-display issue only.
+- The MOVE index may permanently read `"unknown"` if `^MOVE` doesn't resolve via
+  yfinance — see `handoff.md` for what was observed in this environment.
 
 ## Setup (first time)
 

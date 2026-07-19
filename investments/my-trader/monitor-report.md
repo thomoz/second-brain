@@ -17,4 +17,13 @@ No new material changes.
 - **LYV** (holdings) — valuation: PE 83.1 above rich threshold (35.0) (first flagged 2026-07-19)
 - **LLY** (holdings) — valuation: PE 41.8 above rich threshold (35.0) (first flagged 2026-07-19)
 
+### Macro Indicators (this run)
+- **move_index** [ok] — MOVE index at 70.9, below the flag threshold
+- **housing_affordability** [unknown] — FRED median home price / household income data unavailable (FRED_API_KEY not set, or series unavailable)
+- **consumer_sentiment** [unknown] — FRED UMich consumer sentiment data unavailable (FRED_API_KEY not set, or series unavailable)
+- **recession_signal** [unknown] — FRED yield-curve / recession-probability data unavailable (FRED_API_KEY not set, or series unavailable)
+
+### New Candidates Synced From Briefs Finance
+None this run.
+
 Last auto-generated: 2026-07-19.

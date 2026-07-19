@@ -17,6 +17,12 @@ def _no_real_yfinance(monkeypatch):
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
 
 
+@pytest.fixture(autouse=True)
+def _no_macro_or_sync_by_default(monkeypatch):
+    monkeypatch.setattr("mytrader.monitor.macro_indicators.run_all", lambda: [])
+    monkeypatch.setattr("mytrader.monitor.candidate_sync.sync_new_candidates", lambda conn: [])
+
+
 def _fake_result(checks: list[CheckResult]) -> dict:
     return {
         "ticker": "VRTX",
@@ -147,6 +153,8 @@ def test_render_report_lists_new_and_open_alerts():
                 "message": "Dividend cut", "created_at": "2026-07-19T00:00:00+00:00",
             }
         ],
+        "macro_checks": [],
+        "synced_candidates": [],
     }
     report = monitor.render_report(result)
     assert "VRTX" in report
@@ -155,7 +163,10 @@ def test_render_report_lists_new_and_open_alerts():
     assert "3 holding(s)" in report
     assert "7 watchlist candidate(s)" in report
 
-    empty = {"checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": []}
+    empty = {
+        "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [],
+    }
     empty_report = monitor.render_report(empty)
     assert "No new material changes." in empty_report
     assert "None." in empty_report
@@ -164,10 +175,65 @@ def test_render_report_lists_new_and_open_alerts():
 def test_write_report_writes_to_configured_path(tmp_path, monkeypatch):
     report_path = tmp_path / "monitor-report.md"
     monkeypatch.setattr("mytrader.monitor.config.MONITOR_REPORT_PATH", report_path)
-    result = {"checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": []}
+    result = {
+        "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [],
+    }
     monitor.write_report(result)
     assert report_path.exists()
     assert report_path.read_text(encoding="utf-8") == monitor.render_report(result)
+
+
+def test_run_monitor_includes_macro_alert_for_first_flag(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.monitor.macro_indicators.run_all",
+        lambda: [CheckResult(name="recession_signal", verdict="flag", detail="Recession risk rising")],
+    )
+    result = monitor.run_monitor(db_conn)
+    assert len(result["new_alerts"]) == 1
+    assert result["new_alerts"][0]["ticker"] == "MACRO"
+    assert result["new_alerts"][0]["source_table"] == "macro"
+
+
+def test_run_monitor_macro_alert_stays_quiet_on_repeat_flag(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.monitor.macro_indicators.run_all",
+        lambda: [CheckResult(name="recession_signal", verdict="flag", detail="Recession risk rising")],
+    )
+    monitor.run_monitor(db_conn)
+    result = monitor.run_monitor(db_conn)
+    assert result["new_alerts"] == []
+    assert len(result["open_alerts"]) == 1
+
+
+def test_run_monitor_includes_synced_candidates_in_result(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.monitor.candidate_sync.sync_new_candidates",
+        lambda conn: [{"ticker": "NVDA", "company_name": "NVIDIA Corp"}],
+    )
+    result = monitor.run_monitor(db_conn)
+    assert result["synced_candidates"] == [{"ticker": "NVDA", "company_name": "NVIDIA Corp"}]
+
+
+def test_render_report_includes_macro_and_candidate_sections():
+    result = {
+        "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [{"name": "move_index", "verdict": "ok", "detail": "MOVE index at 90.0"}],
+        "synced_candidates": [{"ticker": "NVDA", "company_name": "NVIDIA Corp"}],
+    }
+    report = monitor.render_report(result)
+    assert "### Macro Indicators (this run)" in report
+    assert "move_index" in report
+    assert "### New Candidates Synced From Briefs Finance" in report
+    assert "NVDA" in report
+
+    empty = {
+        "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [],
+    }
+    empty_report = monitor.render_report(empty)
+    assert "Unavailable this run." in empty_report
+    assert "None this run." in empty_report
 
 
 def test_maybe_notify_skips_when_no_new_alerts(monkeypatch):

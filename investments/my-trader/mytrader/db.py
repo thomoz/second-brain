@@ -53,6 +53,10 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 created_at      TEXT NOT NULL,
                 acknowledged    INTEGER NOT NULL DEFAULT 0
             );
+            CREATE TABLE IF NOT EXISTS sync_state (
+                key             TEXT PRIMARY KEY,
+                value           TEXT NOT NULL
+            );
         """)
 
 
@@ -197,6 +201,19 @@ def get_open_alerts(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return conn.execute(
         "SELECT * FROM alert_history WHERE acknowledged = 0 ORDER BY created_at DESC"
     ).fetchall()
+
+
+def get_sync_watermark(conn: sqlite3.Connection, key: str) -> str | None:
+    row = conn.execute("SELECT value FROM sync_state WHERE key = ?", (key,)).fetchone()
+    return row["value"] if row else None
+
+
+def set_sync_watermark(conn: sqlite3.Connection, key: str, value: str) -> None:
+    with conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, ?)",
+            (key, value),
+        )
 
 
 def touch_checked(

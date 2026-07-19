@@ -142,3 +142,18 @@ def test_touch_checked_preserves_expense_ratio_when_none_passed(db_conn):
     row = db.get_holding_row(db_conn, "V", "1")
     assert row["last_checked_at"] is not None
     assert row["last_expense_ratio"] == 0.09
+
+
+def test_get_sync_watermark_returns_none_when_unset(db_conn):
+    assert db.get_sync_watermark(db_conn, "some_key") is None
+
+
+def test_set_sync_watermark_then_get_returns_value(db_conn):
+    db.set_sync_watermark(db_conn, "some_key", "42")
+    assert db.get_sync_watermark(db_conn, "some_key") == "42"
+
+
+def test_set_sync_watermark_overwrites_existing_value(db_conn):
+    db.set_sync_watermark(db_conn, "some_key", "42")
+    db.set_sync_watermark(db_conn, "some_key", "99")
+    assert db.get_sync_watermark(db_conn, "some_key") == "99"

@@ -1,6 +1,39 @@
 # Handoff: my-trader Portfolio Build-Out
 
-## Status: Portfolio triage in progress; Phase A + Phase B tool build COMPLETE (2026-07-19)
+## Status: Portfolio triage in progress; Phase A + B + C tool build COMPLETE (2026-07-19)
+
+**Phase C (macro indicators + Briefs Finance ingest→candidate data-flow) is built** —
+see `.agent/plans/my-trader-phase-c-macro-and-briefs-sync.md` for the full plan. New
+`macro_indicators.py` (4 portfolio-wide checks: MOVE index, housing price-to-income,
+UMich consumer sentiment, recession-probability + bull/bear steepener classification)
+and `candidate_sync.py` (`sync_new_candidates()`, watermarked via new `sync_state`
+table), both wired into `run_monitor()` — no new scheduled infrastructure, both ride
+Monitor's existing daily schedule. New `sync-candidates` CLI subcommand for manual
+triggering. 116 unit tests passing (87 Phase A+B + 29 Phase C), ruff/mypy clean.
+
+Live validation against the real shared DB:
+- `FRED_API_KEY` is **not set** (no `.env` in `investments/briefs-finance/`) — the 3
+  FRED-backed checks (housing_affordability, consumer_sentiment, recession_signal) all
+  read `"unknown"` in the real run. This is expected graceful degradation, not a bug.
+  Set `FRED_API_KEY` in `investments/briefs-finance/.env` (see `.env.example`) to
+  activate them.
+- `^MOVE` **does resolve** via yfinance — confirmed live, read 70.9 in the real run
+  (well below the 140.0 flag threshold), consistent with tool-preplan.md's "confirmed
+  low as of early 2026" note. This indicator is live, not permanently `"unknown"`.
+- `sync-candidates` run against the real shared DB synced **270 new candidates** in one
+  shot — this is the expected one-time backlog catch-up: 83 already-ingested
+  briefs-finance reports (predating this sync feature) held 283 distinct non-excluded
+  tickers with no prior path into the watchlist. A second immediate run correctly
+  synced 0 (watermark works). All 270 landed as `bucket="unassigned"`,
+  `status="raw"`, visible in `potential-holdings.md`.
+- Full `monitor` run afterward: 0 new alerts (7 still open, unchanged from Phase B's
+  validation), macro section showed the 4 expected entries, candidate-sync section
+  correctly showed "None this run" (backlog already consumed by the standalone
+  `sync-candidates` run above).
+- The 270 newly-synced `bucket="unassigned"` watchlist rows are **not yet
+  triaged** — they sit as raw candidates until Shaun/Find reviews and either promotes
+  (`watchlist-add`, flips to `"discussed"`) or ignores them. Not a Phase C gap; no
+  "un-sync"/reject action exists by design (see plan's NOTES).
 
 **Phase A (shared assessment engine + conversational Find) is built** — see
 `.agent/plans/my-trader-phase-a-find-engine.md` for the full plan. Root-level uv
@@ -28,8 +61,8 @@ the real shared DB: first run produced 7 new alerts (LLY/LYV valuation, LYV bala
 sheet, LYV/V/BRK-B sector concentration, ASML valuation); second run confirmed the
 dedup logic — 0 new alerts, same 7 still open.
 
-Phase C (macro indicators, Briefs Finance ingest→candidate data-flow) is not started —
-see `tool-preplan.md`'s "Phase A scope finalized" section.
+Phase C (macro indicators, Briefs Finance ingest→candidate data-flow) is now built —
+see the Phase C summary above and `tool-preplan.md`'s "Phase A scope finalized" section.
 
 The portfolio-triage narrative below (2026-07-11 and earlier) predates the tool build
 and is kept as historical context — the working method described there (discuss one
