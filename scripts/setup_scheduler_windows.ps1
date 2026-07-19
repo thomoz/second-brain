@@ -45,6 +45,16 @@ Register-ScheduledTask -TaskName "SecondBrain-VaultSync" -Action $vsAction `
     -Trigger $vsTrigger -RunLevel Limited -Force
 Write-Output "Registered: SecondBrain-VaultSync"
 
+# my-trader Monitor — daily at 07:30 (after US markets close, before Shaun's day starts)
+$mtPython = Join-Path $ProjectPath "investments\.venv\Scripts\python.exe"
+$mtAction = New-ScheduledTaskAction -Execute $mtPython `
+    -Argument "-m mytrader.main monitor" `
+    -WorkingDirectory (Join-Path $ProjectPath "investments\my-trader")
+$mtTrigger = New-ScheduledTaskTrigger -Daily -At "07:30"
+Register-ScheduledTask -TaskName "SecondBrain-MyTraderMonitor" -Action $mtAction `
+    -Trigger $mtTrigger -RunLevel Limited -Force
+Write-Output "Registered: SecondBrain-MyTraderMonitor"
+
 Write-Output "`nAll tasks registered. View in Task Scheduler (taskschd.msc)"
 Write-Output "After VPS is live, disable Heartbeat, Reflection, WhatsAppBot (keep VaultSync):"
 Write-Output "  Disable-ScheduledTask -TaskName 'SecondBrain-Heartbeat'"

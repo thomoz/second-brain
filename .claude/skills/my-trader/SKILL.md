@@ -38,6 +38,10 @@ uv run --directory investments/my-trader python -m mytrader.main snapshot
 # One-time migration of the already-confirmed rows (VRTX, PMGOLD core+tactical, BRK-B,
 # HDV, SCHD, ASML, LLY, LYV, V) into the shared DB — idempotent, safe to re-run
 uv run --directory investments/my-trader python -m mytrader.main seed
+
+# Scheduled re-check of all holdings + vetted watchlist (also runs automatically —
+# see scripts/setup_scheduler_windows.ps1 / scripts/systemd/second-brain-mytrader-monitor.timer)
+uv run --directory investments/my-trader python -m mytrader.main monitor
 ```
 
 Note: use `uv run --directory <path> ...` rather than `cd`-ing into the directory first —
@@ -74,6 +78,24 @@ Every `find` / `watchlist-add` runs all 7:
 - **Explicit watchlist-add** ("add TICKER to the watchlist") — same checks, plus writes
   a `watchlist` row (`status="discussed"`) and regenerates the markdown snapshots.
 
+## Monitor
+
+Runs daily on a schedule (no chat trigger needed — it's automated, see "Setup" for the
+scheduler entries). Re-checks every `holdings` row and every `watchlist` row with
+`status="discussed"` (never `status="raw"` — Monitor doesn't discover new candidates,
+that stays a Find/conversation action). Reuses the same 7-check engine as Find.
+
+High-bar alerting: a check's first `flag` verdict for a given ticker/check creates one
+alert; repeated flags on later runs stay quiet (already open); a check clearing back to
+non-flag auto-acknowledges its open alert, so a future re-flag raises a fresh one.
+
+Output is a standalone file, `investments/my-trader/monitor-report.md` (full overwrite
+every run — new alerts this run + all currently-open alerts). A bare Windows toast
+notification fires only when there's at least one new alert (reuses
+`.claude/scripts/notifications.py`, same as heartbeat). No Second Brain daily-log entry
+and no WhatsApp push — Monitor is a quieter, separate channel by design. Like Find,
+Monitor never suggests a specific trade action — advisor notes only.
+
 ## Relationship to the `investments` Skill
 
 `investments` (briefs-finance) does PDF ingestion, backtesting, and a 0-100% likelihood
@@ -88,9 +110,10 @@ scoring run as a side effect — it only reads whatever score already exists for
   manually maintained, update periodically from Berkshire's 13F filings.
 - Portfolio concentration aggregation is currency-naive (no FX normalization across
   USD/AUD holdings) — matches the previous hand-maintained holdings.md.
-- ETF expense-ratio drift can only be detected once a ticker has been checked twice.
-- Monitor (scheduled daily re-check of all holdings/watchlist) is Phase B, not yet built —
-  Find only runs on demand, in chat.
+- ETF expense-ratio drift can only be detected once a ticker has been checked twice —
+  Monitor's repeated daily runs are what make this detection real in practice.
+- Monitor is now built (Phase B). Phase C (macro indicators, Briefs Finance
+  ingest→candidate data-flow) is still pending, not yet planned.
 
 ## Setup (first time)
 

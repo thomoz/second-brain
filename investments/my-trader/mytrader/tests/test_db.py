@@ -83,3 +83,62 @@ def test_upsert_watchlist_row_upserts_by_natural_key(db_conn):
     rows = db.get_all_watchlist(db_conn)
     assert len(rows) == 1
     assert rows[0]["notes"] == "updated notes"
+
+
+def test_get_open_alert_returns_none_when_no_alert(db_conn):
+    assert db.get_open_alert(db_conn, "VRTX", "holdings", "dividend") is None
+
+
+def test_insert_alert_then_get_open_alert_finds_it(db_conn):
+    db.insert_alert(
+        db_conn, ticker="VRTX", source_table="holdings", check_name="dividend",
+        severity="flag", message="Dividend cut detected",
+    )
+    row = db.get_open_alert(db_conn, "VRTX", "holdings", "dividend")
+    assert row is not None
+    assert row["message"] == "Dividend cut detected"
+    assert row["acknowledged"] == 0
+
+
+def test_acknowledge_alert_removes_it_from_open_query(db_conn):
+    db.insert_alert(
+        db_conn, ticker="VRTX", source_table="holdings", check_name="dividend",
+        severity="flag", message="Dividend cut detected",
+    )
+    alert = db.get_open_alert(db_conn, "VRTX", "holdings", "dividend")
+    db.acknowledge_alert(db_conn, alert["id"])
+    assert db.get_open_alert(db_conn, "VRTX", "holdings", "dividend") is None
+    assert db.get_open_alerts(db_conn) == []
+
+
+def test_touch_checked_updates_holdings_row(db_conn):
+    db.upsert_holding(
+        db_conn, ticker="V", name="Visa Inc", asset_type="stock", bucket="1",
+        qty=0.1, avg_price=318.41,
+    )
+    db.touch_checked(db_conn, "holdings", "V", "1", 0.05)
+    row = db.get_holding_row(db_conn, "V", "1")
+    assert row["last_checked_at"] is not None
+    assert row["last_expense_ratio"] == 0.05
+
+
+def test_touch_checked_updates_watchlist_row(db_conn):
+    db.upsert_watchlist_row(
+        db_conn, ticker="VRTX", name="Vertex Pharmaceuticals", asset_type="stock", bucket="1",
+        status="discussed",
+    )
+    db.touch_checked(db_conn, "watchlist", "VRTX", "1", 0.03)
+    row = db.get_watchlist_row(db_conn, "VRTX", "1")
+    assert row["last_checked_at"] is not None
+    assert row["last_expense_ratio"] == 0.03
+
+
+def test_touch_checked_preserves_expense_ratio_when_none_passed(db_conn):
+    db.upsert_holding(
+        db_conn, ticker="V", name="Visa Inc", asset_type="stock", bucket="1",
+        qty=0.1, avg_price=318.41, last_expense_ratio=0.09,
+    )
+    db.touch_checked(db_conn, "holdings", "V", "1", None)
+    row = db.get_holding_row(db_conn, "V", "1")
+    assert row["last_checked_at"] is not None
+    assert row["last_expense_ratio"] == 0.09

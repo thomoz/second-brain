@@ -1,6 +1,6 @@
 # Handoff: my-trader Portfolio Build-Out
 
-## Status: Portfolio triage in progress; Phase A tool build COMPLETE (2026-07-19)
+## Status: Portfolio triage in progress; Phase A + Phase B tool build COMPLETE (2026-07-19)
 
 **Phase A (shared assessment engine + conversational Find) is built** — see
 `.agent/plans/my-trader-phase-a-find-engine.md` for the full plan. Root-level uv
@@ -9,12 +9,27 @@ package with the 7 assessment checks, `engine.run_assessment()`, conversational
 `find.py` (ephemeral lookup vs. explicit watchlist-add), `holdings_ops.py` (buy/sell),
 `snapshot.py` (auto-regenerates `holdings.md`/`potential-holdings.md` from the DB),
 `seed.py` (idempotent migration of the Confirmed So Far table), and
-`.claude/skills/my-trader/SKILL.md`. 67 unit tests passing, ruff/mypy clean, live
-`find --ticker VRTX`/`SCHD` validated against real yfinance data. The one-time `seed`
-run against the real shared `investments.db` is still pending Shaun's explicit
-go-ahead (Level 4 manual validation, not yet run for real). Phase B (scheduled Monitor)
-and Phase C (macro indicators, Briefs Finance ingest→candidate data-flow) are not
-started — see `tool-preplan.md`'s "Phase A scope finalized" section.
+`.claude/skills/my-trader/SKILL.md`. The one-time `seed` run against the real shared
+`investments.db` has been run for real (3 holdings, 38 watchlist rows present).
+
+**Phase B (scheduled Monitor) is built** — see
+`.agent/plans/my-trader-phase-b-monitor.md` for the full plan. New `monitor.py`:
+`run_monitor()` re-checks every holding + every `status="discussed"` watchlist row
+using the same Phase A engine, reconciles `flag` verdicts against the `alert_history`
+table (high-bar dedup — only a flag→ok→flag transition raises a fresh alert), writes
+`investments/my-trader/monitor-report.md` (full overwrite), and fires a toast via
+`.claude/scripts/notifications.py` only when there's a new alert. New `monitor` CLI
+subcommand, `cached_session()` in `market_data.py` (avoids an O(n²) yfinance blowup
+across Monitor's per-row loop), Windows Task Scheduler entry + systemd timer/service
+(`second-brain-mytrader-monitor.timer`/`.service`) added but **not yet registered/enabled
+for real** — pending Shaun's go-ahead (Level 4's final step). 87 unit tests passing
+(67 Phase A + 20 Phase B), ruff/mypy clean. Live `monitor` run validated twice against
+the real shared DB: first run produced 7 new alerts (LLY/LYV valuation, LYV balance
+sheet, LYV/V/BRK-B sector concentration, ASML valuation); second run confirmed the
+dedup logic — 0 new alerts, same 7 still open.
+
+Phase C (macro indicators, Briefs Finance ingest→candidate data-flow) is not started —
+see `tool-preplan.md`'s "Phase A scope finalized" section.
 
 The portfolio-triage narrative below (2026-07-11 and earlier) predates the tool build
 and is kept as historical context — the working method described there (discuss one

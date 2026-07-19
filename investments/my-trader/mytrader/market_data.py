@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -15,6 +16,24 @@ class TickerData:
     dividends: Any  # pandas.Series
     news: list[dict[str, Any]] = field(default_factory=list)
     calendar: dict[str, Any] = field(default_factory=dict)
+
+
+_cache: dict[str, TickerData | None] | None = None
+
+
+@contextmanager
+def cached_session():
+    """Enable an in-memory per-run cache for fetch_ticker_data. Off by default (module
+    global stays None) — Find and the existing test suite are unaffected unless this
+    context is explicitly entered. Monitor uses this to avoid an O(n^2) yfinance call
+    blowup: concentration.check() re-fetches every existing holding for every ticker
+    it assesses, and Monitor calls run_assessment() once per holding+watchlist row."""
+    global _cache
+    _cache = {}
+    try:
+        yield
+    finally:
+        _cache = None
 
 
 def _looks_valid(info: dict[str, Any]) -> bool:
@@ -42,12 +61,17 @@ def _fetch_one(ticker: str) -> TickerData | None:
 
 def fetch_ticker_data(ticker: str) -> TickerData | None:
     """Fetch yfinance data for a normalized ticker. Tries .AX fallback if the
-    primary lookup returns no info. Returns None if both fail."""
+    primary lookup returns no info. Returns None if both fail. Cached for the
+    duration of a cached_session() context, if one is active."""
     normalized = tickers.normalize(ticker)
+    if _cache is not None and normalized in _cache:
+        return _cache[normalized]
     data = _fetch_one(normalized)
-    if data is not None:
-        return data
-    return _fetch_one(tickers.asx_variant(ticker))
+    if data is None:
+        data = _fetch_one(tickers.asx_variant(ticker))
+    if _cache is not None:
+        _cache[normalized] = data
+    return data
 
 
 def fetch_fx_change_pct(base: str, quote: str = "AUD", period: str = "3mo") -> float | None:

@@ -157,3 +157,66 @@ def upsert_watchlist_row(
                 (ticker, name, asset_type, bucket, status, notes, source,
                  last_expense_ratio, now, now),
             )
+
+
+def get_open_alert(
+    conn: sqlite3.Connection, ticker: str, source_table: str, check_name: str
+) -> sqlite3.Row | None:
+    """Most recent unacknowledged alert for this (ticker, source_table, check_name),
+    or None. Dedup key deliberately excludes `message` — a check's message text can
+    drift run-to-run (e.g. a PE ratio nudging) without that being a new material
+    event; only a flag->ok->flag transition should raise a fresh alert."""
+    return conn.execute(
+        """SELECT * FROM alert_history
+           WHERE ticker = ? AND source_table = ? AND check_name = ? AND acknowledged = 0
+           ORDER BY created_at DESC LIMIT 1""",
+        (ticker, source_table, check_name),
+    ).fetchone()
+
+
+def insert_alert(
+    conn: sqlite3.Connection, *, ticker: str, source_table: str,
+    check_name: str, severity: str, message: str,
+) -> None:
+    now = _now()
+    with conn:
+        conn.execute(
+            """INSERT INTO alert_history
+               (ticker, source_table, check_name, severity, message, created_at, acknowledged)
+               VALUES (?, ?, ?, ?, ?, ?, 0)""",
+            (ticker, source_table, check_name, severity, message, now),
+        )
+
+
+def acknowledge_alert(conn: sqlite3.Connection, alert_id: int) -> None:
+    with conn:
+        conn.execute("UPDATE alert_history SET acknowledged = 1 WHERE id = ?", (alert_id,))
+
+
+def get_open_alerts(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute(
+        "SELECT * FROM alert_history WHERE acknowledged = 0 ORDER BY created_at DESC"
+    ).fetchall()
+
+
+def touch_checked(
+    conn: sqlite3.Connection, table: str, ticker: str, bucket: str,
+    last_expense_ratio: float | None,
+) -> None:
+    """Update last_checked_at (and last_expense_ratio if the check produced one) for
+    a holdings/watchlist row. `table` must be "holdings" or "watchlist" — always a
+    hardcoded literal from monitor.py's own call sites, never external input."""
+    assert table in ("holdings", "watchlist"), f"invalid table: {table!r}"
+    now = _now()
+    with conn:
+        if last_expense_ratio is not None:
+            conn.execute(
+                f"UPDATE {table} SET last_checked_at = ?, last_expense_ratio = ? "
+                f"WHERE ticker = ? AND bucket = ?",
+                (now, last_expense_ratio, ticker, bucket),
+            )
+        else:
+            conn.execute(
+                f"UPDATE {table} SET last_checked_at = ? WHERE ticker = ? AND bucket = ?",
+                (now, ticker, bucket),
+            )

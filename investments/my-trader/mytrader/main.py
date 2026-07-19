@@ -90,6 +90,20 @@ def cmd_seed(args) -> None:
     print("Seeded confirmed holdings/watchlist into the shared DB.")
 
 
+def cmd_monitor(args) -> None:
+    from .monitor import maybe_notify, run_monitor, write_report
+
+    conn = _open_conn()
+    result = run_monitor(conn)
+    conn.close()
+    write_report(result)
+    maybe_notify(result)
+    print(
+        f"Monitor complete: {len(result['new_alerts'])} new alert(s), "
+        f"{len(result['open_alerts'])} open. See investments/my-trader/monitor-report.md"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="my-trader — personal investing Find tool")
     subparsers = parser.add_subparsers(dest="command")
@@ -118,6 +132,7 @@ def main() -> None:
 
     subparsers.add_parser("snapshot", help="Regenerate holdings.md / potential-holdings.md from the DB")
     subparsers.add_parser("seed", help="One-time migration of Confirmed So Far rows into the DB")
+    subparsers.add_parser("monitor", help="Scheduled re-check of all holdings + vetted watchlist")
 
     args = parser.parse_args()
 
@@ -128,6 +143,7 @@ def main() -> None:
         "holding-sell": cmd_holding_sell,
         "snapshot": cmd_snapshot,
         "seed": cmd_seed,
+        "monitor": cmd_monitor,
     }
 
     if args.command in dispatch:

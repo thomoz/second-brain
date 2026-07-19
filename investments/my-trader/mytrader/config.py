@@ -9,6 +9,7 @@ from scripts.config import DB_PATH  # noqa: F401  (re-exported for mytrader call
 MY_TRADER_DIR = Path(__file__).resolve().parent.parent  # mytrader -> my-trader
 HOLDINGS_MD_PATH = MY_TRADER_DIR / "holdings.md"
 WATCHLIST_MD_PATH = MY_TRADER_DIR / "potential-holdings.md"
+MONITOR_REPORT_PATH = MY_TRADER_DIR / "monitor-report.md"
 
 BERKSHIRE_HOLDINGS: frozenset[str] = frozenset({
     # Manually maintained — update periodically from Berkshire's 13F filings
