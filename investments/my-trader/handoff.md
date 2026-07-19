@@ -1,6 +1,24 @@
 # Handoff: my-trader Portfolio Build-Out
 
-## Status: In progress — going through candidates one at a time, no portfolio finalized yet
+## Status: Portfolio triage in progress; Phase A tool build COMPLETE (2026-07-19)
+
+**Phase A (shared assessment engine + conversational Find) is built** — see
+`.agent/plans/my-trader-phase-a-find-engine.md` for the full plan. Root-level uv
+workspace joining `investments/briefs-finance` + `investments/my-trader`; `mytrader/`
+package with the 7 assessment checks, `engine.run_assessment()`, conversational
+`find.py` (ephemeral lookup vs. explicit watchlist-add), `holdings_ops.py` (buy/sell),
+`snapshot.py` (auto-regenerates `holdings.md`/`potential-holdings.md` from the DB),
+`seed.py` (idempotent migration of the Confirmed So Far table), and
+`.claude/skills/my-trader/SKILL.md`. 67 unit tests passing, ruff/mypy clean, live
+`find --ticker VRTX`/`SCHD` validated against real yfinance data. The one-time `seed`
+run against the real shared `investments.db` is still pending Shaun's explicit
+go-ahead (Level 4 manual validation, not yet run for real). Phase B (scheduled Monitor)
+and Phase C (macro indicators, Briefs Finance ingest→candidate data-flow) are not
+started — see `tool-preplan.md`'s "Phase A scope finalized" section.
+
+The portfolio-triage narrative below (2026-07-11 and earlier) predates the tool build
+and is kept as historical context — the working method described there (discuss one
+ticker at a time by hand) is superseded by Find once `seed` has run for real.
 
 ## Context
 
