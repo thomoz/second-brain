@@ -18,6 +18,21 @@ def _no_real_yfinance(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _isolate_snapshot_paths(monkeypatch, tmp_path):
+    """run_monitor() calls snapshot.regenerate_all() at the end of every run, which
+    writes to config.HOLDINGS_MD_PATH / WATCHLIST_MD_PATH / PENDING_CANDIDATES_MD_PATH.
+    Without this, every test in this file silently overwrites the REAL
+    holdings.md/watchlist.md/synced-candidates-pending-review.md with test-fixture
+    data — discovered 2026-07-19 after a real commit accidentally captured files
+    emptied by exactly this gap (test_snapshot.py's own _patch_paths already covered
+    this for its own tests; this file never had the equivalent)."""
+    import mytrader.config as mt_config
+    monkeypatch.setattr(mt_config, "HOLDINGS_MD_PATH", tmp_path / "holdings.md")
+    monkeypatch.setattr(mt_config, "WATCHLIST_MD_PATH", tmp_path / "watchlist.md")
+    monkeypatch.setattr(mt_config, "PENDING_CANDIDATES_MD_PATH", tmp_path / "synced-candidates-pending-review.md")
+
+
+@pytest.fixture(autouse=True)
 def _no_macro_or_sync_by_default(monkeypatch):
     monkeypatch.setattr("mytrader.monitor.macro_indicators.run_all", lambda: [])
     monkeypatch.setattr("mytrader.monitor.candidate_sync.sync_new_candidates", lambda conn: [])
