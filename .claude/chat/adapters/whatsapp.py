@@ -32,12 +32,16 @@ class WhatsAppPollingAdapter:
         self.api_token = api_token
         self.my_number = my_number  # e.g. "61410868612"
         self.poll_interval = poll_interval
+        self.my_lid = ""  # e.g. "215895204962474@lid" — resolved at connect()
 
     @property
     def platform(self) -> Platform:
         return Platform.WHATSAPP
 
     async def connect(self) -> None:
+        from integrations.whatsapp import get_own_chat_id
+
+        self.my_lid = get_own_chat_id(self.instance_id, self.api_token)
         print(f"[{datetime.now()}] WhatsApp adapter ready (polling instance {self.instance_id})")
 
     async def disconnect(self) -> None:
@@ -85,8 +89,12 @@ class WhatsAppPollingAdapter:
             sender_data = body.get("senderData", {})
             sender = sender_data.get("sender", "")
 
-            # Security filter: only respond to Shaun's own number (fail-closed: empty my_number blocks all)
-            if not self.my_number or self.my_number not in sender:
+            # Security filter: only respond to Shaun's own account, by phone-number JID
+            # or lid (fail-closed: no match on either configured identifier blocks it)
+            is_mine = bool(self.my_number) and self.my_number in sender
+            if not is_mine and self.my_lid:
+                is_mine = sender == self.my_lid
+            if not is_mine:
                 _ack()
                 return None
 

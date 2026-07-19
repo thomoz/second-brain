@@ -102,6 +102,65 @@ def test_poll_once_empty_my_number_blocks_all(requests_mock):
     assert msg is None
 
 
+def test_poll_once_accepts_lid_sender(requests_mock):
+    """Post-migration: sender may be tagged with lid instead of phone-number JID."""
+    payload = {
+        "receiptId": 300,
+        "body": {
+            "typeWebhook": "incomingMessageReceived",
+            "senderData": {
+                "chatId": "215895204962474@lid",
+                "sender": "215895204962474@lid",
+            },
+            "messageData": {
+                "typeMessage": "textMessage",
+                "textMessageData": {"textMessage": "hello via lid"},
+            },
+        },
+    }
+    adapter = make_adapter()
+    adapter.my_lid = "215895204962474@lid"
+    requests_mock.get(
+        f"https://api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
+        json=payload,
+    )
+    requests_mock.delete(
+        f"https://api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/300"
+    )
+    msg = adapter._poll_once()
+    assert msg is not None
+    assert msg.text == "hello via lid"
+
+
+def test_poll_once_rejects_unmatched_lid(requests_mock):
+    """A different lid (not ours) must still be filtered out."""
+    payload = {
+        "receiptId": 301,
+        "body": {
+            "typeWebhook": "incomingMessageReceived",
+            "senderData": {
+                "chatId": "999999999999999@lid",
+                "sender": "999999999999999@lid",
+            },
+            "messageData": {
+                "typeMessage": "textMessage",
+                "textMessageData": {"textMessage": "hack via lid"},
+            },
+        },
+    }
+    adapter = make_adapter()
+    adapter.my_lid = "215895204962474@lid"
+    requests_mock.get(
+        f"https://api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
+        json=payload,
+    )
+    requests_mock.delete(
+        f"https://api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/301"
+    )
+    msg = adapter._poll_once()
+    assert msg is None
+
+
 def test_poll_once_non_text_message(requests_mock):
     payload = {
         "receiptId": 200,

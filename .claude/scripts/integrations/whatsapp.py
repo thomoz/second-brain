@@ -34,6 +34,28 @@ def get_greenapi_base(instance_id: str) -> str:
     return f"https://api.green-api.com/waInstance{instance_id}"
 
 
+def get_own_chat_id(instance_id: str = "", api_token: str = "") -> str:
+    """Return this instance's own chatId (lid format post-migration), or "" on failure.
+
+    WhatsApp is phasing out phone-number JIDs (e.g. 61410868612@c.us) in favor of
+    opaque lid identifiers (e.g. 215895204962474@lid). Messages from the account's
+    own number may arrive tagged with either, depending on GREEN-API/WhatsApp state.
+    """
+    from config import WHATSAPP_API_TOKEN, WHATSAPP_INSTANCE_ID
+
+    iid = instance_id or WHATSAPP_INSTANCE_ID
+    tok = api_token or WHATSAPP_API_TOKEN
+    if not iid or not tok:
+        return ""
+    try:
+        resp = requests.get(f"{get_greenapi_base(iid)}/getWaSettings/{tok}", timeout=10)
+        if resp.status_code != 200:
+            return ""
+        return resp.json().get("chatId", "") or ""
+    except Exception:
+        return ""
+
+
 def send_message(
     chat_id: str,
     text: str,
