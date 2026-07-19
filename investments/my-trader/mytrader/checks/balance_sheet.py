@@ -1,4 +1,13 @@
-"""Balance sheet / leverage health check."""
+"""Balance sheet / leverage health check.
+
+debtToEquity/currentRatio are frequently absent from yfinance for financial-sector
+tickers (banks, etc.) — verified 2026-07-19 against NU (Nu Holdings): both fields are
+simply missing from the info dict, not a data-fetch failure. Banks don't have a
+conventional current-assets/current-liabilities split, so Yahoo doesn't populate
+these the way it does for industrials/consumer companies. Falls back to
+returnOnEquity as a rough health proxy in that case rather than reporting "unknown"
+for an entire sector when a genuinely relevant number is sitting right there.
+"""
 
 from __future__ import annotations
 
@@ -14,7 +23,23 @@ def check(data) -> CheckResult:
     current_ratio = data.info.get("currentRatio")
 
     if debt_to_equity is None and current_ratio is None:
-        return CheckResult(name="balance_sheet", verdict="unknown", detail="No balance sheet data available")
+        roe = data.info.get("returnOnEquity")
+        if roe is None:
+            return CheckResult(name="balance_sheet", verdict="unknown", detail="No balance sheet data available")
+        roe_pct = roe * 100
+        if roe_pct <= config.ROE_FLAG_THRESHOLD_PCT:
+            return CheckResult(
+                name="balance_sheet", verdict="flag",
+                detail=f"debt/equity and current ratio unavailable (common for financials); "
+                       f"return on equity {roe_pct:.1f}% <= {config.ROE_FLAG_THRESHOLD_PCT}% fallback threshold",
+                data={"return_on_equity_pct": round(roe_pct, 2)},
+            )
+        return CheckResult(
+            name="balance_sheet", verdict="ok",
+            detail=f"debt/equity and current ratio unavailable (common for financials); "
+                   f"return on equity {roe_pct:.1f}% used as fallback health proxy",
+            data={"return_on_equity_pct": round(roe_pct, 2)},
+        )
 
     flags = []
     if debt_to_equity is not None and debt_to_equity >= config.DEBT_TO_EQUITY_FLAG:

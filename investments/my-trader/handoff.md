@@ -2,6 +2,26 @@
 
 ## Status: Portfolio triage in progress; Phase A + B + C tool build COMPLETE (2026-07-19)
 
+**2026-07-19, same day — "throw everything you have at it": compute-if-missing
+Briefs Finance score + balance sheet ROE fallback**: Shaun asked Find on NU why the
+balance sheet check said "unknown" and why the Briefs Finance score said "no history"
+despite having just run `backtest` during today's report ingest. Root-caused both:
+(1) `debtToEquity`/`currentRatio` are genuinely absent from yfinance for financial-
+sector tickers (verified against NU's raw info dict) — `checks/balance_sheet.py` now
+falls back to `returnOnEquity` (new `config.ROE_FLAG_THRESHOLD_PCT = 5.0`) rather than
+reporting unknown for an entire sector; (2) `backtest` and `score`/`assess` are
+separate briefs-finance commands — backtest only populates historical-return
+`outcomes`, the 0-100% score in `likelihood_scores` needs a separate `compute_score`
+call that ingestion never ran. `engine.py`'s `_lookup_briefs_finance_score` (shared by
+Find and Monitor) is now `_lookup_or_compute_briefs_finance_score` — computes a score
+on the spot (~9 haiku LLM calls) when a ticker has a recommendation but no score yet,
+persists it, returns `None` only when there's no recommendation at all to score.
+Verified live on NU: balance_sheet went from `[unknown]` to `[ok]` (ROE 30.1%),
+briefs_finance_score went from "no history" to 60/100. Checked the current backlog
+impact: only 3 of Monitor's 9 tracked tickers are missing a score, so the next
+Monitor run will be slightly slower (not another backlog flood like candidate_sync's
+first run) but not by much. 141 tests passing, ruff/mypy clean.
+
 **2026-07-19, same day — renamed potential-holdings.md to watchlist.md**: Shaun asked
 for the file to be renamed. `config.WATCHLIST_MD_PATH` now points to `watchlist.md`;
 updated all references across `mytrader/*.py`, `SKILL.md`, `instructions.md`,

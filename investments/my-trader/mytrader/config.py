@@ -36,6 +36,9 @@ PE_CHEAP_THRESHOLD = 12.0
 DEBT_TO_EQUITY_FLAG = 150.0
 CURRENT_RATIO_FLAG = 1.0
 SECTOR_CONCENTRATION_FLAG_PCT = 25.0  # candidate's sector as % of holdings mkt value
+ROE_FLAG_THRESHOLD_PCT = 5.0  # balance_sheet.py's fallback proxy when debt/equity and
+                                # current ratio are both unavailable (common for banks/
+                                # financials) — flag if return on equity is weak.
 
 # Phase C — macro monitoring indicators (tool-preplan.md "Monitoring Indicators",
 # confirmed 2026-07-19). Thresholds below are best-guess defaults set during planning

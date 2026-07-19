@@ -53,3 +53,43 @@ def test_run_assessment_looks_up_briefs_finance_score(db_conn, monkeypatch):
         )
     result = engine.run_assessment("VRTX", db_conn)
     assert result["briefs_finance_score"] == {"score": 72, "provisional": False, "computed_at": "2026-07-01T00:00:00"}
+
+
+def test_run_assessment_computes_score_when_ticker_has_recommendation_but_no_score(db_conn, monkeypatch):
+    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
+    with db_conn:
+        cur = db_conn.execute(
+            """INSERT INTO reports (file_path, content_hash, report_date, ingested_at)
+               VALUES ('x', 'hash1', '2026-01-01', datetime('now'))"""
+        )
+        report_id = cur.lastrowid
+        db_conn.execute(
+            """INSERT INTO recommendations (report_id, ticker, buy_thesis, excluded, extracted_at)
+               VALUES (?, 'NU', 'digital bank thesis', 0, datetime('now'))""",
+            (report_id,),
+        )
+
+    def _fake_compute_score(recommendation_id, conn):
+        conn.execute(
+            """INSERT INTO likelihood_scores
+               (recommendation_id, score, provisional, computed_at)
+               VALUES (?, 55, 1, '2026-07-19T00:00:00')""",
+            (recommendation_id,),
+        )
+        return {"score": 55, "provisional": True}
+
+    monkeypatch.setattr("scripts.score.compute_score", _fake_compute_score)
+
+    result = engine.run_assessment("NU", db_conn)
+    assert result["briefs_finance_score"] == {"score": 55, "provisional": True, "computed_at": "2026-07-19T00:00:00"}
+
+
+def test_run_assessment_score_stays_none_when_no_recommendation_exists(db_conn, monkeypatch):
+    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
+    calls = []
+    monkeypatch.setattr("scripts.score.compute_score", lambda rec_id, conn: calls.append(rec_id))
+
+    result = engine.run_assessment("ZZZZ", db_conn)
+
+    assert result["briefs_finance_score"] is None
+    assert calls == []

@@ -85,7 +85,7 @@ Every `find` / `watchlist-add` runs all 7:
 |-------|-------------------|
 | Dividend trend | Trailing vs. prior 12-month dividend sum |
 | Valuation | Trailing/forward PE vs. configured rich/cheap bands |
-| Balance sheet | Debt/equity and current ratio |
+| Balance sheet | Debt/equity and current ratio; falls back to return on equity when both are unavailable (common for financials/banks) |
 | FX exposure | Non-AUD currency + AUD move (informational only) |
 | Concentration | Berkshire 13F overlap + candidate's sector vs. existing holdings |
 | Sector/geopolitical risk | Sector/industry vs. known active flashpoints |
@@ -155,8 +155,21 @@ Review the pending file and either:
 `investments` (briefs-finance) does PDF ingestion, backtesting, and a 0-100% likelihood
 score against 9 investor principles. `my-trader`'s Find layers that score in as one
 additional input — Shaun's own criteria (sustainable, competitive edge, pricing power)
-plus the 7 checks above are the primary basis. Find never triggers a fresh briefs-finance
-scoring run as a side effect — it only reads whatever score already exists for that ticker.
+plus the 7 checks above are the primary basis.
+
+**Compute-if-missing** (changed 2026-07-19, Shaun: "throw everything you have at
+assessing it"): `engine.run_assessment()` — shared by both Find and Monitor — now
+computes a fresh briefs-finance score on the spot (`scripts.score.compute_score`,
+~9 haiku LLM calls, one per investor-principle file) whenever a ticker has a
+non-excluded Briefs Finance recommendation but no score yet. The result is persisted
+to `likelihood_scores`, so this only costs anything the *first* time a given ticker
+is assessed — every call after that reads the cached row. Returns `None` only when
+the ticker was never a Briefs Finance recommendation at all (no `buy_thesis` to score
+against the 9 principles, nothing to compute regardless). Because Find and Monitor
+share this function, Monitor's first run after a backlog of unscored
+holdings/watchlist tickers builds up will take noticeably longer than usual (one
+compute_score call per missing ticker) — steady-state runs are fast again once
+everything currently tracked has a cached score.
 
 ## Known Limitations
 
