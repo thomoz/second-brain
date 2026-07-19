@@ -84,6 +84,24 @@ def test_run_assessment_computes_score_when_ticker_has_recommendation_but_no_sco
     assert result["briefs_finance_score"] == {"score": 55, "provisional": True, "computed_at": "2026-07-19T00:00:00"}
 
 
+def test_run_assessment_calls_backtest_refresh_for_ticker(db_conn, monkeypatch):
+    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
+    calls = []
+    monkeypatch.setattr("mytrader.engine._refresh_backtest_for_ticker", lambda ticker: calls.append(ticker))
+
+    engine.run_assessment("VRTX", db_conn)
+
+    assert calls == ["VRTX"]
+
+
+def test_refresh_backtest_for_ticker_swallows_exceptions(monkeypatch):
+    def _boom(ticker_filter=None):
+        raise RuntimeError("network blew up")
+
+    monkeypatch.setattr("scripts.backtest.run_backtest", _boom)
+    engine._refresh_backtest_for_ticker("VRTX")  # must not raise
+
+
 def test_run_assessment_score_stays_none_when_no_recommendation_exists(db_conn, monkeypatch):
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
     calls = []

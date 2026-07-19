@@ -2,6 +2,41 @@
 
 ## Status: Portfolio triage in progress; Phase A + B + C tool build COMPLETE (2026-07-19)
 
+**2026-07-19, same day — ticker-scoped backtest refresh added to Find/Monitor, and a
+real test-isolation bug fully root-caused**: Shaun asked whether backtest should
+auto-run on Find too (it's cheap — yfinance price lookups only, no LLM calls, unlike
+score computation) — added `engine._refresh_backtest_for_ticker()`, called on every
+`run_assessment()` alongside the score lookup, refreshing (not caching) since 3m/6m/
+12m windows genuinely elapse over time. This opens its own DB connection via
+`scripts.backtest.run_backtest()` (not the caller's `conn`), so a global autouse
+`conftest.py` fixture now stubs it for every test by default — the same class of
+real-DB leak risk as the file-path issue below, caught before it could bite.
+
+Separately: Shaun noticed `watchlist.md` was empty. First suspected the VaultSync
+scheduled task; the `vault_sync_runs.log` **disproved** that (every cycle logged
+"already up to date" for the entire window — it never touched anything). Root cause
+was `test_monitor.py` never isolating `config.HOLDINGS_MD_PATH`/`WATCHLIST_MD_PATH`/
+`PENDING_CANDIDATES_MD_PATH` to `tmp_path` the way `test_snapshot.py`'s own
+`_patch_paths` does — every `pytest` run silently overwrote the real snapshot files
+with near-empty test-fixture data, and a prior commit (`6fbb609`) had captured one of
+those corrupted states because the files were staged without diffing first. Fixed
+`test_monitor.py`, but a second mtime-based bisection across all 19 test files (each
+run individually, checking file mtimes before/after) found the SAME gap independently
+copy-pasted into three more files — `test_find.py`, `test_holdings_ops.py`,
+`test_seed.py` — each with its own `_patch_snapshot` helper that predated
+`PENDING_CANDIDATES_MD_PATH` and was never updated when that third path was added.
+Fixed all three. Verified with precision: all three real files' mtimes are now
+byte-identical before and after a full 143-test suite run — confirmed clean.
+Restored all three files from the database (always the correct source of truth
+throughout this whole incident — the DB itself never lost a row) and committed
+immediately after diffing, not before.
+
+**Lesson, not just a bug**: copy-pasted test-isolation helpers drift silently when
+new state is added to the thing they isolate. There's no single shared fixture for
+"don't touch the real snapshot files" — it's independently reimplemented per test
+file. Worth consolidating into one shared conftest.py fixture so this class of bug
+can't recur a fourth time.
+
 **2026-07-19, same day — "throw everything you have at it": compute-if-missing
 Briefs Finance score + balance sheet ROE fallback**: Shaun asked Find on NU why the
 balance sheet check said "unknown" and why the Briefs Finance score said "no history"

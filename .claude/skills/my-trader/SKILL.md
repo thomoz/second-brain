@@ -171,6 +171,16 @@ holdings/watchlist tickers builds up will take noticeably longer than usual (one
 compute_score call per missing ticker) — steady-state runs are fast again once
 everything currently tracked has a cached score.
 
+**Backtest refresh on every call** (also 2026-07-19): unlike the score, a
+ticker-scoped `scripts.backtest.run_backtest(ticker_filter=...)` call runs on *every*
+`run_assessment()`, not cached once — 3m/6m/12m outcome windows genuinely elapse over
+time, so there's real value in refreshing rather than caching. Cheap compared to
+scoring (yfinance price lookups only, no LLM calls). No-op for tickers with no Briefs
+Finance recommendation. Note: `ingest` never auto-runs `backtest` — they're separate
+commands (confirmed 2026-07-19 after Shaun asked why a same-day-ingested pick showed
+no score despite `backtest` having been run manually during ingestion — `backtest`
+only populates `outcomes`, not `likelihood_scores`).
+
 ## Known Limitations
 
 - `BERKSHIRE_HOLDINGS` starts empty in `mytrader/config.py` — no free API for 13F data;

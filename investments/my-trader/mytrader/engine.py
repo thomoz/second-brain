@@ -56,6 +56,26 @@ def _lookup_or_compute_briefs_finance_score(ticker: str, conn: sqlite3.Connectio
     return _read_briefs_finance_score(ticker, conn)
 
 
+def _refresh_backtest_for_ticker(ticker: str) -> None:
+    """Ticker-scoped backtest refresh (confirmed 2026-07-19 — Shaun: "throw
+    everything you have at it"). Cheap (yfinance price lookups only, no LLM calls)
+    unlike score computation, so this runs on *every* assessment rather than being
+    cached once — backtest outcomes genuinely change over time as 3m/6m/12m windows
+    elapse, so there's real value in refreshing on every call. Uses its own DB
+    connection (scripts.backtest.run_backtest's own lifecycle, WAL mode allows this
+    concurrently with engine.run_assessment's connection). No-op if the ticker has no
+    Briefs Finance recommendation at all (query just returns zero rows). Swallows
+    exceptions — a backtest hiccup (network, etc.) shouldn't break the rest of the
+    assessment.
+    """
+    try:
+        from scripts.backtest import run_backtest
+
+        run_backtest(ticker_filter=ticker)
+    except Exception:
+        pass
+
+
 def run_assessment(ticker: str, conn: sqlite3.Connection) -> dict[str, Any]:
     normalized = tickers.normalize(ticker)
     data = market_data.fetch_ticker_data(normalized)
@@ -72,6 +92,7 @@ def run_assessment(ticker: str, conn: sqlite3.Connection) -> dict[str, Any]:
         etf_mechanics.check(data, existing_row),
     ]
 
+    _refresh_backtest_for_ticker(normalized)
     briefs_score = _lookup_or_compute_briefs_finance_score(normalized, conn)
 
     return {
