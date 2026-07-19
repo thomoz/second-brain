@@ -19,6 +19,8 @@ That's all that's needed before execution. The rest (DNS config, Windows service
 
 Phone contact — create a contact called "Second Brain" with your own mobile number so Siri can address it.
 
+Bot going quiet / not responding? See GREEN-API-troubleshooting.md before re-doing setup from scratch.
+
 
 
 /core_piv_loop:plan-feature "let's go ahead and create the structured plan for Phase 6"

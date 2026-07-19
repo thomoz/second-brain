@@ -159,6 +159,9 @@ python .claude/scripts/integrations/query.py outlook unread       # Unread count
 python .claude/scripts/integrations/query.py outlook urgent       # Unread last 2h
 ```
 
+WhatsApp bot setup: `GREEN-API (30 min).txt`. If it goes quiet with no errors, see
+`GREEN-API-troubleshooting.md` before re-doing setup from scratch.
+
 ## External Knowledge Wiki
 
 Navigate via `wiki/index.md`. Use the `llm-wiki` skill to ingest, query, and lint the wiki.
