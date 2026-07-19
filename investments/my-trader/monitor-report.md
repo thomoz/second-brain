@@ -19,7 +19,6 @@ No new material changes.
 - **LLY** (holdings) — valuation: PE 41.8 above rich threshold (35.0) (first flagged 2026-07-19)
 
 ### Watchlist Opportunities (this run)
-- **ASML** — up +18.6% over the last 3 months
 - **VRTX** — up +10.6% over the last 3 months
 
 ### Macro Indicators (this run)

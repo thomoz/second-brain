@@ -2,6 +2,15 @@
 
 ## Status: Portfolio triage in progress; Phase A + B + C tool build COMPLETE (2026-07-19)
 
+**2026-07-19, same day — momentum gated on valuation (opportunity check bug)**: Shaun
+caught it within minutes of the feature shipping — ASML was flagged "interesting"
+purely on +18.6% 3-month momentum while carrying an *open valuation alert* (PE 60.2,
+above `PE_RICH_THRESHOLD`) in the very same report. Self-contradictory: a price
+run-up on an already-expensive stock is a caution signal, not an opportunity one — if
+there was a cheap entry point it likely already passed. `checks/opportunity.py`'s
+momentum leg now suppresses itself when the ticker's own PE is at/above
+`PE_RICH_THRESHOLD`. 160 tests passing (3 new, covering the gate and its edge cases).
+
 **2026-07-19, same day — Opportunity signal (8th check) + Watchlist Opportunities
 report section**: Shaun pushed back hard on `monitor-report.md` only ever showing
 risk warnings ("did you think monitor-report was just for warning me... I also want

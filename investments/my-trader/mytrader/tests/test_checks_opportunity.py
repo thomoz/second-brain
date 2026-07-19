@@ -34,6 +34,30 @@ def test_weak_momentum_does_not_flag():
     assert result.verdict == "ok"
 
 
+def test_momentum_suppressed_when_already_rich():
+    """Real bug caught 2026-07-19: ASML flagged "interesting" on +18.6% momentum
+    alone while carrying an open valuation alert (PE 60.2) in the same report --
+    self-contradictory. A price run-up on an already-expensive stock is a caution
+    signal, not an opportunity one."""
+    data = TickerData(ticker="ASML", info={"trailingPE": 60.2}, dividends=None)
+    result = opportunity.check(data, None, 18.6)
+    assert result.verdict == "ok"
+    assert "18.6" not in result.detail
+
+
+def test_momentum_still_flags_when_valuation_reasonable():
+    data = TickerData(ticker="X", info={"trailingPE": 20.0}, dividends=None)
+    result = opportunity.check(data, None, 18.6)
+    assert result.verdict == "interesting"
+    assert "18.6" in result.detail
+
+
+def test_momentum_flags_when_pe_unavailable():
+    data = TickerData(ticker="X", info={}, dividends=None)
+    result = opportunity.check(data, None, 18.6)
+    assert result.verdict == "interesting"
+
+
 def test_high_briefs_score_flags_interesting():
     data = TickerData(ticker="X", info={"trailingPE": 20.0}, dividends=None)
     result = opportunity.check(data, {"score": 80, "provisional": False}, None)

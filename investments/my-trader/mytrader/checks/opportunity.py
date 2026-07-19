@@ -15,6 +15,14 @@ Explicitly does NOT compare against existing holdings in the same sector (consid
 and rejected 2026-07-19 — Shaun: "it doesn't matter if I have another holding in the
 same sector... I can make the choice myself by asking you to deeply compare them").
 This looks at the candidate alone.
+
+Momentum is gated on valuation (fixed 2026-07-19, same day this was first built):
+Shaun caught ASML being called "interesting" purely on +18.6% 3-month momentum while
+simultaneously carrying an open valuation alert (PE 60.2, well above
+PE_RICH_THRESHOLD) in the very same report — directly self-contradictory. A price
+run-up on an already-expensive stock is a reason for more caution, not less; if there
+was a cheap entry point it likely already passed. Momentum only counts as a positive
+reason when the stock isn't also flagged rich by its own PE.
 """
 
 from __future__ import annotations
@@ -37,7 +45,12 @@ def check(
     if pe is not None and pe <= config.PE_CHEAP_THRESHOLD:
         reasons.append(f"PE {pe:.1f} at/below cheap threshold ({config.PE_CHEAP_THRESHOLD})")
 
-    if recent_return_pct is not None and recent_return_pct >= config.OPPORTUNITY_MOMENTUM_FLAG_PCT:
+    already_rich = pe is not None and pe >= config.PE_RICH_THRESHOLD
+    if (
+        recent_return_pct is not None
+        and recent_return_pct >= config.OPPORTUNITY_MOMENTUM_FLAG_PCT
+        and not already_rich
+    ):
         reasons.append(f"up {recent_return_pct:+.1f}% over the last 3 months")
 
     if briefs_score is not None and briefs_score["score"] >= config.OPPORTUNITY_SCORE_FLAG:

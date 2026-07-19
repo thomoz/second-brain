@@ -114,8 +114,11 @@ alone (deliberately does NOT compare against existing same-sector holdings — S
 "it doesn't matter if I have another holding in the same sector... I can make the
 choice myself by asking you to deeply compare them"): PE at/below
 `config.PE_CHEAP_THRESHOLD`, 3-month price return at/above
-`config.OPPORTUNITY_MOMENTUM_FLAG_PCT` (10%), or Briefs Finance score at/above
-`config.OPPORTUNITY_SCORE_FLAG` (70). Any one firing sets `verdict="interesting"`
+`config.OPPORTUNITY_MOMENTUM_FLAG_PCT` (10%, gated — suppressed when the stock is
+already flagged rich by its own PE, fixed 2026-07-19 after ASML was called
+"interesting" purely on momentum while carrying an open valuation alert in the same
+report — a run-up on an already-expensive stock is a caution signal, not upside), or
+Briefs Finance score at/above `config.OPPORTUNITY_SCORE_FLAG` (70). Any one firing sets `verdict="interesting"`
 with all matching reasons listed. Rendered by Monitor as a live snapshot every run
 (not deduped through `alert_history` like the risk checks — Shaun wants to see it
 every run while it's true, not just once). Only applies to `status="discussed"`
