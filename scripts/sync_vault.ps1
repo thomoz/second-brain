@@ -11,9 +11,13 @@ $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 Add-Content -Path $log -Value "[$timestamp] vault sync start"
 
 git add Memory/
-$staged = git diff --cached --name-only
+$staged = git diff --cached --name-only -- Memory/
 if ($staged) {
-    git commit -m "vault sync $(Get-Date -Format 'yyyy-MM-dd HH:mm')" 2>&1 | Add-Content -Path $log
+    # Scoped to Memory/ so this never sweeps up unrelated staged changes (e.g. a
+    # `git mv`/`git add` left uncommitted elsewhere in the repo when this timer fires
+    # every 2 minutes) into a mislabeled "vault sync" commit. Anything else staged
+    # stays staged, untouched, for whoever/whatever staged it to commit deliberately.
+    git commit -m "vault sync $(Get-Date -Format 'yyyy-MM-dd HH:mm')" -- Memory/ 2>&1 | Add-Content -Path $log
 }
 
 $before = git rev-parse HEAD

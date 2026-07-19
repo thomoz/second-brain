@@ -11,10 +11,12 @@ LOG="$PROJECT_ROOT/.claude/scripts/vault_sync_runs.log"
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] vault sync start" >> "$LOG"
 
-# Stage and commit any local Memory/ changes
+# Stage and commit any local Memory/ changes. Scoped to Memory/ on both the diff
+# check and the commit itself so this never sweeps up unrelated staged changes into
+# a mislabeled "vault sync" commit — anything else staged stays staged, untouched.
 git add Memory/
-if ! git diff --quiet --cached; then
-    git commit -m "vault sync $(date '+%Y-%m-%d %H:%M')" >> "$LOG" 2>&1
+if ! git diff --quiet --cached -- Memory/; then
+    git commit -m "vault sync $(date '+%Y-%m-%d %H:%M')" -- Memory/ >> "$LOG" 2>&1
 fi
 
 # Pull remote changes; note which Memory/ files changed
