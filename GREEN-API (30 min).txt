@@ -1,0 +1,24 @@
+GREEN-API (30 min)
+1. Create account at green-api.com
+2. Create a new Instance → scan QR with your WhatsApp mobile app
+3. Copy idInstance and apiTokenInstance from the console
+4. Start on the Developer plan (free, 3-chat limit) — enough for testing; upgrade to Business (~$9 USD/month) before regular use
+
+.env file — add these to your project root .env:
+WHATSAPP_INSTANCE_ID=your_instance_id
+WHATSAPP_API_TOKEN=your_token
+WHATSAPP_MY_NUMBER=61412345678@c.us   # your mobile in international format + @c.us
+
+Cloudflare Tunnel (15 min)
+1. Free account at cloudflare.com (if you don't have one)
+2. Run ! winget install Cloudflare.cloudflared
+3. Run ! cloudflared tunnel login — opens browser, authorise
+4. Run ! cloudflared tunnel create second-brain — saves a credentials JSON, gives you a tunnel ID
+
+That's all that's needed before execution. The rest (DNS config, Windows service install, GREEN-API webhook URL) gets wired up during the execute phase once the bot server exists.
+
+Phone contact — create a contact called "Second Brain" with your own mobile number so Siri can address it.
+
+
+
+/core_piv_loop:plan-feature "let's go ahead and create the structured plan for Phase 6"
