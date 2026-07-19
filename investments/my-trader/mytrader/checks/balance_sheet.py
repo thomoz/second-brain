@@ -51,7 +51,11 @@ def check(data) -> CheckResult:
     if flags:
         return CheckResult(name="balance_sheet", verdict="flag", detail="; ".join(flags), data=data_out)
 
-    return CheckResult(
-        name="balance_sheet", verdict="ok",
-        detail="Debt/equity and current ratio within thresholds", data=data_out,
-    )
+    parts = []
+    if debt_to_equity is not None:
+        parts.append(f"debt/equity {debt_to_equity:.1f}")
+    if current_ratio is not None:
+        parts.append(f"current ratio {current_ratio:.2f}")
+    detail = f"{', '.join(parts)} — within thresholds" if parts else "Debt/equity and current ratio within thresholds"
+
+    return CheckResult(name="balance_sheet", verdict="ok", detail=detail, data=data_out)

@@ -25,7 +25,10 @@ def test_low_current_ratio_flags():
 
 def test_healthy_balance_sheet_ok():
     data = TickerData(ticker="X", info={"debtToEquity": 50.0, "currentRatio": 2.0}, dividends=None)
-    assert balance_sheet.check(data).verdict == "ok"
+    result = balance_sheet.check(data)
+    assert result.verdict == "ok"
+    assert "debt/equity 50.0" in result.detail
+    assert "current ratio 2.00" in result.detail
 
 
 def test_falls_back_to_roe_when_debt_equity_and_current_ratio_missing():
