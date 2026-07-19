@@ -86,7 +86,7 @@ def run_assessment(ticker: str, conn: sqlite3.Connection) -> dict[str, Any]:
     briefs_score = _lookup_or_compute_briefs_finance_score(normalized, conn)
     recent_return_pct = return_data.fetch_recent_return_pct(normalized) if data is not None else None
 
-    results = [
+    other_checks = [
         dividend.check(data),
         valuation.check(data),
         balance_sheet.check(data),
@@ -94,8 +94,8 @@ def run_assessment(ticker: str, conn: sqlite3.Connection) -> dict[str, Any]:
         concentration.check(data, conn),
         sector_risk.check(data),
         etf_mechanics.check(data, existing_row),
-        opportunity.check(data, briefs_score, recent_return_pct),
     ]
+    results = [*other_checks, opportunity.check(data, other_checks, briefs_score, recent_return_pct)]
 
     return {
         "ticker": normalized,

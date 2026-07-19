@@ -41,10 +41,30 @@ ROE_FLAG_THRESHOLD_PCT = 5.0  # balance_sheet.py's fallback proxy when debt/equi
                                 # financials) — flag if return on equity is weak.
 
 # checks/opportunity.py — confirmed 2026-07-19: Monitor was only ever surfacing risk
-# warnings, never "this looks worth a look" positive signals. PE_CHEAP_THRESHOLD
-# (above) is reused as the valuation leg; these two are new.
-OPPORTUNITY_MOMENTUM_FLAG_PCT = 10.0  # 3-month price return at/above this = notable
-                                        # positive momentum, best-guess starting point.
+# warnings, never "this looks worth a look" positive signals. Rebuilt 2026-07-19, same
+# day, after Shaun called out the first version's arbitrary thresholds ("research a
+# bunch of tests and mental models that expert and successful traders use") — every
+# threshold below is the ACTUAL stated criterion from the matching
+# investments/briefs-finance/principles/*.md file, not invented. PE_CHEAP_THRESHOLD
+# (above) is reused as Graham's fallback leg when P/B is unavailable.
+OPPORTUNITY_GRAHAM_NUMBER_MAX = 22.5  # graham.md: "combined P/E x P/B < 22.5" — the
+                                        # actual Graham Number formula from The
+                                        # Intelligent Investor, not an arbitrary cutoff.
+OPPORTUNITY_MIN_PLAUSIBLE_PB = 0.1  # yfinance's priceToBook is unreliable for
+                                      # dual-share-class companies (verified against
+                                      # BRK-B: book value from the wrong share class
+                                      # produced P/B=0.00097) — treat anything below
+                                      # this floor as bad data, not a real signal.
+OPPORTUNITY_PEG_MAX = 1.0  # lynch.md: "PEG ratio... PEG < 1 is attractive."
+OPPORTUNITY_ROE_MIN_PCT = 15.0  # buffett.md: "High return on equity (15%+
+                                  # consistently)"; smith.md: "ROCE consistently above
+                                  # 15%" — same number, independently stated twice.
+OPPORTUNITY_DIP_FLAG_PCT = 10.0  # marks.md/neilson.md: contrarian "unloved... out of
+                                   # favour" / "discount... for non-structural
+                                   # reasons" — magnitude is still a best-guess
+                                   # starting point (the principle files don't state a
+                                   # specific %), but the direction and "no other
+                                   # active flags" gate are the sourced part.
 OPPORTUNITY_SCORE_FLAG = 70  # Briefs Finance likelihood score at/above this = high
                                # conviction, best-guess starting point (0-100 scale).
 

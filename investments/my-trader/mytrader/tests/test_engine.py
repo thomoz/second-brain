@@ -106,7 +106,7 @@ def test_refresh_backtest_for_ticker_swallows_exceptions(monkeypatch):
     engine._refresh_backtest_for_ticker("VRTX")  # must not raise
 
 
-def test_run_assessment_passes_score_and_recent_return_to_opportunity_check(db_conn, monkeypatch):
+def test_run_assessment_passes_other_checks_and_score_to_opportunity_check(db_conn, monkeypatch):
     monkeypatch.setattr(
         "mytrader.market_data.fetch_ticker_data",
         lambda ticker: TickerData(ticker=ticker, info={"trailingPE": 8.0}, dividends=None),
@@ -115,15 +115,39 @@ def test_run_assessment_passes_score_and_recent_return_to_opportunity_check(db_c
         "mytrader.engine._lookup_or_compute_briefs_finance_score",
         lambda ticker, conn: {"score": 85, "provisional": False, "computed_at": "x"},
     )
-    monkeypatch.setattr("mytrader.engine.return_data.fetch_recent_return_pct", lambda ticker, period="3mo": 15.0)
+    monkeypatch.setattr("mytrader.engine.return_data.fetch_recent_return_pct", lambda ticker, period="3mo": -15.0)
 
     result = engine.run_assessment("VRTX", db_conn)
 
     opp = next(c for c in result["checks"] if c.name == "opportunity")
     assert opp.verdict == "interesting"
-    assert "PE 8.0" in opp.detail
-    assert "15.0%" in opp.detail
+    assert "Graham" in opp.detail
+    assert "Marks/Neilson" in opp.detail
+    assert "Briefs Finance" in opp.detail
     assert "85/100" in opp.detail
+
+
+def test_run_assessment_opportunity_suppressed_when_valuation_flags(db_conn, monkeypatch):
+    """End-to-end check that engine.py actually wires the other 7 checks into
+    opportunity.check() — a real rich-PE valuation flag from the same assessment
+    should suppress the opportunity signal, even with a strong Briefs Finance score."""
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(ticker=ticker, info={"trailingPE": 60.0}, dividends=None),
+    )
+    monkeypatch.setattr(
+        "mytrader.engine._lookup_or_compute_briefs_finance_score",
+        lambda ticker, conn: {"score": 90, "provisional": False, "computed_at": "x"},
+    )
+    monkeypatch.setattr("mytrader.engine.return_data.fetch_recent_return_pct", lambda ticker, period="3mo": -15.0)
+
+    result = engine.run_assessment("VRTX", db_conn)
+
+    valuation_check = next(c for c in result["checks"] if c.name == "valuation")
+    assert valuation_check.verdict == "flag"
+    opp = next(c for c in result["checks"] if c.name == "opportunity")
+    assert opp.verdict == "ok"
+    assert "Active risk flag" in opp.detail
 
 
 def test_run_assessment_score_stays_none_when_no_recommendation_exists(db_conn, monkeypatch):

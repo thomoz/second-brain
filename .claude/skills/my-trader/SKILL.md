@@ -108,21 +108,52 @@ everything you have at assessing it."
 
 ## Opportunity Signal
 
-`checks/opportunity.py` — confirmed 2026-07-19 after Shaun pointed out Monitor only
-ever told him what to avoid, never what to be interested in. Looks at the candidate
-alone (deliberately does NOT compare against existing same-sector holdings — Shaun:
-"it doesn't matter if I have another holding in the same sector... I can make the
-choice myself by asking you to deeply compare them"): PE at/below
-`config.PE_CHEAP_THRESHOLD`, 3-month price return at/above
-`config.OPPORTUNITY_MOMENTUM_FLAG_PCT` (10%, gated — suppressed when the stock is
-already flagged rich by its own PE, fixed 2026-07-19 after ASML was called
-"interesting" purely on momentum while carrying an open valuation alert in the same
-report — a run-up on an already-expensive stock is a caution signal, not upside), or
-Briefs Finance score at/above `config.OPPORTUNITY_SCORE_FLAG` (70). Any one firing sets `verdict="interesting"`
-with all matching reasons listed. Rendered by Monitor as a live snapshot every run
-(not deduped through `alert_history` like the risk checks — Shaun wants to see it
-every run while it's true, not just once). Only applies to `status="discussed"`
-watchlist rows, never holdings (you already own those).
+`checks/opportunity.py`. Confirmed 2026-07-19 after Shaun pointed out Monitor only
+ever told him what to avoid, never what to be interested in. First version used
+invented thresholds (raw PE cutoff, "price up 10%") and Shaun called it out directly:
+"research a bunch of tests and mental models that expert and successful traders use,
+otherwise this whole tool is a waste of time." Rebuilt the same day from
+`investments/briefs-finance/principles/*.md` (the 9 investor-principle files already
+in this codebase) — every threshold below is that principle's own literal stated
+criterion, not invented:
+
+- **Graham** — PE × P/B < 22.5 (the actual Graham Number formula; falls back to plain
+  PE ≤ `PE_CHEAP_THRESHOLD` if P/B is unavailable). Graham's own file explicitly
+  states "price momentum does not [matter]" for value signals — direct confirmation
+  the original momentum-only design was wrong in principle, not just in the ASML edge
+  case.
+- **Lynch** — PEG ≤ `OPPORTUNITY_PEG_MAX` (1.0), his literal "growth at a reasonable
+  price" threshold.
+- **Buffett/Smith** — ROE ≥ `OPPORTUNITY_ROE_MIN_PCT` (15%, both files independently
+  state this exact number) AND not already valuation-rich — quality at a fair price,
+  not quality at any price.
+- **Marks/Neilson** — price down ≥ `OPPORTUNITY_DIP_FLAG_PCT` (10%) over 3 months,
+  answering Shaun's own follow-up ("a stock can be an opportunity if its price is
+  falling") — a decline is only a signal when nothing else is actively wrong, which
+  the gate below enforces. Magnitude is still a best-guess starting point; direction
+  and gating are the sourced part.
+- **Briefs Finance score** ≥ `OPPORTUNITY_SCORE_FLAG` (70, unchanged).
+
+**Gate (Marks' risk-first framing / Munger's inversion)**: ALL signals above are
+suppressed if the ticker has any active `"flag"` verdict among the other 7 checks in
+the same assessment (dividend cut, balance sheet stress, rich valuation) —
+`concentration` is explicitly excluded from this gate, since Shaun already ruled
+sector overlap out of scope here ("it doesn't matter if I have another holding in the
+same sector... I can make the choice myself by asking you to deeply compare them").
+This is what caught and fixed the ASML case (was flagged "interesting" purely on
+momentum while its own valuation check was actively flagging it rich in the same
+report) more robustly than the first patch — any active flag suppresses everything,
+not just a PE-specific carve-out on the momentum leg.
+
+Multiple signals firing together get a "(N independent signals)" note per Munger's
+confluence framing. Rendered by Monitor as a live snapshot every run (not deduped
+through `alert_history` like the risk checks — Shaun wants to see it every run while
+it's true, not just once). Only applies to `status="discussed"` watchlist rows, never
+holdings (extending to holdings was proposed but not yet confirmed by Shaun).
+
+**Standing rule**: nothing in this tool ever auto-removes a watchlist/holdings row as
+a side effect of an assessment — Shaun: "you shouldn't auto-delete things from the
+watchlist after you give results - it's up to me to tell you to delete a stock."
 
 ## Monitor
 

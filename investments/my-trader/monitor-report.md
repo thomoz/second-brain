@@ -19,7 +19,10 @@ No new material changes.
 - **LLY** (holdings) — valuation: PE 41.8 above rich threshold (35.0) (first flagged 2026-07-19)
 
 ### Watchlist Opportunities (this run)
-- **VRTX** — up +10.6% over the last 3 months
+- **NU** — Lynch [PEG 0.80 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 30.1% at/above 15.0%, not richly valued]; Marks/Neilson [down -10.0% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
+- **PMGOLD** — Marks/Neilson [down -14.6% over 3 months with no other flags — possible overreaction, not a fundamental problem]
+- **PMGOLD** — Marks/Neilson [down -14.6% over 3 months with no other flags — possible overreaction, not a fundamental problem]
+- **VRTX** — Buffett/Smith [ROE 24.2% at/above 15.0%, not richly valued]
 
 ### Macro Indicators (this run)
 - **move_index** [ok] — MOVE index at 70.9, below the flag threshold

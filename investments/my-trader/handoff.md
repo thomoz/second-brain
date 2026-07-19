@@ -2,6 +2,42 @@
 
 ## Status: Portfolio triage in progress; Phase A + B + C tool build COMPLETE (2026-07-19)
 
+**2026-07-19, same day — opportunity check rebuilt from real investing frameworks**:
+Shaun called out the first version directly: "You need to research a bunch of tests
+and mental models that expert and successful traders use, otherwise this whole tool
+is a waste of time." Also flagged the design was philosophically backwards — "a stock
+can be an opportunity if its price is falling" — the old design only ever rewarded
+rising prices. Rebuilt `checks/opportunity.py` entirely from
+`investments/briefs-finance/principles/*.md` (the 9 investor-principle files already
+in this codebase, previously only used by briefs-finance's own LLM scoring) — every
+threshold is that principle's own literal stated criterion:
+- **Graham**: actual Graham Number, PE × P/B < 22.5 (his file also explicitly states
+  "price momentum does not [matter]" — direct confirmation the old design was wrong
+  in principle).
+- **Lynch**: PEG ≤ 1.0.
+- **Buffett/Smith**: ROE ≥ 15% (both files independently state this exact number)
+  AND not already valuation-rich — quality at a fair price.
+- **Marks/Neilson**: price down ≥10% over 3 months, gated on nothing else being
+  wrong — directly answers Shaun's falling-price point.
+- Briefs Finance score ≥ 70 (unchanged).
+All legs now gated on "no active flag among the other 7 checks in the same
+assessment" (`concentration` excluded — Shaun ruled sector overlap out of scope
+earlier) — a more robust, principled version of the earlier ASML-only patch. 2+
+signals firing together get a "(N independent signals)" note (Munger's confluence).
+
+**Second real bug caught during verification**: BRK-B's yfinance `priceToBook` came
+back as 0.00097 — Berkshire's dual share classes (BRK-A/BRK-B, ~1500:1 price ratio)
+caused Yahoo to pair BRK-B's price with BRK-A's book value, producing a nonsense
+near-zero P/B that would have made an already-not-cheap PE 14.6 stock fire the Graham
+leg on garbage data. Added `OPPORTUNITY_MIN_PLAUSIBLE_PB = 0.1` floor. Verified live:
+BRK-B correctly shows no signal now; NU (3 signals: PEG 0.80, ROE 30.1%, down -10%),
+PMGOLD (down -14.6%, gold-price-driven), and VRTX (ROE 24.2%) all look sane.
+
+Also confirmed (standing rule, saved to memory): my-trader must never auto-remove a
+watchlist/holdings row as a side effect of any check or score — deletion is always an
+explicit user action. Holdings extension of the opportunity signal was proposed but
+not yet confirmed by Shaun. 165 tests passing, ruff/mypy clean.
+
 **2026-07-19, same day — momentum gated on valuation (opportunity check bug)**: Shaun
 caught it within minutes of the feature shipping — ASML was flagged "interesting"
 purely on +18.6% 3-month momentum while carrying an *open valuation alert* (PE 60.2,
