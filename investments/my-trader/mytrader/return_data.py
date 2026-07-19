@@ -57,12 +57,12 @@ def fetch_dividend_yield_pct(ticker: str) -> float | None:
     return pct
 
 
-def fetch_ten_year_return_pct(ticker: str) -> float | None:
+def _fetch_cumulative_return_pct(ticker: str, period: str) -> float | None:
     import yfinance as yf
 
     for candidate in (tickers.normalize(ticker), tickers.asx_variant(ticker)):
         try:
-            hist = yf.Ticker(candidate).history(period="10y", auto_adjust=True)
+            hist = yf.Ticker(candidate).history(period=period, auto_adjust=True)
         except Exception:
             continue
         if hist.empty or len(hist) < 2:
@@ -73,6 +73,16 @@ def fetch_ten_year_return_pct(ticker: str) -> float | None:
             continue
         return round((end / start - 1) * 100, 1)
     return None
+
+
+def fetch_ten_year_return_pct(ticker: str) -> float | None:
+    return _fetch_cumulative_return_pct(ticker, "10y")
+
+
+def fetch_recent_return_pct(ticker: str, period: str = "3mo") -> float | None:
+    """Short-window cumulative return — same adjusted-close approximation as
+    fetch_ten_year_return_pct, used by checks/opportunity.py as a momentum signal."""
+    return _fetch_cumulative_return_pct(ticker, period)
 
 
 def refresh_watchlist_return_data(conn) -> int:

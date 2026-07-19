@@ -6,7 +6,6 @@ Auto-generated from Briefs Finance's `recommendations` table by `sync-candidates
 |--------|---------|--------|--------|
 | FNV | Franco-Nevada | Gold royalty company positioned for stagflation protection, with EBITDA margins above 90%, zero debt, insulation from mining cost inflation, and shares trading well below prior highs alongside a pullback in gold. | 2026-07-19 |
 | KMI | Kinder Morgan | Large gas pipeline operator with fee-based revenues positioned to benefit from growing demand from AI data centers, power plants, and LNG exports, supported by a large future project backlog and recent profit growth. | 2026-07-19 |
-| NU | Nu Holdings | Digital-first Latin American bank with 135 million customers, profit up 41%, four million new customers in one quarter, and shares down about 24% in 2026 despite nearly 40% annual business expansion. | 2026-07-19 |
 | OKE | ONEOK | Natural gas pipeline and processing business with fee-based, long-term contracted cash flows, rising demand from data centers, power grid growth, and LNG exports, plus a dividend yield around 4.8%. | 2026-07-19 |
 | SOFI | SoFi Technologies | Market is pricing in noise instead of results for a profitable U.S. neobank with record sales, rapid membership and lending growth, and a bank charter that helps it hold up better in a high-rate environment. | 2026-07-19 |
 

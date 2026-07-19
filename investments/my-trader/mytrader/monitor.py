@@ -12,6 +12,13 @@ future re-flag raises a fresh one. Output is a standalone file only
 alert — no Second Brain daily-log or WhatsApp push, per tool-preplan.md's "output
 channel" decision.
 
+Also surfaces "Watchlist Opportunities" every run (confirmed 2026-07-19, Shaun: "I
+also want to know if I should be interested in a holding on the watchlist" — Monitor
+was previously only ever a list of things to worry about) — checks/opportunity.py's
+verdict="interesting" signal (cheap valuation, strong recent momentum, high Briefs
+Finance score) for status="discussed" watchlist rows, rendered as a live snapshot
+every run rather than deduped through alert_history like the risk checks.
+
 Also runs candidate_sync.sync_new_candidates() once per run (re-added 2026-07-19,
 same day it was first removed) -- this is safe to run unattended because it only
 ever writes to the separate pending_candidates staging table/
@@ -60,7 +67,14 @@ def _reconcile_alerts(
 
 def _process_row(
     row: sqlite3.Row, source_table: str, conn: sqlite3.Connection
-) -> list[dict[str, Any]]:
+) -> tuple[list[dict[str, Any]], Any]:
+    """Returns (new_alerts, opportunity_check). opportunity_check is the raw
+    CheckResult (or None) — the "interesting" verdict deliberately does NOT go
+    through _reconcile_alerts/alert_history (confirmed 2026-07-19, Shaun: "I also
+    want to know if I should be interested in a holding on the watchlist"): unlike
+    risk flags, which should go quiet after the first time so Shaun isn't renotified
+    of an unchanged risk, an opportunity signal should keep showing up every run
+    while it's still true — Shaun wants a live snapshot, not a one-time alert."""
     ticker = row["ticker"]
     bucket = row["bucket"]
     result = engine.run_assessment(ticker, conn)
@@ -70,7 +84,8 @@ def _process_row(
     expense_ratio = etf_check.data.get("expense_ratio") if etf_check else None
     db.touch_checked(conn, source_table, ticker, bucket, expense_ratio)
 
-    return new_alerts
+    opportunity_check = next((c for c in result["checks"] if c.name == "opportunity"), None)
+    return new_alerts, opportunity_check
 
 
 def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
@@ -84,15 +99,20 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
     watchlist = [w for w in db.get_all_watchlist(conn) if w["status"] == "discussed"]
 
     new_alerts: list[dict[str, Any]] = []
+    opportunities: list[dict[str, Any]] = []
     with market_data.cached_session():
         for row in holdings:
             try:
-                new_alerts.extend(_process_row(row, "holdings", conn))
+                row_alerts, _ = _process_row(row, "holdings", conn)
+                new_alerts.extend(row_alerts)
             except Exception as e:
                 print(f"[monitor] error checking holding {row['ticker']}: {e}")
         for row in watchlist:
             try:
-                new_alerts.extend(_process_row(row, "watchlist", conn))
+                row_alerts, opp_check = _process_row(row, "watchlist", conn)
+                new_alerts.extend(row_alerts)
+                if opp_check is not None and opp_check.verdict == "interesting":
+                    opportunities.append({"ticker": row["ticker"], "detail": opp_check.detail})
             except Exception as e:
                 print(f"[monitor] error checking watchlist {row['ticker']}: {e}")
 
@@ -114,6 +134,7 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
             {"name": c.name, "verdict": c.verdict, "detail": c.detail} for c in macro_checks
         ],
         "synced_candidates": synced_candidates,
+        "opportunities": opportunities,
     }
 
 
@@ -144,6 +165,13 @@ def render_report(result: dict[str, Any]) -> str:
             )
     else:
         lines.append("None.")
+
+    lines += ["", "### Watchlist Opportunities (this run)"]
+    if result["opportunities"]:
+        for o in result["opportunities"]:
+            lines.append(f"- **{o['ticker']}** — {o['detail']}")
+    else:
+        lines.append("Nothing standing out this run.")
 
     lines += ["", "### Macro Indicators (this run)"]
     if result["macro_checks"]:

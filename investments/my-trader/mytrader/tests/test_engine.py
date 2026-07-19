@@ -4,14 +4,18 @@ from mytrader import engine
 from mytrader.market_data import TickerData
 
 
-def test_run_assessment_includes_all_seven_checks(db_conn, monkeypatch):
+def test_run_assessment_includes_all_eight_checks(db_conn, monkeypatch):
     monkeypatch.setattr(
         "mytrader.market_data.fetch_ticker_data",
         lambda ticker: TickerData(ticker=ticker, info={"sector": "Healthcare", "trailingPE": 20.0}, dividends=None),
     )
     result = engine.run_assessment("VRTX", db_conn)
     assert result["ticker"] == "VRTX"
-    assert len(result["checks"]) == 7
+    assert len(result["checks"]) == 8
+    assert {c.name for c in result["checks"]} == {
+        "dividend", "valuation", "balance_sheet", "fx", "concentration",
+        "sector_risk", "etf_mechanics", "opportunity",
+    }
     assert result["excluded"] is False
     assert result["data_available"] is True
 
@@ -100,6 +104,26 @@ def test_refresh_backtest_for_ticker_swallows_exceptions(monkeypatch):
 
     monkeypatch.setattr("scripts.backtest.run_backtest", _boom)
     engine._refresh_backtest_for_ticker("VRTX")  # must not raise
+
+
+def test_run_assessment_passes_score_and_recent_return_to_opportunity_check(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(ticker=ticker, info={"trailingPE": 8.0}, dividends=None),
+    )
+    monkeypatch.setattr(
+        "mytrader.engine._lookup_or_compute_briefs_finance_score",
+        lambda ticker, conn: {"score": 85, "provisional": False, "computed_at": "x"},
+    )
+    monkeypatch.setattr("mytrader.engine.return_data.fetch_recent_return_pct", lambda ticker, period="3mo": 15.0)
+
+    result = engine.run_assessment("VRTX", db_conn)
+
+    opp = next(c for c in result["checks"] if c.name == "opportunity")
+    assert opp.verdict == "interesting"
+    assert "PE 8.0" in opp.detail
+    assert "15.0%" in opp.detail
+    assert "85/100" in opp.detail
 
 
 def test_run_assessment_score_stays_none_when_no_recommendation_exists(db_conn, monkeypatch):

@@ -2,6 +2,30 @@
 
 ## Status: Portfolio triage in progress; Phase A + B + C tool build COMPLETE (2026-07-19)
 
+**2026-07-19, same day — Opportunity signal (8th check) + Watchlist Opportunities
+report section**: Shaun pushed back hard on `monitor-report.md` only ever showing
+risk warnings ("did you think monitor-report was just for warning me... I also want
+to know if I should be interested in a holding on the watchlist"). Added
+`checks/opportunity.py`: looks at the candidate alone (cheap PE, strong 3-month price
+momentum via new `return_data.fetch_recent_return_pct`, high Briefs Finance score),
+`verdict="interesting"` when any fire. Deliberately does NOT compare against existing
+same-sector holdings — Shaun explicitly rejected that scope ("it doesn't matter if I
+have another holding in the same sector... I can make the choice myself by asking you
+to deeply compare them"), so `checks/concentration.py` was left untouched. Wired into
+`engine.run_assessment()` as an 8th check; `monitor.py` renders it as a live
+"Watchlist Opportunities" section every run — NOT deduped through `alert_history`
+like the risk checks, since Shaun wants to see it every run while it's true, not just
+once. Two new config thresholds (`OPPORTUNITY_MOMENTUM_FLAG_PCT=10.0`,
+`OPPORTUNITY_SCORE_FLAG=70`), both best-guess defaults per this session's established
+pattern. Verified live: ASML (+18.6%) and VRTX (+10.6%) both flagged for 3-month
+momentum on a real Monitor run. Also promoted NU into the real watchlist
+(`bucket=1`, `status="discussed"`) per Shaun's explicit request — first real Monitor
+alert on it was the sector-concentration flag (Financial Services, via the Visa
+holding), exactly the scenario that prompted the "it doesn't matter" pushback above.
+157 tests passing, ruff/mypy clean; the new `fetch_recent_return_pct` network call
+required its own global `conftest.py` stub (same leak-prevention pattern as backtest
+refresh and score computation) to keep the test suite hermetic.
+
 **2026-07-19, same day — ticker-scoped backtest refresh added to Find/Monitor, and a
 real test-isolation bug fully root-caused**: Shaun asked whether backtest should
 auto-run on Find too (it's cheap — yfinance price lookups only, no LLM calls, unlike

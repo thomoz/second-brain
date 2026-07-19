@@ -77,9 +77,9 @@ Note: use `uv run --directory <path> ...` rather than `cd`-ing into the director
   until explicitly promoted).
 - Strategy/criteria reference: `investments/my-trader/investment-strategy.md`
 
-## The 7 Assessment Checks
+## The 8 Assessment Checks
 
-Every `find` / `watchlist-add` runs all 7:
+Every `find` / `watchlist-add` runs all 8:
 
 | Check | What it looks at |
 |-------|-------------------|
@@ -90,29 +90,55 @@ Every `find` / `watchlist-add` runs all 7:
 | Concentration | Berkshire 13F overlap + candidate's sector vs. existing holdings |
 | Sector/geopolitical risk | Sector/industry vs. known active flashpoints |
 | ETF mechanics | Expense ratio baseline / drift (drift only detectable after a repeat check) |
+| Opportunity | Cheap valuation, strong 3-month momentum, or high Briefs Finance score — `verdict="interesting"` when any fire. Added 2026-07-19 (see "Opportunity Signal" below) |
+
+Also, on every `run_assessment()` call (Find or Monitor): a ticker-scoped
+`scripts.backtest.run_backtest(ticker_filter=...)` refresh (cheap — yfinance price
+lookups only, no LLM calls — runs every time, not cached, since outcome windows
+genuinely elapse) and a compute-if-missing Briefs Finance likelihood score (~9 haiku
+LLM calls, cached after the first time). Both added 2026-07-19, Shaun: "throw
+everything you have at assessing it."
 
 ## Two Distinct Find Actions
 
-- **Ephemeral lookup** ("what do you think of TICKER") — runs the 7 checks, reports
+- **Ephemeral lookup** ("what do you think of TICKER") — runs the 8 checks, reports
   back, persists nothing.
 - **Explicit watchlist-add** ("add TICKER to the watchlist") — same checks, plus writes
   a `watchlist` row (`status="discussed"`) and regenerates the markdown snapshots.
+
+## Opportunity Signal
+
+`checks/opportunity.py` — confirmed 2026-07-19 after Shaun pointed out Monitor only
+ever told him what to avoid, never what to be interested in. Looks at the candidate
+alone (deliberately does NOT compare against existing same-sector holdings — Shaun:
+"it doesn't matter if I have another holding in the same sector... I can make the
+choice myself by asking you to deeply compare them"): PE at/below
+`config.PE_CHEAP_THRESHOLD`, 3-month price return at/above
+`config.OPPORTUNITY_MOMENTUM_FLAG_PCT` (10%), or Briefs Finance score at/above
+`config.OPPORTUNITY_SCORE_FLAG` (70). Any one firing sets `verdict="interesting"`
+with all matching reasons listed. Rendered by Monitor as a live snapshot every run
+(not deduped through `alert_history` like the risk checks — Shaun wants to see it
+every run while it's true, not just once). Only applies to `status="discussed"`
+watchlist rows, never holdings (you already own those).
 
 ## Monitor
 
 Runs daily on a schedule (no chat trigger needed — it's automated, see "Setup" for the
 scheduler entries). Re-checks every `holdings` row and every `watchlist` row with
 `status="discussed"` (never `status="raw"` — Monitor doesn't discover new candidates,
-that stays a Find/conversation action). Reuses the same 7-check engine as Find.
+that stays a Find/conversation action). Reuses the same 8-check engine as Find.
 
 High-bar alerting: a check's first `flag` verdict for a given ticker/check creates one
 alert; repeated flags on later runs stay quiet (already open); a check clearing back to
-non-flag auto-acknowledges its open alert, so a future re-flag raises a fresh one.
+non-flag auto-acknowledges its open alert, so a future re-flag raises a fresh one. The
+`opportunity` check's `"interesting"` verdict is explicitly exempt from this dedup —
+see "Opportunity Signal" above.
 
 Output is a standalone file, `investments/my-trader/monitor-report.md` (full overwrite
-every run — new alerts this run + all currently-open alerts). A bare Windows toast
-notification fires only when there's at least one new alert (reuses
-`.claude/scripts/notifications.py`, same as heartbeat). No Second Brain daily-log entry
+every run — new alerts this run + all currently-open alerts + watchlist opportunities
+this run). A bare Windows toast notification fires only when there's at least one new
+alert (reuses `.claude/scripts/notifications.py`, same as heartbeat) — opportunities
+don't trigger a toast, only visible in the report. No Second Brain daily-log entry
 and no WhatsApp push — Monitor is a quieter, separate channel by design. Like Find,
 Monitor never suggests a specific trade action — advisor notes only.
 

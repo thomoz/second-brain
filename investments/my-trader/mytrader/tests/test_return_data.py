@@ -99,6 +99,32 @@ def test_fetch_ten_year_return_pct_computes_cumulative_return(monkeypatch):
     assert return_data.fetch_ten_year_return_pct("VRTX") == 100.0
 
 
+def test_fetch_recent_return_pct_computes_cumulative_return(monkeypatch):
+    # Calls _fetch_cumulative_return_pct directly, not the public
+    # fetch_recent_return_pct wrapper -- conftest.py's global
+    # _no_real_recent_return_fetch fixture stubs the latter (accessed via
+    # mytrader.engine.return_data.fetch_recent_return_pct, which mutates the shared
+    # return_data module attribute) for every test by default, since engine.py calls
+    # it as a real network fetch. The underlying helper is untouched by that stub.
+    import types
+
+    import pandas as pd
+
+    class _FakeTicker:
+        def __init__(self, symbol):
+            self.symbol = symbol
+
+        def history(self, period, auto_adjust):
+            assert period == "3mo"
+            return pd.DataFrame({"Close": [100.0, 115.0]})
+
+    fake_yf = types.ModuleType("yfinance")
+    fake_yf.Ticker = _FakeTicker
+    monkeypatch.setitem(__import__("sys").modules, "yfinance", fake_yf)
+
+    assert return_data._fetch_cumulative_return_pct("VRTX", "3mo") == 15.0
+
+
 def test_refresh_watchlist_return_data_updates_rows(db_conn, monkeypatch):
     db.upsert_watchlist_row(
         db_conn, ticker="VRTX", name="Vertex Pharmaceuticals", asset_type="stock", bucket="1",

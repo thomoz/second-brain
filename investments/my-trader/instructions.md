@@ -6,7 +6,7 @@
 - **Holdings** — what you actually own. Update by saying "I bought/sold X."
 - **Watchlist** (`watchlist.md`) — your personal "maybe" list. Only changes when you tell the second brain to explicitly add/remove something (can't be directly edited)  .
 - **Post-Crash AI Watch** — a section inside the watchlist for good AI companies you like but won't buy at today's prices. Same rule as the rest of the watchlist: it's rendered from the database, so you can't hand-edit it in the file — ask Claude, or run `watchlist-add`/`watchlist-remove`/`watchlist-move-bucket --to-bucket ai_postcrash` yourself.
-- **Monitor** — runs once a day by itself. Re-checks your holdings/watchlist for problems (dividend cuts, overvaluation, etc.) and 4 big-picture economic warning signs.
+- **Monitor** — runs once a day by itself. Re-checks your holdings/watchlist for problems (dividend cuts, overvaluation, etc.) and 4 big-picture economic warning signs. Also surfaces upside: a "Watchlist Opportunities" section flags candidates that look cheap, have strong recent momentum, or a high Briefs Finance score — shown every run while true, not just once.
 - **Briefs Finance sync** — a research feed that finds new stock ideas from reports. Runs automatically once a day (as part of Monitor), but never touches your real watchlist directly — new ideas always land in the pending-review pile first.
 - **Pending review** — new ideas from that sync sit here waiting for your thumbs up (add to watchlist) or thumbs down (bin it).
 
@@ -114,7 +114,7 @@ an explicit action.
 | `holdings.md` | Current positions (auto-generated, never hand-edit) |
 | `watchlist.md` | Your curated watchlist — vetted ("discussed") + raw candidates you've explicitly added, plus a separate "Post-Crash AI Watch" section for major AI-boom names you're deliberately not buying at current valuations. Never touched by automatic sync (auto-generated from the DB, never hand-edit) |
 | `synced-candidates-pending-review.md` | New Briefs Finance picks waiting for you to review — `promote-candidate` or `dismiss-candidate` each one (auto-generated, never hand-edit) |
-| `monitor-report.md` | Today's new/open alerts, macro indicators |
+| `monitor-report.md` | Today's new/open alerts, watchlist opportunities, macro indicators |
 | `investment-strategy.md` | Your own criteria + vetted late-cycle/warning-signal lessons |
 | `tool-preplan.md` | Full design scratchpad — checks, thresholds, open questions |
 | `handoff.md` | Build history / current status narrative |

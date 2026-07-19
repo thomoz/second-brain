@@ -1,4 +1,4 @@
-"""Assessment engine — aggregates all 7 checks + ethical filter + briefs-finance score lookup."""
+"""Assessment engine — aggregates all 8 checks + ethical filter + briefs-finance score lookup."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from typing import Any
 
 from scripts.ethical_filter import check_ticker as ethical_check
 
-from . import db, market_data, tickers
-from .checks import balance_sheet, concentration, dividend, etf_mechanics, fx, sector_risk, valuation
+from . import db, market_data, return_data, tickers
+from .checks import balance_sheet, concentration, dividend, etf_mechanics, fx, opportunity, sector_risk, valuation
 
 
 def _read_briefs_finance_score(ticker: str, conn: sqlite3.Connection) -> dict[str, Any] | None:
@@ -82,6 +82,10 @@ def run_assessment(ticker: str, conn: sqlite3.Connection) -> dict[str, Any]:
     excluded, exclusion_reason = ethical_check(normalized)
     existing_row = db.get_holding_row(conn, normalized) or db.get_watchlist_row(conn, normalized)
 
+    _refresh_backtest_for_ticker(normalized)
+    briefs_score = _lookup_or_compute_briefs_finance_score(normalized, conn)
+    recent_return_pct = return_data.fetch_recent_return_pct(normalized) if data is not None else None
+
     results = [
         dividend.check(data),
         valuation.check(data),
@@ -90,10 +94,8 @@ def run_assessment(ticker: str, conn: sqlite3.Connection) -> dict[str, Any]:
         concentration.check(data, conn),
         sector_risk.check(data),
         etf_mechanics.check(data, existing_row),
+        opportunity.check(data, briefs_score, recent_return_pct),
     ]
-
-    _refresh_backtest_for_ticker(normalized)
-    briefs_score = _lookup_or_compute_briefs_finance_score(normalized, conn)
 
     return {
         "ticker": normalized,

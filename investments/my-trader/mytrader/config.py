@@ -40,6 +40,14 @@ ROE_FLAG_THRESHOLD_PCT = 5.0  # balance_sheet.py's fallback proxy when debt/equi
                                 # current ratio are both unavailable (common for banks/
                                 # financials) — flag if return on equity is weak.
 
+# checks/opportunity.py — confirmed 2026-07-19: Monitor was only ever surfacing risk
+# warnings, never "this looks worth a look" positive signals. PE_CHEAP_THRESHOLD
+# (above) is reused as the valuation leg; these two are new.
+OPPORTUNITY_MOMENTUM_FLAG_PCT = 10.0  # 3-month price return at/above this = notable
+                                        # positive momentum, best-guess starting point.
+OPPORTUNITY_SCORE_FLAG = 70  # Briefs Finance likelihood score at/above this = high
+                               # conviction, best-guess starting point (0-100 scale).
+
 # Phase C — macro monitoring indicators (tool-preplan.md "Monitoring Indicators",
 # confirmed 2026-07-19). Thresholds below are best-guess defaults set during planning
 # without live data access — sanity-check against real fetched values at Task 5.4's

@@ -58,3 +58,12 @@ def _no_real_backtest_refresh(monkeypatch):
     forgetting to stub it — the same class of bug as the test_monitor.py real-file
     leak found 2026-07-19."""
     monkeypatch.setattr("mytrader.engine._refresh_backtest_for_ticker", lambda ticker: None)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_recent_return_fetch(monkeypatch):
+    """engine.run_assessment() calls return_data.fetch_recent_return_pct(), a real
+    yfinance network call (checks/opportunity.py's momentum signal) — global/autouse
+    for the same reason as the two fixtures above: don't let a real network call hit
+    every test in the suite by default."""
+    monkeypatch.setattr("mytrader.engine.return_data.fetch_recent_return_pct", lambda ticker, period="3mo": None)

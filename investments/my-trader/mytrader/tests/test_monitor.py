@@ -170,6 +170,7 @@ def test_render_report_lists_new_and_open_alerts():
         ],
         "macro_checks": [],
         "synced_candidates": [],
+        "opportunities": [],
     }
     report = monitor.render_report(result)
     assert "VRTX" in report
@@ -180,7 +181,7 @@ def test_render_report_lists_new_and_open_alerts():
 
     empty = {
         "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
-        "macro_checks": [], "synced_candidates": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
     }
     empty_report = monitor.render_report(empty)
     assert "No new material changes." in empty_report
@@ -192,7 +193,7 @@ def test_write_report_writes_to_configured_path(tmp_path, monkeypatch):
     monkeypatch.setattr("mytrader.monitor.config.MONITOR_REPORT_PATH", report_path)
     result = {
         "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
-        "macro_checks": [], "synced_candidates": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
     }
     monitor.write_report(result)
     assert report_path.exists()
@@ -238,6 +239,7 @@ def test_render_report_includes_macro_and_synced_candidates_sections():
         "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
         "macro_checks": [{"name": "move_index", "verdict": "ok", "detail": "MOVE index at 90.0"}],
         "synced_candidates": [{"ticker": "NVDA", "company_name": "NVIDIA Corp"}],
+        "opportunities": [{"ticker": "NU", "detail": "PE 8.0 at/below cheap threshold (12.0)"}],
     }
     report = monitor.render_report(result)
     assert "### Macro Indicators (this run)" in report
@@ -245,14 +247,63 @@ def test_render_report_includes_macro_and_synced_candidates_sections():
     assert "### New Candidates Synced (Pending Review)" in report
     assert "NVDA" in report
     assert "synced-candidates-pending-review.md" in report
+    assert "### Watchlist Opportunities (this run)" in report
+    assert "NU" in report
+    assert "PE 8.0" in report
 
     empty = {
         "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
-        "macro_checks": [], "synced_candidates": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
     }
     empty_report = monitor.render_report(empty)
     assert "Unavailable this run." in empty_report
     assert "None this run." in empty_report
+    assert "Nothing standing out this run." in empty_report
+
+
+def test_run_monitor_includes_watchlist_opportunity(db_conn, monkeypatch):
+    db.upsert_watchlist_row(
+        db_conn, ticker="NU", name="Nu Holdings", asset_type="stock", bucket="1",
+        status="discussed",
+    )
+    monkeypatch.setattr(
+        "mytrader.monitor.engine.run_assessment",
+        lambda ticker, conn: _fake_result(
+            [CheckResult(name="opportunity", verdict="interesting", detail="PE 8.0 at/below cheap threshold")]
+        ),
+    )
+    result = monitor.run_monitor(db_conn)
+    assert result["opportunities"] == [{"ticker": "NU", "detail": "PE 8.0 at/below cheap threshold"}]
+
+
+def test_run_monitor_excludes_non_interesting_opportunity(db_conn, monkeypatch):
+    db.upsert_watchlist_row(
+        db_conn, ticker="NU", name="Nu Holdings", asset_type="stock", bucket="1",
+        status="discussed",
+    )
+    monkeypatch.setattr(
+        "mytrader.monitor.engine.run_assessment",
+        lambda ticker, conn: _fake_result(
+            [CheckResult(name="opportunity", verdict="ok", detail="No standout positive signal this run")]
+        ),
+    )
+    result = monitor.run_monitor(db_conn)
+    assert result["opportunities"] == []
+
+
+def test_run_monitor_holdings_never_produce_opportunities(db_conn, monkeypatch):
+    """Opportunity signals only make sense for things you don't yet own — a holding
+    with an "interesting" opportunity check result should never surface in the
+    Watchlist Opportunities section."""
+    _seed_holding(db_conn)
+    monkeypatch.setattr(
+        "mytrader.monitor.engine.run_assessment",
+        lambda ticker, conn: _fake_result(
+            [CheckResult(name="opportunity", verdict="interesting", detail="PE 8.0 at/below cheap threshold")]
+        ),
+    )
+    result = monitor.run_monitor(db_conn)
+    assert result["opportunities"] == []
 
 
 def test_maybe_notify_skips_when_no_new_alerts(monkeypatch):

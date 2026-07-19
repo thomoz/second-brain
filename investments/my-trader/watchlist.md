@@ -22,6 +22,7 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 | KO | Coca-Cola Co | stock | 1 | 2.43% | +144% | Not yet discussed. Flagged "defensive?" |
 | LAND | Gladstone Land Corp | reit | 2 | 6.26% | +16% | Not yet discussed. Farmland REIT |
 | MCD | McDonald's Corp | stock | 1 | 2.65% | +175% | Not yet discussed. Flagged "defensive?" |
+| NU | Nu Holdings | stock | 1 | — | — | Digital-first Latin American bank with 135 million customers, profit up 41%, four million new customers in one quarter, and shares down about 24% in 2026 despite nearly 40% annual business expansion. |
 | OLLI | Ollie's Bargain Outlet | stock | 1 | — | +159% | Not yet discussed. Dollar-store category |
 | PALI | Palisades Goldcorp Ltd | stock | 2 | — | -100% | Not yet discussed (previously mislabeled as vetted, corrected 2026-07-19). Holds equity/warrant stakes in 100+ junior miners — diversified critical-metals exposure, not a pure gold play. Should be sized very small if ever confirmed |
 | PMGOLD | Perth Mint Gold Structured Product | etf | 3a | 0.00% | +224% | Confirmed — never-sell ballast, hold/sell rule = no formal rule (periodic check-in) |
