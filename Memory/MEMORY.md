@@ -8,7 +8,6 @@ _Active items and pointers to structured memory pages. Always loaded into sessio
 
 _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here; archive to decisions/ when done._
 
-- (Jun 17) VPS: secondbrain@137.184.102.104, dir /home/secondbrain/second-brain
 
 ## Entity Pages
 
