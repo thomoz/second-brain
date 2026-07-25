@@ -67,11 +67,15 @@ Note: use `uv run --directory <path> ...` rather than `cd`-ing into the director
   `recommendations`, `likelihood_scores` etc. — owned by briefs-finance)
 - Snapshots: `investments/my-trader/holdings.md`, `investments/my-trader/watchlist.md`
   (auto-regenerated after every write — never hand-edit these once the tool is in use).
-  `watchlist.md` renders two sections: "Watchlist" (everything else) and
-  "Post-Crash AI Watch" (watchlist rows with `bucket="ai_postcrash"` — major AI-boom
-  names with real moats that Shaun has deliberately chosen not to buy at current
-  AI-bubble valuations, kept for reconsideration if/when the sector corrects; see
-  `config.AI_POSTCRASH_BUCKET`).
+  `watchlist.md` renders three sections: "Watchlist" (everything else), "Bucket 4 —
+  Crash Discount Buys" (watchlist rows with `bucket="4"` — great, durable companies
+  Shaun wants to buy at a crash-driven discount rather than today's price; not timed
+  around a specific bubble and not a sell-after-recovery trade; migrates to Bucket 1
+  once actually bought; see `config.CRASH_DISCOUNT_BUCKET`), and "Post-Crash AI Watch"
+  (watchlist rows with `bucket="ai_postcrash"` — major AI-boom names with real moats
+  that Shaun has deliberately chosen not to buy at current AI-bubble valuations, kept
+  for reconsideration if/when the sector corrects; see `config.AI_POSTCRASH_BUCKET`).
+  Strategy bucket framework (1/2/3/4) is documented in `tool-preplan.md`.
 - Pending synced candidates: `investments/my-trader/synced-candidates-pending-review.md`
   (auto-regenerated from the `pending_candidates` table — separate from the watchlist
   until explicitly promoted).
@@ -92,6 +96,7 @@ Every `find` / `watchlist-add` runs all 9:
 | ETF mechanics | Expense ratio baseline / drift (drift only detectable after a repeat check) |
 | Opportunity | Grounded in real investor-principle criteria — `verdict="interesting"` when any fire, gated on no active flags elsewhere. Added 2026-07-19 (see "Opportunity Signal" below) |
 | Price action | Plain 1-month + 3-month price return, `verdict` always `"info"` — never a signal, just the fact. Added 2026-07-19 (see below) |
+| Crash resilience | Peak-to-trough drawdown in each of 4 fixed historical windows (2008 GFC, Dec 2018 correction, COVID 2020, 2022 bear market), `verdict` always `"info"`/`"unknown"` — retrospective context, not gated into opportunity's flag-suppression list. Added 2026-07-25 (see below) |
 
 Also, on every `run_assessment()` call (Find or Monitor): a ticker-scoped
 `scripts.backtest.run_backtest(ticker_filter=...)` refresh (cheap — yfinance price
@@ -102,7 +107,7 @@ everything you have at assessing it."
 
 ## Two Distinct Find Actions
 
-- **Ephemeral lookup** ("what do you think of TICKER") — runs the 9 checks, reports
+- **Ephemeral lookup** ("what do you think of TICKER") — runs the 10 checks, reports
   back, persists nothing.
 - **Explicit watchlist-add** ("add TICKER to the watchlist") — same checks, plus writes
   a `watchlist` row (`status="discussed"`) and regenerates the markdown snapshots.
@@ -168,12 +173,34 @@ holdings (extending to holdings was proposed but not yet confirmed by Shaun).
 a side effect of an assessment — Shaun: "you shouldn't auto-delete things from the
 watchlist after you give results - it's up to me to tell you to delete a stock."
 
+## Crash Resilience Check
+
+`crash_windows.py` + `checks/crash_resilience.py` — added 2026-07-25. Prompted by a
+real gap found comparing dollar-store tickers: FIVE and OLLI both "look like"
+defensive dollar stores by name but historically amplified market crashes ~2x (FIVE:
+-59.1% in COVID vs. the S&P 500's -33.9%), while DG (genuine consumables/staples
+business) barely dipped (-1.1%) — that distinction wasn't visible anywhere in the
+assessment until Shaun asked for it directly ("checks how well a stock has performed
+during the major crashes").
+
+Reports peak-to-trough drawdown over 4 fixed, well-documented broad-market windows —
+not company-specific dips, so the same windows apply to every ticker:
+- 2008 financial crisis (2007-10-01 → 2009-03-09)
+- Dec 2018 correction (2018-08-01 → 2018-12-31)
+- COVID crash (2020-01-01 → 2020-04-15)
+- 2022 bear market (2021-10-01 → 2022-12-31)
+
+A ticker that didn't exist yet for a given window (e.g. FIVE, IPO'd 2012, has no 2008
+data) is simply skipped for that window. `verdict` is always `"info"` (or `"unknown"`
+with no data) — retrospective context, not a live health signal, so it's deliberately
+NOT included in `opportunity.py`'s flag-suppression gate.
+
 ## Monitor
 
 Runs daily on a schedule (no chat trigger needed — it's automated, see "Setup" for the
 scheduler entries). Re-checks every `holdings` row and every `watchlist` row with
 `status="discussed"` (never `status="raw"` — Monitor doesn't discover new candidates,
-that stays a Find/conversation action). Reuses the same 9-check engine as Find.
+that stays a Find/conversation action). Reuses the same 10-check engine as Find.
 
 High-bar alerting: a check's first `flag` verdict for a given ticker/check creates one
 alert; repeated flags on later runs stay quiet (already open); a check clearing back to

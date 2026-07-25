@@ -2,6 +2,57 @@
 
 ## Status: Portfolio triage in progress; Phase A + B + C tool build COMPLETE (2026-07-19)
 
+**2026-07-25 — Bucket 4 added: "Crash Discount Buys"**: Prompted by the CPRT
+assessment (below) — a good moat business, reasonably priced today, that fit none of
+the three existing buckets (not overpriced like an AI-bubble name, not a
+sell-after-recovery trade like Bucket 2, no reason to "wait" like Bucket 1 already
+covers). Shaun: "the 4th bucket is for buying great companies that are highly likely
+to be around for a long time and to appreciate in value post crash at discount
+prices" — distinct from Post-Crash AI Watch (not scoped to one bubble) and Bucket 2
+(buy-and-hold once entered, not a timed trade). New `config.CRASH_DISCOUNT_BUCKET =
+"4"`, new "## Bucket 4 — Crash Discount Buys" section in `snapshot.py`'s
+`regenerate_watchlist_md` (same pattern as Post-Crash AI Watch), documented in
+`tool-preplan.md`. Moved via the now-fixed `watchlist-move-bucket` CLI (data-loss bug
+from earlier the same day, see below): KO and BRK-B (from Bucket 1), TSLA and UBER
+(from Post-Crash AI Watch) — all four are Shaun's own named examples ("coca cola,
+berkshire, uber, apple, tesla" — Apple/AAPL not yet on the watchlist, not added).
+Shaun: "i don't have a lot of shares and am lookin at entering the market at discount
+pricing. Once in, we can look at moving stocks into bucket 1" — confirms the intended
+lifecycle (Bucket 4 → buy the dip → Bucket 1 once actually held). CPRT itself stayed
+in Bucket 1, not Bucket 4 — its own case for waiting was already weak. 181 tests
+passing (1 new: snapshot.py bucket-4 section split, mirroring the existing
+post-crash-AI section test).
+
+**2026-07-25 — crash_resilience check (10th check), historical drawdown context**:
+Shaun asked to add a criterion checking how a stock has performed during major
+historical crashes, after a real gap surfaced comparing dollar-store tickers earlier
+in the week: FIVE and OLLI both "look like" defensive dollar stores by name but
+historically amplified market crashes ~2x (FIVE: -59.1% in COVID vs. the S&P 500's
+-33.9%), while DG (genuine consumables/staples business) barely dipped (-1.1%) — that
+distinction wasn't visible anywhere in the assessment. New `crash_windows.py`
+(peak-to-trough drawdown over 4 fixed windows: 2008 GFC, Dec 2018 correction, COVID
+2020, 2022 bear market — skips windows before a ticker's IPO) + `checks/
+crash_resilience.py` (`verdict` always `"info"`/`"unknown"`, deliberately NOT included
+in opportunity.py's flag-suppression gate — retrospective context, not a live health
+signal). Wired into engine.py's results list (10th check now). 180 tests passing (7
+new: balance_sheet ok-branch numbers, watchlist-move-bucket data-loss regression,
+negative-PE bug fix (2), crash_windows drawdown math (4) minus 1 consolidated,
+crash_resilience check behavior (3)). Verified live against FIVE/DG — exact match to
+the manual calculation done earlier in the week.
+
+Same session, two other real bugs found and fixed during a full-watchlist deep-dive
+(47 tickers): (1) `balance_sheet.py`'s "ok" branch showed a generic "within
+thresholds" message instead of the actual debt/equity and current ratio numbers —
+now always shows them, matching every other check. (2) `cmd_watchlist_move_bucket`
+(main.py) deleted the old (ticker, bucket) row and re-inserted for the new bucket via
+`upsert_watchlist_row`, which never touches dividend_yield_pct/ten_year_return_pct —
+silently wiped TSLA's and UBER's 10Y Return figures when moved to ai_postcrash.
+Fixed by carrying those two fields through via `update_watchlist_return_data`. (3) A
+third bug, found during the same sweep: TLT (bond ETF) showed PE -4226.0 and
+LAND/JOBY showed smaller negative PEs, all satisfying `pe <= PE_CHEAP_THRESHOLD` and
+firing the Graham opportunity signal as if a deeply negative (loss-making) PE were a
+bargain — both valuation.py and opportunity.py's Graham fallback now require pe > 0.
+
 **2026-07-19, same day — price_action check (9th check), plain informational price
 context**: Shaun asked about DG and noted "its gone up 11% in a month" — Find had
 shown nothing about it. Root cause: DG was +11.4% over 1 month but only -0.1% over 3

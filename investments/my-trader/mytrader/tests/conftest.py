@@ -67,3 +67,11 @@ def _no_real_recent_return_fetch(monkeypatch):
     for the same reason as the two fixtures above: don't let a real network call hit
     every test in the suite by default."""
     monkeypatch.setattr("mytrader.engine.return_data.fetch_recent_return_pct", lambda ticker, period="3mo": None)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_crash_drawdown_fetch(monkeypatch):
+    """engine.run_assessment() calls checks/crash_resilience.check(), which does its
+    own multi-year yfinance history() fetch via crash_windows.fetch_crash_drawdowns()
+    — global/autouse for the same reason as the two fixtures above."""
+    monkeypatch.setattr("mytrader.checks.crash_resilience.crash_windows.fetch_crash_drawdowns", lambda ticker: None)

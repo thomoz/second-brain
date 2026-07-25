@@ -84,7 +84,11 @@ def _watchlist_table(rows: list[sqlite3.Row]) -> list[str]:
 def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
     rows = db.get_all_watchlist(conn)
     postcrash = [r for r in rows if r["bucket"] == config.AI_POSTCRASH_BUCKET]
-    main_rows = [r for r in rows if r["bucket"] != config.AI_POSTCRASH_BUCKET]
+    crash_discount = [r for r in rows if r["bucket"] == config.CRASH_DISCOUNT_BUCKET]
+    main_rows = [
+        r for r in rows
+        if r["bucket"] not in (config.AI_POSTCRASH_BUCKET, config.CRASH_DISCOUNT_BUCKET)
+    ]
 
     lines = [
         "# Potential Holdings (Watchlist)",
@@ -100,6 +104,18 @@ def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
         "",
     ]
     lines += _watchlist_table(main_rows)
+    lines += [
+        "",
+        "## Bucket 4 — Crash Discount Buys",
+        "",
+        "Great, durable companies highly likely to still be around long-term — "
+        "waiting for a crash-driven discount to enter rather than buying at today's "
+        "price. Not timed around a specific bubble like Post-Crash AI Watch below, "
+        "and not a sell-after-recovery trade like Bucket 2. Once actually bought, "
+        "migrate to Bucket 1.",
+        "",
+    ]
+    lines += _watchlist_table(crash_discount)
     lines += [
         "",
         "## Post-Crash AI Watch",

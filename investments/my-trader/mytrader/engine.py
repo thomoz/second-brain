@@ -1,4 +1,4 @@
-"""Assessment engine — aggregates all 9 checks + ethical filter + briefs-finance score lookup."""
+"""Assessment engine — aggregates all 10 checks + ethical filter + briefs-finance score lookup."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from . import db, market_data, return_data, tickers
 from .checks import (
     balance_sheet,
     concentration,
+    crash_resilience,
     dividend,
     etf_mechanics,
     fx,
@@ -110,6 +111,7 @@ def run_assessment(ticker: str, conn: sqlite3.Connection) -> dict[str, Any]:
         *other_checks,
         opportunity.check(data, other_checks, briefs_score, recent_return_3mo),
         price_action.check(recent_return_1mo, recent_return_3mo),
+        crash_resilience.check(data),
     ]
 
     return {

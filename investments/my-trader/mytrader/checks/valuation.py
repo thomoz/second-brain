@@ -19,6 +19,8 @@ def check(data) -> CheckResult:
 
     if pe >= config.PE_RICH_THRESHOLD:
         verdict, detail = "flag", f"PE {pe:.1f} above rich threshold ({config.PE_RICH_THRESHOLD})"
+    elif pe < 0:
+        verdict, detail = "unknown", f"PE {pe:.1f} is negative (loss-making) — not a valid cheapness signal"
     elif pe <= config.PE_CHEAP_THRESHOLD:
         verdict, detail = "ok", f"PE {pe:.1f} at/below cheap threshold ({config.PE_CHEAP_THRESHOLD})"
     else:

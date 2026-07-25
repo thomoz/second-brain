@@ -31,3 +31,14 @@ def test_normal_pe_ok():
 def test_falls_back_to_forward_pe():
     data = TickerData(ticker="X", info={"forwardPE": 45.0}, dividends=None)
     assert valuation.check(data).verdict == "flag"
+
+
+def test_negative_pe_is_not_treated_as_cheap():
+    """Regression: found 2026-07-19 running a full watchlist sweep — TLT (bond ETF,
+    no real earnings) showed PE -4226.0 and JOBY/LAND (loss-making) showed smaller
+    negative PEs, all falling into the `pe <= PE_CHEAP_THRESHOLD` branch and getting
+    labeled "cheap". A negative PE means negative earnings, not a bargain."""
+    data = TickerData(ticker="X", info={"trailingPE": -4226.0}, dividends=None)
+    result = valuation.check(data)
+    assert result.verdict == "unknown"
+    assert "negative" in result.detail

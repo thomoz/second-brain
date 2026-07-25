@@ -64,6 +64,16 @@ def test_graham_falls_back_to_pe_when_pb_unavailable():
     assert "P/B unavailable" in result.detail
 
 
+def test_graham_pe_fallback_ignores_negative_pe():
+    """Real bug caught 2026-07-19 during a full-watchlist sweep: TLT (bond ETF) showed
+    trailingPE -4226.0, which satisfied `pe <= PE_CHEAP_THRESHOLD` and fired the Graham
+    fallback leg as if a deeply negative (loss-making) PE were a bargain. LAND and JOBY
+    showed the same pattern with smaller negative PEs."""
+    data = TickerData(ticker="TLT", info={"trailingPE": -4226.0}, dividends=None)
+    result = opportunity.check(data, [_OK], None, None)
+    assert result.verdict == "ok"
+
+
 def test_lynch_peg_flags_interesting():
     data = TickerData(ticker="X", info={"trailingPE": 20.0, "pegRatio": 0.8}, dividends=None)
     result = opportunity.check(data, [_OK], None, None)

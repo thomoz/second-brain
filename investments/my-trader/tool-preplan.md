@@ -433,6 +433,32 @@ no clear answer if half the position is never-sell and half is conditions-depend
 - Gold miners (GDX etc.) are a **separate product from gold itself** — they live in
   Bucket 2, not here — don't conflate when the tool encodes rules for each.
 
+### Bucket 4 — Crash Discount Buys (great companies, waiting for a crash-driven discount)
+**Added 2026-07-25.** Prompted by assessing CPRT (Copart): a genuinely good moat
+business, reasonably priced today, but one that historically amplifies broad-market
+crashes ~1.3x rather than resisting them — it fit neither Bucket 1 (no reason to wait,
+not overpriced) nor Post-Crash AI Watch (no bubble to wait out, not AI-related) nor
+Bucket 2 (not a sell-after-recovery trade). Shaun: "the 4th bucket is for buying great
+companies that are highly likely to be around for a long time and to appreciate in
+value post crash at discount prices" — distinct from all three existing categories:
+
+- **Not Bucket 1** — Bucket 1 buys accumulate now, regardless of price. Bucket 4
+  explicitly waits for a crash-driven discount rather than buying at today's price.
+  Shaun: "i don't have a lot of shares and am lookin at entering the market at
+  discount pricing." Once actually bought, a Bucket 4 position **migrates to Bucket
+  1** (it becomes a normal long-term hold once entered).
+- **Not Bucket 2** — Bucket 2 is a timed trade (buy the crash, sell after recovery).
+  Bucket 4 is buy-and-hold once entered, same as Bucket 1, just entered
+  opportunistically.
+- **Not Post-Crash AI Watch** — that bucket is scoped to one specific bubble (AI
+  valuations); Bucket 4 isn't waiting on any particular bubble to deflate, just a
+  general market-wide crash/discount.
+
+**Moved into Bucket 4 2026-07-25** (Shaun's explicit examples + confirmed move): KO
+(Coca-Cola), BRK-B (Berkshire Hathaway) — both moved from Bucket 1 — and TSLA, UBER —
+both moved from Post-Crash AI Watch. CPRT itself stayed in Bucket 1 (its own case for
+waiting was already weak — not overpriced today), not Bucket 4.
+
 ## Hold/Sell Rules
 
 **Confirmed 2026-07-19 — starting rule: no formal rule.** Just a periodic check-in

@@ -4,17 +4,18 @@ from mytrader import engine
 from mytrader.market_data import TickerData
 
 
-def test_run_assessment_includes_all_nine_checks(db_conn, monkeypatch):
+def test_run_assessment_includes_all_ten_checks(db_conn, monkeypatch):
     monkeypatch.setattr(
         "mytrader.market_data.fetch_ticker_data",
         lambda ticker: TickerData(ticker=ticker, info={"sector": "Healthcare", "trailingPE": 20.0}, dividends=None),
     )
     result = engine.run_assessment("VRTX", db_conn)
     assert result["ticker"] == "VRTX"
-    assert len(result["checks"]) == 9
+    assert len(result["checks"]) == 10
     assert {c.name for c in result["checks"]} == {
         "dividend", "valuation", "balance_sheet", "fx", "concentration",
         "sector_risk", "etf_mechanics", "opportunity", "price_action",
+        "crash_resilience",
     }
     assert result["excluded"] is False
     assert result["data_available"] is True

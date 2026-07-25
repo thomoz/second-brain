@@ -85,6 +85,34 @@ def test_upsert_watchlist_row_upserts_by_natural_key(db_conn):
     assert rows[0]["notes"] == "updated notes"
 
 
+def test_move_bucket_preserves_return_data(db_conn):
+    """Regression: cmd_watchlist_move_bucket (main.py) deletes the old (ticker, bucket)
+    row and inserts a fresh one for the new bucket via upsert_watchlist_row, which
+    never touches dividend_yield_pct/ten_year_return_pct. Found 2026-07-19 when moving
+    TSLA and UBER to the ai_postcrash bucket silently wiped their 10Y Return figures —
+    upsert_watchlist_row's INSERT branch leaves those columns NULL on a brand-new
+    (ticker, bucket) key. The real fix carries the values through via a follow-up
+    update_watchlist_return_data call; this locks in that the round trip preserves them."""
+    db.upsert_watchlist_row(
+        db_conn, ticker="TSLA", name="Tesla Inc", asset_type="stock", bucket="1",
+    )
+    db.update_watchlist_return_data(db_conn, "TSLA", "1", None, 2425.0)
+
+    row = db.get_watchlist_row(db_conn, "TSLA", "1")
+    db.delete_watchlist_row(db_conn, "TSLA", "1")
+    db.upsert_watchlist_row(
+        db_conn, ticker="TSLA", name=row["name"], asset_type=row["asset_type"],
+        bucket="ai_postcrash", status=row["status"], notes=row["notes"],
+        source=row["source"], last_expense_ratio=row["last_expense_ratio"],
+    )
+    db.update_watchlist_return_data(
+        db_conn, "TSLA", "ai_postcrash", row["dividend_yield_pct"], row["ten_year_return_pct"],
+    )
+
+    moved = db.get_watchlist_row(db_conn, "TSLA", "ai_postcrash")
+    assert moved["ten_year_return_pct"] == 2425.0
+
+
 def test_insert_pending_candidate_then_get_finds_it(db_conn):
     db.insert_pending_candidate(
         db_conn, ticker="NVDA", company_name="Nvidia", buy_thesis="AI chip demand",

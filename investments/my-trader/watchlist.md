@@ -7,7 +7,7 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 | Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |
 |--------|------|------|--------|----------|------------|--------|
 | AEM | Agnico Eagle Mines | stock | 2 | 1.20% | +192% | Not yet discussed. Individual gold miner |
-| BRK-B | Berkshire Hathaway Inc (Class B) | stock | 1 | — | +235% | Good candidate — proven capital allocation, diversified moats; watch succession (Abel) and index-fund overlap |
+| CPRT | Copart Inc | stock | 1 | — | — | Vehicle salvage/insurance auction near-duopoly (land-bank moat). Fair-price-today case, not a crash-timing trade: PE 17.4, clean balance sheet (D/E 1.1), ROE 17.6%, opportunity check fired 2 signals on a -15.8% 3mo dip. Crash-resilience check shows it amplifies broad-market crashes ~1.3x (COVID -43.8% vs S&P -33.9%, 2022 -35.4% vs S&P -25.4%) -- moat protects market position, not stock price, so doesn't fit the AI-postcrash 'wait for a bubble to deflate' framing either. |
 | DG | Dollar General | stock | 1 | 1.86% | +55% | Not yet discussed. Dollar-store category |
 | DLTR | Dollar Tree | stock | 1 | — | +32% | Not yet discussed. Dollar-store category |
 | DOLLARAMA | Dollarama Inc | stock | 1 | — | — | Not yet discussed. Dollar-store category — "taking over reject shop" |
@@ -19,18 +19,15 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 | HDV | iShares Core High Dividend ETF | etf | 1 | 2.90% | +142% | Candidate — quality/moat + high-dividend screen; broader than staples (24% staples, 24% healthcare, 20% energy). Check top-10 holdings + Berkshire overlap before committing |
 | IXI.AX | iShares Global Consumer Staples ETF | etf | 1 | 1.78% | +84% | Not yet discussed. Fee 0.41% |
 | JOBY | Joby Aviation | stock | 1 | — | -31% | Not yet discussed. Speculative |
-| KO | Coca-Cola Co | stock | 1 | 2.43% | +144% | Not yet discussed. Flagged "defensive?" |
 | LAND | Gladstone Land Corp | reit | 2 | 6.26% | +16% | Not yet discussed. Farmland REIT |
 | MCD | McDonald's Corp | stock | 1 | 2.65% | +175% | Not yet discussed. Flagged "defensive?" |
-| NU | Nu Holdings | stock | 1 | — | — | Digital-first Latin American bank with 135 million customers, profit up 41%, four million new customers in one quarter, and shares down about 24% in 2026 despite nearly 40% annual business expansion. |
+| NU | Nu Holdings | stock | 1 | — | +32% | Digital-first Latin American bank with 135 million customers, profit up 41%, four million new customers in one quarter, and shares down about 24% in 2026 despite nearly 40% annual business expansion. |
 | OLLI | Ollie's Bargain Outlet | stock | 1 | — | +159% | Not yet discussed. Dollar-store category |
 | PALI | Palisades Goldcorp Ltd | stock | 2 | — | -100% | Not yet discussed (previously mislabeled as vetted, corrected 2026-07-19). Holds equity/warrant stakes in 100+ junior miners — diversified critical-metals exposure, not a pure gold play. Should be sized very small if ever confirmed |
 | PMGOLD | Perth Mint Gold Structured Product | etf | 3a | 0.00% | +224% | Confirmed — never-sell ballast, hold/sell rule = no formal rule (periodic check-in) |
 | PMGOLD | Perth Mint Gold Structured Product | etf | 3b | 0.00% | +224% | Confirmed — same vehicle as core sleeve, tracked separately; conditions-dependent, hold/sell rule = no formal rule (periodic check-in) to start |
 | SCHD | Schwab US Dividend Equity ETF | etf | 1 | 3.30% | +223% | Candidate — dividend aristocrats-style ETF; not yet deeply discussed (no mechanics/overlap review done) |
 | TLT | iShares 20+ Year Treasury Bond ETF | etf | 2 | 2.56% | -19% | Not yet discussed. Situational — only helps in deflationary/rate-cutting crashes, not inflationary ones (e.g. 2022) |
-| TSLA | Tesla Inc | stock | 1 | — | +2425% | Not yet discussed. Previously held, position closed 2026-07-19; growth/volatile, not a classic moat-pricing-power profile |
-| UBER | Uber Technologies | stock | 1 | — | +74% | Not yet discussed. Flagged as a "likely growth stock" |
 | VAS | Vanguard ASX300 ETF (ASX, AU-domiciled) | etf | 1 | — | +135% | Not yet discussed. Broad index option — pick one (paired with VGS), depends on broker/domicile |
 | VDC | Vanguard Consumer Staples ETF | etf | 1 | 2.13% | +107% | Not yet discussed. Fee 0.09% |
 | VGS | Vanguard MSCI World ETF (ASX, AU-domiciled) | etf | 1 | — | +267% | Not yet discussed. Broad index option — pick one (paired with VAS), depends on broker/domicile |
@@ -42,6 +39,17 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 | WM | Waste Management Inc | stock | 2 | 1.41% | +326% | Not yet discussed. Flagged for possible re-homing to Bucket 1 (defensive utility-like business) |
 | XLP | Consumer Staples Select Sector SPDR ETF | etf | 1 | 2.02% | +100% | Not yet discussed. Fee 0.08%; also flagged for bucket re-homing |
 | XLU | Utilities Select Sector SPDR ETF | etf | unassigned | 4.29% | +138% | Not yet discussed. Sector/thematic |
+
+## Bucket 4 — Crash Discount Buys
+
+Great, durable companies highly likely to still be around long-term — waiting for a crash-driven discount to enter rather than buying at today's price. Not timed around a specific bubble like Post-Crash AI Watch below, and not a sell-after-recovery trade like Bucket 2. Once actually bought, migrate to Bucket 1.
+
+| Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |
+|--------|------|------|--------|----------|------------|--------|
+| BRK-B | Berkshire Hathaway Inc (Class B) | stock | 4 | — | +235% | Good candidate — proven capital allocation, diversified moats; watch succession (Abel) and index-fund overlap |
+| KO | Coca-Cola Co | stock | 4 | 2.43% | +144% | Not yet discussed. Flagged "defensive?" |
+| TSLA | Tesla Inc | stock | 4 | — | +2425% | Not yet discussed. Previously held, position closed 2026-07-19; growth/volatile, not a classic moat-pricing-power profile |
+| UBER | Uber Technologies | stock | 4 | — | +74% | Not yet discussed. Flagged as a "likely growth stock" |
 
 ## Post-Crash AI Watch
 
@@ -61,4 +69,4 @@ Major AI-boom names with real moats (chip/foundry monopoly, hyperscaler platform
 | SNDK | SanDisk | stock | ai_postcrash | — | +3663% | Major U.S.-listed NAND flash provider for AI long-term memory with sold-out enterprise inventory, rising margins, strong data center revenue growth, and a hard-to-replicate Kioxia manufacturing partnership. |
 | TSM | Taiwan Semiconductor Manufacturing Company Limited | stock | ai_postcrash | 2.93% | +1713% | Named as one of the companies powering AI that has been crushing it, fitting the report's AI chip supply-chain thesis. |
 
-Last auto-generated: 2026-07-19.
+Last auto-generated: 2026-07-25.

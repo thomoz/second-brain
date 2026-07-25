@@ -35,6 +35,15 @@ opportunity while it has a live, unresolved problem. concentration is explicitly
 excluded from this gate — Shaun already ruled sector overlap out of scope here
 ("it doesn't matter if I have another holding in the same sector... I can make the
 choice myself by asking you to deeply compare them").
+
+Fix history:
+- 2026-07-19: BRK-B's yfinance priceToBook (0.00097, a dual-share-class data mismatch)
+  made the Graham Number leg fire on garbage data — added OPPORTUNITY_MIN_PLAUSIBLE_PB
+  floor.
+- 2026-07-19: a full-watchlist sweep found TLT (PE -4226.0), LAND, and JOBY all firing
+  the Graham PE-fallback leg on deeply negative PE — negative PE means negative
+  earnings, not "cheap". The primary Graham-Number leg already required pe > 0; the
+  fallback leg didn't. Both valuation.py and this file's fallback now require pe > 0.
 """
 
 from __future__ import annotations
@@ -74,7 +83,7 @@ def check(
     pb_plausible = pb is not None and pb >= config.OPPORTUNITY_MIN_PLAUSIBLE_PB
     if pe is not None and pb_plausible and pe > 0 and pe * pb < config.OPPORTUNITY_GRAHAM_NUMBER_MAX:
         reasons.append(f"Graham [PE {pe:.1f} x P/B {pb:.2f} = {pe * pb:.1f}, below {config.OPPORTUNITY_GRAHAM_NUMBER_MAX}]")
-    elif pe is not None and pe <= config.PE_CHEAP_THRESHOLD:
+    elif pe is not None and 0 < pe <= config.PE_CHEAP_THRESHOLD:
         reasons.append(f"Graham [PE {pe:.1f} at/below cheap threshold ({config.PE_CHEAP_THRESHOLD}), P/B unavailable/implausible]")
 
     peg = data.info.get("pegRatio") or data.info.get("trailingPegRatio")

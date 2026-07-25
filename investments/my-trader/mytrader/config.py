@@ -19,6 +19,14 @@ AI_POSTCRASH_BUCKET = "ai_postcrash"  # watchlist bucket for major AI-boom names
                                        # sector corrects. Rendered as its own section
                                        # in watchlist.md by snapshot.py.
 
+CRASH_DISCOUNT_BUCKET = "4"  # Bucket 4, added 2026-07-25: great, durable companies
+                              # (KO, BRK-B, TSLA, UBER) Shaun wants to buy at a
+                              # crash-discount price rather than today's price — not
+                              # timed around a specific bubble like ai_postcrash, and
+                              # not a sell-after-recovery trade like Bucket 2. Once
+                              # actually bought, migrates to Bucket 1. Rendered as its
+                              # own section in watchlist.md by snapshot.py.
+
 BERKSHIRE_HOLDINGS: frozenset[str] = frozenset({
     # Manually maintained — update periodically from Berkshire's 13F filings
     # (quiverquant.com/insiders/berkshire-hathaway or cnbc.com/berkshire-hathaway-portfolio).

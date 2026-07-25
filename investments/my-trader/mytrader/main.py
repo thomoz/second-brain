@@ -69,7 +69,10 @@ def cmd_watchlist_remove(args) -> None:
 
 
 def cmd_watchlist_move_bucket(args) -> None:
-    from .db import delete_watchlist_row, get_all_watchlist, get_watchlist_row, upsert_watchlist_row
+    from .db import (
+        delete_watchlist_row, get_all_watchlist, get_watchlist_row,
+        update_watchlist_return_data, upsert_watchlist_row,
+    )
     from .snapshot import regenerate_all
     from .tickers import normalize
 
@@ -98,6 +101,10 @@ def cmd_watchlist_move_bucket(args) -> None:
         bucket=args.to_bucket, status=row["status"], notes=row["notes"],
         source=row["source"], last_expense_ratio=row["last_expense_ratio"],
     )
+    if row["dividend_yield_pct"] is not None or row["ten_year_return_pct"] is not None:
+        update_watchlist_return_data(
+            conn, ticker, args.to_bucket, row["dividend_yield_pct"], row["ten_year_return_pct"],
+        )
     regenerate_all(conn)
     conn.close()
     print(f"Moved {ticker} from bucket {row['bucket']} to {args.to_bucket}.")

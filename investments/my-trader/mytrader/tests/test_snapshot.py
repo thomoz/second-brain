@@ -88,6 +88,27 @@ def test_regenerate_watchlist_md_splits_post_crash_ai_section(db_conn, monkeypat
     assert "NVDA" in postcrash_section
 
 
+def test_regenerate_watchlist_md_splits_bucket_4_section(db_conn, monkeypatch, tmp_path):
+    _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
+
+    db.upsert_watchlist_row(
+        db_conn, ticker="VRTX", name="Vertex Pharmaceuticals Inc", asset_type="stock", bucket="1",
+        status="discussed", notes="Good candidate",
+    )
+    db.upsert_watchlist_row(
+        db_conn, ticker="KO", name="Coca-Cola Co", asset_type="stock", bucket="4",
+        status="raw", notes="Buy at a crash discount",
+    )
+    snapshot.regenerate_watchlist_md(db_conn)
+
+    content = watchlist_path.read_text(encoding="utf-8")
+    assert "## Bucket 4 — Crash Discount Buys" in content
+    watchlist_section, rest = content.split("## Bucket 4 — Crash Discount Buys")
+    assert "VRTX" in watchlist_section
+    assert "KO" not in watchlist_section
+    assert "KO" in rest
+
+
 def test_regenerate_all_writes_all_three_files(db_conn, monkeypatch, tmp_path):
     holdings_path, watchlist_path, pending_path = _patch_paths(monkeypatch, tmp_path)
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
