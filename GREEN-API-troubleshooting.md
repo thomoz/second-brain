@@ -61,6 +61,15 @@ to be layered. This doc exists so the next outage takes less than a full afterno
   it. We saw double ticks for over an hour with zero trace on the GREEN-API side; the fault was
   entirely in GREEN-API's relay, invisible to the tick marks.
 
+- **Check `incomingWebhook` is `yes`, even though this project doesn't use webhooks.** This is
+  cheap and should be checked early, alongside instance state:
+  ```
+  GET /waInstance{id}/getSettings/{token}
+  ```
+  Look at `incomingWebhook` specifically. See "Silent failure: `incomingWebhook` disabled"
+  below — this setting controls event generation, not just HTTP delivery, and being `no` looks
+  identical to every other silent-drop failure in this doc.
+
 - **Use the read-only message journal to inspect real traffic without racing the live bot**:
   ```
   GET /waInstance{id}/lastIncomingMessages/{token}?minutes=10
@@ -112,6 +121,32 @@ This catches the "poll loop quietly degrades" failure class (the
 It does **not** catch a total session outage that also breaks outbound
 `sendMessage` — that class would still need the tick-marks-aren't-proof
 lesson above and a manual check.
+
+## Silent failure: `incomingWebhook` disabled (found 2026-07-27)
+
+A test message showed double ticks on WhatsApp (delivered) and even appeared in the GREEN-API
+console's Chats view, but the bot never replied — no error in `whatsapp_runs.log`, and
+`lastIncomingMessages` came back empty even across a 24h window. A full logout + fresh QR
+rescan (see relinking steps above) made no difference.
+
+**Root cause:** the instance's `Receive webhooks on incoming messages and files` setting was
+`No`. This project deliberately never sets a `webhookUrl` and relies purely on polling
+(`receiveNotification`), so this looked irrelevant — but the setting is not just an HTTP
+delivery toggle. It's the master switch for whether GREEN-API generates
+`incomingMessageReceived` events *at all*. With it off, WhatsApp itself still received and
+displayed the message fine (that's a separate, always-on session sync — hence it showing in the
+console), but GREEN-API never created an event for it, so `receiveNotification` had nothing to
+dequeue. Same silent signature as every other failure in this doc: no crash, no log line, just
+quiet.
+
+**Fix:** in the GREEN-API console → instance → Webhooks, set
+`Receive webhooks on incoming messages and files` to `Yes`. Leave `Webhook Url` empty — this
+does not enable HTTP delivery, it only re-enables event generation for the polling queue to
+consume. Confirm via `getSettings`: `incomingWebhook` should read `yes`.
+
+**Lesson:** don't reason from "we don't use webhooks" to "webhook settings don't matter" —
+check `getSettings().incomingWebhook` as a first-pass diagnostic alongside `getStateInstance`,
+before chasing account-link or lid-format theories.
 
 ## Related
 
