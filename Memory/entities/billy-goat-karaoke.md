@@ -19,3 +19,4 @@ Hosted karaoke shows at venues across Sydney.
 
 ## Status
 Active
+- (Jul 26) Verify billygoatkaraoke.com.au expiry and renew if Crazy Domains email is legitimate
