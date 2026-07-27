@@ -101,3 +101,67 @@ def run_health_check() -> str | None:
         save_state(WHATSAPP_HEALTH_STATE_FILE, state)
 
     return None
+
+
+def check_session() -> dict[str, Any]:
+    """Query GREEN-API directly for the account link state via `getStateInstance`.
+
+    Deliberately independent of the bot process and the notification queue —
+    it still works even if the bot has crashed, or if the queue-based event
+    pipeline itself is misconfigured (see the `incomingWebhook` lesson in
+    GREEN-API-troubleshooting.md — that failure looked identical to this one
+    from the outside, so this check needs a signal that doesn't depend on the
+    same pipeline). `authorized: None` means the request itself failed
+    (network blip on this check) — treated as inconclusive, not a disconnect.
+    """
+    import requests
+
+    from config import WHATSAPP_API_TOKEN, WHATSAPP_INSTANCE_ID
+    from integrations.whatsapp import get_greenapi_base
+
+    if not WHATSAPP_INSTANCE_ID or not WHATSAPP_API_TOKEN:
+        return {"authorized": None, "state": ""}
+    try:
+        base = get_greenapi_base(WHATSAPP_INSTANCE_ID)
+        resp = requests.get(f"{base}/getStateInstance/{WHATSAPP_API_TOKEN}", timeout=15)
+        if resp.status_code != 200:
+            return {"authorized": None, "state": ""}
+        state = resp.json().get("stateInstance", "")
+        return {"authorized": state == "authorized", "state": state}
+    except Exception:
+        return {"authorized": None, "state": ""}
+
+
+def run_session_check() -> str | None:
+    """Alert on a NEW loss of GREEN-API session authorization (deduped in the
+    same state file as run_health_check, separate key). This is the "total
+    session outage" case that run_health_check's log-scanning explicitly
+    doesn't catch (see its docstring). The WhatsApp alert here is best-effort
+    only — if the session is genuinely down, sending over WhatsApp will also
+    fail; the toast/console channel is the fallback that still gets through.
+    """
+    from notifications import send_toast_notification, send_whatsapp_notification
+
+    result = check_session()
+    state = load_state(WHATSAPP_HEALTH_STATE_FILE)
+    was_alerted = state.get("session_alerted", False)
+
+    if result["authorized"] is False and not was_alerted:
+        message = (
+            f"⚠️ WhatsApp bot: GREEN-API session state is '{result['state']}', "
+            f"not authorized. The account is disconnected — see the relinking "
+            f"steps in GREEN-API-troubleshooting.md."
+        )
+        send_toast_notification("Second Brain: WhatsApp session disconnected", message)
+        send_whatsapp_notification(message)
+        state["session_alerted"] = True
+        state["session_alerted_at"] = now_local().isoformat()
+        save_state(WHATSAPP_HEALTH_STATE_FILE, state)
+        return message
+
+    if result["authorized"] is True and was_alerted:
+        state["session_alerted"] = False
+        state["session_recovered_at"] = now_local().isoformat()
+        save_state(WHATSAPP_HEALTH_STATE_FILE, state)
+
+    return None

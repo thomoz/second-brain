@@ -110,3 +110,103 @@ def test_run_health_check_clears_alert_on_recovery(tmp_path, monkeypatch):
 
     state = load_state(tmp_path / "state.json")
     assert state["alerted"] is False
+
+
+def test_check_session_authorized(monkeypatch):
+    class _Resp:
+        status_code = 200
+
+        def json(self):
+            return {"stateInstance": "authorized"}
+
+    monkeypatch.setattr("requests.get", lambda *a, **kw: _Resp())
+    import config
+
+    monkeypatch.setattr(config, "WHATSAPP_INSTANCE_ID", "123")
+    monkeypatch.setattr(config, "WHATSAPP_API_TOKEN", "tok")
+
+    result = wh.check_session()
+    assert result == {"authorized": True, "state": "authorized"}
+
+
+def test_check_session_not_authorized(monkeypatch):
+    class _Resp:
+        status_code = 200
+
+        def json(self):
+            return {"stateInstance": "starting"}
+
+    monkeypatch.setattr("requests.get", lambda *a, **kw: _Resp())
+    import config
+
+    monkeypatch.setattr(config, "WHATSAPP_INSTANCE_ID", "123")
+    monkeypatch.setattr(config, "WHATSAPP_API_TOKEN", "tok")
+
+    result = wh.check_session()
+    assert result == {"authorized": False, "state": "starting"}
+
+
+def test_check_session_request_failure_is_inconclusive(monkeypatch):
+    def _raise(*a, **kw):
+        raise ConnectionError("boom")
+
+    monkeypatch.setattr("requests.get", _raise)
+    import config
+
+    monkeypatch.setattr(config, "WHATSAPP_INSTANCE_ID", "123")
+    monkeypatch.setattr(config, "WHATSAPP_API_TOKEN", "tok")
+
+    result = wh.check_session()
+    assert result == {"authorized": None, "state": ""}
+
+
+def test_run_session_check_alerts_once_then_dedupes(tmp_path, monkeypatch):
+    monkeypatch.setattr(wh, "WHATSAPP_HEALTH_STATE_FILE", tmp_path / "state.json")
+    monkeypatch.setattr(wh, "check_session", lambda: {"authorized": False, "state": "starting"})
+
+    sent = []
+    monkeypatch.setattr(
+        "notifications.send_whatsapp_notification", lambda msg, **kw: sent.append(msg)
+    )
+    monkeypatch.setattr("notifications.send_toast_notification", lambda *a, **kw: None)
+
+    first = wh.run_session_check()
+    assert first is not None
+    assert len(sent) == 1
+
+    second = wh.run_session_check()
+    assert second is None
+    assert len(sent) == 1
+
+
+def test_run_session_check_inconclusive_never_alerts(tmp_path, monkeypatch):
+    monkeypatch.setattr(wh, "WHATSAPP_HEALTH_STATE_FILE", tmp_path / "state.json")
+    monkeypatch.setattr(wh, "check_session", lambda: {"authorized": None, "state": ""})
+
+    sent = []
+    monkeypatch.setattr(
+        "notifications.send_whatsapp_notification", lambda msg, **kw: sent.append(msg)
+    )
+    monkeypatch.setattr("notifications.send_toast_notification", lambda *a, **kw: None)
+
+    result = wh.run_session_check()
+    assert result is None
+    assert sent == []
+
+
+def test_run_session_check_clears_alert_on_recovery(tmp_path, monkeypatch):
+    monkeypatch.setattr(wh, "WHATSAPP_HEALTH_STATE_FILE", tmp_path / "state.json")
+    from shared import save_state
+
+    save_state(tmp_path / "state.json", {"session_alerted": True})
+    monkeypatch.setattr(wh, "check_session", lambda: {"authorized": True, "state": "authorized"})
+    monkeypatch.setattr("notifications.send_whatsapp_notification", lambda msg, **kw: None)
+    monkeypatch.setattr("notifications.send_toast_notification", lambda *a, **kw: None)
+
+    result = wh.run_session_check()
+
+    assert result is None
+    from shared import load_state
+
+    state = load_state(tmp_path / "state.json")
+    assert state["session_alerted"] is False

@@ -529,9 +529,10 @@ def run_heartbeat(dry_run: bool = False, force: bool = False, skip_guardrail: bo
     # the days it silently took before this existed — see whatsapp_health.py).
     if not dry_run:
         try:
-            from whatsapp_health import run_health_check
+            from whatsapp_health import run_health_check, run_session_check
 
             run_health_check()
+            run_session_check()
         except Exception as e:
             print(f"[{now_local()}] WhatsApp health check error (non-fatal): {e}")
 

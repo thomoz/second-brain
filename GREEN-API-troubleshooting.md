@@ -118,9 +118,18 @@ alerts once, not every cycle) — ~30min worst-case detection instead of days.
 This catches the "poll loop quietly degrades" failure class (the
 `receiveNotification` long-poll failing while quick one-shot calls like
 `getStateInstance` keep working — the exact pattern diagnosed 2026-07-25/26).
-It does **not** catch a total session outage that also breaks outbound
-`sendMessage` — that class would still need the tick-marks-aren't-proof
-lesson above and a manual check.
+
+A second check, `run_session_check()` (added same day), covers the other gap:
+a total session disconnect (the account gets logged out — the 2026-07-19
+outage). It calls `getStateInstance` directly every heartbeat cycle,
+independent of the bot process and the notification queue, and alerts (same
+dedup pattern) if the state isn't `authorized`. Deliberately calls the API
+directly rather than trusting the queue/event pipeline, since that pipeline
+is exactly what silently broke in the `incomingWebhook` incident below — a
+detector shouldn't depend on the same mechanism it's meant to catch failing.
+The WhatsApp side of the alert is best-effort only (if the session is truly
+down, that send will fail too); the toast/console channel is the fallback
+that still gets through.
 
 ## Silent failure: `incomingWebhook` disabled (found 2026-07-27)
 
