@@ -95,6 +95,24 @@ matching either format. This only guards the adapter's own identity check — it
 anything about GREEN-API's server-side relay behavior, which was the actual blocker in this
 outage.
 
+## Automated detection (added 2026-07-27)
+
+The bot going silent for days with nothing surfacing it (this outage, and the
+2026-07-19 one) was the real problem, more than any single root cause.
+`.claude/scripts/whatsapp_health.py` now runs on every heartbeat cycle
+(every 30 min, regardless of active-hours gating) and scans the bot's own log
+for a run of 3+ consecutive `WhatsApp poll error` lines since the last
+successfully processed message. On a new degradation it alerts via the
+existing WhatsApp/Toast notification channels (deduped so an ongoing outage
+alerts once, not every cycle) — ~30min worst-case detection instead of days.
+
+This catches the "poll loop quietly degrades" failure class (the
+`receiveNotification` long-poll failing while quick one-shot calls like
+`getStateInstance` keep working — the exact pattern diagnosed 2026-07-25/26).
+It does **not** catch a total session outage that also breaks outbound
+`sendMessage` — that class would still need the tick-marks-aren't-proof
+lesson above and a manual check.
+
 ## Related
 
 - Setup guide: [`GREEN-API (30 min).txt`](./GREEN-API%20(30%20min).txt)

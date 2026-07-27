@@ -81,6 +81,9 @@ python -c "import sys; sys.path.insert(0,'.claude/scripts'); from session_contex
 # Manual memory flush (replace paths as needed)
 python .claude/scripts/memory_flush.py <transcript_path> <session_id>
 
+# WhatsApp bot health check (dry run, no alert sent unless actually degraded)
+python -c "import sys; sys.path.insert(0,'.claude/scripts'); from whatsapp_health import check_health; print(check_health())"
+
 # Memory search (Phase 3)
 python .claude/scripts/memory_index.py              # Incremental re-index
 python .claude/scripts/memory_index.py --rebuild    # Force full reindex
