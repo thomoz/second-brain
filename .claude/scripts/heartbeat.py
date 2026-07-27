@@ -522,6 +522,19 @@ def run_heartbeat(dry_run: bool = False, force: bool = False, skip_guardrail: bo
 
     _start = time.time()
 
+    # WhatsApp bot health check — deterministic, no LLM call, runs on every
+    # invocation of this script regardless of active-hours/interval gating
+    # below (an outage matters at any hour; the systemd timer fires every 30
+    # min year-round, so this gives ~30min worst-case detection instead of
+    # the days it silently took before this existed — see whatsapp_health.py).
+    if not dry_run:
+        try:
+            from whatsapp_health import run_health_check
+
+            run_health_check()
+        except Exception as e:
+            print(f"[{now_local()}] WhatsApp health check error (non-fatal): {e}")
+
     # Active-hours gate
     if not force and not is_within_active_hours():
         print(f"[{now_local()}] Outside active hours, skipping heartbeat")

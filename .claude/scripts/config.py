@@ -134,6 +134,12 @@ HEARTBEAT_FILE = VAULT_DIR / "HEARTBEAT.md"
 # State file constants
 HEARTBEAT_STATE_FILE = STATE_DIR / "heartbeat-state.json"
 REFLECTION_STATE_FILE = STATE_DIR / "reflection-state.json"
+WHATSAPP_HEALTH_STATE_FILE = STATE_DIR / "whatsapp-health-state.json"
+
+# WhatsApp bot's own stdout/stderr log (path set via the systemd unit's
+# StandardOutput/StandardError=append: directives, not written by Python directly —
+# defined here so whatsapp_health.py doesn't hardcode a duplicate path).
+WHATSAPP_LOG_PATH = SCRIPTS_DIR / "whatsapp_runs.log"
 
 # Draft lifecycle constants (dirs already created in ensure_directories)
 DRAFTS_ACTIVE_DIR = ACTIVE_DRAFTS_DIR  # alias for clarity
