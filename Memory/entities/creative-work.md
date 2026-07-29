@@ -20,3 +20,4 @@ Free up 1-2 days/week for passion projects once income is stabilised.
 
 ## Status
 On hold — income stabilisation takes priority in short-medium term
+- (Jul 29) Sync Opp: Video Game | Regional Music due Fri 31 Jul 2026 5:00am AEST
