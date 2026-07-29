@@ -20,8 +20,15 @@ def fetch_yfinance_macro(snapshot_date: date) -> dict[str, float | None]:
     return result
 
 
-def fred_value_on(series_id: str, target: date) -> float | None:
-    """Fetch most recent FRED observation on or before target date."""
+def fred_observation_on(series_id: str, target: date) -> tuple[float, date] | None:
+    """Fetch most recent FRED (value, observation_date) on or before target date.
+
+    800-day lookback covers annual series with FRED's typical ~19-month publication
+    lag (e.g. MEHOINUSA672N median household income), not just monthly series like
+    UMCSENT/RECPROUSM156N. sort_order=desc + limit=1 means a wider window only reaches
+    further back for the latest value -- it never returns something staler than what a
+    narrower window would have found, so widening is safe for every existing caller.
+    """
     if not FRED_API_KEY:
         return None
     from datetime import timedelta
@@ -30,7 +37,7 @@ def fred_value_on(series_id: str, target: date) -> float | None:
             "https://api.stlouisfed.org/fred/series/observations",
             params={
                 "series_id": series_id,
-                "observation_start": (target - timedelta(days=45)).isoformat(),
+                "observation_start": (target - timedelta(days=800)).isoformat(),
                 "observation_end": target.isoformat(),
                 "sort_order": "desc",
                 "limit": 1,
@@ -40,10 +47,17 @@ def fred_value_on(series_id: str, target: date) -> float | None:
             timeout=10,
         )
         obs = r.json().get("observations", [])
-        val = obs[0]["value"] if obs else None
-        return float(val) if val and val != "." else None
+        if not obs or obs[0]["value"] == ".":
+            return None
+        return float(obs[0]["value"]), date.fromisoformat(obs[0]["date"])
     except Exception:
         return None
+
+
+def fred_value_on(series_id: str, target: date) -> float | None:
+    """Fetch most recent FRED observation value on or before target date."""
+    result = fred_observation_on(series_id, target)
+    return result[0] if result else None
 
 
 def fetch_fred_macro(snapshot_date: date) -> dict[str, float | None]:

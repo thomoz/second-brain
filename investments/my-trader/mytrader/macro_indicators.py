@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
-from scripts.macro import fred_value_on
+from scripts.macro import fred_observation_on, fred_value_on
 
 from . import config
 from .checks import CheckResult
@@ -64,48 +64,61 @@ def check_move_index() -> CheckResult:
 
 def check_housing_affordability() -> CheckResult:
     today = date.today()
-    price = fred_value_on(config.FRED_MEDIAN_HOME_PRICE_SERIES, today)
-    income = fred_value_on(config.FRED_MEDIAN_HOUSEHOLD_INCOME_SERIES, today)
-    if not price or not income:
+    price_obs = fred_observation_on(config.FRED_MEDIAN_HOME_PRICE_SERIES, today)
+    income_obs = fred_observation_on(config.FRED_MEDIAN_HOUSEHOLD_INCOME_SERIES, today)
+    if not price_obs or not income_obs:
         return CheckResult(
             name="housing_affordability", verdict="unknown",
             detail="FRED median home price / household income data unavailable "
                    "(FRED_API_KEY not set, or series unavailable)",
         )
+    price, price_date = price_obs
+    income, income_date = income_obs
     ratio = round(price / income, 2)
+    # income (annual, ~19mo publication lag) is almost always the stale side --
+    # surface both dates since they're rarely the same and the ratio is meaningless
+    # without knowing how current each side actually is.
+    as_of = f"price as of {price_date.isoformat()}, income as of {income_date.isoformat()}"
+    data = {
+        "ratio": ratio,
+        "price_date": price_date.isoformat(),
+        "income_date": income_date.isoformat(),
+    }
     if ratio >= config.HOUSING_P2I_FLAG_RATIO:
         return CheckResult(
             name="housing_affordability", verdict="flag",
-            detail=f"Housing price-to-income ratio at {ratio}x, at/above the "
+            detail=f"Housing price-to-income ratio at {ratio}x ({as_of}), at/above the "
                    f"{config.HOUSING_P2I_FLAG_RATIO}x stress threshold",
-            data={"ratio": ratio},
+            data=data,
         )
     return CheckResult(
         name="housing_affordability", verdict="ok",
-        detail=f"Housing price-to-income ratio at {ratio}x",
-        data={"ratio": ratio},
+        detail=f"Housing price-to-income ratio at {ratio}x ({as_of})",
+        data=data,
     )
 
 
 def check_consumer_sentiment() -> CheckResult:
-    value = fred_value_on(config.FRED_CONSUMER_SENTIMENT_SERIES, date.today())
-    if value is None:
+    obs = fred_observation_on(config.FRED_CONSUMER_SENTIMENT_SERIES, date.today())
+    if obs is None:
         return CheckResult(
             name="consumer_sentiment", verdict="unknown",
             detail="FRED UMich consumer sentiment data unavailable "
                    "(FRED_API_KEY not set, or series unavailable)",
         )
+    value, obs_date = obs
+    as_of = f"as of {obs_date.isoformat()}"
     if value <= config.CONSUMER_SENTIMENT_FLAG_LEVEL:
         return CheckResult(
             name="consumer_sentiment", verdict="flag",
-            detail=f"UMich consumer sentiment at {value:.1f}, at/below the "
+            detail=f"UMich consumer sentiment at {value:.1f} ({as_of}), at/below the "
                    f"{config.CONSUMER_SENTIMENT_FLAG_LEVEL:.0f} stress threshold",
-            data={"value": value},
+            data={"value": value, "as_of": obs_date.isoformat()},
         )
     return CheckResult(
         name="consumer_sentiment", verdict="ok",
-        detail=f"UMich consumer sentiment at {value:.1f}",
-        data={"value": value},
+        detail=f"UMich consumer sentiment at {value:.1f} ({as_of})",
+        data={"value": value, "as_of": obs_date.isoformat()},
     )
 
 
@@ -113,14 +126,16 @@ def check_recession_signal() -> CheckResult:
     today = date.today()
     prior = today - timedelta(days=config.STEEPENER_LOOKBACK_DAYS)
 
-    curve_now = fred_value_on(config.FRED_YIELD_CURVE_SERIES, today)
-    recession_prob = fred_value_on(config.FRED_RECESSION_PROB_SERIES, today)
-    if curve_now is None or recession_prob is None:
+    curve_obs = fred_observation_on(config.FRED_YIELD_CURVE_SERIES, today)
+    prob_obs = fred_observation_on(config.FRED_RECESSION_PROB_SERIES, today)
+    if curve_obs is None or prob_obs is None:
         return CheckResult(
             name="recession_signal", verdict="unknown",
             detail="FRED yield-curve / recession-probability data unavailable "
                    "(FRED_API_KEY not set, or series unavailable)",
         )
+    curve_now, curve_date = curve_obs
+    recession_prob, prob_date = prob_obs
 
     short_now = fred_value_on(config.FRED_2Y_TREASURY_SERIES, today)
     short_prior = fred_value_on(config.FRED_2Y_TREASURY_SERIES, prior)
@@ -139,14 +154,21 @@ def check_recession_signal() -> CheckResult:
         elif short_falling and long_rising:
             steepener = "mixed steepening (both ends moving)"
 
-    detail = f"10Y-2Y spread {curve_now:+.2f}pp, recession probability {recession_prob:.1f}%"
+    detail = (
+        f"10Y-2Y spread {curve_now:+.2f}pp (as of {curve_date.isoformat()}), "
+        f"recession probability {recession_prob:.1f}% (as of {prob_date.isoformat()})"
+    )
     if steepener:
         detail += f"; {steepener}"
 
     verdict = "flag" if recession_prob >= config.RECESSION_PROB_FLAG_PCT else "ok"
     return CheckResult(
         name="recession_signal", verdict=verdict, detail=detail,
-        data={"yield_curve": curve_now, "recession_prob": recession_prob, "steepener": steepener},
+        data={
+            "yield_curve": curve_now, "yield_curve_date": curve_date.isoformat(),
+            "recession_prob": recession_prob, "recession_prob_date": prob_date.isoformat(),
+            "steepener": steepener,
+        },
     )
 
 
