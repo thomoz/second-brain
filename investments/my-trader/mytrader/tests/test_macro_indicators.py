@@ -184,11 +184,45 @@ def test_check_recession_signal_no_steepener_classification_when_lookback_data_m
     assert "steepener" not in result.detail
 
 
-def test_run_all_returns_four_check_results(monkeypatch):
+def test_check_inflation_expectations_unknown_when_fred_unavailable(monkeypatch):
+    monkeypatch.setattr("mytrader.macro_indicators.fred_observation_on", lambda series_id, target: None)
+    result = macro_indicators.check_inflation_expectations()
+    assert result.verdict == "unknown"
+
+
+def test_check_inflation_expectations_flags_at_or_above_threshold(monkeypatch):
+    def _fake(series_id, target):
+        if series_id == config.FRED_BREAKEVEN_10Y_SERIES:
+            return 2.9, _D
+        if series_id == config.FRED_BREAKEVEN_5Y5Y_FORWARD_SERIES:
+            return config.INFLATION_EXPECTATION_FLAG_PCT, _D
+        return None
+
+    monkeypatch.setattr("mytrader.macro_indicators.fred_observation_on", _fake)
+    result = macro_indicators.check_inflation_expectations()
+    assert result.verdict == "flag"
+    assert "as of 2026-01-01" in result.detail
+
+
+def test_check_inflation_expectations_ok_below_threshold(monkeypatch):
+    def _fake(series_id, target):
+        if series_id == config.FRED_BREAKEVEN_10Y_SERIES:
+            return 2.2, _D
+        if series_id == config.FRED_BREAKEVEN_5Y5Y_FORWARD_SERIES:
+            return config.INFLATION_EXPECTATION_FLAG_PCT - 0.5, _D
+        return None
+
+    monkeypatch.setattr("mytrader.macro_indicators.fred_observation_on", _fake)
+    result = macro_indicators.check_inflation_expectations()
+    assert result.verdict == "ok"
+
+
+def test_run_all_returns_five_check_results(monkeypatch):
     monkeypatch.setattr("mytrader.macro_indicators._yfinance_latest_close", lambda ticker: None)
     monkeypatch.setattr("mytrader.macro_indicators.fred_observation_on", lambda series_id, target: None)
     results = macro_indicators.run_all()
-    assert len(results) == 4
+    assert len(results) == 5
     assert {r.name for r in results} == {
         "move_index", "housing_affordability", "consumer_sentiment", "recession_signal",
+        "inflation_expectations",
     }

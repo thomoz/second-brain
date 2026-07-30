@@ -10,6 +10,11 @@ detail text rather than being a 5th standalone check, per that section's own not
 that it's "a refinement to fold into the existing bullet," not an independently
 tested signal.
 
+check_inflation_expectations() (added 2026-07-30) is a later addition beyond
+tool-preplan.md's original 5-indicator list -- a market-implied/forward-looking
+complement to recession_signal's backward-looking yield-curve/recession-probability
+read and consumer_sentiment's survey-based read.
+
 FRED_YIELD_CURVE_SERIES/FRED_RECESSION_PROB_SERIES in config.py intentionally
 duplicate string values already present in briefs-finance's own
 scripts/config.py:FRED_SERIES — that dict is shaped for fetch_fred_macro()'s bulk
@@ -172,10 +177,43 @@ def check_recession_signal() -> CheckResult:
     )
 
 
+def check_inflation_expectations() -> CheckResult:
+    """Market-implied inflation expectations -- complements recession_signal's
+    yield-curve/recession-probability read (backward/coincident) with a forward-looking
+    signal: what the TIPS/breakeven market currently prices in for future inflation,
+    as opposed to check_consumer_sentiment's survey-based read or realized CPI.
+    """
+    today = date.today()
+    breakeven_obs = fred_observation_on(config.FRED_BREAKEVEN_10Y_SERIES, today)
+    forward_obs = fred_observation_on(config.FRED_BREAKEVEN_5Y5Y_FORWARD_SERIES, today)
+    if breakeven_obs is None or forward_obs is None:
+        return CheckResult(
+            name="inflation_expectations", verdict="unknown",
+            detail="FRED breakeven inflation data unavailable "
+                   "(FRED_API_KEY not set, or series unavailable)",
+        )
+    breakeven, breakeven_date = breakeven_obs
+    forward, forward_date = forward_obs
+
+    detail = (
+        f"10Y breakeven {breakeven:.2f}% (as of {breakeven_date.isoformat()}), "
+        f"5Y5Y forward {forward:.2f}% (as of {forward_date.isoformat()})"
+    )
+    verdict = "flag" if forward >= config.INFLATION_EXPECTATION_FLAG_PCT else "ok"
+    return CheckResult(
+        name="inflation_expectations", verdict=verdict, detail=detail,
+        data={
+            "breakeven_10y": breakeven, "breakeven_10y_date": breakeven_date.isoformat(),
+            "forward_5y5y": forward, "forward_5y5y_date": forward_date.isoformat(),
+        },
+    )
+
+
 def run_all() -> list[CheckResult]:
     return [
         check_move_index(),
         check_housing_affordability(),
         check_consumer_sentiment(),
         check_recession_signal(),
+        check_inflation_expectations(),
     ]

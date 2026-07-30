@@ -112,3 +112,20 @@ RECESSION_PROB_FLAG_PCT = 20.0  # tool-preplan.md: NY Fed model "~25-30% 12-mont
                                   # that observed level so Monitor already flags today.
 STEEPENER_LOOKBACK_DAYS = 90  # window for comparing short/long-end direction to
                                 # classify bull vs. bear steepening.
+
+# Added 2026-07-30 -- not part of tool-preplan.md's original 5-indicator Phase C list,
+# added on request as a market-implied (forward-looking) complement to the
+# already-tracked recession_prob/yield_curve signals, which are backward/coincident.
+FRED_BREAKEVEN_10Y_SERIES = "T10YIE"
+FRED_BREAKEVEN_5Y5Y_FORWARD_SERIES = "T5YIFR"  # Fed's own preferred longer-run
+                                                 # inflation-expectations gauge --
+                                                 # strips out near-term noise the 10Y
+                                                 # breakeven still carries.
+INFLATION_EXPECTATION_FLAG_PCT = 3.0  # live 2026-07-29 reading: 5Y5Y forward 2.28%,
+                                        # 10Y breakeven 2.26% -- both still anchored
+                                        # close to the Fed's 2% target despite CPI
+                                        # running at 4.2% (investment-strategy.md),
+                                        # meaning the bond market currently reads the
+                                        # inflation shock as transitory, not structural.
+                                        # Flag set with headroom above today's level so
+                                        # a genuine de-anchoring move would trigger it.
