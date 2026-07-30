@@ -10,10 +10,14 @@ detail text rather than being a 5th standalone check, per that section's own not
 that it's "a refinement to fold into the existing bullet," not an independently
 tested signal.
 
-check_inflation_expectations() (added 2026-07-30) is a later addition beyond
-tool-preplan.md's original 5-indicator list -- a market-implied/forward-looking
-complement to recession_signal's backward-looking yield-curve/recession-probability
-read and consumer_sentiment's survey-based read.
+check_inflation_expectations() and check_credit_spreads() (added 2026-07-30) are
+later additions beyond tool-preplan.md's original 5-indicator list --
+inflation_expectations is a market-implied/forward-looking complement to
+recession_signal's backward-looking yield-curve/recession-probability read and
+consumer_sentiment's survey-based read; credit_spreads is investment-strategy.md's
+"credit stress" job, previously flagged but never implemented. recession_signal also
+gained a folded-in 10Y-3M curve refinement (the Fed's own preferred inversion metric)
+at the same time, same treatment as the existing bull/bear steepener refinement.
 
 FRED_YIELD_CURVE_SERIES/FRED_RECESSION_PROB_SERIES in config.py intentionally
 duplicate string values already present in briefs-finance's own
@@ -159,19 +163,34 @@ def check_recession_signal() -> CheckResult:
         elif short_falling and long_rising:
             steepener = "mixed steepening (both ends moving)"
 
+    # 3m10y (the Fed's own preferred inversion metric) is a refinement on top of the
+    # 2s10s spread above, same treatment as the steepener classification -- optional,
+    # degrades gracefully (curve_now/recession_prob remain the required inputs).
+    curve_3m10y_obs = fred_observation_on(config.FRED_YIELD_CURVE_3M10Y_SERIES, today)
+
     detail = (
         f"10Y-2Y spread {curve_now:+.2f}pp (as of {curve_date.isoformat()}), "
         f"recession probability {recession_prob:.1f}% (as of {prob_date.isoformat()})"
     )
+    if curve_3m10y_obs is not None:
+        curve_3m10y, curve_3m10y_date = curve_3m10y_obs
+        detail += f"; 10Y-3M spread {curve_3m10y:+.2f}pp (as of {curve_3m10y_date.isoformat()})"
+        if curve_3m10y < 0:
+            detail += " (inverted)"
     if steepener:
         detail += f"; {steepener}"
 
-    verdict = "flag" if recession_prob >= config.RECESSION_PROB_FLAG_PCT else "ok"
+    verdict = "flag" if (
+        recession_prob >= config.RECESSION_PROB_FLAG_PCT
+        or (curve_3m10y_obs is not None and curve_3m10y_obs[0] < 0)
+    ) else "ok"
     return CheckResult(
         name="recession_signal", verdict=verdict, detail=detail,
         data={
             "yield_curve": curve_now, "yield_curve_date": curve_date.isoformat(),
             "recession_prob": recession_prob, "recession_prob_date": prob_date.isoformat(),
+            "yield_curve_3m10y": curve_3m10y_obs[0] if curve_3m10y_obs else None,
+            "yield_curve_3m10y_date": curve_3m10y_obs[1].isoformat() if curve_3m10y_obs else None,
             "steepener": steepener,
         },
     )
@@ -209,6 +228,37 @@ def check_inflation_expectations() -> CheckResult:
     )
 
 
+def check_credit_spreads() -> CheckResult:
+    """High-yield credit spread -- the bond market's own pricing of default risk,
+    investment-strategy.md's "credit stress" job (alongside recession_signal's
+    recession-onset job and the valuation checks in checks/valuation.py). Useful as a
+    counter-check against equity valuation gauges: spreads can stay tight even when
+    equity valuations look stretched, meaning credit markets aren't (yet) pricing in
+    the same stress.
+    """
+    obs = fred_observation_on(config.FRED_HY_OAS_SERIES, date.today())
+    if obs is None:
+        return CheckResult(
+            name="credit_spreads", verdict="unknown",
+            detail="FRED high-yield credit spread data unavailable "
+                   "(FRED_API_KEY not set, or series unavailable)",
+        )
+    value, obs_date = obs
+    as_of = f"as of {obs_date.isoformat()}"
+    if value >= config.CREDIT_SPREAD_FLAG_PCT:
+        return CheckResult(
+            name="credit_spreads", verdict="flag",
+            detail=f"ICE BofA US HY OAS at {value:.2f}pp ({as_of}), at/above the "
+                   f"{config.CREDIT_SPREAD_FLAG_PCT:.1f}pp stress threshold",
+            data={"value": value, "as_of": obs_date.isoformat()},
+        )
+    return CheckResult(
+        name="credit_spreads", verdict="ok",
+        detail=f"ICE BofA US HY OAS at {value:.2f}pp ({as_of})",
+        data={"value": value, "as_of": obs_date.isoformat()},
+    )
+
+
 def run_all() -> list[CheckResult]:
     return [
         check_move_index(),
@@ -216,4 +266,5 @@ def run_all() -> list[CheckResult]:
         check_consumer_sentiment(),
         check_recession_signal(),
         check_inflation_expectations(),
+        check_credit_spreads(),
     ]

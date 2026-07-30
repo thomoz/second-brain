@@ -129,3 +129,23 @@ INFLATION_EXPECTATION_FLAG_PCT = 3.0  # live 2026-07-29 reading: 5Y5Y forward 2.
                                         # inflation shock as transitory, not structural.
                                         # Flag set with headroom above today's level so
                                         # a genuine de-anchoring move would trigger it.
+
+# Added 2026-07-30 -- investment-strategy.md's "credit stress" job (alongside
+# valuation and recession-onset), previously flagged as a legitimate but
+# unimplemented indicator ("High-yield credit spread (OAS)... a counter-check
+# against the valuation metrics").
+FRED_HY_OAS_SERIES = "BAMLH0A0HYM2"  # ICE BofA US High Yield Index OAS
+CREDIT_SPREAD_FLAG_PCT = 5.0  # live 2026-07-28 reading: 2.84pp -- historically tight,
+                                # no stress priced in. >=5pp is a widely-cited "credit
+                                # markets pricing real stress" level (2008 peaked
+                                # ~20pp, COVID ~11pp), so this flags well before
+                                # crisis-level, not at it.
+
+FRED_YIELD_CURVE_3M10Y_SERIES = "T10Y3M"  # the Fed's own preferred yield-curve
+                                             # inversion metric (vs. the 2s10s already
+                                             # tracked above) -- folded into
+                                             # check_recession_signal() as an
+                                             # additional data point/flag trigger
+                                             # rather than a separate check, matching
+                                             # how the bull/bear steepener refinement
+                                             # was folded into that same check.

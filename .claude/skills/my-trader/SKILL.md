@@ -218,19 +218,24 @@ Monitor never suggests a specific trade action — advisor notes only.
 
 ## Macro Monitoring Indicators
 
-Every `monitor` run also runs 5 portfolio-wide checks (not per-ticker), once per run:
+Every `monitor` run also runs 6 portfolio-wide checks (not per-ticker), once per run:
 MOVE index (bond-market stress), housing price-to-income ratio, University of
-Michigan Consumer Sentiment Index, a recession-probability check whose detail
-text also classifies bull vs. bear yield-curve steepening (a refinement folded into
-that check, not a separate check), and market-implied inflation expectations
-(10Y breakeven + the Fed's own preferred 5Y5Y forward gauge, added 2026-07-30 as a
-forward-looking complement to the backward/coincident recession-probability check
-and survey-based consumer-sentiment check). These reuse the same high-bar alert-dedup
+Michigan Consumer Sentiment Index, a recession-probability check whose detail text
+also folds in the 10Y-3M curve (the Fed's own preferred inversion metric, flags on
+its own if inverted) and classifies bull vs. bear yield-curve steepening (both
+refinements folded into that one check, not separate checks), market-implied
+inflation expectations (10Y breakeven + the Fed's own preferred 5Y5Y forward gauge,
+added 2026-07-30 as a forward-looking complement to the backward/coincident
+recession-probability check and survey-based consumer-sentiment check), and
+high-yield credit spreads (ICE BofA US HY OAS, added 2026-07-30 — the bond market's
+own pricing of default risk, a counter-check against equity valuation gauges).
+These reuse the same high-bar alert-dedup
 mechanism as the per-ticker checks, via a `"MACRO"`/`"macro"` sentinel ticker/
 source_table pair in `alert_history`. Shown in `monitor-report.md`'s "Macro
 Indicators" section every run regardless of flag status (unlike per-ticker checks,
 which are only shown when flagged/open). FRED-backed checks (housing, sentiment,
-recession, inflation expectations) degrade to `"unknown"` if `FRED_API_KEY` is unset,
+recession, inflation expectations, credit spreads) degrade to `"unknown"` if
+`FRED_API_KEY` is unset,
 and each surfaces its FRED observation date in its detail text so a stale-but-real
 reading (e.g. annual household-income data, ~19-month publication lag) is never
 mistaken for a live number.

@@ -115,6 +115,41 @@ def test_check_recession_signal_flags_at_or_above_threshold(monkeypatch):
     assert "as of 2026-01-01" in result.detail
 
 
+def test_check_recession_signal_includes_3m10y_when_available(monkeypatch):
+    def _fake_obs(series_id, target):
+        if series_id == config.FRED_YIELD_CURVE_SERIES:
+            return 0.5, _D
+        if series_id == config.FRED_RECESSION_PROB_SERIES:
+            return 5.0, _D
+        if series_id == config.FRED_YIELD_CURVE_3M10Y_SERIES:
+            return 0.84, _D
+        return None
+
+    monkeypatch.setattr("mytrader.macro_indicators.fred_observation_on", _fake_obs)
+    monkeypatch.setattr("mytrader.macro_indicators.fred_value_on", lambda series_id, target: None)
+    result = macro_indicators.check_recession_signal()
+    assert "10Y-3M spread +0.84pp" in result.detail
+    assert "inverted" not in result.detail
+    assert result.verdict == "ok"
+
+
+def test_check_recession_signal_flags_when_3m10y_inverted_even_if_prob_below_threshold(monkeypatch):
+    def _fake_obs(series_id, target):
+        if series_id == config.FRED_YIELD_CURVE_SERIES:
+            return 0.5, _D
+        if series_id == config.FRED_RECESSION_PROB_SERIES:
+            return config.RECESSION_PROB_FLAG_PCT - 10.0, _D
+        if series_id == config.FRED_YIELD_CURVE_3M10Y_SERIES:
+            return -0.2, _D
+        return None
+
+    monkeypatch.setattr("mytrader.macro_indicators.fred_observation_on", _fake_obs)
+    monkeypatch.setattr("mytrader.macro_indicators.fred_value_on", lambda series_id, target: None)
+    result = macro_indicators.check_recession_signal()
+    assert "10Y-3M spread -0.20pp (as of 2026-01-01) (inverted)" in result.detail
+    assert result.verdict == "flag"
+
+
 def test_check_recession_signal_classifies_bull_steepener(monkeypatch):
     def _fake_obs(series_id, target):
         if series_id == config.FRED_YIELD_CURVE_SERIES:
@@ -217,12 +252,37 @@ def test_check_inflation_expectations_ok_below_threshold(monkeypatch):
     assert result.verdict == "ok"
 
 
-def test_run_all_returns_five_check_results(monkeypatch):
+def test_check_credit_spreads_unknown_when_fred_unavailable(monkeypatch):
+    monkeypatch.setattr("mytrader.macro_indicators.fred_observation_on", lambda series_id, target: None)
+    result = macro_indicators.check_credit_spreads()
+    assert result.verdict == "unknown"
+
+
+def test_check_credit_spreads_flags_at_or_above_threshold(monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.macro_indicators.fred_observation_on",
+        lambda series_id, target: (config.CREDIT_SPREAD_FLAG_PCT, _D),
+    )
+    result = macro_indicators.check_credit_spreads()
+    assert result.verdict == "flag"
+    assert "as of 2026-01-01" in result.detail
+
+
+def test_check_credit_spreads_ok_below_threshold(monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.macro_indicators.fred_observation_on",
+        lambda series_id, target: (config.CREDIT_SPREAD_FLAG_PCT - 2.0, _D),
+    )
+    result = macro_indicators.check_credit_spreads()
+    assert result.verdict == "ok"
+
+
+def test_run_all_returns_six_check_results(monkeypatch):
     monkeypatch.setattr("mytrader.macro_indicators._yfinance_latest_close", lambda ticker: None)
     monkeypatch.setattr("mytrader.macro_indicators.fred_observation_on", lambda series_id, target: None)
     results = macro_indicators.run_all()
-    assert len(results) == 5
+    assert len(results) == 6
     assert {r.name for r in results} == {
         "move_index", "housing_affordability", "consumer_sentiment", "recession_signal",
-        "inflation_expectations",
+        "inflation_expectations", "credit_spreads",
     }
