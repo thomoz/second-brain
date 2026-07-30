@@ -10,12 +10,14 @@ detail text rather than being a 5th standalone check, per that section's own not
 that it's "a refinement to fold into the existing bullet," not an independently
 tested signal.
 
-check_inflation_expectations() and check_credit_spreads() (added 2026-07-30) are
-later additions beyond tool-preplan.md's original 5-indicator list --
-inflation_expectations is a market-implied/forward-looking complement to
-recession_signal's backward-looking yield-curve/recession-probability read and
-consumer_sentiment's survey-based read; credit_spreads is investment-strategy.md's
-"credit stress" job, previously flagged but never implemented. recession_signal also
+check_inflation_expectations(), check_credit_spreads(), and check_australia_cpi()
+(added 2026-07-30) are later additions beyond tool-preplan.md's original
+5-indicator list -- inflation_expectations is a market-implied/forward-looking
+complement to recession_signal's backward-looking yield-curve/recession-probability
+read and consumer_sentiment's survey-based read; credit_spreads is
+investment-strategy.md's "credit stress" job, previously flagged but never
+implemented; australia_cpi reads directly from the ABS (mytrader/abs_cpi.py) since
+FRED's own AU CPI series turned out to be 18+ months stale. recession_signal also
 gained a folded-in 10Y-3M curve refinement (the Fed's own preferred inversion metric)
 at the same time, same treatment as the existing bull/bear steepener refinement.
 
@@ -34,7 +36,7 @@ from datetime import date, timedelta
 
 from scripts.macro import fred_observation_on, fred_value_on
 
-from . import config
+from . import abs_cpi, config
 from .checks import CheckResult
 
 
@@ -259,6 +261,36 @@ def check_credit_spreads() -> CheckResult:
     )
 
 
+def check_australia_cpi() -> CheckResult:
+    """Australia's own headline CPI (YoY), read directly from the ABS (see
+    mytrader/abs_cpi.py) rather than FRED's OECD-relay copy, which was found 18+
+    months stale (verified 2026-07-30). Flags outside the RBA's official 2-3%
+    inflation target band.
+    """
+    result = abs_cpi.fetch_australia_cpi_yoy()
+    if result is None:
+        return CheckResult(
+            name="australia_cpi", verdict="unknown",
+            detail="ABS CPI data unavailable (fetch/parse failed)",
+        )
+    value, ref_month = result
+    as_of = f"reference month {ref_month.isoformat()}"
+    data = {"value": value, "reference_month": ref_month.isoformat()}
+    if value < config.RBA_TARGET_BAND_LOW_PCT or value > config.RBA_TARGET_BAND_HIGH_PCT:
+        return CheckResult(
+            name="australia_cpi", verdict="flag",
+            detail=f"Australia headline CPI {value:.1f}% YoY ({as_of}), outside the "
+                   f"RBA's {config.RBA_TARGET_BAND_LOW_PCT:.0f}-"
+                   f"{config.RBA_TARGET_BAND_HIGH_PCT:.0f}% target band",
+            data=data,
+        )
+    return CheckResult(
+        name="australia_cpi", verdict="ok",
+        detail=f"Australia headline CPI {value:.1f}% YoY ({as_of}), within RBA target band",
+        data=data,
+    )
+
+
 def run_all() -> list[CheckResult]:
     return [
         check_move_index(),
@@ -267,4 +299,5 @@ def run_all() -> list[CheckResult]:
         check_recession_signal(),
         check_inflation_expectations(),
         check_credit_spreads(),
+        check_australia_cpi(),
     ]

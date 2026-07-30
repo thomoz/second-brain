@@ -149,3 +149,11 @@ FRED_YIELD_CURVE_3M10Y_SERIES = "T10Y3M"  # the Fed's own preferred yield-curve
                                              # rather than a separate check, matching
                                              # how the bull/bear steepener refinement
                                              # was folded into that same check.
+
+# Added 2026-07-30 -- FRED's own AU CPI series (AUSCPIALLQINMEI, via OECD relay) was
+# found 18+ months stale, so this reads directly from the ABS's own published
+# spreadsheet instead (see mytrader/abs_cpi.py). RBA_TARGET_BAND_* is the Reserve
+# Bank of Australia's official inflation target -- live 2026-07-30 reading (June
+# 2026 data): 3.8% YoY, already outside/above the band.
+RBA_TARGET_BAND_LOW_PCT = 2.0
+RBA_TARGET_BAND_HIGH_PCT = 3.0
