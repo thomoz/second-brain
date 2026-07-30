@@ -10,19 +10,21 @@ detail text rather than being a 5th standalone check, per that section's own not
 that it's "a refinement to fold into the existing bullet," not an independently
 tested signal.
 
-check_inflation_expectations(), check_credit_spreads(), check_australia_cpi(), and
-check_us_cpi() (added 2026-07-30) are later additions beyond tool-preplan.md's
-original 5-indicator list -- inflation_expectations is a market-implied/
-forward-looking complement to recession_signal's backward-looking yield-curve/
-recession-probability read and consumer_sentiment's survey-based read;
+check_inflation_expectations(), check_credit_spreads(), check_australia_cpi(),
+check_us_cpi(), and check_uk_cpi() (added 2026-07-30) are later additions beyond
+tool-preplan.md's original 5-indicator list -- inflation_expectations is a
+market-implied/forward-looking complement to recession_signal's backward-looking
+yield-curve/recession-probability read and consumer_sentiment's survey-based read;
 credit_spreads is investment-strategy.md's "credit stress" job, previously flagged
-but never implemented; australia_cpi reads directly from the ABS
-(mytrader/abs_cpi.py) since FRED's own AU CPI series turned out to be 18+ months
-stale; us_cpi is the realized/backward-looking counterpart to
-inflation_expectations' forward-looking breakeven read, via FRED's own CPIAUCSL
-with a units="pc1" transform. recession_signal also gained a folded-in 10Y-3M
-curve refinement (the Fed's own preferred inversion metric) at the same time, same
-treatment as the existing bull/bear steepener refinement.
+but never implemented; australia_cpi/uk_cpi read directly from the ABS/ONS
+(mytrader/abs_cpi.py, mytrader/ons_cpi.py) since FRED's own AU CPI series turned
+out to be 18+ months stale (UK was never tracked via FRED at all); us_cpi is the
+realized/backward-looking counterpart to inflation_expectations' forward-looking
+breakeven read, via FRED's own CPIAUCSL with a units="pc1" transform. Japan CPI
+deliberately parked (2026-07-30) -- e-Stat requires its own registered appId,
+same as FRED's key, not yet obtained. recession_signal also gained a folded-in
+10Y-3M curve refinement (the Fed's own preferred inversion metric) at the same
+time, same treatment as the existing bull/bear steepener refinement.
 
 FRED_YIELD_CURVE_SERIES/FRED_RECESSION_PROB_SERIES in config.py intentionally
 duplicate string values already present in briefs-finance's own
@@ -39,7 +41,7 @@ from datetime import date, timedelta
 
 from scripts.macro import fred_observation_on, fred_value_on
 
-from . import abs_cpi, config
+from . import abs_cpi, config, ons_cpi
 from .checks import CheckResult
 
 
@@ -326,6 +328,37 @@ def check_us_cpi() -> CheckResult:
     )
 
 
+def check_uk_cpi() -> CheckResult:
+    """UK headline CPI (YoY), read directly from the ONS's stable CSV endpoint
+    (mytrader/ons_cpi.py) -- same realized/backward-looking job as australia_cpi
+    and us_cpi. Flags outside a +/-1pp tolerance band around the BoE's 2% target
+    (a single point target, not an official band, same approximation as us_cpi).
+    """
+    result = ons_cpi.fetch_uk_cpi_yoy()
+    if result is None:
+        return CheckResult(
+            name="uk_cpi", verdict="unknown",
+            detail="ONS CPI data unavailable (fetch/parse failed)",
+        )
+    value, ref_month = result
+    as_of = f"reference month {ref_month.isoformat()}"
+    data = {"value": value, "reference_month": ref_month.isoformat()}
+    if value < config.UK_CPI_TARGET_BAND_LOW_PCT or value > config.UK_CPI_TARGET_BAND_HIGH_PCT:
+        return CheckResult(
+            name="uk_cpi", verdict="flag",
+            detail=f"UK headline CPI {value:.1f}% YoY ({as_of}), outside the "
+                   f"{config.UK_CPI_TARGET_BAND_LOW_PCT:.0f}-"
+                   f"{config.UK_CPI_TARGET_BAND_HIGH_PCT:.0f}% tolerance band around "
+                   f"the BoE's 2% target",
+            data=data,
+        )
+    return CheckResult(
+        name="uk_cpi", verdict="ok",
+        detail=f"UK headline CPI {value:.1f}% YoY ({as_of}), within tolerance band",
+        data=data,
+    )
+
+
 def run_all() -> list[CheckResult]:
     return [
         check_move_index(),
@@ -336,4 +369,5 @@ def run_all() -> list[CheckResult]:
         check_credit_spreads(),
         check_australia_cpi(),
         check_us_cpi(),
+        check_uk_cpi(),
     ]

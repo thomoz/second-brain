@@ -218,7 +218,7 @@ Monitor never suggests a specific trade action — advisor notes only.
 
 ## Macro Monitoring Indicators
 
-Every `monitor` run also runs 8 portfolio-wide checks (not per-ticker), once per run:
+Every `monitor` run also runs 9 portfolio-wide checks (not per-ticker), once per run:
 MOVE index (bond-market stress), housing price-to-income ratio, University of
 Michigan Consumer Sentiment Index, a recession-probability check whose detail text
 also folds in the 10Y-3M curve (the Fed's own preferred inversion metric, flags on
@@ -238,7 +238,12 @@ months until one resolves — self-healing against release-day timing without a
 hardcoded release calendar. Also US headline CPI (added 2026-07-30 — the realized/
 backward-looking counterpart to inflation_expectations' forward-looking breakeven
 read, via FRED's own CPIAUCSL with a `units="pc1"` transform for a ready-made YoY %;
-flags outside a +/-1pp tolerance band around the Fed's 2% target).
+flags outside a +/-1pp tolerance band around the Fed's 2% target), and UK headline
+CPI (added 2026-07-30, `mytrader/ons_cpi.py` — read directly from the ONS's stable
+CSV endpoint, which unlike ABS's file never moves — no release-month rollback
+logic needed; flags outside the same +/-1pp tolerance band around the BoE's 2%
+target). Japan CPI deliberately parked — e-Stat's API requires its own free
+registered `appId` (same pattern as FRED's key) that hasn't been obtained yet.
 These reuse the same high-bar alert-dedup
 mechanism as the per-ticker checks, via a `"MACRO"`/`"macro"` sentinel ticker/
 source_table pair in `alert_history`. Shown in `monitor-report.md`'s "Macro

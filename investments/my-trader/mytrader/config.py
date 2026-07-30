@@ -166,3 +166,11 @@ RBA_TARGET_BAND_HIGH_PCT = 3.0
 FRED_US_CPI_SERIES = "CPIAUCSL"
 US_CPI_TARGET_BAND_LOW_PCT = 1.0
 US_CPI_TARGET_BAND_HIGH_PCT = 3.0
+
+# Added 2026-07-30 -- UK CPI YoY read directly from the ONS (mytrader/ons_cpi.py),
+# same realized/backward-looking job as us_cpi/australia_cpi. BoE's target is a
+# single 2% point (like the Fed's, not an official band like the RBA's) -- same
+# +/-1pp tolerance approximation. Live 2026-07-30 reading (June 2026 data): 2.6%
+# YoY, within this band (unlike AU/US currently).
+UK_CPI_TARGET_BAND_LOW_PCT = 1.0
+UK_CPI_TARGET_BAND_HIGH_PCT = 3.0
