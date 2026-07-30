@@ -157,3 +157,12 @@ FRED_YIELD_CURVE_3M10Y_SERIES = "T10Y3M"  # the Fed's own preferred yield-curve
 # 2026 data): 3.8% YoY, already outside/above the band.
 RBA_TARGET_BAND_LOW_PCT = 2.0
 RBA_TARGET_BAND_HIGH_PCT = 3.0
+
+# Added 2026-07-30 -- US CPI YoY via FRED's own units="pc1" (percent change from
+# year ago) transform on the raw CPIAUCSL index, avoiding a second manual lookback
+# query. The Fed's target is a single 2% point (not an official band like the RBA's),
+# so this uses a commonly-cited +/-1pp tolerance range as a reasonable "comfortable"
+# band -- live 2026-07-30 reading (June 2026 data): 3.46% YoY, already above it.
+FRED_US_CPI_SERIES = "CPIAUCSL"
+US_CPI_TARGET_BAND_LOW_PCT = 1.0
+US_CPI_TARGET_BAND_HIGH_PCT = 3.0

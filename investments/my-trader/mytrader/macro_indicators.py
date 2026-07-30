@@ -10,16 +10,19 @@ detail text rather than being a 5th standalone check, per that section's own not
 that it's "a refinement to fold into the existing bullet," not an independently
 tested signal.
 
-check_inflation_expectations(), check_credit_spreads(), and check_australia_cpi()
-(added 2026-07-30) are later additions beyond tool-preplan.md's original
-5-indicator list -- inflation_expectations is a market-implied/forward-looking
-complement to recession_signal's backward-looking yield-curve/recession-probability
-read and consumer_sentiment's survey-based read; credit_spreads is
-investment-strategy.md's "credit stress" job, previously flagged but never
-implemented; australia_cpi reads directly from the ABS (mytrader/abs_cpi.py) since
-FRED's own AU CPI series turned out to be 18+ months stale. recession_signal also
-gained a folded-in 10Y-3M curve refinement (the Fed's own preferred inversion metric)
-at the same time, same treatment as the existing bull/bear steepener refinement.
+check_inflation_expectations(), check_credit_spreads(), check_australia_cpi(), and
+check_us_cpi() (added 2026-07-30) are later additions beyond tool-preplan.md's
+original 5-indicator list -- inflation_expectations is a market-implied/
+forward-looking complement to recession_signal's backward-looking yield-curve/
+recession-probability read and consumer_sentiment's survey-based read;
+credit_spreads is investment-strategy.md's "credit stress" job, previously flagged
+but never implemented; australia_cpi reads directly from the ABS
+(mytrader/abs_cpi.py) since FRED's own AU CPI series turned out to be 18+ months
+stale; us_cpi is the realized/backward-looking counterpart to
+inflation_expectations' forward-looking breakeven read, via FRED's own CPIAUCSL
+with a units="pc1" transform. recession_signal also gained a folded-in 10Y-3M
+curve refinement (the Fed's own preferred inversion metric) at the same time, same
+treatment as the existing bull/bear steepener refinement.
 
 FRED_YIELD_CURVE_SERIES/FRED_RECESSION_PROB_SERIES in config.py intentionally
 duplicate string values already present in briefs-finance's own
@@ -291,6 +294,38 @@ def check_australia_cpi() -> CheckResult:
     )
 
 
+def check_us_cpi() -> CheckResult:
+    """US headline CPI (YoY), via FRED's own units="pc1" transform on CPIAUCSL --
+    the realized/backward-looking counterpart to check_inflation_expectations'
+    forward-looking breakeven read. Flags outside a +/-1pp band around the Fed's 2%
+    target (the Fed itself targets a single point, not an official band like the
+    RBA's, so this is a reasonable-tolerance approximation, not an official range).
+    """
+    obs = fred_observation_on(config.FRED_US_CPI_SERIES, date.today(), units="pc1")
+    if obs is None:
+        return CheckResult(
+            name="us_cpi", verdict="unknown",
+            detail="FRED US CPI data unavailable (FRED_API_KEY not set, or series unavailable)",
+        )
+    value, obs_date = obs
+    as_of = f"as of {obs_date.isoformat()}"
+    data = {"value": value, "as_of": obs_date.isoformat()}
+    if value < config.US_CPI_TARGET_BAND_LOW_PCT or value > config.US_CPI_TARGET_BAND_HIGH_PCT:
+        return CheckResult(
+            name="us_cpi", verdict="flag",
+            detail=f"US headline CPI {value:.2f}% YoY ({as_of}), outside the "
+                   f"{config.US_CPI_TARGET_BAND_LOW_PCT:.0f}-"
+                   f"{config.US_CPI_TARGET_BAND_HIGH_PCT:.0f}% tolerance band around "
+                   f"the Fed's 2% target",
+            data=data,
+        )
+    return CheckResult(
+        name="us_cpi", verdict="ok",
+        detail=f"US headline CPI {value:.2f}% YoY ({as_of})",
+        data=data,
+    )
+
+
 def run_all() -> list[CheckResult]:
     return [
         check_move_index(),
@@ -300,4 +335,5 @@ def run_all() -> list[CheckResult]:
         check_inflation_expectations(),
         check_credit_spreads(),
         check_australia_cpi(),
+        check_us_cpi(),
     ]

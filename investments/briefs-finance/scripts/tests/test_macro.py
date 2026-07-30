@@ -36,6 +36,58 @@ def test_fred_returns_all_none_without_key():
         macro_mod.FRED_API_KEY = original_key
 
 
+def test_fred_observation_on_passes_units_param_when_given():
+    """units, when provided, is passed straight through to FRED's own API params."""
+    import scripts.macro as macro_mod
+
+    captured = {}
+
+    class _Resp:
+        def json(self):
+            return {"observations": [{"value": "3.46", "date": "2026-06-01"}]}
+
+    def _fake_get(url, params, timeout):
+        captured.update(params)
+        return _Resp()
+
+    original_key = macro_mod.FRED_API_KEY
+    try:
+        macro_mod.FRED_API_KEY = "fake-key"
+        with patch("scripts.macro.requests.get", _fake_get):
+            result = macro_mod.fred_observation_on("CPIAUCSL", date(2026, 7, 30), units="pc1")
+    finally:
+        macro_mod.FRED_API_KEY = original_key
+
+    assert result == (3.46, date(2026, 6, 1))
+    assert captured["units"] == "pc1"
+
+
+def test_fred_observation_on_omits_units_param_by_default():
+    """units is omitted entirely (not sent as None) when not provided, preserving
+    every existing caller's behavior."""
+    import scripts.macro as macro_mod
+
+    captured = {}
+
+    class _Resp:
+        def json(self):
+            return {"observations": [{"value": "1.0", "date": "2026-06-01"}]}
+
+    def _fake_get(url, params, timeout):
+        captured.update(params)
+        return _Resp()
+
+    original_key = macro_mod.FRED_API_KEY
+    try:
+        macro_mod.FRED_API_KEY = "fake-key"
+        with patch("scripts.macro.requests.get", _fake_get):
+            macro_mod.fred_observation_on("T10Y2Y", date(2026, 7, 30))
+    finally:
+        macro_mod.FRED_API_KEY = original_key
+
+    assert "units" not in captured
+
+
 def test_fetch_macro_snapshot_merges_both_sources():
     """fetch_macro_snapshot merges yfinance and FRED data."""
     from scripts.macro import fetch_macro_snapshot

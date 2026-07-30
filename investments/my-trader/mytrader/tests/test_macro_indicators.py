@@ -302,13 +302,42 @@ def test_check_australia_cpi_ok_within_target_band(monkeypatch):
     assert result.verdict == "ok"
 
 
-def test_run_all_returns_seven_check_results(monkeypatch):
+def test_check_us_cpi_unknown_when_fred_unavailable(monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.macro_indicators.fred_observation_on", lambda series_id, target, units=None: None
+    )
+    result = macro_indicators.check_us_cpi()
+    assert result.verdict == "unknown"
+
+
+def test_check_us_cpi_flags_above_band(monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.macro_indicators.fred_observation_on",
+        lambda series_id, target, units=None: (config.US_CPI_TARGET_BAND_HIGH_PCT + 0.5, _D),
+    )
+    result = macro_indicators.check_us_cpi()
+    assert result.verdict == "flag"
+    assert "as of 2026-01-01" in result.detail
+
+
+def test_check_us_cpi_ok_within_band(monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.macro_indicators.fred_observation_on",
+        lambda series_id, target, units=None: (2.0, _D),
+    )
+    result = macro_indicators.check_us_cpi()
+    assert result.verdict == "ok"
+
+
+def test_run_all_returns_eight_check_results(monkeypatch):
     monkeypatch.setattr("mytrader.macro_indicators._yfinance_latest_close", lambda ticker: None)
-    monkeypatch.setattr("mytrader.macro_indicators.fred_observation_on", lambda series_id, target: None)
+    monkeypatch.setattr(
+        "mytrader.macro_indicators.fred_observation_on", lambda series_id, target, units=None: None
+    )
     monkeypatch.setattr("mytrader.macro_indicators.abs_cpi.fetch_australia_cpi_yoy", lambda: None)
     results = macro_indicators.run_all()
-    assert len(results) == 7
+    assert len(results) == 8
     assert {r.name for r in results} == {
         "move_index", "housing_affordability", "consumer_sentiment", "recession_signal",
-        "inflation_expectations", "credit_spreads", "australia_cpi",
+        "inflation_expectations", "credit_spreads", "australia_cpi", "us_cpi",
     }

@@ -218,7 +218,7 @@ Monitor never suggests a specific trade action — advisor notes only.
 
 ## Macro Monitoring Indicators
 
-Every `monitor` run also runs 7 portfolio-wide checks (not per-ticker), once per run:
+Every `monitor` run also runs 8 portfolio-wide checks (not per-ticker), once per run:
 MOVE index (bond-market stress), housing price-to-income ratio, University of
 Michigan Consumer Sentiment Index, a recession-probability check whose detail text
 also folds in the 10Y-3M curve (the Fed's own preferred inversion metric, flags on
@@ -235,13 +235,16 @@ AUSCPIALLQINMEI series turned out to be 18+ months stale; flags outside the RBA'
 2-3% inflation target band). The ABS file's URL embeds the release month with no
 permanent link, so `abs_cpi.py` tries the current month and steps backward up to 4
 months until one resolves — self-healing against release-day timing without a
-hardcoded release calendar.
+hardcoded release calendar. Also US headline CPI (added 2026-07-30 — the realized/
+backward-looking counterpart to inflation_expectations' forward-looking breakeven
+read, via FRED's own CPIAUCSL with a `units="pc1"` transform for a ready-made YoY %;
+flags outside a +/-1pp tolerance band around the Fed's 2% target).
 These reuse the same high-bar alert-dedup
 mechanism as the per-ticker checks, via a `"MACRO"`/`"macro"` sentinel ticker/
 source_table pair in `alert_history`. Shown in `monitor-report.md`'s "Macro
 Indicators" section every run regardless of flag status (unlike per-ticker checks,
 which are only shown when flagged/open). FRED-backed checks (housing, sentiment,
-recession, inflation expectations, credit spreads) degrade to `"unknown"` if
+recession, inflation expectations, credit spreads, US CPI) degrade to `"unknown"` if
 `FRED_API_KEY` is unset, and australia_cpi degrades to `"unknown"` if the ABS fetch/
 parse fails,
 and each surfaces its FRED observation date in its detail text so a stale-but-real

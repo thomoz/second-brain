@@ -20,7 +20,9 @@ def fetch_yfinance_macro(snapshot_date: date) -> dict[str, float | None]:
     return result
 
 
-def fred_observation_on(series_id: str, target: date) -> tuple[float, date] | None:
+def fred_observation_on(
+    series_id: str, target: date, units: str | None = None
+) -> tuple[float, date] | None:
     """Fetch most recent FRED (value, observation_date) on or before target date.
 
     800-day lookback covers annual series with FRED's typical ~19-month publication
@@ -28,22 +30,31 @@ def fred_observation_on(series_id: str, target: date) -> tuple[float, date] | No
     UMCSENT/RECPROUSM156N. sort_order=desc + limit=1 means a wider window only reaches
     further back for the latest value -- it never returns something staler than what a
     narrower window would have found, so widening is safe for every existing caller.
+
+    units: optional FRED transformation code (e.g. "pc1" = percent change from year
+    ago) passed straight through to FRED's API -- lets a raw index series like
+    CPIAUCSL return a ready-made YoY % without a second manual lookback query. Omitted
+    by default, preserving every existing caller's behavior (FRED's own default is
+    "lin", the untransformed level).
     """
     if not FRED_API_KEY:
         return None
     from datetime import timedelta
     try:
+        params = {
+            "series_id": series_id,
+            "observation_start": (target - timedelta(days=800)).isoformat(),
+            "observation_end": target.isoformat(),
+            "sort_order": "desc",
+            "limit": 1,
+            "api_key": FRED_API_KEY,
+            "file_type": "json",
+        }
+        if units is not None:
+            params["units"] = units
         r = requests.get(
             "https://api.stlouisfed.org/fred/series/observations",
-            params={
-                "series_id": series_id,
-                "observation_start": (target - timedelta(days=800)).isoformat(),
-                "observation_end": target.isoformat(),
-                "sort_order": "desc",
-                "limit": 1,
-                "api_key": FRED_API_KEY,
-                "file_type": "json",
-            },
+            params=params,
             timeout=10,
         )
         obs = r.json().get("observations", [])
