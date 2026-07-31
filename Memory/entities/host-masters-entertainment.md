@@ -17,3 +17,4 @@ Umbrella entity covering all hosted live entertainment shows (karaoke, music bin
 
 ## Status
 Active — sole trader structure
+- (Jul 30) 2 new SongbookDB song requests came in for Host Masters Entertainment
