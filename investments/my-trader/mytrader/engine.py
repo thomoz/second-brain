@@ -122,7 +122,7 @@ def run_assessment(
     if include_principles_fit:
         results.append(
             principles_fit.check(
-                normalized, data, other_checks, briefs_score, recent_return_1mo, recent_return_3mo
+                normalized, data, other_checks, briefs_score, recent_return_1mo, recent_return_3mo, conn
             )
         )
 

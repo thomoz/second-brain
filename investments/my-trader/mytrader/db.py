@@ -79,6 +79,12 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 source          TEXT NOT NULL DEFAULT 'briefs_finance_ingest',
                 synced_at       TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS macro_snapshot_cache (
+                name            TEXT PRIMARY KEY,
+                verdict         TEXT NOT NULL,
+                detail          TEXT NOT NULL,
+                computed_at     TEXT NOT NULL
+            );
         """)
     _ensure_watchlist_return_columns(conn)
 
@@ -291,6 +297,28 @@ def set_sync_watermark(conn: sqlite3.Connection, key: str, value: str) -> None:
             "INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, ?)",
             (key, value),
         )
+
+
+def upsert_macro_snapshot(conn: sqlite3.Connection, checks: list) -> None:
+    """Persist the latest macro-indicator snapshot (all 9, regardless of verdict) so
+    checks/principles_fit.py can read a cheap, cached regime read on every Find call
+    instead of re-fetching MOVE/FRED/ABS/ONS live each time — those signals are
+    inherently slow-moving (CPI is monthly/quarterly, credit spreads/yield curve are
+    daily), so Monitor's once-a-day refresh is fresh enough. Always overwrites — only
+    the latest snapshot matters, no history needed here (Monitor's own alert_history
+    already tracks flagged changes over time)."""
+    now = _now()
+    with conn:
+        for c in checks:
+            conn.execute(
+                """INSERT OR REPLACE INTO macro_snapshot_cache (name, verdict, detail, computed_at)
+                   VALUES (?, ?, ?, ?)""",
+                (c.name, c.verdict, c.detail, now),
+            )
+
+
+def get_macro_snapshot(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute("SELECT * FROM macro_snapshot_cache ORDER BY name").fetchall()
 
 
 def touch_checked(

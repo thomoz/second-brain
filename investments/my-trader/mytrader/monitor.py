@@ -122,6 +122,8 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
         print(f"[monitor] error running macro indicators: {e}")
         macro_checks = []
     new_alerts.extend(_reconcile_alerts(MACRO_TICKER, MACRO_SOURCE_TABLE, macro_checks, conn))
+    if macro_checks:
+        db.upsert_macro_snapshot(conn, macro_checks)
 
     snapshot.regenerate_all(conn)
 

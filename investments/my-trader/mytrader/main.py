@@ -37,7 +37,9 @@ def _print_assessment(result: dict) -> None:
 
     principles = next((c for c in result["checks"] if c.name == "principles_fit"), None)
     if principles is not None and principles.data.get("results"):
-        print("\nPrinciples fit (Find's own read, graded against all 9 frameworks):")
+        macro_as_of = principles.data.get("macro_snapshot_as_of")
+        macro_note = f" (macro regime as of {macro_as_of})" if macro_as_of else " (no cached macro snapshot — run Monitor at least once)"
+        print(f"\nPrinciples fit (Find's own read, graded against all 9 frameworks{macro_note}):")
         for p in sorted(principles.data["results"], key=lambda r: r["score"], reverse=True):
             print(f"  {p['principle']:<10}: {p['score']:>3}/100 — {p['reasoning']}")
 

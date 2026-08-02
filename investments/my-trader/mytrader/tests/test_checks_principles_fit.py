@@ -79,3 +79,60 @@ def test_thesis_notes_no_active_flags_when_clean():
     other_checks = [CheckResult(name="valuation", verdict="ok", detail="fine", data={"pe": 17.5})]
     thesis = principles_fit._build_thesis("KO", other_checks, None, None, None)
     assert "No active risk flags this run" in thesis
+
+
+def test_thesis_omits_macro_section_when_no_snapshot():
+    other_checks = [CheckResult(name="valuation", verdict="ok", detail="fine", data={"pe": 17.5})]
+    thesis = principles_fit._build_thesis("KO", other_checks, None, None, None, macro_rows=None)
+    assert "Macro regime" not in thesis
+
+
+def test_thesis_includes_macro_snapshot_when_provided():
+    other_checks = [CheckResult(name="valuation", verdict="ok", detail="fine", data={"pe": 17.5})]
+    macro_rows = [
+        {"name": "recession_signal", "verdict": "flag", "detail": "10Y-3M curve inverted",
+         "computed_at": "2026-08-01T21:30:00+00:00"},
+        {"name": "credit_spreads", "verdict": "ok", "detail": "HY OAS 3.2%",
+         "computed_at": "2026-08-01T21:30:00+00:00"},
+    ]
+    thesis = principles_fit._build_thesis("KO", other_checks, None, None, None, macro_rows=macro_rows)
+    assert "Macro regime as of 2026-08-01" in thesis
+    assert "recession_signal [flag] 10Y-3M curve inverted" in thesis
+    assert "credit_spreads [ok] HY OAS 3.2%" in thesis
+
+
+def test_check_reads_macro_snapshot_from_db_conn(db_conn, monkeypatch, tmp_path):
+    from mytrader import db as mytrader_db
+
+    (tmp_path / "buffett.md").write_text("Buffett criteria", encoding="utf-8")
+    monkeypatch.setattr("scripts.config.PRINCIPLES_DIR", tmp_path)
+
+    captured_thesis = {}
+
+    def _fake_score(thesis, principle_name, file_content):
+        captured_thesis["value"] = thesis
+        return (80, "great fit")
+
+    monkeypatch.setattr("scripts.score.score_thesis_against_principle", _fake_score)
+    mytrader_db.upsert_macro_snapshot(
+        db_conn, [CheckResult(name="move_index", verdict="ok", detail="MOVE at 90.0")]
+    )
+
+    data = TickerData(ticker="KO", info={}, dividends=None)
+    result = principles_fit.check("KO", data, [_OK], None, None, None, db_conn)
+
+    assert "Macro regime" in captured_thesis["value"]
+    assert "move_index [ok] MOVE at 90.0" in captured_thesis["value"]
+    assert result.data["macro_snapshot_as_of"] is not None
+
+
+def test_check_macro_snapshot_as_of_none_without_conn(monkeypatch, tmp_path):
+    (tmp_path / "buffett.md").write_text("Buffett criteria", encoding="utf-8")
+    monkeypatch.setattr("scripts.config.PRINCIPLES_DIR", tmp_path)
+    monkeypatch.setattr("scripts.score.score_thesis_against_principle", lambda *a, **k: (80, "fine"))
+
+    data = TickerData(ticker="KO", info={}, dividends=None)
+    result = principles_fit.check("KO", data, [_OK], None, None, None)  # no conn passed
+
+    assert "Macro regime" not in result.data["thesis"]
+    assert result.data.get("macro_snapshot_as_of") is None
