@@ -44,6 +44,24 @@ Fix history:
   the Graham PE-fallback leg on deeply negative PE — negative PE means negative
   earnings, not "cheap". The primary Graham-Number leg already required pe > 0; the
   fallback leg didn't. Both valuation.py and this file's fallback now require pe > 0.
+
+Crash-discount fit (added 2026-08-02) — Shaun: "if fundamentals show good but price
+is too high, that's a potentially good crash discount buy." Before this, a rich-PE
+flag fully suppressed the opportunity signal (the general risk-first gate below), so
+a genuinely strong business that's simply expensive right now got zero positive
+signal — indistinguishable from a business that's expensive AND has a real problem.
+Those are different cases: "flag now, worth watching for a crash-driven discount"
+vs. "not worth a look at all." valuation is now excluded from the general flag gate
+(same carve-out reasoning as concentration) and handled as its own branch: if
+nothing else on this run is flagged and ROE clears Buffett/Smith's own 15% bar, fire
+a distinct "Crash-discount fit" signal — same underlying criterion as the normal
+Buffett/Smith leg, just reframed as "wait for a discount" instead of "buy today"
+since the price itself is the disqualifier here, not the business. Enriches the
+detail with crash_resilience's historical drawdown figures when available (raw
+material for judging how big a real crash-driven discount might actually be), but
+doesn't gate on them — a bad historical crash showing isn't disqualifying the same
+way an active flag is, it's just useful context, consistent with crash_resilience.py
+itself always being "info", never a pass/fail signal.
 """
 
 from __future__ import annotations
@@ -63,7 +81,12 @@ def check(
     if data is None:
         return CheckResult(name="opportunity", verdict="unknown", detail="No market data available")
 
-    has_active_flag = any(c.verdict == "flag" for c in other_checks if c.name != "concentration")
+    # valuation excluded here (see "Crash-discount fit" above) -- handled as its own
+    # branch below instead of blanket-suppressing everything. concentration excluded
+    # per Shaun's original ruling (sector overlap out of scope for this gate).
+    has_active_flag = any(
+        c.verdict == "flag" for c in other_checks if c.name not in ("concentration", "valuation")
+    )
     if has_active_flag:
         return CheckResult(
             name="opportunity", verdict="ok",
@@ -71,10 +94,31 @@ def check(
                    "an opportunity regardless of price or valuation",
         )
 
-    reasons = []
-
     pe = data.info.get("trailingPE") or data.info.get("forwardPE")
     pb = data.info.get("priceToBook")
+    roe = data.info.get("returnOnEquity")
+    already_rich = pe is not None and pe >= config.PE_RICH_THRESHOLD
+
+    if already_rich:
+        if roe is not None and roe * 100 >= config.OPPORTUNITY_ROE_MIN_PCT:
+            crash = next((c for c in other_checks if c.name == "crash_resilience"), None)
+            crash_note = f"; historical crash behaviour: {crash.detail}" if crash and crash.data.get("drawdowns") else ""
+            detail = (
+                f"Crash-discount fit [ROE {roe * 100:.1f}% at/above {config.OPPORTUNITY_ROE_MIN_PCT}%, "
+                f"but currently rich (PE {pe:.1f}) — quality worth watching for a crash-driven "
+                f"discount rather than buying at today's price{crash_note}]"
+            )
+            return CheckResult(
+                name="opportunity", verdict="interesting", detail=detail,
+                data={"reasons": ["crash_discount_fit"]},
+            )
+        return CheckResult(
+            name="opportunity", verdict="ok",
+            detail=f"PE {pe:.1f} rich and no ROE signal strong enough to call this a crash-discount candidate",
+        )
+
+    reasons = []
+
     # Yahoo's priceToBook is unreliable for dual-share-class companies -- verified
     # 2026-07-19 against BRK-B: bookValue returned was BRK-A's per-share book value
     # ($505,559) divided against BRK-B's price ($490.91), producing a nonsense
@@ -90,9 +134,7 @@ def check(
     if peg is not None and 0 < peg <= config.OPPORTUNITY_PEG_MAX:
         reasons.append(f"Lynch [PEG {peg:.2f} at/below {config.OPPORTUNITY_PEG_MAX} — growth at a reasonable price]")
 
-    roe = data.info.get("returnOnEquity")
-    already_rich = pe is not None and pe >= config.PE_RICH_THRESHOLD
-    if roe is not None and roe * 100 >= config.OPPORTUNITY_ROE_MIN_PCT and not already_rich:
+    if roe is not None and roe * 100 >= config.OPPORTUNITY_ROE_MIN_PCT:
         reasons.append(f"Buffett/Smith [ROE {roe * 100:.1f}% at/above {config.OPPORTUNITY_ROE_MIN_PCT}%, not richly valued]")
 
     if recent_return_pct is not None and recent_return_pct <= -config.OPPORTUNITY_DIP_FLAG_PCT:

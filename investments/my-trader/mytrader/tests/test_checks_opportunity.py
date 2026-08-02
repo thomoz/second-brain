@@ -4,7 +4,8 @@ from mytrader.checks import CheckResult, opportunity
 from mytrader.market_data import TickerData
 
 _OK = CheckResult(name="valuation", verdict="ok", detail="fine")
-_FLAG = CheckResult(name="valuation", verdict="flag", detail="PE above rich threshold")
+_FLAG = CheckResult(name="balance_sheet", verdict="flag", detail="debt/equity above threshold")
+_VALUATION_FLAG = CheckResult(name="valuation", verdict="flag", detail="PE above rich threshold")
 _CONCENTRATION_FLAG = CheckResult(name="concentration", verdict="flag", detail="sector concentration")
 
 
@@ -138,3 +139,43 @@ def test_multiple_signals_note_confluence():
     assert result.verdict == "interesting"
     assert "3 independent signals" in result.detail
     assert len(result.data["reasons"]) == 3
+
+
+def test_crash_discount_fit_flags_interesting_when_rich_but_high_roe():
+    """Shaun 2026-08-02: 'if fundamentals show good but price is too high, that's a
+    potentially good crash discount buy' -- rich PE alone should no longer suppress
+    the signal outright when nothing else is wrong and ROE clears the quality bar."""
+    data = TickerData(ticker="X", info={"trailingPE": 60.0, "returnOnEquity": 0.30}, dividends=None)
+    result = opportunity.check(data, [_VALUATION_FLAG], None, None)
+    assert result.verdict == "interesting"
+    assert "Crash-discount fit" in result.detail
+    assert "ROE 30.0%" in result.detail
+    assert "PE 60.0" in result.detail
+
+
+def test_crash_discount_fit_does_not_flag_without_strong_roe():
+    data = TickerData(ticker="X", info={"trailingPE": 60.0, "returnOnEquity": 0.05}, dividends=None)
+    result = opportunity.check(data, [_VALUATION_FLAG], None, None)
+    assert result.verdict == "ok"
+    assert "Crash-discount fit" not in result.detail
+
+
+def test_crash_discount_fit_suppressed_by_a_real_other_flag():
+    """Rich valuation alone routes to the crash-discount branch, but a genuine
+    problem elsewhere (not valuation, not concentration) still suppresses everything
+    -- being expensive AND having a real issue is not a crash-discount candidate."""
+    data = TickerData(ticker="X", info={"trailingPE": 60.0, "returnOnEquity": 0.30}, dividends=None)
+    result = opportunity.check(data, [_VALUATION_FLAG, _FLAG], None, None)
+    assert result.verdict == "ok"
+    assert "Active risk flag" in result.detail
+
+
+def test_crash_discount_fit_includes_crash_resilience_note_when_available():
+    data = TickerData(ticker="X", info={"trailingPE": 60.0, "returnOnEquity": 0.30}, dividends=None)
+    crash_check = CheckResult(
+        name="crash_resilience", verdict="info", detail="2022 bear market -16.7%",
+        data={"drawdowns": [{"label": "2022 bear market", "drawdown_pct": -16.7}]},
+    )
+    result = opportunity.check(data, [_VALUATION_FLAG, crash_check], None, None)
+    assert result.verdict == "interesting"
+    assert "2022 bear market -16.7%" in result.detail

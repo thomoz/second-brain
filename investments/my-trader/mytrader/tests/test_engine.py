@@ -129,10 +129,12 @@ def test_run_assessment_passes_other_checks_and_score_to_opportunity_check(db_co
     assert "85/100" in opp.detail
 
 
-def test_run_assessment_opportunity_suppressed_when_valuation_flags(db_conn, monkeypatch):
-    """End-to-end check that engine.py actually wires the other 7 checks into
-    opportunity.check() — a real rich-PE valuation flag from the same assessment
-    should suppress the opportunity signal, even with a strong Briefs Finance score."""
+def test_run_assessment_rich_valuation_alone_no_longer_blanket_suppresses(db_conn, monkeypatch):
+    """End-to-end: a rich-PE valuation flag with no ROE data doesn't fire the
+    crash-discount leg (nothing to judge quality on), but it no longer produces the
+    generic 'Active risk flag' suppression message either — valuation is its own
+    branch now (see checks/opportunity.py, 2026-08-02: 'if fundamentals show good but
+    price is too high, that's a potentially good crash discount buy')."""
     monkeypatch.setattr(
         "mytrader.market_data.fetch_ticker_data",
         lambda ticker: TickerData(ticker=ticker, info={"trailingPE": 60.0}, dividends=None),
@@ -149,7 +151,29 @@ def test_run_assessment_opportunity_suppressed_when_valuation_flags(db_conn, mon
     assert valuation_check.verdict == "flag"
     opp = next(c for c in result["checks"] if c.name == "opportunity")
     assert opp.verdict == "ok"
-    assert "Active risk flag" in opp.detail
+    assert "crash-discount candidate" in opp.detail
+
+
+def test_run_assessment_crash_discount_fit_fires_with_real_valuation_flag(db_conn, monkeypatch):
+    """End-to-end: rich PE + strong ROE, nothing else flagged, actually fires the new
+    crash-discount signal through the real engine wiring, not just opportunity.py in
+    isolation."""
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(
+            ticker=ticker, info={"trailingPE": 60.0, "returnOnEquity": 0.30}, dividends=None
+        ),
+    )
+    monkeypatch.setattr(
+        "mytrader.engine._lookup_or_compute_briefs_finance_score", lambda ticker, conn: None
+    )
+    monkeypatch.setattr("mytrader.engine.return_data.fetch_recent_return_pct", lambda ticker, period="3mo": None)
+
+    result = engine.run_assessment("VRTX", db_conn)
+
+    opp = next(c for c in result["checks"] if c.name == "opportunity")
+    assert opp.verdict == "interesting"
+    assert "Crash-discount fit" in opp.detail
 
 
 def test_run_assessment_fetches_distinct_1mo_and_3mo_returns_for_price_action(db_conn, monkeypatch):
