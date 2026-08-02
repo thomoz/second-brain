@@ -18,6 +18,18 @@ def test_lookup_ticker_persists_nothing(db_conn, monkeypatch):
     assert db_conn.execute("SELECT COUNT(*) AS n FROM holdings").fetchone()["n"] == 0
 
 
+def test_lookup_ticker_opts_in_to_principles_fit(db_conn, monkeypatch):
+    captured = {}
+
+    def _fake_run_assessment(ticker, conn, include_principles_fit=False):
+        captured["include_principles_fit"] = include_principles_fit
+        return {"ticker": ticker}
+
+    monkeypatch.setattr("mytrader.find.engine.run_assessment", _fake_run_assessment)
+    find.lookup_ticker("VRTX", db_conn)
+    assert captured["include_principles_fit"] is True
+
+
 def test_add_to_watchlist_persists_row(db_conn, monkeypatch, tmp_path):
     _patch_snapshot(monkeypatch, tmp_path)
     find.add_to_watchlist("vrtx", "Vertex Pharmaceuticals", "stock", "1", "test notes", db_conn)

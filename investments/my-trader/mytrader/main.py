@@ -35,6 +35,12 @@ def _print_assessment(result: dict) -> None:
     else:
         print("\nBriefs Finance score: no history for this ticker")
 
+    principles = next((c for c in result["checks"] if c.name == "principles_fit"), None)
+    if principles is not None and principles.data.get("results"):
+        print("\nPrinciples fit (Find's own read, graded against all 9 frameworks):")
+        for p in sorted(principles.data["results"], key=lambda r: r["score"], reverse=True):
+            print(f"  {p['principle']:<10}: {p['score']:>3}/100 — {p['reasoning']}")
+
 
 def cmd_find(args) -> None:
     from .find import lookup_ticker

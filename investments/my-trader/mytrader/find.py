@@ -8,8 +8,9 @@ from . import db, engine, snapshot, tickers
 
 
 def lookup_ticker(ticker: str, conn: sqlite3.Connection) -> dict:
-    """Ephemeral 'what do you think of TICKER' lookup. Persists nothing."""
-    return engine.run_assessment(ticker, conn)
+    """Ephemeral 'what do you think of TICKER' lookup. Persists nothing. Includes the
+    principles-fit check (9-framework LLM grading) — Find-only, not run by Monitor."""
+    return engine.run_assessment(ticker, conn, include_principles_fit=True)
 
 
 def add_to_watchlist(

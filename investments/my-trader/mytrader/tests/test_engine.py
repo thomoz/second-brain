@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from mytrader import engine
+from mytrader.checks import CheckResult
 from mytrader.market_data import TickerData
 
 
@@ -171,6 +172,30 @@ def test_run_assessment_fetches_distinct_1mo_and_3mo_returns_for_price_action(db
     assert price_action_check.verdict == "info"
     assert "1mo +11.4%" in price_action_check.detail
     assert "3mo -0.1%" in price_action_check.detail
+
+
+def test_run_assessment_excludes_principles_fit_by_default(db_conn, monkeypatch):
+    """principles_fit is 9 extra LLM calls -- opt-in only, so Monitor's daily re-check
+    of every holding + discussed watchlist row (which never passes the flag) stays
+    unaffected."""
+    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
+    result = engine.run_assessment("VRTX", db_conn)
+    assert "principles_fit" not in {c.name for c in result["checks"]}
+    assert len(result["checks"]) == 10
+
+
+def test_run_assessment_includes_principles_fit_when_opted_in(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(ticker=ticker, info={"trailingPE": 20.0}, dividends=None),
+    )
+    monkeypatch.setattr(
+        "mytrader.engine.principles_fit.check",
+        lambda *a, **k: CheckResult(name="principles_fit", verdict="info", detail="stub"),
+    )
+    result = engine.run_assessment("VRTX", db_conn, include_principles_fit=True)
+    assert "principles_fit" in {c.name for c in result["checks"]}
+    assert len(result["checks"]) == 11
 
 
 def test_run_assessment_score_stays_none_when_no_recommendation_exists(db_conn, monkeypatch):
