@@ -222,6 +222,30 @@ def test_run_monitor_macro_alert_stays_quiet_on_repeat_flag(db_conn, monkeypatch
     assert len(result["open_alerts"]) == 1
 
 
+def test_run_monitor_persists_macro_snapshot(db_conn, monkeypatch):
+    """checks/principles_fit.py reads this cache instead of re-fetching MOVE/FRED/
+    ABS/ONS live on every Find call — Monitor is what keeps it fresh, once a day."""
+    monkeypatch.setattr(
+        "mytrader.monitor.macro_indicators.run_all",
+        lambda: [
+            CheckResult(name="move_index", verdict="ok", detail="MOVE at 90.0"),
+            CheckResult(name="recession_signal", verdict="flag", detail="Recession risk rising"),
+        ],
+    )
+    monitor.run_monitor(db_conn)
+    rows = db.get_macro_snapshot(db_conn)
+    assert {r["name"] for r in rows} == {"move_index", "recession_signal"}
+
+
+def test_run_monitor_skips_macro_snapshot_persist_when_indicators_fail(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.monitor.macro_indicators.run_all",
+        lambda: (_ for _ in ()).throw(RuntimeError("network down")),
+    )
+    monitor.run_monitor(db_conn)  # must not raise
+    assert db.get_macro_snapshot(db_conn) == []
+
+
 def test_run_monitor_calls_candidate_sync_and_includes_result(db_conn, monkeypatch):
     """candidate_sync now runs automatically once per Monitor run again (re-added
     2026-07-19, same day it was first removed) — safe because it only ever writes to

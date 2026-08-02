@@ -243,3 +243,34 @@ def test_set_sync_watermark_overwrites_existing_value(db_conn):
     db.set_sync_watermark(db_conn, "some_key", "42")
     db.set_sync_watermark(db_conn, "some_key", "99")
     assert db.get_sync_watermark(db_conn, "some_key") == "99"
+
+
+def test_get_macro_snapshot_empty_when_unset(db_conn):
+    assert db.get_macro_snapshot(db_conn) == []
+
+
+def test_upsert_macro_snapshot_inserts_all_checks(db_conn):
+    from mytrader.checks import CheckResult
+
+    checks = [
+        CheckResult(name="move_index", verdict="ok", detail="MOVE at 90.0"),
+        CheckResult(name="credit_spreads", verdict="flag", detail="HY OAS widening"),
+    ]
+    db.upsert_macro_snapshot(db_conn, checks)
+    rows = db.get_macro_snapshot(db_conn)
+    assert len(rows) == 2
+    by_name = {r["name"]: r for r in rows}
+    assert by_name["move_index"]["verdict"] == "ok"
+    assert by_name["credit_spreads"]["detail"] == "HY OAS widening"
+    assert by_name["move_index"]["computed_at"] is not None
+
+
+def test_upsert_macro_snapshot_overwrites_not_duplicates(db_conn):
+    from mytrader.checks import CheckResult
+
+    db.upsert_macro_snapshot(db_conn, [CheckResult(name="move_index", verdict="ok", detail="v1")])
+    db.upsert_macro_snapshot(db_conn, [CheckResult(name="move_index", verdict="flag", detail="v2")])
+    rows = db.get_macro_snapshot(db_conn)
+    assert len(rows) == 1
+    assert rows[0]["verdict"] == "flag"
+    assert rows[0]["detail"] == "v2"

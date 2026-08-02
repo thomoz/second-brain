@@ -17,6 +17,7 @@ from .checks import (
     fx,
     opportunity,
     price_action,
+    principles_fit,
     sector_risk,
     valuation,
 )
@@ -87,7 +88,12 @@ def _refresh_backtest_for_ticker(ticker: str) -> None:
         pass
 
 
-def run_assessment(ticker: str, conn: sqlite3.Connection) -> dict[str, Any]:
+def run_assessment(
+    ticker: str, conn: sqlite3.Connection, include_principles_fit: bool = False
+) -> dict[str, Any]:
+    """include_principles_fit: opt-in, Find-only (see checks/principles_fit.py) — 9
+    extra LLM calls per assessment, so defaulted off. Monitor never passes True, so
+    its daily re-check of every holding + discussed watchlist row is unaffected."""
     normalized = tickers.normalize(ticker)
     data = market_data.fetch_ticker_data(normalized)
     excluded, exclusion_reason = ethical_check(normalized)
@@ -113,6 +119,12 @@ def run_assessment(ticker: str, conn: sqlite3.Connection) -> dict[str, Any]:
         price_action.check(recent_return_1mo, recent_return_3mo),
         crash_resilience.check(data),
     ]
+    if include_principles_fit:
+        results.append(
+            principles_fit.check(
+                normalized, data, other_checks, briefs_score, recent_return_1mo, recent_return_3mo, conn
+            )
+        )
 
     return {
         "ticker": normalized,
