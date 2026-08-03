@@ -75,3 +75,15 @@ def _no_real_crash_drawdown_fetch(monkeypatch):
     own multi-year yfinance history() fetch via crash_windows.fetch_crash_drawdowns()
     — global/autouse for the same reason as the two fixtures above."""
     monkeypatch.setattr("mytrader.checks.crash_resilience.crash_windows.fetch_crash_drawdowns", lambda ticker: None)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_sec_filing_fetch(monkeypatch):
+    """principles_fit.check() calls sec_filings.get_filing_summaries_for_ticker(),
+    which does real SEC EDGAR HTTP + LLM calls when conn is not None -- global/autouse
+    for the same reason as the three fixtures above: don't let a real network/LLM
+    call hit every test in the suite that exercises the real check by default."""
+    monkeypatch.setattr(
+        "mytrader.checks.principles_fit.sec_filings.get_filing_summaries_for_ticker",
+        lambda ticker, conn: None,
+    )

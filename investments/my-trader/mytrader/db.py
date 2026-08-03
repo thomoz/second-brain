@@ -85,6 +85,18 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 detail          TEXT NOT NULL,
                 computed_at     TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS sec_cik_map (
+                ticker          TEXT PRIMARY KEY,
+                cik             TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS sec_filing_cache (
+                ticker              TEXT NOT NULL,
+                filing_type         TEXT NOT NULL,
+                accession_number    TEXT NOT NULL,
+                summary             TEXT NOT NULL,
+                fetched_at          TEXT NOT NULL,
+                PRIMARY KEY (ticker, filing_type)
+            );
         """)
     _ensure_watchlist_return_columns(conn)
 
@@ -319,6 +331,44 @@ def upsert_macro_snapshot(conn: sqlite3.Connection, checks: list) -> None:
 
 def get_macro_snapshot(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return conn.execute("SELECT * FROM macro_snapshot_cache ORDER BY name").fetchall()
+
+
+def upsert_cik_map_bulk(conn: sqlite3.Connection, ticker_to_cik: dict[str, str]) -> None:
+    """Full resync, not incremental -- company tickers get delisted/renamed, so a
+    stale row must be able to disappear on refresh, not just accumulate."""
+    with conn:
+        conn.execute("DELETE FROM sec_cik_map")
+        conn.executemany(
+            "INSERT INTO sec_cik_map (ticker, cik) VALUES (?, ?)",
+            list(ticker_to_cik.items()),
+        )
+
+
+def get_cik_for_ticker(conn: sqlite3.Connection, ticker: str) -> str | None:
+    row = conn.execute("SELECT cik FROM sec_cik_map WHERE ticker = ?", (ticker,)).fetchone()
+    return row["cik"] if row else None
+
+
+def get_cached_filing_summary(
+    conn: sqlite3.Connection, ticker: str, filing_type: str
+) -> sqlite3.Row | None:
+    return conn.execute(
+        """SELECT * FROM sec_filing_cache WHERE ticker = ? AND filing_type = ?""",
+        (ticker, filing_type),
+    ).fetchone()
+
+
+def upsert_filing_summary_cache(
+    conn: sqlite3.Connection, *, ticker: str, filing_type: str,
+    accession_number: str, summary: str,
+) -> None:
+    with conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO sec_filing_cache
+               (ticker, filing_type, accession_number, summary, fetched_at)
+               VALUES (?, ?, ?, ?, ?)""",
+            (ticker, filing_type, accession_number, summary, _now()),
+        )
 
 
 def touch_checked(

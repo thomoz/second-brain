@@ -256,6 +256,50 @@ and each surfaces its FRED observation date in its detail text so a stale-but-re
 reading (e.g. annual household-income data, ~19-month publication lag) is never
 mistaken for a live number.
 
+## SEC Filing Reads (principles_fit)
+
+Added 2026-08-03 (`mytrader/sec_filings.py`). `principles_fit` — the opt-in, Find-only
+check that grades Find's own thesis against all 9 investor frameworks — now folds in
+each US-listed ticker's latest 10-K, 10-Q, and DEF 14A (proxy statement) primary-source
+disclosures, fetched directly from SEC EDGAR (free, no API key, just a descriptive
+`User-Agent`). Business/Risk Factors/MD&A sections are pulled from 10-K/10-Q; executive
+compensation and CD&A sections from DEF 14A. Each filing's relevant sections are
+summarized via one `sdk_compat` LLM call (`config.SEC_FILING_SUMMARY_MODEL`, default
+`"sonnet"` — a Claude-shaped tier alias that resolves through whatever backend is
+active, e.g. `gpt-5.4` under the current Codex backend) and folded into the same thesis
+text all 9 principle files grade — so the frameworks are informed by what the company
+itself discloses, not just yfinance's derived ratios.
+
+**Caching**: two independent caches, deliberately different from `principles_fit`'s own
+"never cache the thesis" policy (the thesis itself is still rebuilt fresh every Find
+call). `sec_cik_map` (ticker→CIK, bulk-refreshed every `SEC_CIK_MAP_REFRESH_DAYS`, 30)
+and `sec_filing_cache` (per-ticker/filing_type summary, invalidated only when SEC
+publishes a new accession number for that filing type — filing text is static between
+filings, so re-summarizing on every Find call would be wasted LLM spend for no benefit).
+A stale cached summary is still returned if a live re-fetch fails, rather than dropping
+that filing type entirely.
+
+**Degradation**: non-US tickers (SEC EDGAR has no ASX/LSE/etc coverage) fall through a
+plain CIK-lookup miss straight back to today's stats-only `principles_fit` behavior — no
+exception, no visible difference beyond the transparency note below.
+
+`find`'s output shows `(includes SEC filing read: 10-K, 10-Q, ...)` under the Principles
+fit section whenever real filing content informed the run.
+
+**Known limitations**:
+- **DEF 14A section-finding is a blunt heuristic** and the biggest technical-risk area —
+  proxy statements use free-form section titles with no reliable Item-header convention
+  (unlike 10-K/10-Q). Individual filers also don't always use the exact SEC-caption
+  wording (confirmed against a real 2026 KO proxy: it never uses the literal phrase
+  "security ownership of certain beneficial owners" anywhere, so that section is simply
+  skipped for filers phrasing it differently — a known, accepted gap, not a bug).
+- **CIK-map staleness**: a ticker that IPO'd in the last `SEC_CIK_MAP_REFRESH_DAYS` (30)
+  days may not resolve to a CIK yet even though SEC has since added it.
+- `_latest_filing_entry` only checks the submissions JSON's `"recent"` array (SEC's own
+  docs describe it as covering roughly the last ~1000 filings / most recent few years),
+  not the paginated `"files"` array used for very long filing histories — in practice
+  "most recent 10-K/10-Q/DEF 14A" should always land in `"recent"`.
+
 ## Briefs Finance Candidate Sync
 
 **Runs automatically once a day as part of `monitor`** (re-enabled 2026-07-19, same

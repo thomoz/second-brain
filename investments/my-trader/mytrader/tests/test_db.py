@@ -274,3 +274,50 @@ def test_upsert_macro_snapshot_overwrites_not_duplicates(db_conn):
     assert len(rows) == 1
     assert rows[0]["verdict"] == "flag"
     assert rows[0]["detail"] == "v2"
+
+
+def test_get_cik_for_ticker_returns_none_when_unmapped(db_conn):
+    assert db.get_cik_for_ticker(db_conn, "KO") is None
+
+
+def test_upsert_cik_map_bulk_then_get_finds_it(db_conn):
+    db.upsert_cik_map_bulk(db_conn, {"KO": "21344", "AAPL": "320193"})
+    assert db.get_cik_for_ticker(db_conn, "KO") == "21344"
+    assert db.get_cik_for_ticker(db_conn, "AAPL") == "320193"
+
+
+def test_upsert_cik_map_bulk_is_full_resync_not_incremental(db_conn):
+    """A delisted/renamed ticker must disappear on refresh, not accumulate forever."""
+    db.upsert_cik_map_bulk(db_conn, {"KO": "21344"})
+    db.upsert_cik_map_bulk(db_conn, {"AAPL": "320193"})
+    assert db.get_cik_for_ticker(db_conn, "KO") is None
+    assert db.get_cik_for_ticker(db_conn, "AAPL") == "320193"
+
+
+def test_get_cached_filing_summary_returns_none_when_unset(db_conn):
+    assert db.get_cached_filing_summary(db_conn, "KO", "10-K") is None
+
+
+def test_upsert_filing_summary_cache_then_get_finds_it(db_conn):
+    db.upsert_filing_summary_cache(
+        db_conn, ticker="KO", filing_type="10-K",
+        accession_number="0000021344-26-000010", summary="Strong moat, rising margins.",
+    )
+    row = db.get_cached_filing_summary(db_conn, "KO", "10-K")
+    assert row is not None
+    assert row["accession_number"] == "0000021344-26-000010"
+    assert row["summary"] == "Strong moat, rising margins."
+
+
+def test_upsert_filing_summary_cache_replaces_on_same_key(db_conn):
+    db.upsert_filing_summary_cache(
+        db_conn, ticker="KO", filing_type="10-K",
+        accession_number="0000021344-25-000001", summary="Old summary.",
+    )
+    db.upsert_filing_summary_cache(
+        db_conn, ticker="KO", filing_type="10-K",
+        accession_number="0000021344-26-000010", summary="New summary.",
+    )
+    row = db.get_cached_filing_summary(db_conn, "KO", "10-K")
+    assert row["accession_number"] == "0000021344-26-000010"
+    assert row["summary"] == "New summary."

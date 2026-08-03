@@ -174,3 +174,40 @@ US_CPI_TARGET_BAND_HIGH_PCT = 3.0
 # YoY, within this band (unlike AU/US currently).
 UK_CPI_TARGET_BAND_LOW_PCT = 1.0
 UK_CPI_TARGET_BAND_HIGH_PCT = 3.0
+
+# Added 2026-08-03 -- SEC EDGAR filing reads for principles_fit's thesis (see
+# .agent/plans/sec-filings-principles-fit.md). SEC_USER_AGENT is a legally-required
+# descriptive header per SEC's fair-access policy -- confirmed with Shaun, do not
+# change without asking (a generic/missing User-Agent can get the IP rate-limited).
+SEC_USER_AGENT = "Shaun Thomson thomoz@outlook.com"
+SEC_CIK_MAP_URL = "https://www.sec.gov/files/company_tickers.json"
+SEC_SUBMISSIONS_URL_TEMPLATE = "https://data.sec.gov/submissions/CIK{cik_padded}.json"
+SEC_ARCHIVES_URL_TEMPLATE = (
+    "https://www.sec.gov/Archives/edgar/data/{cik}/{accession_no_dashes}/{document}"
+)
+SEC_CIK_MAP_REFRESH_DAYS = 30  # bulk ticker->CIK file changes rarely; a brand-new
+                                 # IPO not yet in a <30-day-old cache is a known,
+                                 # accepted gap -- not solved in v1, see SKILL.md.
+SEC_FILING_TYPES = ("10-K", "10-Q", "DEF 14A")
+SEC_REQUEST_DELAY_SECONDS = 0.2  # small courtesy delay between the handful of
+                                    # sequential SEC requests one Find call can make
+                                    # (index + up to 3 documents) -- well under SEC's
+                                    # stated ~10 req/sec limit, defensive only.
+SEC_FILING_SUMMARY_MODEL = "sonnet"  # LOCKED IN 2026-08-03 after a real side-by-side
+                                        # comparison against "haiku" on KO's real 10-K
+                                        # (resolved at test time, via the active Codex
+                                        # backend, to gpt-5.4 vs gpt-5.4-mini -- see
+                                        # sdk_compat's model-agnostic architecture rule).
+                                        # Both tiers produced accurate, well-organized
+                                        # summaries; sonnet's additionally closed with an
+                                        # explicit synthesized investment-thesis paragraph
+                                        # haiku's did not, which matters since this
+                                        # summary feeds 9 downstream principle-grading
+                                        # calls -- kept as the default on that margin.
+SEC_MAX_SECTION_CHARS = 6000  # per-section cap fed into the summarization prompt --
+                                 # mirrors scripts/score.py's own
+                                 # file_content[:3000] truncation pattern for the same
+                                 # "don't blow the prompt budget" reason.
+SEC_MAX_RAW_DOCUMENT_BYTES = 10_000_000  # guard against a mislinked huge document;
+                                            # a 10-K/10-Q/DEF14A primary document is
+                                            # never legitimately this large.

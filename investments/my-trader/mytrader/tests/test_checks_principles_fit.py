@@ -136,3 +136,55 @@ def test_check_macro_snapshot_as_of_none_without_conn(monkeypatch, tmp_path):
 
     assert "Macro regime" not in result.data["thesis"]
     assert result.data.get("macro_snapshot_as_of") is None
+
+
+def test_thesis_omits_filing_section_when_none():
+    other_checks = [CheckResult(name="valuation", verdict="ok", detail="fine", data={"pe": 17.5})]
+    thesis = principles_fit._build_thesis("KO", other_checks, None, None, None, filing_summaries=None)
+    assert "filing highlights" not in thesis
+
+
+def test_thesis_includes_filing_summaries_when_provided():
+    other_checks = [CheckResult(name="valuation", verdict="ok", detail="fine", data={"pe": 17.5})]
+    thesis = principles_fit._build_thesis(
+        "KO", other_checks, None, None, None,
+        filing_summaries={"10-K": "Strong moat, rising margins."},
+    )
+    assert "10-K filing highlights" in thesis
+    assert "Strong moat, rising margins." in thesis
+
+
+def test_check_calls_filing_lookup_when_conn_given(db_conn, monkeypatch, tmp_path):
+    (tmp_path / "buffett.md").write_text("Buffett criteria", encoding="utf-8")
+    monkeypatch.setattr("scripts.config.PRINCIPLES_DIR", tmp_path)
+    monkeypatch.setattr("scripts.score.score_thesis_against_principle", lambda *a, **k: (80, "fine"))
+
+    calls = []
+
+    def _fake_lookup(ticker, conn):
+        calls.append(ticker)
+        return {"10-K": "Solid fundamentals."}
+
+    monkeypatch.setattr("mytrader.checks.principles_fit.sec_filings.get_filing_summaries_for_ticker", _fake_lookup)
+
+    data = TickerData(ticker="KO", info={}, dividends=None)
+    result = principles_fit.check("KO", data, [_OK], None, None, None, db_conn)
+
+    assert calls == ["KO"]
+    assert result.data["filing_types_used"] == ["10-K"]
+
+
+def test_check_skips_filing_lookup_without_conn(monkeypatch, tmp_path):
+    (tmp_path / "buffett.md").write_text("Buffett criteria", encoding="utf-8")
+    monkeypatch.setattr("scripts.config.PRINCIPLES_DIR", tmp_path)
+    monkeypatch.setattr("scripts.score.score_thesis_against_principle", lambda *a, **k: (80, "fine"))
+
+    def _raise_if_called(ticker, conn):
+        raise AssertionError("filing lookup should not be called when conn is None")
+
+    monkeypatch.setattr("mytrader.checks.principles_fit.sec_filings.get_filing_summaries_for_ticker", _raise_if_called)
+
+    data = TickerData(ticker="KO", info={}, dividends=None)
+    result = principles_fit.check("KO", data, [_OK], None, None, None)  # no conn passed
+
+    assert result.data["filing_types_used"] == []

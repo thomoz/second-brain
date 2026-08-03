@@ -34,6 +34,19 @@ re-fetching MOVE/FRED/ABS/ONS live on every Find call would add real latency for
 real freshness gain. Cache can go stale if Monitor's timer misses a day — the "as of"
 date is surfaced in the thesis text itself so that's visible, not hidden, matching
 macro_indicators.py's own existing practice of surfacing FRED observation dates.
+
+SEC filing reads (added 2026-08-03, see mytrader/sec_filings.py and
+.agent/plans/sec-filings-principles-fit.md) — folds each US-listed ticker's latest
+10-K/10-Q/DEF 14A primary-source disclosures (Business, Risk Factors, MD&A,
+executive comp/ownership) into this same thesis, via sec_filings.get_
+filing_summaries_for_ticker(), so the 9 frameworks are informed by what the company
+itself discloses, not just yfinance's derived ratios. This is a DIFFERENT cache from
+the "never cache the thesis" policy described above — sec_filings.py's own
+sec_filing_cache is invalidated only when a newer SEC accession number appears
+(filing text is static between filings, unlike this check's live-stats thesis, which
+shifts run to run), not a contradiction of that policy, just a narrower cache one
+layer down. Non-US tickers (SEC EDGAR has no ASX/LSE/etc coverage) degrade silently
+to today's stats-only behavior.
 """
 
 from __future__ import annotations
@@ -41,7 +54,7 @@ from __future__ import annotations
 import sqlite3
 from typing import Any
 
-from .. import config, db
+from .. import config, db, sec_filings
 from . import CheckResult
 
 
@@ -52,6 +65,7 @@ def _build_thesis(
     recent_return_1mo: float | None,
     recent_return_3mo: float | None,
     macro_rows: list[sqlite3.Row] | None = None,
+    filing_summaries: dict[str, str] | None = None,
 ) -> str:
     """Construct a short thesis-style summary from Find's own live check results, in
     place of a PDF-derived buy_thesis, so the principle files have something concrete
@@ -96,6 +110,10 @@ def _build_thesis(
         macro_parts = "; ".join(f"{r['name']} [{r['verdict']}] {r['detail']}" for r in macro_rows)
         parts.append(f"Macro regime as of {as_of}: {macro_parts}.")
 
+    if filing_summaries:
+        for filing_type, summary in filing_summaries.items():
+            parts.append(f"{filing_type} filing highlights: {summary}")
+
     return " ".join(parts)
 
 
@@ -118,8 +136,10 @@ def check(
         return CheckResult(name="principles_fit", verdict="unknown", detail="Principle files not found")
 
     macro_rows = db.get_macro_snapshot(conn) if conn is not None else []
+    filing_summaries = sec_filings.get_filing_summaries_for_ticker(ticker, conn) if conn is not None else None
     thesis = _build_thesis(
-        ticker, other_checks, briefs_score, recent_return_1mo, recent_return_3mo, macro_rows
+        ticker, other_checks, briefs_score, recent_return_1mo, recent_return_3mo,
+        macro_rows, filing_summaries,
     )
 
     results = []
@@ -146,5 +166,6 @@ def check(
         data={
             "thesis": thesis, "average": round(average, 1), "results": results,
             "macro_snapshot_as_of": macro_rows[0]["computed_at"][:10] if macro_rows else None,
+            "filing_types_used": sorted(filing_summaries) if filing_summaries else [],
         },
     )

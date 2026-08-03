@@ -42,6 +42,9 @@ def _print_assessment(result: dict) -> None:
         print(f"\nPrinciples fit (Find's own read, graded against all 9 frameworks{macro_note}):")
         for p in sorted(principles.data["results"], key=lambda r: r["score"], reverse=True):
             print(f"  {p['principle']:<10}: {p['score']:>3}/100 — {p['reasoning']}")
+        filing_types = principles.data.get("filing_types_used") or []
+        if filing_types:
+            print(f"  (includes SEC filing read: {', '.join(filing_types)})")
 
 
 def cmd_find(args) -> None:
