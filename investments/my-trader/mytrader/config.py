@@ -43,6 +43,15 @@ PE_RICH_THRESHOLD = 35.0
 PE_CHEAP_THRESHOLD = 12.0
 DEBT_TO_EQUITY_FLAG = 150.0
 CURRENT_RATIO_FLAG = 1.0
+
+# checks/scale.py display anchors, added 2026-08-03 -- the "good" end of the 0-10
+# scale hint shown next to debt/equity and current ratio. Not new signals/verdicts
+# (DEBT_TO_EQUITY_FLAG/CURRENT_RATIO_FLAG above are unchanged and still the only
+# flag-trigger logic) -- just the other end of the display range.
+DEBT_TO_EQUITY_IDEAL = 0.0  # debt-free is the top of the scale
+CURRENT_RATIO_HEALTHY = 2.0  # conventional "2:1 is healthy" liquidity rule of thumb
+                               # (same class of citation as HOUSING_P2I_FLAG_RATIO's
+                               # "~2.5-3x considered affordable by convention" below)
 SECTOR_CONCENTRATION_FLAG_PCT = 25.0  # candidate's sector as % of holdings mkt value
 ROE_FLAG_THRESHOLD_PCT = 5.0  # balance_sheet.py's fallback proxy when debt/equity and
                                 # current ratio are both unavailable (common for banks/

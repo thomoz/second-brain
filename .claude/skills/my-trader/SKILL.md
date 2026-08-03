@@ -379,6 +379,30 @@ Review the pending file and either:
   — moves it into the real watchlist
 - `dismiss-candidate --ticker X` — discards it without adding to the watchlist
 
+## Scale Hints on Raw Figures
+
+`checks/scale.py`, added 2026-08-03 at Shaun's request ("so I know if the figure is
+good or not — otherwise I'll have no idea or forget"). Appends a `N/10 — label` hint
+next to raw figures in `valuation.py` (PE) and `balance_sheet.py` (debt/equity,
+current ratio, ROE fallback) — the two checks that print numbers with no built-in
+explanation of whether they're good. `opportunity.py` already states its threshold
+comparisons in words (e.g. "ROE 30.6% at/above 15.0%") so a scale there would be
+redundant, and was deliberately left unchanged.
+
+Every anchor reuses a threshold that already exists in `config.py` (PE_CHEAP/RICH,
+DEBT_TO_EQUITY_FLAG, CURRENT_RATIO_FLAG, ROE_FLAG_THRESHOLD_PCT,
+OPPORTUNITY_ROE_MIN_PCT) — no new signal or verdict logic, just a display label. Two
+new named constants were added purely as the "good" end of the display range:
+`DEBT_TO_EQUITY_IDEAL` (0 — debt-free) and `CURRENT_RATIO_HEALTHY` (2.0 — the
+conventional "2:1 is healthy" liquidity rule of thumb, same citation class as
+`HOUSING_P2I_FLAG_RATIO`'s "~2.5-3x considered affordable by convention").
+
+**Deliberately not scaled**: dividend trend (a %-change with no natural ceiling, not a
+bounded level) and expense ratio (no existing sourced good/bad threshold in
+`config.py` to anchor against) — a possible follow-up if Shaun wants it, not built
+here to avoid inventing a threshold the way the original opportunity.py thresholds
+were once called out for doing.
+
 ## Relationship to the `investments` Skill
 
 `investments` (briefs-finance) does PDF ingestion, backtesting, and a 0-100% likelihood
