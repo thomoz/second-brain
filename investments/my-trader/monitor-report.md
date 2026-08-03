@@ -20,6 +20,7 @@ No new material changes.
 - **LLY** (holdings) — valuation: PE 41.8 above rich threshold (35.0) (first flagged 2026-07-19)
 
 ### Watchlist Opportunities (this run)
+- **ASML** — Crash-discount fit [ROE 53.9% at/above 15.0%, but currently rich (PE 55.9) — quality worth watching for a crash-driven discount rather than buying at today's price]
 - **CEG** — Buffett/Smith [ROE 16.1% at/above 15.0%, not richly valued]; Marks/Neilson [down -14.5% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **CPRT** — Buffett/Smith [ROE 17.6% at/above 15.0%, not richly valued]; Marks/Neilson [down -12.5% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **KO** — Buffett/Smith [ROE 42.1% at/above 15.0%, not richly valued]
