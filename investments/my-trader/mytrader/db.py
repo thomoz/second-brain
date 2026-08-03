@@ -97,6 +97,14 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 fetched_at          TEXT NOT NULL,
                 PRIMARY KEY (ticker, filing_type)
             );
+            CREATE TABLE IF NOT EXISTS asx_announcement_cache (
+                ticker              TEXT NOT NULL,
+                announcement_type   TEXT NOT NULL,
+                announcement_id     TEXT NOT NULL,
+                summary             TEXT NOT NULL,
+                fetched_at          TEXT NOT NULL,
+                PRIMARY KEY (ticker, announcement_type)
+            );
         """)
     _ensure_watchlist_return_columns(conn)
 
@@ -368,6 +376,28 @@ def upsert_filing_summary_cache(
                (ticker, filing_type, accession_number, summary, fetched_at)
                VALUES (?, ?, ?, ?, ?)""",
             (ticker, filing_type, accession_number, summary, _now()),
+        )
+
+
+def get_cached_asx_summary(
+    conn: sqlite3.Connection, ticker: str, announcement_type: str
+) -> sqlite3.Row | None:
+    return conn.execute(
+        """SELECT * FROM asx_announcement_cache WHERE ticker = ? AND announcement_type = ?""",
+        (ticker, announcement_type),
+    ).fetchone()
+
+
+def upsert_asx_summary_cache(
+    conn: sqlite3.Connection, *, ticker: str, announcement_type: str,
+    announcement_id: str, summary: str,
+) -> None:
+    with conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO asx_announcement_cache
+               (ticker, announcement_type, announcement_id, summary, fetched_at)
+               VALUES (?, ?, ?, ?, ?)""",
+            (ticker, announcement_type, announcement_id, summary, _now()),
         )
 
 

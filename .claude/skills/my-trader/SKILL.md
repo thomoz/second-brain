@@ -300,6 +300,64 @@ fit section whenever real filing content informed the run.
   not the paginated `"files"` array used for very long filing histories — in practice
   "most recent 10-K/10-Q/DEF 14A" should always land in `"recent"`.
 
+## ASX Announcement Reads (principles_fit)
+
+Added 2026-08-03 (`mytrader/asx_announcements.py`), the ASX-listed sibling of the SEC
+filing reads above. Each `.AX`-suffixed ticker's latest Annual Report and Half-Year
+Report are fetched as PDFs from the ASX Market Announcements Platform (free, no login
+— a two-hop scrape: list announcements for the ticker/year, follow each announcement's
+legal click-through interstitial, extract the real PDF URL from a hidden form field).
+PDF text is extracted via `briefs-finance`'s own `scripts.extract.extract_text`
+(pdfplumber, falling back to PyMuPDF+pytesseract OCR for scanned PDFs), a heading-search
+heuristic pulls the Operating and Financial Review / Review of Operations / Risk
+Management / Directors' Report sections, and each report's relevant sections are
+summarized via one `sdk_compat` LLM call (`config.ASX_ANNOUNCEMENT_SUMMARY_MODEL`,
+default `"sonnet"`, reusing the SEC filing reads' already-locked-in tier) and folded
+into the same thesis text all 9 principle files grade.
+
+**Caching**: one cache table, `asx_announcement_cache`, same invalidation philosophy as
+`sec_filing_cache` — invalidated only when a new ASX announcement id (`idsId`) appears
+for that (ticker, announcement type), not time-based. A stale cached summary is still
+returned if a live re-fetch fails, rather than dropping that announcement type entirely.
+No CIK-equivalent bulk map/cache is needed — ASX's announcement-list endpoint takes the
+bare ticker code directly (`.AX` suffix stripped), a genuine simplification vs the SEC
+build, not a missing piece.
+
+**Degradation**: non-ASX tickers (no `.AX` suffix) return immediately with zero network
+calls, straight back to today's stats-only `principles_fit` behavior.
+
+**Year fallback**: if the current calendar year's announcement list is missing a target
+type (confirmed live 2026-08-03: neither BXB nor WES had lodged their FY2026 Annual
+Report yet, since both have a 30 June fiscal year end and annual reports typically lodge
+Aug–Oct), the previous year's list is checked as a fallback for that type.
+
+`find`'s output shows `(includes ASX announcement read: Annual Report, ...)` under the
+Principles fit section whenever real announcement content informed the run.
+
+**Known limitations**:
+- **Heading-search is a blunt heuristic, the biggest technical-risk area** — same class
+  of problem as the SEC filing reads' DEF 14A heuristic, but with a different real
+  failure mode: ASX report headings repeat as running per-page headers spanning many
+  pages of one section (confirmed live: WES's real 2025 Annual Report repeats
+  "operating and financial review" 29 times across a ~40-page chapter), so neither
+  "first occurrence" nor "last occurrence" alone is reliable — the first occurrence is
+  often an isolated table-of-contents line, and the last occurrence can land in an
+  unrelated subsection near the chapter's end. The current heuristic treats a lone early
+  occurrence far ahead of the next one as a TOC line and skips to the second; this is
+  still best-effort, and the LLM summarization step is expected to filter remaining
+  window noise, not this extraction step.
+- **Apostrophe encoding**: real filer PDFs render the possessive apostrophe in headings
+  like "Directors' Report" inconsistently after PDF extraction (confirmed: pdfplumber
+  renders it as a mangled replacement character for at least one real filer) — heading
+  candidates and extracted text are both normalized (apostrophe-bearing characters
+  replaced with a space) before matching to work around this.
+- **Announcement-type title matching** is validated against real BXB/WES titles only —
+  a different filer's wording for "Annual Report" or "Half-Year Report" equivalents may
+  not match `config.ASX_ANNOUNCEMENT_TYPES`' patterns and would silently skip that type.
+- **Appendix 4E** (preliminary final report) is not a separately-tracked type in v1 —
+  WES's real Annual Report title already includes "(including Appendix 4E)" so its
+  content is captured incidentally, but it isn't a standalone signal.
+
 ## Briefs Finance Candidate Sync
 
 **Runs automatically once a day as part of `monitor`** (re-enabled 2026-07-19, same

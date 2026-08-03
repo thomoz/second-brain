@@ -87,3 +87,14 @@ def _no_real_sec_filing_fetch(monkeypatch):
         "mytrader.checks.principles_fit.sec_filings.get_filing_summaries_for_ticker",
         lambda ticker, conn: None,
     )
+
+
+@pytest.fixture(autouse=True)
+def _no_real_asx_announcement_fetch(monkeypatch):
+    """principles_fit.check() calls asx_announcements.get_announcement_summaries_
+    for_ticker(), which does real ASX HTTP + LLM calls when conn is not None --
+    global/autouse for the same reason as _no_real_sec_filing_fetch above."""
+    monkeypatch.setattr(
+        "mytrader.checks.principles_fit.asx_announcements.get_announcement_summaries_for_ticker",
+        lambda ticker, conn: None,
+    )

@@ -1,0 +1,273 @@
+Asia-Pacific: The pallet and container pooling business in Asia-Pacific and the CHEP branded RPC business in
+Australia and New Zealand.
+There were no significant changes in the nature of Brambles’ principal activities during 1H26.
+Review of Operations and Results
+Due to a change in reporting structure, the European IBC business is recognised in the CHEP Americas segment, effective
+1 July 2025. Comparatives have been reclassified accordingly.
+A review of Brambles’ operations for 1H26 and the results of those operations are covered in the Financial Review on pages
+2 to 8 accompanying this report.
+Page 9 of 30
+ylno
+esu
+lanosrep
+roF
+DIRECTORS’ REPORT continued
+Matters Since the End of the Half-Year
+The Directors have declared an interim dividend for 2026 of 23.0 US cents per share, to be paid in Australian dollars at
+32.74 Australian cents per share, and which will be 20% franked. The dividend will be paid on 9 April 2026 to shareholders
+on the register on 12 March 2026.
+Other than the above, the Directors are not aware of any matter or circumstance that has arisen since 31 December 2025 up
+to the date of this report that has significantly affected or may significantly affect the operations of the Group, the results of
+those operations or the state of affairs of the Group in future financial years.
+Auditor's Independence Declaration
+The auditor's independence declaration, as required under Section 307C of the Corporations Act 2001, is set out on page 30
+and forms part of this report.
+This report is made in accordance with a resolution of the Directors.
+J P Mullen G A Chipchase
+Chair Chief Executive Officer
+19 February 2026
+Page 10 of 30
+ylno
+esu
+lanosrep
+roF
+Consolidated Financial Report
+for the half-year ended 31 December 2025
+Index Page
+Consolidated Statement of Comprehensive Income 12
+Consolidated Balance Sheet 13
+Consolidated Cash Flow Statement 14
+Consolidated Statement of Changes in Equity 15
+Notes to and Forming Part of the Consolidated Financial Statements
+1. Basis of Preparation 16
+2. Changes to Accounting and Other Standards 16
+3. Other Information 17
+4. Segment Information – Continuing Operations 18
+5. Operating Expenses – Continuing Operations 22
+6. Earnings Per Share 23
+7. Dividends 24
+8. Issued and Quoted Securities 24
+9. Discontinued Operations 25
+10. Net Assets Per Share 25
+11. Contingencies 26
+12. Events After Balance Sheet Date 26
+Directors' Declaration 27
+Independent Auditor's Review Report 28
+Auditor's Independence Declaration 30
+Page 11 of 30
+ylno
+esu
+lanosrep
+roF
+Consolidated Statement of Comprehensive
+Income
+for the half-year ended 31 December 2025
+First half First half
+2026 2025
+Note US$m US$m
+Continuing operations
+Sales revenue 4 3,533.5 3,371.7
+Other income and other revenue 126.6 115.5
+Operating expenses 5 (2,865.7) (2,766.8)
+Share of results of associates (2.4) (2.5)
+Operating profit 792.0 717.9
+Finance revenue 10.1 5.4
+Finance costs (69.8) (67.4)
+Net finance costs (59.7) (62.0)
+Net impact arising from hyperinflationary economies 3C (8.9) (10.2)
+Profit before tax 723.4 645.7
+Tax expense (216.0) (200.0)
+Profit from continuing operations 507.4 445.7
+Profit from discontinued operations 9 3.4 0.5
+Profit for the period attributable to members of the parent entity 510.8 446.2
+Other comprehensive income:
+Items that will not be reclassified to profit or loss:
+Actuarial gain on defined benefit pension plans 2.7 4.1
+Tax expense on items that will not be reclassified to profit or loss (0.7) (1.0)
+2.0 3.1
+Items that may be reclassified to profit or loss:
+Exchange differences on translation of foreign subsidiaries 16.2 (91.3)
+Cash flow hedge reserve:
+• loss on cash flow hedge (8.1) -
+• gain on cash flow hedge reclassified to profit or loss (1.1) -
+• tax benefit 2.3 -
+9.3 (91.3)
+Other comprehensive income/(loss) for the period 11.3 (88.2)
+Total comprehensive income for the period attributable to members of
+522.1 358.0
+the parent entity
+Earnings Per Share (EPS) - US cents
+Continuing operations
+• basic 6 37.2 32.1
+• diluted 37.0 31.9
+Total
+• basic 37.4 32.1
+• diluted 37.3 31.9
+The consolidated statement of comprehensive income should be read in conjunction with the accompanying notes.
+Page 12 of 30
+ylno
+esu
+lanosrep
+roF
+Consolidated Balance Sheet
+as at 31 December 2025
+December June
+2025 2025
+Note US$m US$m
+Assets
+Current assets
+Cash and cash equivalents 167.3 608.9
+Trade and other receivables 1,099.1 1,130.6
+Inventories 57.1 62.6
+Other assets 100.4 91.9
+Total current assets 1,423.9 1,894.0
+Non-current assets
+Other receivables 5.2 31.4
+Property, plant and equipment 6,252.9 6,218.3
+Right-of-use leased assets 827.7 823.8
+Goodwill and intangible assets 258.7 254.0
+Investments in associates 150.6 152.6
+Deferred tax assets 142.7 153.5
+Derivative financial instruments 33.5 41.4
+Total non-current assets 7,671.3 7,675.0
+Total assets 9,095.2 9,569.0
+Liabilities
+Current liabilities
+Trade and other payables 1,745.3 1,920.8
+Lease liabilities 146.7 144.0
+Borrowings 73.3 545.6
+Tax payable 58.9 43.9
+Provisions 109.4 191.4
+Total current liabilities 2,133.6 2,845.7
+Non-current liabilities
+Lease liabilities 793.2 787.7
+Borrowings 1,899.9 1,746.8
+Provisions 85.7 84.1
+Retirement benefit obligations 6.5 12.5
+Deferred tax liabilities 762.7 742.0
+Total non-current liabilities 3,548.0 3,373.1
+Total liabilities 5,681.6 6,218.8
+Net assets 3,413.6 3,350.2
+Equity
+Contributed equity 8 4,091.1 4,233.1
+Reserves (7,325.5) (7,303.1)
+Retained earnings 6,648.0 6,420.2
+Total equity 3,413.6 3,350.2
+The consolidated balance sheet should be read in conjunction with the accompanying notes.
+Page 13 of 30
+ylno
+esu
+lanosrep
+roF
+Consolidated Cash Flow Statement
+for the half-year ended 31 December 2025
+First half First half
+2026 2025
+Note US$m US$m
+Cash flows from operating activities
+Receipts from customers 4,063.1 3,895.2
+Payments to suppliers and employees (2,899.9) (2,893.4)
+Cash generated from operations 1,163.2 1,001.8
+Interest received 5.5 3.8
+Interest paid1 (41.0) (53.2)
+Income taxes paid (163.6) (129.4)
+Net cash inflow from operating activities 964.1 823.0
+Cash flows from investing activities
+Payments for property, plant and equipment (554.6) (482.6)
+Proceeds from sale of property, plant and equipment2 86.0 93.8
+Payments for intangible assets (13.8) (5.0)
+Net payments relating to divested businesses 9 (0.2) (1.0)
+Net cash outflow from investing activities (482.6) (394.8)
+Cash flows from financing activities
+Proceeds from borrowings3 173.7 261.6
+Repayments of borrowings3 (524.2) (188.9)
+Payment of principal component of lease liabilities (76.8) (66.6)
+Net (outflow)/inflow from derivative financial instruments (20.1) 7.0
+Payments for share buy-back (195.0) (158.4)
+Dividends paid 7 (286.0) (264.9)
+Net cash outflow from financing activities (928.4) (410.2)
+Net (decrease)/increase in cash and cash equivalents (446.9) 18.0
+Cash and cash equivalents, net of overdrafts, at beginning of the period 605.9 112.4
+Effect of exchange rate changes 1.4 (3.7)
+Cash and cash equivalents, net of overdrafts, at end of the period4 160.4 126.7
+1 Includes interest paid on leases of US$23.3 million in first half 2026 (first half 2025: US$23.1 million).
+2 Includes compensation for lost pooling equipment of US$84.9 million in first half 2026 (first half 2025: US$92.8 million).
+3 From second half 2025, cash flows from certain borrowings with maturities less than three months are presented on a net basis.
+The first half 2025 comparative information previously disclosed on a gross basis has been reclassified accordingly, with no change
+to net cash outflow from financing activities. Refer Note 1.
+4 Cash of US$160.4 million as at 31 December 2025 includes cash and cash equivalents of US$167.3 million and is net of overdrafts
+of US$6.9 million.
+The consolidated cash flow statement should be read in conjunction with the accompanying notes.
+Page 14 of 30
+ylno
+esu
+lanosrep
+roF
+Consolidated Statement of Changes in Equity
+for the half-year ended 31 December 2025
+Contributed Retained
+equity Reserves earnings Total
+Note US$m US$m US$m US$m
+Half-year ended 31 December 2024
+Opening balance as at 1 July 2024 4,564.0 (7,392.0) 6,055.1 3,227.1
+Profit for the period - - 446.2 446.2
+Other comprehensive (loss)/income - (91.3) 3.1 (88.2)
+Total comprehensive (loss)/income - (91.3) 449.3 358.0
+Share-based payments:
+• expense recognised - 17.2 - 17.2
+• shares issued - (36.9) - (36.9)
+• equity component of related tax - 6.7 - 6.7
+Transactions with owners in their capacity as owners:
+• dividends declared 7 - - (273.6) (273.6)
+• issues of ordinary shares, net of transaction costs 36.9 - - 36.9
+• share buy-back (158.4) - - (158.4)
+Closing balance as at 31 December 2024 4,442.5 (7,496.3) 6,230.8 3,177.0
+Half-year ended 31 December 2025
+Opening balance as at 1 July 2025 4,233.1 (7,303.1) 6,420.2 3,350.2
+Profit for the period - - 510.8 510.8
+Other comprehensive income - 9.3 2.0 11.3
+Total comprehensive income - 9.3 512.8 522.1
+Share-based payments:
+• expense recognised - 18.0 - 18.0
+• shares issued - (53.0) - (53.0)
+• equity component of related tax - 3.3 - 3.3
+Transactions with owners in their capacity as owners:
+• dividends declared 7 - - (285.0) (285.0)
+• issues of ordinary shares, net of transaction costs 8 53.0 - - 53.0
+• share buy-back 8 (195.0) - - (195.0)
+Closing balance as at 31 December 2025 4,091.1 (7,325.5) 6,648.0 3,413.6
+The consolidated statement of changes in equity should be read in conjunction with the accompanying notes.
+Page 15 of 30
+ylno
+esu
+lanosrep
+roF
+Notes to and Forming Part of the
+Consolidated Financial Statements
+for the half-year ended 31 December 2025
+Note 1. Basis of Preparation
+These interim financial statements present the consolidated results of Brambles Limited (ACN 118 896 021) and its subsidiaries
+(Brambles or the Group) for first half 2026. These financial statements have been authorised for issue in accordance with a resolution
+of the Directors on 19 February 2026.
+References to 2026 and 2025 are to the financial years ending on 30 June 2026 and 30 June 2025, respectively.
+These consolidated financial statements are a general purpose financial report and have been prepared in accordance with the
+requirements of the Corporations Act 2001 and AASB 134 Interim Financial Reporting which ensures compliance with International
+Financial Reporting Standard IAS 34 Interim Financial Reporting.
+These consolidated financial statements do not include all the notes that would normally be included in an annual financial report.
+These consolidated financial statements should be read in conjunction with Brambles’ 2025 Annual Report.
+These consolidated financial statements and all comparatives have been prepared using consistent accounting policies, as set out in
+Brambles’ 2025 Annual Report.
+As Brambles is a company of a kind referred to in ASIC Corporations Instrument 2016/191, relevant amounts in the consolidated
+financial statements and Directors’ Report have been rounded to the nearest hundred thousand US dollars. Amounts in cents have
+been rounded to the nearest tenth of a cent.
+From second half 2025, Brambles presents cash flows from certain borrowings with maturities less than three months on a net basis, to
+better reflect the short-term nature of these amounts as required by accounting standard AASB 107 Statement of Cash Flows. The first
+half 2025 comparative information previously disclosed on a gross basis has been reclassified accordingly, with no change in the net
+cash outflow from financing activities. For first half 2025, proceeds from borrowings of US$261.6 million (previously US$813.3 million)
+and repayments of borrowings of US$188.9 million (previously US$740.6 million) are presented on a net basis.
+Due to a change in reporting structure, the European Intermediate Bulk Container (IBC) business is recognised in the CHEP Americas
+segment, effective 1 July 2025. Comparatives have been reclassified accordingly (refer Note 4).
+Comparative information in the statement of comprehensive income includes a reclassification of US$9.2 million of costs that were
+previously offset within other income. These costs have been reclassified to operating expenses to enhance comparability between
+periods.
+As at 31 December 2025, Bramb

@@ -211,3 +211,75 @@ SEC_MAX_SECTION_CHARS = 6000  # per-section cap fed into the summarization promp
 SEC_MAX_RAW_DOCUMENT_BYTES = 10_000_000  # guard against a mislinked huge document;
                                             # a 10-K/10-Q/DEF14A primary document is
                                             # never legitimately this large.
+
+# Added 2026-08-03 -- ASX Market Announcements reads for principles_fit's thesis (see
+# .agent/plans/asx-announcements-principles-fit.md), the ASX-listed sibling of the
+# SEC_* block above. ASX_USER_AGENT deliberately differs in kind from SEC_USER_AGENT:
+# SEC's is a descriptive contact-email UA required by SEC's fair-access policy; ASX's
+# access path runs through an Incapsula/Imperva WAF on the interstitial page (see
+# .agent/plans/completed/asx-market-announcements-handoff.md), so a real browser UA is
+# used there instead to avoid tripping bot detection -- not a fair-access header, a
+# WAF-compatibility one.
+ASX_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+)
+ASX_ANNOUNCEMENTS_LIST_URL_TEMPLATE = (
+    "https://www.asx.com.au/asx/v2/statistics/announcements.do"
+    "?by=asxCode&asxCode={code}&timeframe=Y&year={year}"
+)  # confirmed live 2026-08-03 against real BXB/WES data, see the handoff above.
+ASX_ANNOUNCEMENT_INTERSTITIAL_URL_TEMPLATE = (
+    "https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId={ids_id}"
+)  # confirmed live 2026-08-03 -- the click-through legal interstitial whose HTML
+   # embeds the real PDF URL in a hidden `pdfURL` form field, see the handoff above.
+ASX_ANNOUNCEMENT_TYPES: dict[str, tuple[str, ...]] = {
+    "Annual Report": ("annual report", "full year statutory accounts", "full-year statutory accounts"),
+    "Half-Year Report": (
+        "half year accounts", "half-year accounts", "half yearly report",
+        "half year report", "half-year report", "appendix 4d",
+    ),
+}  # VALIDATED live 2026-08-03 against real BXB/WES announcement titles (Task 4.3) --
+   # the originally-guessed "annual report"/"half year report" substrings alone missed
+   # real filer wording: BXB's half-year financial statements are titled literally
+   # "Half Year Accounts" (no "report"/"half-year" wording at all), and BXB's annual
+   # equivalent is titled "Full Year Statutory Accounts" (no literal "annual report"
+   # anywhere). WES uses more SEC-DEF14A-like conventional wording ("2025 Annual
+   # Report (including Appendix 4E)", "2026 Half-year Report incorporating Appendix
+   # 4D") so its original guesses matched fine. Deliberately does NOT match "annual
+   # general meeting" / "full-year result presentation" / "full-year media release"
+   # titles (also real, confirmed present) -- those are meeting notices and investor
+   # decks, not the primary disclosure document this feature wants.
+ASX_REQUEST_DELAY_SECONDS = 0.2  # mirrors SEC_REQUEST_DELAY_SECONDS; the WAF caution
+                                    # above makes this more important here, not less.
+ASX_ANNOUNCEMENT_SUMMARY_MODEL = "sonnet"  # reuses SEC_FILING_SUMMARY_MODEL's
+                                              # already-locked-in tier as a starting
+                                              # default, not a fresh evaluation -- PDF
+                                              # text is noisier than SEC's clean HTML,
+                                              # revisit after seeing real ASX-PDF-
+                                              # derived summary quality.
+ASX_MAX_SECTION_CHARS = 6000  # mirrors SEC_MAX_SECTION_CHARS.
+ASX_MAX_RAW_PDF_BYTES = 20_000_000  # NOTE: intentionally 2x SEC_MAX_RAW_DOCUMENT_BYTES
+                                       # -- confirmed live 2026-08-03: WES's real 2025
+                                       # Annual Report PDF is 13.9MB and BXB's real
+                                       # Full Year Statutory Accounts PDF is 10.3MB,
+                                       # both of which SEC's 10MB-equivalent guard
+                                       # would have rejected as "mislinked huge
+                                       # document" -- ASX annual reports routinely run
+                                       # much larger than SEC's clean HTML filings.
+ASX_HEADING_CANDIDATES = (
+    "operating and financial review",
+    "review of operations",
+    "risk management",
+    "directors report",  # apostrophe deliberately omitted -- see
+                           # _normalize_for_heading_search in asx_announcements.py.
+)  # VALIDATED live 2026-08-03 against real fetched BXB Half-Year Accounts and WES
+   # Annual Report PDFs (Task 4.3), replacing the originally-guessed
+   # "principal risks"/"directors' report" list, which had two real, confirmed
+   # problems: (1) "principal risks"/"key risks" appear ZERO times in either real
+   # document -- not a real ASX heading convention, at least not for these filers;
+   # (2) "directors' report" with a literal straight/curly apostrophe fails to match
+   # real extracted text because pdfplumber renders the filer's typographic
+   # apostrophe as a mangled replacement character in practice (confirmed: BXB's
+   # real "Directors' Report" running header extracts as "Directors� Report"-
+   # shaped text) -- apostrophe-bearing candidates must have the apostrophe stripped
+   # before matching, both from the candidate and the extracted text.

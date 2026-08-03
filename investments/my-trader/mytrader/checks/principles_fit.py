@@ -47,6 +47,17 @@ sec_filing_cache is invalidated only when a newer SEC accession number appears
 shifts run to run), not a contradiction of that policy, just a narrower cache one
 layer down. Non-US tickers (SEC EDGAR has no ASX/LSE/etc coverage) degrade silently
 to today's stats-only behavior.
+
+ASX announcement reads (added 2026-08-03, see mytrader/asx_announcements.py and
+.agent/plans/asx-announcements-principles-fit.md) — the ASX-listed sibling of the
+SEC filing reads above. Folds each `.AX`-suffixed ticker's latest Annual Report and
+Half-Year Report (fetched as PDFs from the ASX Market Announcements Platform, the
+closest ASX equivalent to SEC EDGAR) into the same thesis, via asx_announcements.
+get_announcement_summaries_for_ticker(). Same cache philosophy as sec_filing_cache
+— asx_announcements.py's own asx_announcement_cache is invalidated only when a new
+ASX announcement id appears for that type, not the "never cache the thesis" policy
+above. Non-ASX tickers degrade silently to today's stats-only behavior, same as
+non-US tickers already do for the SEC filing reads.
 """
 
 from __future__ import annotations
@@ -54,7 +65,7 @@ from __future__ import annotations
 import sqlite3
 from typing import Any
 
-from .. import config, db, sec_filings
+from .. import asx_announcements, config, db, sec_filings
 from . import CheckResult
 
 
@@ -66,6 +77,7 @@ def _build_thesis(
     recent_return_3mo: float | None,
     macro_rows: list[sqlite3.Row] | None = None,
     filing_summaries: dict[str, str] | None = None,
+    asx_summaries: dict[str, str] | None = None,
 ) -> str:
     """Construct a short thesis-style summary from Find's own live check results, in
     place of a PDF-derived buy_thesis, so the principle files have something concrete
@@ -114,6 +126,10 @@ def _build_thesis(
         for filing_type, summary in filing_summaries.items():
             parts.append(f"{filing_type} filing highlights: {summary}")
 
+    if asx_summaries:
+        for announcement_type, summary in asx_summaries.items():
+            parts.append(f"{announcement_type} highlights: {summary}")
+
     return " ".join(parts)
 
 
@@ -137,9 +153,10 @@ def check(
 
     macro_rows = db.get_macro_snapshot(conn) if conn is not None else []
     filing_summaries = sec_filings.get_filing_summaries_for_ticker(ticker, conn) if conn is not None else None
+    asx_summaries = asx_announcements.get_announcement_summaries_for_ticker(ticker, conn) if conn is not None else None
     thesis = _build_thesis(
         ticker, other_checks, briefs_score, recent_return_1mo, recent_return_3mo,
-        macro_rows, filing_summaries,
+        macro_rows, filing_summaries, asx_summaries,
     )
 
     results = []
@@ -167,5 +184,6 @@ def check(
             "thesis": thesis, "average": round(average, 1), "results": results,
             "macro_snapshot_as_of": macro_rows[0]["computed_at"][:10] if macro_rows else None,
             "filing_types_used": sorted(filing_summaries) if filing_summaries else [],
+            "asx_announcement_types_used": sorted(asx_summaries) if asx_summaries else [],
         },
     )

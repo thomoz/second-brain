@@ -45,6 +45,9 @@ def _print_assessment(result: dict) -> None:
         filing_types = principles.data.get("filing_types_used") or []
         if filing_types:
             print(f"  (includes SEC filing read: {', '.join(filing_types)})")
+        asx_types = principles.data.get("asx_announcement_types_used") or []
+        if asx_types:
+            print(f"  (includes ASX announcement read: {', '.join(asx_types)})")
 
 
 def cmd_find(args) -> None:
