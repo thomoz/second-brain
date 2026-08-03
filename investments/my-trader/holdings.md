@@ -11,4 +11,4 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 | PMGOLD | Perth Mint Gold Structured Product | 69.0 | $1,237.86 | $58.27 | $-2,782.77 | 3a |
 | V | Visa Inc (Class A) | 0.1001 | $36.65 | $318.41 | +$4.78 | 1 |
 
-Last auto-generated: 2026-08-02.
+Last auto-generated: 2026-08-03.
