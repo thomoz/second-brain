@@ -15,6 +15,7 @@ from .checks import (
     dividend,
     etf_mechanics,
     fx,
+    news_events,
     opportunity,
     price_action,
     principles_fit,
@@ -89,11 +90,19 @@ def _refresh_backtest_for_ticker(ticker: str) -> None:
 
 
 def run_assessment(
-    ticker: str, conn: sqlite3.Connection, include_principles_fit: bool = False
+    ticker: str,
+    conn: sqlite3.Connection,
+    include_principles_fit: bool = False,
+    include_news_events: bool = False,
 ) -> dict[str, Any]:
     """include_principles_fit: opt-in, Find-only (see checks/principles_fit.py) — 9
     extra LLM calls per assessment, so defaulted off. Monitor never passes True, so
-    its daily re-check of every holding + discussed watchlist row is unaffected."""
+    its daily re-check of every holding + discussed watchlist row is unaffected.
+
+    include_news_events: opt-in, Find-only (see checks/news_events.py) — one
+    LLM+web-search call per assessment, same reasoning as include_principles_fit.
+    Added to other_checks (not appended after, like principles_fit) so a "flag"
+    verdict here participates in opportunity.py's existing risk-flag gate."""
     normalized = tickers.normalize(ticker)
     data = market_data.fetch_ticker_data(normalized)
     excluded, exclusion_reason = ethical_check(normalized)
@@ -113,6 +122,8 @@ def run_assessment(
         sector_risk.check(data),
         etf_mechanics.check(data, existing_row),
     ]
+    if include_news_events:
+        other_checks.append(news_events.check(normalized, conn))
     results = [
         *other_checks,
         opportunity.check(data, other_checks, briefs_score, recent_return_3mo),

@@ -93,6 +93,7 @@ def test_buffett_smith_quality_at_fair_price_flags_interesting():
     result = opportunity.check(data, [_OK], None, None)
     assert result.verdict == "interesting"
     assert "Buffett/Smith" in result.detail
+    assert "/10 —" in result.detail  # ROE scale hint, same convention as PE/debt-equity/current-ratio
 
 
 def test_buffett_smith_quality_suppressed_when_already_rich():
@@ -150,6 +151,7 @@ def test_crash_discount_fit_flags_interesting_when_rich_but_high_roe():
     assert result.verdict == "interesting"
     assert "Crash-discount fit" in result.detail
     assert "ROE 30.0%" in result.detail
+    assert "/10 —" in result.detail  # ROE scale hint
     assert "PE 60.0" in result.detail
 
 

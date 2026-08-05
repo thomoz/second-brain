@@ -91,12 +91,31 @@ def _build_thesis(
 
     bs = by_name.get("balance_sheet")
     if bs is not None:
-        if bs.data.get("debt_to_equity") is not None:
-            parts.append(f"Debt/equity {bs.data['debt_to_equity']:.1f}.")
-        if bs.data.get("current_ratio") is not None:
-            parts.append(f"Current ratio {bs.data['current_ratio']:.2f}.")
-        if bs.data.get("return_on_equity_pct") is not None:
-            parts.append(f"ROE {bs.data['return_on_equity_pct']:.1f}%.")
+        # yfinance's debtToEquity is debt expressed as a PERCENT of equity (this
+        # tool's own >=150 flag threshold means "debt >= 1.5x equity"), not a plain
+        # ratio -- a bare "Debt/equity 11.9." (even with a "(9/10 -- very good)" scale
+        # hint appended) still got misread by the LLM as an alarmingly high ~12x
+        # multiple rather than the low ~0.12x it actually is: found live on KSPI
+        # 2026-08-03, where balance_sheet.py itself grades 11.9 as 9/10 "very good"
+        # but multiple principle reasonings called the same number "very high
+        # debt/equity" -- persisted even after the scale-hint-only fix, so this spells
+        # out both the percent-of-equity framing and the equivalent x-multiple
+        # explicitly rather than relying on an annotation to override the LLM's prior.
+        de = bs.data.get("debt_to_equity")
+        if de is not None:
+            threshold_x = config.DEBT_TO_EQUITY_FLAG / 100
+            parts.append(
+                f"Debt-to-equity: {de / 100:.2f}x (debt is {de:.0f}% of equity; "
+                f"this tool flags at or above {threshold_x:.1f}x)."
+            )
+        cr = bs.data.get("current_ratio")
+        if cr is not None:
+            parts.append(f"Current ratio {cr:.2f}.")
+        roe = bs.data.get("return_on_equity_pct")
+        if roe is not None:
+            parts.append(f"Return on equity {roe:.1f}%.")
+        if bs.verdict == "flag":
+            parts.append(f"Balance sheet check flagged this run: {bs.detail}")
 
     div = by_name.get("dividend")
     if div is not None:
@@ -144,6 +163,19 @@ def check(
 ) -> CheckResult:
     if data is None:
         return CheckResult(name="principles_fit", verdict="unknown", detail="No market data available")
+
+    if data.info.get("quoteType") == "ETF":
+        # Buffett/Graham/Fisher/etc. grade individual operating businesses (moat,
+        # management, ROE, capital allocation) -- meaningless for a diversified fund,
+        # confirmed by IVV/SPY both landing ~35/100 despite being exactly what they're
+        # supposed to be (cheap, diversified index exposure). Skip the 9 LLM calls
+        # entirely rather than produce a low score that reads as a red flag but isn't
+        # one -- see checks/etf_mechanics.py for the fund-appropriate checks instead.
+        return CheckResult(
+            name="principles_fit", verdict="unknown",
+            detail="Skipped for ETFs — these 9 frameworks grade individual operating "
+                   "businesses, not diversified funds (see etf_mechanics for fund-specific checks)",
+        )
 
     from scripts.config import PRINCIPLES_DIR
     from scripts.score import score_thesis_against_principle

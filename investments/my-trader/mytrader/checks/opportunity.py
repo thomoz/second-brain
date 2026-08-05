@@ -70,6 +70,7 @@ from typing import Any
 
 from .. import config
 from . import CheckResult
+from .scale import format_scale
 
 
 def check(
@@ -103,10 +104,15 @@ def check(
         if roe is not None and roe * 100 >= config.OPPORTUNITY_ROE_MIN_PCT:
             crash = next((c for c in other_checks if c.name == "crash_resilience"), None)
             crash_note = f"; historical crash behaviour: {crash.detail}" if crash and crash.data.get("drawdowns") else ""
+            # Same 0-10 scale-hint convention as balance_sheet.py's ROE fallback --
+            # ROE only ever appears via this check (no dedicated ROE check exists
+            # outside balance_sheet.py's financials-only fallback), so without this it
+            # was the one metric in a Find report with no word-description anchor.
+            roe_scale = format_scale(roe * 100, config.OPPORTUNITY_ROE_MIN_PCT, config.ROE_FLAG_THRESHOLD_PCT)
             detail = (
-                f"Crash-discount fit [ROE {roe * 100:.1f}% at/above {config.OPPORTUNITY_ROE_MIN_PCT}%, "
-                f"but currently rich (PE {pe:.1f}) — quality worth watching for a crash-driven "
-                f"discount rather than buying at today's price{crash_note}]"
+                f"Crash-discount fit [ROE {roe * 100:.1f}% at/above {config.OPPORTUNITY_ROE_MIN_PCT}% "
+                f"({roe_scale}), but currently rich (PE {pe:.1f}) — quality worth watching for a "
+                f"crash-driven discount rather than buying at today's price{crash_note}]"
             )
             return CheckResult(
                 name="opportunity", verdict="interesting", detail=detail,
@@ -135,7 +141,11 @@ def check(
         reasons.append(f"Lynch [PEG {peg:.2f} at/below {config.OPPORTUNITY_PEG_MAX} — growth at a reasonable price]")
 
     if roe is not None and roe * 100 >= config.OPPORTUNITY_ROE_MIN_PCT:
-        reasons.append(f"Buffett/Smith [ROE {roe * 100:.1f}% at/above {config.OPPORTUNITY_ROE_MIN_PCT}%, not richly valued]")
+        roe_scale = format_scale(roe * 100, config.OPPORTUNITY_ROE_MIN_PCT, config.ROE_FLAG_THRESHOLD_PCT)
+        reasons.append(
+            f"Buffett/Smith [ROE {roe * 100:.1f}% at/above {config.OPPORTUNITY_ROE_MIN_PCT}% "
+            f"({roe_scale}), not richly valued]"
+        )
 
     if recent_return_pct is not None and recent_return_pct <= -config.OPPORTUNITY_DIP_FLAG_PCT:
         reasons.append(

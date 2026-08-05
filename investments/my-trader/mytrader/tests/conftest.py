@@ -98,3 +98,22 @@ def _no_real_asx_announcement_fetch(monkeypatch):
         "mytrader.checks.principles_fit.asx_announcements.get_announcement_summaries_for_ticker",
         lambda ticker, conn: None,
     )
+
+
+@pytest.fixture(autouse=True)
+def _no_real_etf_funds_data_fetch(monkeypatch):
+    """etf_mechanics.check() calls _fetch_funds_data() for every ETF ticker (top
+    holdings/sector weightings context, added 2026-08-04) -- a real yfinance network
+    call -- global/autouse for the same reason as the fixtures above."""
+    monkeypatch.setattr("mytrader.checks.etf_mechanics._fetch_funds_data", lambda ticker: None)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_news_events_search(monkeypatch):
+    """checks/news_events.check() calls news_search.get_news_events_for_ticker(),
+    which does a real sdk_compat WebSearch+LLM call when conn is not None --
+    global/autouse for the same reason as _no_real_sec_filing_fetch above."""
+    monkeypatch.setattr(
+        "mytrader.checks.news_events.news_search.get_news_events_for_ticker",
+        lambda ticker, conn: None,
+    )

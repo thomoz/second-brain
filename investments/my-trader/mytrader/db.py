@@ -105,6 +105,12 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 fetched_at          TEXT NOT NULL,
                 PRIMARY KEY (ticker, announcement_type)
             );
+            CREATE TABLE IF NOT EXISTS news_events_cache (
+                ticker              TEXT PRIMARY KEY,
+                verdict             TEXT NOT NULL,
+                detail              TEXT NOT NULL,
+                fetched_at          TEXT NOT NULL
+            );
         """)
     _ensure_watchlist_return_columns(conn)
 
@@ -398,6 +404,23 @@ def upsert_asx_summary_cache(
                (ticker, announcement_type, announcement_id, summary, fetched_at)
                VALUES (?, ?, ?, ?, ?)""",
             (ticker, announcement_type, announcement_id, summary, _now()),
+        )
+
+
+def get_cached_news_events(conn: sqlite3.Connection, ticker: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT * FROM news_events_cache WHERE ticker = ?", (ticker,)
+    ).fetchone()
+
+
+def upsert_news_events_cache(
+    conn: sqlite3.Connection, *, ticker: str, verdict: str, detail: str,
+) -> None:
+    with conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO news_events_cache (ticker, verdict, detail, fetched_at)
+               VALUES (?, ?, ?, ?)""",
+            (ticker, verdict, detail, _now()),
         )
 
 

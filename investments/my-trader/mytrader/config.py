@@ -275,6 +275,60 @@ ASX_MAX_RAW_PDF_BYTES = 20_000_000  # NOTE: intentionally 2x SEC_MAX_RAW_DOCUMEN
                                        # would have rejected as "mislinked huge
                                        # document" -- ASX annual reports routinely run
                                        # much larger than SEC's clean HTML filings.
+# Added 2026-08-04 -- ETF-specific criteria (checks/etf_mechanics.py), built after the
+# XMET (Betashares Energy Transition Metals ETF) bug showed the tool was grading funds
+# against principles_fit's 9 stock-picking frameworks (Buffett/Graham/etc.), which
+# grade individual operating businesses and don't apply to a diversified fund -- IVV
+# and SPY had already independently landed ~35/100 there despite being exactly what
+# they're supposed to be. These two thresholds are NOT sourced from
+# investments/briefs-finance's principle files (those don't cover funds at all) --
+# they're industry rules-of-thumb, same class of best-guess default as
+# OPPORTUNITY_DIP_FLAG_PCT, confirmed with Shaun 2026-08-04.
+ETF_AUM_FLAG_USD = 50_000_000.0  # widely-cited rule of thumb (ETF.com/Morningstar-
+                                    # style coverage): funds below this level are
+                                    # economically marginal for the issuer to keep
+                                    # running -- real closure/delisting risk. Verified
+                                    # this field (yfinance's totalAssets) populates for
+                                    # both US- and AU-domiciled ETFs (XMET $129M,
+                                    # PMGOLD $2.4B, IVV $888B all read live 2026-08-04).
+ETF_AUM_HEALTHY_USD = 500_000_000.0  # 0-10 scale's "excellent" anchor -- 10x the flag
+                                        # threshold, comfortably inside established-
+                                        # liquid-fund territory. An anchor point for
+                                        # format_scale's display range, not itself a
+                                        # flag trigger -- same class as
+                                        # DEBT_TO_EQUITY_IDEAL/CURRENT_RATIO_HEALTHY.
+ETF_EXPENSE_RATIO_FLAG_PCT = 1.0  # Core index funds (IVV/VOO/SPY) run 0.03-0.09%;
+                                     # actively-managed/thematic ETFs routinely run
+                                     # 0.5-1.5%+, so 1.00%+ is a widely-cited "getting
+                                     # expensive" line for a fund. yfinance's
+                                     # netExpenseRatio is consistently unpopulated for
+                                     # AU-domiciled ETFs (confirmed live against XMET/
+                                     # PMGOLD/IXI.AX, all None) -- degrades to unknown
+                                     # for those, same graceful-degradation pattern as
+                                     # the FRED-backed macro checks.
+ETF_EXPENSE_RATIO_CHEAP_PCT = 0.20  # matches real core index-fund pricing (IVV 0.03%
+                                       # confirmed live).
+
+# Added 2026-08-05 -- news/event search (checks/news_events.py), covering live
+# catalysts fundamentals-only checks structurally can't see (M&A offers, lawsuits,
+# credit downgrades, leadership turnover, short-seller reports). Confirmed live
+# against ZIM: yfinance's own news feed (already fetched into TickerData.news,
+# previously unused by any check) carried none of ZIM's live Hapag-Lloyd takeover
+# story -- its 10 most recent items were generic Zacks-style market recaps -- but a
+# single web search surfaced it immediately, including a live rival counter-bid
+# neither yfinance nor a stale third-party video had. Runs via sdk_compat with
+# allowed_tools=["WebSearch"] -- under the active Codex backend (confirmed live:
+# sdk_compat.BACKEND == "codex") this uses Codex CLI's own tools.web_search flag,
+# flat-rate on the ChatGPT subscription, not a separate paid search API.
+NEWS_EVENTS_SUMMARY_MODEL = "sonnet"  # same Claude-shaped tier alias as
+                                          # SEC_FILING_SUMMARY_MODEL/
+                                          # ASX_ANNOUNCEMENT_SUMMARY_MODEL.
+NEWS_EVENTS_CACHE_HOURS = 20.0  # short, time-based TTL -- unlike sec_filing_cache/
+                                   # asx_announcement_cache (invalidated on a new
+                                   # accession/announcement id), news has no version
+                                   # identifier to key off, so this is roughly "once
+                                   # per day" rather than "until something changes".
+
 ASX_HEADING_CANDIDATES = (
     "operating and financial review",
     "review of operations",

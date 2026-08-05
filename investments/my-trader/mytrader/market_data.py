@@ -37,7 +37,16 @@ def cached_session():
 
 
 def _looks_valid(info: dict[str, Any]) -> bool:
-    return info.get("regularMarketPrice") is not None or bool(info.get("quoteType"))
+    # yfinance's failure-mode info dict for a symbol that doesn't exist on the primary
+    # lookup (e.g. an ASX-only ticker tried bare, without .AX) still comes back with
+    # quoteType set to the literal string "NONE" -- truthy, so `bool(...)` alone was
+    # fooled into treating it as valid data and never triggering the .AX fallback
+    # below. Found live 2026-08-04: XMET (Betashares Energy Transition Metals ETF,
+    # ASX-only) silently assessed against a garbage info dict -- no PE, no balance
+    # sheet, no sector, "Not an ETF" despite genuinely being one -- while
+    # crash_windows.py/return_data.py (which each retry both variants independently
+    # for price history) got real ASX data, making the bug easy to miss.
+    return info.get("regularMarketPrice") is not None or info.get("quoteType") not in (None, "NONE")
 
 
 def _fetch_one(ticker: str) -> TickerData | None:

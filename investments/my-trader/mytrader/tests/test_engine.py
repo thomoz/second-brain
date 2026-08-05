@@ -222,6 +222,42 @@ def test_run_assessment_includes_principles_fit_when_opted_in(db_conn, monkeypat
     assert len(result["checks"]) == 11
 
 
+def test_run_assessment_includes_news_events_when_opted_in(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(ticker=ticker, info={"trailingPE": 20.0}, dividends=None),
+    )
+    monkeypatch.setattr(
+        "mytrader.engine.news_events.check",
+        lambda *a, **k: CheckResult(name="news_events", verdict="info", detail="stub"),
+    )
+    result = engine.run_assessment("VRTX", db_conn, include_news_events=True)
+    assert "news_events" in {c.name for c in result["checks"]}
+    assert len(result["checks"]) == 11
+
+
+def test_news_events_flag_suppresses_opportunity(db_conn, monkeypatch):
+    """A material news_events flag should gate opportunity.py the same way a
+    dividend/balance-sheet flag does — confirms news_events is wired into
+    other_checks (ahead of opportunity), not appended after like principles_fit."""
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(
+            ticker=ticker,
+            info={"trailingPE": 5.0, "priceToBook": 0.5, "returnOnEquity": 0.30},
+            dividends=None,
+        ),
+    )
+    monkeypatch.setattr(
+        "mytrader.engine.news_events.check",
+        lambda *a, **k: CheckResult(name="news_events", verdict="flag", detail="Live takeover offer"),
+    )
+    result = engine.run_assessment("VRTX", db_conn, include_news_events=True)
+    opportunity_result = next(c for c in result["checks"] if c.name == "opportunity")
+    assert opportunity_result.verdict == "ok"
+    assert "Active risk flag" in opportunity_result.detail
+
+
 def test_run_assessment_score_stays_none_when_no_recommendation_exists(db_conn, monkeypatch):
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
     calls = []

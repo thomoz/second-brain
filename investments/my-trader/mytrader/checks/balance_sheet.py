@@ -7,6 +7,19 @@ conventional current-assets/current-liabilities split, so Yahoo doesn't populate
 these the way it does for industrials/consumer companies. Falls back to
 returnOnEquity as a rough health proxy in that case rather than reporting "unknown"
 for an entire sector when a genuinely relevant number is sitting right there.
+
+Considered adding a lease-adjusted debt/equity for lease-heavy industries (shipping,
+airlines) 2026-08-05, after ZIM's raw 143.1 D/E turned out to be ~98.6% IFRS 16
+capital lease obligations (vessel charters) rather than conventional borrowed money.
+Deliberately NOT built: lease obligations behave economically like real debt here --
+IFRS 16 exists specifically because operating leases were being used to obscure real
+leverage, rating agencies include lease liabilities in adjusted-leverage metrics for
+the same reason, and defaulting on a shipping time charter is not a clean walk-away --
+standard charter party terms (e.g. NYPE) leave the charterer liable for the shortfall
+between the contracted and prevailing market rate for the rest of the term, the same
+basic mechanic as a bond default claim. Yahoo's raw debtToEquity below is already the
+more conservative, defensible number; a lease-excluded variant would understate real
+risk, not correct a bug.
 """
 
 from __future__ import annotations
