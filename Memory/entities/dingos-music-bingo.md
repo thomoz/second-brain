@@ -16,3 +16,4 @@ Hosted music bingo shows at venues across Sydney.
 
 ## Status
 Active
+- (Aug 05) Business name renewal email arrived; check due date and payment
