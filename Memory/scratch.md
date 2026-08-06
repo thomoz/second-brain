@@ -44,3 +44,6 @@ Check Facebook Messenger in case Kave Parker replied.
 
 ## 2026-07-01 [WhatsApp save]
 Ask me a question: uncover my shadow side.
+
+## 2026-08-06 [WhatsApp save]
+How does getting a loan against stocks that you own, then living off that, work?
