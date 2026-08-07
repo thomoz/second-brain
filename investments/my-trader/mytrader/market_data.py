@@ -97,3 +97,49 @@ def fetch_fx_change_pct(base: str, quote: str = "AUD", period: str = "3mo") -> f
         return round((end - start) / start * 100, 2)
     except Exception:
         return None
+
+
+def fetch_balance_sheet_financials(ticker: str) -> dict[str, float] | None:
+    """Deeper fallback for entity types where yfinance's .info convenience ratios
+    (debtToEquity/currentRatio/returnOnEquity) are empty but the underlying
+    balance_sheet/financials statements have real numbers one level deeper --
+    confirmed 2026-08-06 against GROW.L (Molten Ventures, a UK investment trust):
+    .info's three ratio fields were all None, but Total Debt, Stockholders Equity,
+    and Net Income were all present in the statements. checks/balance_sheet.py
+    already has a documented ROE-only fallback for this class of gap (banks,
+    verified 2026-07-19 against NU) -- this just extends where that ROE (and,
+    when available, debt/equity) can come from, rather than giving up to
+    "unknown" when real data exists.
+
+    Returns a dict shaped like the fields it's standing in for -- "debtToEquity"
+    in the same percent-of-equity units as yfinance's own .info field,
+    "returnOnEquity" as a fraction (not *100) -- so callers can treat these
+    exactly like .info.get(...) results. Returns None if the statements are
+    empty or missing the needed rows (not every ticker has this data either --
+    same graceful degradation as everywhere else in this module)."""
+    import yfinance as yf
+
+    try:
+        t = yf.Ticker(ticker)
+        bs = t.balance_sheet
+        if bs is None or bs.empty:
+            return None
+        equity = bs.loc["Stockholders Equity"].iloc[0] if "Stockholders Equity" in bs.index else None
+        if equity is None or float(equity) == 0:
+            return None
+
+        result: dict[str, float] = {}
+        if "Total Debt" in bs.index:
+            total_debt = bs.loc["Total Debt"].iloc[0]
+            if total_debt is not None:
+                result["debtToEquity"] = round(float(total_debt) / float(equity) * 100, 2)
+
+        fin = t.financials
+        if fin is not None and not fin.empty and "Net Income" in fin.index:
+            net_income = fin.loc["Net Income"].iloc[0]
+            if net_income is not None:
+                result["returnOnEquity"] = float(net_income) / float(equity)
+
+        return result or None
+    except Exception:
+        return None

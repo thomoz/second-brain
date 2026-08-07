@@ -117,3 +117,12 @@ def _no_real_news_events_search(monkeypatch):
         "mytrader.checks.news_events.news_search.get_news_events_for_ticker",
         lambda ticker, conn: None,
     )
+
+
+@pytest.fixture(autouse=True)
+def _no_real_balance_sheet_statement_fetch(monkeypatch):
+    """checks/balance_sheet.check() calls market_data.fetch_balance_sheet_financials()
+    as a second-tier ROE fallback (added 2026-08-06) whenever .info has none of
+    debtToEquity/currentRatio/returnOnEquity -- a real yfinance network call --
+    global/autouse for the same reason as the fixtures above."""
+    monkeypatch.setattr("mytrader.market_data.fetch_balance_sheet_financials", lambda ticker: None)

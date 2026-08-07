@@ -3,8 +3,17 @@ from __future__ import annotations
 import sys
 import types
 
+import pandas as pd
+
 from mytrader import market_data
 from mytrader.market_data import TickerData
+
+# conftest.py's autouse _no_real_balance_sheet_statement_fetch fixture patches
+# market_data.fetch_balance_sheet_financials to a None-returning stub -- save the
+# real function here, at import time before any fixture runs, so the tests below
+# that exercise the real implementation can restore it (same pattern as
+# test_sec_filings.py / test_news_search.py).
+_real_fetch_balance_sheet_financials = market_data.fetch_balance_sheet_financials
 
 
 def _counting_stub(calls: list[str]):
@@ -86,3 +95,63 @@ def test_fetch_ticker_data_falls_back_to_asx_when_bare_lookup_is_placeholder(mon
     data = market_data.fetch_ticker_data("XMET")
     assert data is not None
     assert data.info["quoteType"] == "ETF"
+
+
+def _install_fake_yfinance(monkeypatch, balance_sheet=None, financials=None):
+    class _FakeTicker:
+        def __init__(self, symbol):
+            self._symbol = symbol
+
+        @property
+        def balance_sheet(self):
+            return balance_sheet if balance_sheet is not None else pd.DataFrame()
+
+        @property
+        def financials(self):
+            return financials if financials is not None else pd.DataFrame()
+
+    fake_yf = types.ModuleType("yfinance")
+    fake_yf.Ticker = _FakeTicker
+    monkeypatch.setitem(sys.modules, "yfinance", fake_yf)
+
+
+def test_fetch_balance_sheet_financials_computes_de_and_roe(monkeypatch):
+    """Regression fixture for GROW.L (Molten Ventures) -- confirmed live 2026-08-06:
+    .info's debtToEquity/currentRatio/returnOnEquity were all None, but these same
+    figures were present in the raw statements."""
+    bs = pd.DataFrame(
+        {pd.Timestamp("2026-03-31"): [130_800_000.0, 1_323_800_000.0]},
+        index=["Total Debt", "Stockholders Equity"],
+    )
+    fin = pd.DataFrame({pd.Timestamp("2026-03-31"): [120_300_000.0]}, index=["Net Income"])
+    _install_fake_yfinance(monkeypatch, balance_sheet=bs, financials=fin)
+    monkeypatch.setattr(market_data, "fetch_balance_sheet_financials", _real_fetch_balance_sheet_financials)
+
+    result = market_data.fetch_balance_sheet_financials("GROW.L")
+    assert result["debtToEquity"] == round(130_800_000.0 / 1_323_800_000.0 * 100, 2)
+    assert result["returnOnEquity"] == 120_300_000.0 / 1_323_800_000.0
+
+
+def test_fetch_balance_sheet_financials_returns_none_when_equity_missing(monkeypatch):
+    bs = pd.DataFrame({pd.Timestamp("2026-03-31"): [130_800_000.0]}, index=["Total Debt"])
+    _install_fake_yfinance(monkeypatch, balance_sheet=bs)
+    monkeypatch.setattr(market_data, "fetch_balance_sheet_financials", _real_fetch_balance_sheet_financials)
+    assert market_data.fetch_balance_sheet_financials("X") is None
+
+
+def test_fetch_balance_sheet_financials_returns_none_when_statement_empty(monkeypatch):
+    _install_fake_yfinance(monkeypatch)
+    monkeypatch.setattr(market_data, "fetch_balance_sheet_financials", _real_fetch_balance_sheet_financials)
+    assert market_data.fetch_balance_sheet_financials("X") is None
+
+
+def test_fetch_balance_sheet_financials_partial_when_financials_missing(monkeypatch):
+    bs = pd.DataFrame(
+        {pd.Timestamp("2026-03-31"): [130_800_000.0, 1_323_800_000.0]},
+        index=["Total Debt", "Stockholders Equity"],
+    )
+    _install_fake_yfinance(monkeypatch, balance_sheet=bs)
+    monkeypatch.setattr(market_data, "fetch_balance_sheet_financials", _real_fetch_balance_sheet_financials)
+    result = market_data.fetch_balance_sheet_financials("X")
+    assert "debtToEquity" in result
+    assert "returnOnEquity" not in result
