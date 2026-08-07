@@ -111,6 +111,25 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 detail              TEXT NOT NULL,
                 fetched_at          TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS gold_backtest_results (
+                id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+                signal                  TEXT NOT NULL,
+                direction               TEXT NOT NULL,
+                horizon_unit            TEXT NOT NULL,  -- 'day' or 'month'
+                horizon_value           INTEGER NOT NULL,
+                n                       INTEGER NOT NULL,
+                mean_return_pct         REAL,
+                median_return_pct       REAL,
+                win_rate_pct            REAL,
+                best_return_pct         REAL,
+                worst_return_pct        REAL,
+                baseline_n              INTEGER NOT NULL,
+                baseline_mean_pct       REAL,
+                baseline_median_pct     REAL,
+                baseline_win_rate_pct   REAL,
+                computed_at             TEXT NOT NULL,
+                UNIQUE(signal, direction, horizon_unit, horizon_value)
+            );
         """)
     _ensure_watchlist_return_columns(conn)
 
@@ -422,6 +441,30 @@ def upsert_news_events_cache(
                VALUES (?, ?, ?, ?)""",
             (ticker, verdict, detail, _now()),
         )
+
+
+def upsert_gold_backtest_results(conn: sqlite3.Connection, results: dict) -> None:
+    now = _now()
+    with conn:
+        for (signal, direction, horizon_unit, horizon_value), stats in results.items():
+            b = stats["baseline"]
+            conn.execute(
+                """INSERT OR REPLACE INTO gold_backtest_results
+                   (signal, direction, horizon_unit, horizon_value, n, mean_return_pct,
+                    median_return_pct, win_rate_pct, best_return_pct, worst_return_pct,
+                    baseline_n, baseline_mean_pct, baseline_median_pct,
+                    baseline_win_rate_pct, computed_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (signal, direction, horizon_unit, horizon_value, stats["n"], stats["mean"],
+                 stats["median"], stats["win_rate"], stats["best"], stats["worst"],
+                 b["n"], b["mean"], b["median"], b["win_rate"], now),
+            )
+
+
+def get_gold_backtest_results(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute(
+        "SELECT * FROM gold_backtest_results ORDER BY signal, direction, horizon_unit, horizon_value"
+    ).fetchall()
 
 
 def touch_checked(

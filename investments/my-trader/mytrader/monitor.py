@@ -35,7 +35,7 @@ import sqlite3
 from datetime import date
 from typing import Any
 
-from . import candidate_sync, config, db, engine, macro_indicators, market_data, snapshot
+from . import candidate_sync, config, db, engine, gold_outlook, macro_indicators, market_data, snapshot
 
 SEVERITY = "flag"  # Phase B keeps severity simple: every alert comes from a
                     # "flag" verdict. Refining severity tiers is a later tuning task.
@@ -125,6 +125,14 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
     if macro_checks:
         db.upsert_macro_snapshot(conn, macro_checks)
 
+    try:
+        outlook = gold_outlook.build_outlook(conn, macro_checks)
+        if outlook is not None:
+            gold_outlook.write_outlook(outlook)
+    except Exception as e:
+        print(f"[monitor] error building gold outlook: {e}")
+        outlook = None
+
     snapshot.regenerate_all(conn)
 
     return {
@@ -137,6 +145,7 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
         ],
         "synced_candidates": synced_candidates,
         "opportunities": opportunities,
+        "gold_outlook_available": outlook is not None,
     }
 
 
@@ -179,6 +188,13 @@ def render_report(result: dict[str, Any]) -> str:
     if result["macro_checks"]:
         for c in result["macro_checks"]:
             lines.append(f"- **{c['name']}** [{c['verdict']}] — {c['detail']}")
+    else:
+        lines.append("Unavailable this run.")
+
+    lines += ["", "### Gold Outlook"]
+    if result.get("gold_outlook_available"):
+        lines.append("See investments/my-trader/gold-outlook.md — today/tomorrow, "
+                      "this week, and this month reads, refreshed this run.")
     else:
         lines.append("Unavailable this run.")
 

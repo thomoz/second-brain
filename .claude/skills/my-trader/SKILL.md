@@ -47,6 +47,10 @@ uv run --directory investments/my-trader python -m mytrader.main monitor
 # right now (also runs automatically once a day as part of `monitor`)
 uv run --directory investments/my-trader python -m mytrader.main sync-candidates
 
+# Force a fresh gold backtest right now (slow, on-demand — also refreshes
+# automatically, roughly once a day, as part of `monitor` — see "Gold Outlook" below)
+uv run --directory investments/my-trader python -m mytrader.main gold-backtest
+
 # Review synced-candidates-pending-review.md, then promote or dismiss each one
 uv run --directory investments/my-trader python -m mytrader.main promote-candidate --ticker VRTX --bucket 1 --status raw
 uv run --directory investments/my-trader python -m mytrader.main dismiss-candidate --ticker XYZ
@@ -218,7 +222,7 @@ Monitor never suggests a specific trade action — advisor notes only.
 
 ## Macro Monitoring Indicators
 
-Every `monitor` run also runs 9 portfolio-wide checks (not per-ticker), once per run:
+Every `monitor` run also runs 14 portfolio-wide checks (not per-ticker), once per run:
 MOVE index (bond-market stress), housing price-to-income ratio, University of
 Michigan Consumer Sentiment Index, a recession-probability check whose detail text
 also folds in the 10Y-3M curve (the Fed's own preferred inversion metric, flags on
@@ -255,6 +259,94 @@ parse fails,
 and each surfaces its FRED observation date in its detail text so a stale-but-real
 reading (e.g. annual household-income data, ~19-month publication lag) is never
 mistaken for a live number.
+
+Five more checks (added 2026-08-07, Phase 1 of a gold-tracking feature — Shaun holds
+gold via PMGOLD, ASX bucket 3a) cover the macro drivers that actually move gold:
+real yields (FRED DFII10, the 10Y TIPS yield — the opportunity cost of holding
+non-yielding gold and the single most important gold driver; a two-sided band flags
+both negative real yields, a bullish catalyst, and elevated real yields above 2%,
+which historically pressure gold hard), the US dollar index (FRED DTWEXBGS, the
+broad trade-weighted series — chosen over yfinance's `DX-Y.NYB` to keep this
+module's FRED-first pattern; flags on a >3% move over a 30-day lookback rather than
+an absolute level, since DXY has no natural high/low the way a bounded ratio does),
+gold trend (GC=F futures price vs its 50-day and 200-day moving averages, with
+sign-flip cross detection reporting the most recent price/200DMA cross plus PMGOLD's
+own AUD price and AUD/USD 3-month context — deliberately always an `"info"` verdict,
+never a flag or opportunity signal, since a 200DMA cross is a contested signal for
+gold specifically: standard trend-following treats a break below as bearish, but
+gold has a documented small-sample history of behaving as a contrarian buy signal
+instead, so this reports the fact neutrally rather than judging it, same philosophy
+as the per-ticker `price_action` check), the gold/silver ratio (GC=F/SI=F, flagged
+at the commonly-cited historical-extreme bands of 80 high / 50 low), and VIX
+(equity-market volatility, complementing the existing MOVE bond-volatility check,
+flagged above the widely-cited crisis-adjacent level of 30). All five thresholds are
+best-guess defaults pending Shaun's sign-off against real `monitor-report.md`
+readings, not sourced from a stated criterion the way `OPPORTUNITY_*` thresholds
+are. These 5 signals' historical track record, plus 6 live technical indicators, now
+feed a daily backtest-grounded directional read — see "Gold Outlook" below.
+
+## Gold Outlook
+
+Added 2026-08-07, Phase 2 of the gold-tracking feature (Phase 1 was the 5 macro
+checks above). `investments/my-trader/gold-outlook.md` — regenerated every `monitor`
+run, immediately after the macro checks. Combines:
+
+- **6 live technical indicators** on GC=F (`mytrader/gold_technicals.py`): trend
+  (20/50/200-day moving averages), MACD, RSI, Stochastic, ATR, Bollinger Bands, key
+  support/resistance levels, volume context, and this-month seasonality — every
+  indicator built as a full-history `*_series()` function (also used by the
+  backtest) with a thin `compute_*()` wrapper for today's value, so there is exactly
+  one implementation per indicator, never two independently-drifting copies.
+- **The 5 Phase 1 macro signals**, reused as-is (`macro_indicators.py`'s
+  `check_real_yields`/`check_dollar_index`/`check_gold_trend`/
+  `check_gold_silver_ratio`/`check_vix`), with one additive `"direction"` field.
+- **Two historical backtests** (`mytrader/gold_backtest.py`), refreshed roughly once
+  a day (`GOLD_BACKTEST_REFRESH_MAX_AGE_DAYS = 1` — each new trading day's price/FRED
+  data is folded in before the next outlook is built, not left stale for a week):
+  **episode-based** for the 5 macro signals (rare regime-shift events — every
+  historical occurrence's forward return, at 1-day/5-day/1-3-6-12-24-month horizons)
+  and **state-conditioned** for the 6 technical indicators (common daily readings —
+  every trading day's forward return conditioned on that day's state, at
+  1-day/5-day/1-month horizons only, since a 14-day RSI or 20-day moving average has
+  nothing meaningful to say 12+ months out).
+
+Three horizon sections — Today/Tomorrow, This Week, This Month — all built by the
+same shared lookup (`gold_outlook._horizon_read()`), differing only in which
+`(horizon_unit, horizon_value)` they query against the backtest results. Every
+currently-active signal/indicator state is looked up against its own real historical
+track record (N always shown) — Today/Tomorrow and This Week are genuinely
+backtest-grounded, not resting on documented rationale the way an earlier draft of
+this feature did. Confidence is labeled per horizon and scales with how much history
+backs it — lowest for Today/Tomorrow (smallest samples, shortest horizon), highest
+for This Month (largest samples, longest-validated horizon, plus a seasonality
+component).
+
+**Real worked example** (live run, 2026-08-07):
+
+```
+### Today / Tomorrow -- bearish lean (6/8) (confidence: low -- shortest horizon, smallest per-signal samples)
+- ma20_trend (above): N=1225, mean 0.04% vs baseline 0.06%, win-rate 54.2%
+- gold_trend (crossed_below): N=35, mean 0.14% vs baseline 0.06%, win-rate 62.9%
+- Expected daily move (ATR-based): ~$77.97 (1.79%)
+- Nearest resistance: $4360.0, nearest support: $3964.2
+
+### This Month -- bullish lean (5/9) (confidence: highest -- most historical data, longest-validated horizon)
+- real_yields (elevated): N=12, mean 3.1% vs baseline 1.19%, win-rate 75.0%
+- seasonality: this calendar month has historically averaged 2.23% (median 2.9%, N=26 years)
+```
+
+Monitor writes the full file every run; `monitor-report.md` gets a one-line pointer
+under "### Gold Outlook". `investments/my-trader/mytrader/main.py`'s `gold-backtest`
+subcommand forces an immediate full recompute on demand (bypassing the ~1-day cache)
+— useful right after changing a `GOLD_TA_*`/`GOLD_BACKTEST_*` threshold in
+`config.py`.
+
+**Non-goals**: no buy/sell directive anywhere, no autonomous trading action — every
+horizon gets a real directional *guess* (Shaun: "This isn't you deciding what I
+should do. This is you giving a guided guess"), always caveated with sample size and
+never presented as proof. See `.agent/plans/gold-tracker-phase2-outlook.md` for the
+full design rationale, including why the two backtest methodologies differ and why
+the refresh cadence is daily rather than weekly.
 
 ## SEC Filing Reads (principles_fit)
 

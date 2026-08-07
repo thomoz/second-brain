@@ -224,6 +224,17 @@ def cmd_dismiss_candidate(args) -> None:
     print(f"Dismissed {count} pending candidate(s) for {ticker}.")
 
 
+def cmd_gold_backtest(args) -> None:
+    from .db import upsert_gold_backtest_results
+    from .gold_backtest import print_stats, run_backtest
+
+    conn = _open_conn()
+    results = run_backtest()
+    upsert_gold_backtest_results(conn, results)
+    conn.close()
+    print_stats(results)
+
+
 def cmd_monitor(args) -> None:
     from .monitor import maybe_notify, run_monitor, write_report
 
@@ -288,6 +299,10 @@ def main() -> None:
         "sync-candidates",
         help="Pull new Briefs Finance recommendations into synced-candidates-pending-review.md",
     )
+    subparsers.add_parser(
+        "gold-backtest",
+        help="Force a fresh backtest of gold's macro signals + technical indicators (slow, on-demand)",
+    )
 
     p_promote = subparsers.add_parser(
         "promote-candidate", help="Move a pending synced candidate into the real watchlist",
@@ -315,6 +330,7 @@ def main() -> None:
         "seed": cmd_seed,
         "monitor": cmd_monitor,
         "sync-candidates": cmd_sync_candidates,
+        "gold-backtest": cmd_gold_backtest,
         "promote-candidate": cmd_promote_candidate,
         "dismiss-candidate": cmd_dismiss_candidate,
         "refresh-watchlist-data": cmd_refresh_watchlist_data,

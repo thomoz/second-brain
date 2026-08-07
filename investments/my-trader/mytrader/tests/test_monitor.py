@@ -38,6 +38,15 @@ def _no_macro_or_sync_by_default(monkeypatch):
     monkeypatch.setattr("mytrader.monitor.candidate_sync.sync_new_candidates", lambda conn: [])
 
 
+@pytest.fixture(autouse=True)
+def _no_real_gold_outlook_by_default(monkeypatch):
+    """run_monitor() calls gold_outlook.build_outlook() every run, which does a
+    real yfinance/FRED fetch + full historical backtest when not stubbed --
+    global/autouse for the same reason as the macro/candidate-sync fixture above:
+    don't let a slow real network call hit every test in this file by default."""
+    monkeypatch.setattr("mytrader.monitor.gold_outlook.build_outlook", lambda conn, macro_checks: None)
+
+
 def _fake_result(checks: list[CheckResult]) -> dict:
     return {
         "ticker": "VRTX",
@@ -264,6 +273,7 @@ def test_render_report_includes_macro_and_synced_candidates_sections():
         "macro_checks": [{"name": "move_index", "verdict": "ok", "detail": "MOVE index at 90.0"}],
         "synced_candidates": [{"ticker": "NVDA", "company_name": "NVIDIA Corp"}],
         "opportunities": [{"ticker": "NU", "detail": "PE 8.0 at/below cheap threshold (12.0)"}],
+        "gold_outlook_available": True,
     }
     report = monitor.render_report(result)
     assert "### Macro Indicators (this run)" in report
@@ -274,15 +284,45 @@ def test_render_report_includes_macro_and_synced_candidates_sections():
     assert "### Watchlist Opportunities (this run)" in report
     assert "NU" in report
     assert "PE 8.0" in report
+    assert "### Gold Outlook" in report
+    assert "gold-outlook.md" in report
 
     empty = {
         "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
         "macro_checks": [], "synced_candidates": [], "opportunities": [],
+        "gold_outlook_available": False,
     }
     empty_report = monitor.render_report(empty)
     assert "Unavailable this run." in empty_report
     assert "None this run." in empty_report
     assert "Nothing standing out this run." in empty_report
+
+
+def test_run_monitor_includes_gold_outlook_available_when_build_succeeds(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.monitor.gold_outlook.build_outlook",
+        lambda conn, macro_checks: {"as_of": "2026-08-07"},
+    )
+    written = []
+    monkeypatch.setattr("mytrader.monitor.gold_outlook.write_outlook", lambda outlook: written.append(outlook))
+    result = monitor.run_monitor(db_conn)
+    assert result["gold_outlook_available"] is True
+    assert written == [{"as_of": "2026-08-07"}]
+
+
+def test_run_monitor_gold_outlook_unavailable_when_build_returns_none(db_conn, monkeypatch):
+    monkeypatch.setattr("mytrader.monitor.gold_outlook.build_outlook", lambda conn, macro_checks: None)
+    result = monitor.run_monitor(db_conn)
+    assert result["gold_outlook_available"] is False
+
+
+def test_run_monitor_survives_gold_outlook_error(db_conn, monkeypatch):
+    def _boom(conn, macro_checks):
+        raise RuntimeError("network down")
+
+    monkeypatch.setattr("mytrader.monitor.gold_outlook.build_outlook", _boom)
+    result = monitor.run_monitor(db_conn)  # must not raise
+    assert result["gold_outlook_available"] is False
 
 
 def test_run_monitor_includes_watchlist_opportunity(db_conn, monkeypatch):

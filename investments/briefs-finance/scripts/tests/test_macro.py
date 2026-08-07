@@ -88,6 +88,50 @@ def test_fred_observation_on_omits_units_param_by_default():
     assert "units" not in captured
 
 
+def test_fred_series_range_returns_ascending_pairs_within_window():
+    import scripts.macro as macro_mod
+
+    class _Resp:
+        def json(self):
+            return {"observations": [
+                {"value": "1.0", "date": "2024-01-02"},
+                {"value": "1.5", "date": "2024-01-03"},
+                {"value": ".", "date": "2024-01-04"},  # unpublished -- must be excluded
+            ]}
+
+    captured = {}
+
+    def _fake_get(url, params, timeout):
+        captured.update(params)
+        captured["timeout"] = timeout
+        return _Resp()
+
+    original_key = macro_mod.FRED_API_KEY
+    try:
+        macro_mod.FRED_API_KEY = "fake-key"
+        with patch("scripts.macro.requests.get", _fake_get):
+            result = macro_mod.fred_series_range("DGS10", date(2024, 1, 1), date(2024, 1, 31))
+    finally:
+        macro_mod.FRED_API_KEY = original_key
+
+    assert result == [(date(2024, 1, 2), 1.0), (date(2024, 1, 3), 1.5)]
+    assert captured["sort_order"] == "asc"
+    assert captured["timeout"] == 30
+
+
+def test_fred_series_range_returns_none_without_key():
+    import scripts.macro as macro_mod
+
+    original_key = macro_mod.FRED_API_KEY
+    try:
+        macro_mod.FRED_API_KEY = ""
+        result = macro_mod.fred_series_range("DGS10", date(2024, 1, 1), date(2024, 1, 31))
+    finally:
+        macro_mod.FRED_API_KEY = original_key
+
+    assert result is None
+
+
 def test_fetch_macro_snapshot_merges_both_sources():
     """fetch_macro_snapshot merges yfinance and FRED data."""
     from scripts.macro import fetch_macro_snapshot

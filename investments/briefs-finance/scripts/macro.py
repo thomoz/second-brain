@@ -65,6 +65,40 @@ def fred_observation_on(
         return None
 
 
+def fred_series_range(
+    series_id: str, start: date, end: date
+) -> list[tuple[date, float]] | None:
+    """Full published-observation history for series_id between start/end
+    (inclusive), ascending by date. Distinct from fred_observation_on's
+    single-latest-point-on-or-before lookup -- gold_backtest.py needs the whole
+    daily history, not just the most recent value. Returns plain (date, value)
+    tuples, not a pandas Series -- briefs-finance declares no pandas dependency;
+    the caller (mytrader, which does) converts.
+    """
+    if not FRED_API_KEY:
+        return None
+    try:
+        params = {
+            "series_id": series_id,
+            "observation_start": start.isoformat(),
+            "observation_end": end.isoformat(),
+            "sort_order": "asc",
+            "limit": 100000,
+            "api_key": FRED_API_KEY,
+            "file_type": "json",
+        }
+        r = requests.get(
+            "https://api.stlouisfed.org/fred/series/observations",
+            params=params, timeout=30,
+        )
+        obs = r.json().get("observations", [])
+        result = [(date.fromisoformat(o["date"]), float(o["value"]))
+                  for o in obs if o["value"] != "."]
+        return result if result else None
+    except Exception:
+        return None
+
+
 def fred_value_on(series_id: str, target: date) -> float | None:
     """Fetch most recent FRED observation value on or before target date."""
     result = fred_observation_on(series_id, target)

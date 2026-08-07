@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 from scripts.config import DB_PATH  # noqa: F401  (re-exported for mytrader callers)
@@ -346,3 +347,132 @@ ASX_HEADING_CANDIDATES = (
    # real "Directors' Report" running header extracts as "Directors� Report"-
    # shaped text) -- apostrophe-bearing candidates must have the apostrophe stripped
    # before matching, both from the candidate and the extracted text.
+
+# Added 2026-08-07 -- Phase 1 gold-tracking macro indicators (see
+# .agent/plans/gold-tracker-handoff.md and gold-tracker-phase1-indicators.md). Shaun
+# holds gold via PMGOLD (ASX, bucket 3a, holdings.md) and recently added to the
+# position. Thresholds below are best-guess defaults, not sourced from a specific
+# stated criterion the way OPPORTUNITY_* thresholds are -- ship, then tune against
+# real monitor-report.md readings (resolved 2026-08-07, same discipline as
+# ETF_AUM_FLAG_USD above).
+FRED_REAL_YIELD_10Y_SERIES = "DFII10"  # 10Y TIPS yield -- opportunity cost of
+                                          # holding non-yielding gold; single most
+                                          # important gold driver per handoff research.
+REAL_YIELD_FLAG_NEGATIVE_PCT = 0.0  # flag when real yields go negative (bullish
+                                       # catalyst for gold).
+REAL_YIELD_FLAG_HIGH_PCT = 2.0  # flag when real yields climb above this (historically
+                                   # pressures gold hard) -- two-sided band.
+
+FRED_USD_INDEX_SERIES = "DTWEXBGS"  # Nominal Broad U.S. Dollar Index -- FRED over
+                                       # yfinance DX-Y.NYB, resolved 2026-08-07 (keeps
+                                       # this module's FRED-first pattern).
+DXY_LOOKBACK_DAYS = 30  # compare today's DXY to ~30 days prior -- same
+                          # today/prior lookback shape as STEEPENER_LOOKBACK_DAYS.
+DXY_FLAG_MOVE_PCT = 3.0  # flag on a >3% move over the lookback window, not an
+                           # absolute level (DXY doesn't have a natural "high/low"
+                           # the way a bounded ratio does).
+
+GOLD_FUTURES_TICKER = "GC=F"  # confirmed live 2026-08-07 via yfinance.
+GOLD_MA_SHORT_DAYS = 50
+GOLD_MA_LONG_DAYS = 200
+GOLD_MA_HISTORY_LOOKBACK_DAYS = 500  # calendar days of history to fetch -- must
+                                        # comfortably exceed GOLD_MA_LONG_DAYS
+                                        # trading days plus enough trailing window
+                                        # to find the most recent price/200DMA cross
+                                        # (confirmed live 2026-08-07: last cross was
+                                        # ~2 months before that date).
+PMGOLD_YFINANCE_TICKER = "PMGOLD.AX"  # Shaun's actual holding (bucket 3a,
+                                         # holdings.md) -- AUD-denominated, shown
+                                         # alongside the USD futures series per the
+                                         # 2026-08-07 "track both" decision.
+
+SILVER_FUTURES_TICKER = "SI=F"
+GOLD_SILVER_RATIO_FLAG_HIGH = 80.0  # commonly-cited historical-extreme high.
+GOLD_SILVER_RATIO_FLAG_LOW = 50.0  # commonly-cited historical-extreme low.
+
+VIX_TICKER = "^VIX"
+VIX_FLAG_LEVEL = 30.0  # widely-cited crisis-adjacent level.
+
+# Added 2026-08-07 -- Gold Outlook (technicals + historical backtest), see
+# .agent/plans/gold-tracker-phase2-outlook.md. GOLD_TA_* are standard,
+# widely-cited technical-analysis conventions (RSI 14/70/30, MACD 12/26/9, etc.
+# -- textbook defaults). GOLD_BACKTEST_* are this plan's own methodology
+# choices -- best-guess defaults, ship and revisit.
+
+GOLD_TA_MA_FAST_DAYS = 20  # short-term trend leg; GOLD_MA_SHORT_DAYS (50) /
+                             # GOLD_MA_LONG_DAYS (200) above are reused as-is.
+GOLD_TA_RSI_PERIOD_DAYS = 14  # textbook default (Wilder's original).
+GOLD_TA_RSI_OVERBOUGHT = 70.0
+GOLD_TA_RSI_OVERSOLD = 30.0
+GOLD_TA_RSI_BULLISH_ABOVE = 55.0  # "elevated" state boundary for the
+                                     # state-conditioned backtest -- a healthy-
+                                     # momentum zone short of overbought, not the
+                                     # same threshold as GOLD_TA_RSI_OVERBOUGHT
+                                     # (70), which flags exhaustion instead.
+GOLD_TA_RSI_BEARISH_BELOW = 45.0  # "depressed" state boundary, same idea
+                                     # mirrored below the midline. The 45-55 band
+                                     # itself is the excluded "neutral" state --
+                                     # not backtested, same treatment as
+                                     # gold_silver_ratio's un-flagged middle range.
+GOLD_TA_MACD_FAST_DAYS = 12  # textbook default.
+GOLD_TA_MACD_SLOW_DAYS = 26
+GOLD_TA_MACD_SIGNAL_DAYS = 9
+GOLD_TA_STOCH_PERIOD_DAYS = 14  # textbook default.
+GOLD_TA_STOCH_SMOOTHING_DAYS = 3
+GOLD_TA_STOCH_OVERBOUGHT = 80.0
+GOLD_TA_STOCH_OVERSOLD = 20.0
+GOLD_TA_ATR_PERIOD_DAYS = 14  # textbook default (Wilder's original).
+GOLD_TA_BOLLINGER_PERIOD_DAYS = 20  # textbook default.
+GOLD_TA_BOLLINGER_STD_MULTIPLIER = 2.0
+GOLD_TA_LEVEL_LOOKBACK_DAYS = 20  # trading days (~1 month) for the recent
+                                     # swing high/low support/resistance proxy.
+GOLD_TA_VOLUME_AVG_DAYS = 20
+
+GOLD_BACKTEST_HISTORY_START = date(2000, 1, 1)  # comfortably before every
+                                     # signal's earliest data (GC=F/SI=F
+                                     # 2000-08-30, VIX 1990-01-02, DFII10
+                                     # 2003-01-02, DTWEXBGS 2006-01-02).
+GOLD_BACKTEST_TRAIN_VALIDATION_SPLIT_DATE = date(2018, 1, 1)  # fixed calendar
+                                     # date -- only occurrences/states on/after
+                                     # this date are ever reported.
+GOLD_BACKTEST_FORWARD_HORIZONS_TRADING_DAYS = (1, 5)  # 1 trading day ~=
+                                     # today/tomorrow, 5 trading days ~= this
+                                     # week. Used by BOTH backtest methodologies
+                                     # -- the 5 macro-signal episodes are cheap
+                                     # to re-check at these short horizons too
+                                     # (N is bounded by episode count either way,
+                                     # not by horizon), and the 6 technical
+                                     # indicator states are the whole reason
+                                     # these horizons exist.
+GOLD_BACKTEST_FORWARD_HORIZONS_MONTHS = (1, 3, 6, 12, 24)  # macro-signal
+                                     # episodes only (see NOTES for why
+                                     # technical-indicator states stop at 1
+                                     # month) -- 3/6/12/24 matches briefs-
+                                     # finance's own stock backtest + a 24m leg
+                                     # for gold's longer cycles; 1m is this
+                                     # plan's own addition for "this month".
+GOLD_BACKTEST_MIN_EPISODE_GAP_DAYS = 60  # calendar days -- collapses
+                                     # threshold-hugging noise into one episode
+                                     # per genuine event for the 4 magnitude-
+                                     # threshold macro signals. Does NOT apply
+                                     # to gold_trend's cross episodes (already
+                                     # discrete) or to any state-conditioned
+                                     # technical indicator (state-conditioning
+                                     # uses every day a state holds, not
+                                     # discrete episodes -- there's nothing to
+                                     # de-duplicate).
+GOLD_BACKTEST_REFRESH_MAX_AGE_DAYS = 1  # Monitor calls
+                                     # gold_backtest.get_cached_or_refresh() on
+                                     # every run -- capped at ~1 day (not the
+                                     # originally-planned week) so each day's
+                                     # new price/FRED data is actually folded
+                                     # into the historical dataset daily, per
+                                     # Shaun's explicit correction 2026-08-07
+                                     # ("each day's new data needs to be added
+                                     # to the historical data") -- confirmed
+                                     # cheap enough to run daily (a handful of
+                                     # bulk fetches, not per-day loops), so
+                                     # there's no real cost to refreshing this
+                                     # often. The on-demand `gold-backtest` CLI
+                                     # subcommand always force-refreshes
+                                     # regardless of this cache.
