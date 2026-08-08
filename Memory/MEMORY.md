@@ -9,8 +9,6 @@ _Active items and pointers to structured memory pages. Always loaded into sessio
 _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here; archive to decisions/ when done._
 
 
-- (Jul 23) SongbookDB: review James Said's Apr-Jun 2026 spreadsheet reply on loan repayments
-- (Jul 23) SongbookDB: review Facebook user data deletion request for developer workflow
 ## Entity Pages
 
 - [[songbookdb/index]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app, PHP upgrade in progress
