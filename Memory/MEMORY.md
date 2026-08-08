@@ -40,6 +40,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - Deploy target: Windows local + DigitalOcean VPS (cloud sync via git)
 - LLM backend: Codex (ChatGPT flat-rate) via codex_sdk_compat.py
 - Never auto-send emails, messages, or social posts
+- VPS-to-local handoffs for next `/prime` should go in `Memory/HEARTBEAT.md` under `## VPS Handoff Inbox`
 
 - For SongbookDB upgrade work, make and test changes one by one; avoid bulk uploads or commits
 - No em dashes in drafted content

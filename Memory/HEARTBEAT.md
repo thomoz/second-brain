@@ -1,5 +1,13 @@
 # Heartbeat Monitoring Checklist
 
+## VPS Handoff Inbox
+- Leave short notes here when something on the VPS should surface in the next local `/prime` session.
+- Keep only active handoffs here.
+- Remove or archive handoffs after they have been seen and handled.
+
+### Active handoffs
+- _(Empty)_
+
 ## Email (All Accounts)
 - [ ] Unread Gmail messages across all accounts (SongbookDB support priority)
 - [ ] Unread Outlook messages

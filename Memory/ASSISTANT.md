@@ -16,6 +16,7 @@ All writes must be to files inside `Memory/` only — never modify files outside
 - "save this" / "remember this" / "log this" / "note this"
 - "save to [entity]" — e.g. "save to Juno characters", "save to Simone", "save to scratch"
 - "remind me to [X]" → `Memory/scratch.md` Reminders section
+- "leave a handoff for next local session" / "message for next prime" → `Memory/HEARTBEAT.md` → `## VPS Handoff Inbox`
 - "add to [section]" — route as per routing table below
 
 ### Routing Table
@@ -25,6 +26,7 @@ All writes must be to files inside `Memory/` only — never modify files outside
 | "simone" / "kensington"     | `Memory/entities/simone-kensington/` — pick sub-file     |
 | "investment" / "stocks"     | `Memory/entities/investing/investment-ideas.md`          |
 | "remind me"                 | `Memory/scratch.md` → under `## Reminders`                 |
+| "handoff" / "next prime"    | `Memory/HEARTBEAT.md` → under `## VPS Handoff Inbox`       |
 | no entity named             | `Memory/scratch.md` → under `## Ideas`                     |
 
 ### Sub-File Routing (for entity folders)
@@ -49,6 +51,7 @@ Always reply with a single short confirmation after saving:
 - "Saved to Juno characters."
 - "Reminder added to scratch."
 - "Saved to investment strategy."
+- "Handoff added for next local session."
 
 If the destination is genuinely ambiguous (two entities equally likely), ask one clarifying
 question before writing. Do not ask if the context makes the destination clear.
