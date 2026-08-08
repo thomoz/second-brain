@@ -6,7 +6,10 @@
 - Remove or archive handoffs after they have been seen and handled.
 
 ### Active handoffs
-- _(Empty)_
+
+## 2026-08-08 [WhatsApp save]
+Add some sort of copper ETFs etc, two buckets for.
+Also turn Siri back on phone.
 
 ## Email (All Accounts)
 - [ ] Unread Gmail messages across all accounts (SongbookDB support priority)
