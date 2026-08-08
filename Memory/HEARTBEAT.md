@@ -14,6 +14,9 @@ Also turn Siri back on phone.
 ## 2026-08-08 [WhatsApp save]
 Tally for me to check what skip button in WhatsApp goes for Shaun's Second Brain and see if I can create something that does that to stop the message thread.
 
+## 2026-08-08 [WhatsApp save]
+Check: when I make a Visa purchase halfway through their fee cycle / interest cycle, when does it start counting towards interest?
+
 ## Email (All Accounts)
 - [ ] Unread Gmail messages across all accounts (SongbookDB support priority)
 - [ ] Unread Outlook messages
