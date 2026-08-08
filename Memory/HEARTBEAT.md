@@ -20,6 +20,9 @@ Check: when I make a Visa purchase halfway through their fee cycle / interest cy
 ## 2026-08-08 [WhatsApp save]
 Look up that Toms video regarding the metric talking about with jobs. It was about an hour into the video.
 
+## 2026-08-08 [WhatsApp save]
+How do I empty the cholesterol pits in my liver?
+
 ## Email (All Accounts)
 - [ ] Unread Gmail messages across all accounts (SongbookDB support priority)
 - [ ] Unread Outlook messages
