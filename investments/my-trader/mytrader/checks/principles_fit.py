@@ -58,6 +58,25 @@ get_announcement_summaries_for_ticker(). Same cache philosophy as sec_filing_cac
 ASX announcement id appears for that type, not the "never cache the thesis" policy
 above. Non-ASX tickers degrade silently to today's stats-only behavior, same as
 non-US tickers already do for the SEC filing reads.
+
+Macro snapshot filtered to general/portfolio-wide checks only (fixed 2026-08-08).
+db.get_macro_snapshot() returns ALL of Monitor's macro checks — since the Gold
+Outlook feature (2026-08-07) added 5 gold-specific checks (real_yields,
+dollar_index, gold_trend, gold_silver_ratio, vix) to that same shared table,
+every ticker's thesis was picking up gold-flavored detail text ("elevated real
+yields historically pressure gold hard", "GC=F $4,401...") regardless of whether
+the ticker had anything to do with gold. Confirmed live 2026-08-08 on GMG.V
+(Graphene Manufacturing Group, a graphene/battery-tech company): several of the
+9 framework scores' reasoning text described "the macro backdrop for gold" as if
+GMG.V itself were gold-exposed — the grading LLM had conflated the generic macro
+context with the ticker under review, most likely because GMG.V's own
+thesis content was thin (small/illiquid TSXV small-cap) and had less to anchor
+on than a substantive ticker-specific narrative would. GENERAL_MACRO_CHECK_NAMES
+below is the original 9-check portfolio-wide set this feature was built against
+(2026-07-19 through 2026-07-30, before gold-specific checks existed) — the 5
+gold checks are excluded from every ticker's thesis, not just non-gold ones,
+since they're purpose-built for the Gold Outlook's own directional read, not
+general regime context for grading unrelated companies.
 """
 
 from __future__ import annotations
@@ -67,6 +86,11 @@ from typing import Any
 
 from .. import asx_announcements, config, db, sec_filings
 from . import CheckResult
+
+GENERAL_MACRO_CHECK_NAMES = frozenset({
+    "move_index", "housing_affordability", "consumer_sentiment", "recession_signal",
+    "inflation_expectations", "credit_spreads", "australia_cpi", "us_cpi", "uk_cpi",
+})
 
 
 def _build_thesis(
@@ -136,9 +160,10 @@ def _build_thesis(
     else:
         parts.append("No active risk flags this run.")
 
-    if macro_rows:
-        as_of = macro_rows[0]["computed_at"][:10]
-        macro_parts = "; ".join(f"{r['name']} [{r['verdict']}] {r['detail']}" for r in macro_rows)
+    general_macro_rows = [r for r in (macro_rows or []) if r["name"] in GENERAL_MACRO_CHECK_NAMES]
+    if general_macro_rows:
+        as_of = general_macro_rows[0]["computed_at"][:10]
+        macro_parts = "; ".join(f"{r['name']} [{r['verdict']}] {r['detail']}" for r in general_macro_rows)
         parts.append(f"Macro regime as of {as_of}: {macro_parts}.")
 
     if filing_summaries:
@@ -210,11 +235,12 @@ def check(
     verdict = "interesting" if average >= config.OPPORTUNITY_SCORE_FLAG else "info"
     detail = f"avg {average:.0f}/100 across 9 investor frameworks (top: {top_summary})"
 
+    general_macro_rows = [r for r in macro_rows if r["name"] in GENERAL_MACRO_CHECK_NAMES]
     return CheckResult(
         name="principles_fit", verdict=verdict, detail=detail,
         data={
             "thesis": thesis, "average": round(average, 1), "results": results,
-            "macro_snapshot_as_of": macro_rows[0]["computed_at"][:10] if macro_rows else None,
+            "macro_snapshot_as_of": general_macro_rows[0]["computed_at"][:10] if general_macro_rows else None,
             "filing_types_used": sorted(filing_summaries) if filing_summaries else [],
             "asx_announcement_types_used": sorted(asx_summaries) if asx_summaries else [],
         },
