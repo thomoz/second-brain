@@ -126,3 +126,16 @@ def _no_real_balance_sheet_statement_fetch(monkeypatch):
     debtToEquity/currentRatio/returnOnEquity -- a real yfinance network call --
     global/autouse for the same reason as the fixtures above."""
     monkeypatch.setattr("mytrader.market_data.fetch_balance_sheet_financials", lambda ticker: None)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_cot_fetch(monkeypatch):
+    """gold_outlook.build_outlook() calls gold_cot.check_cot_positioning() every
+    run (added 2026-08-08), which does a real CFTC network fetch when not
+    stubbed -- global/autouse for the same reason as the fixtures above: don't
+    let a real network call hit every test in the suite that exercises
+    build_outlook by default. Patches the underlying fetch (not
+    check_cot_positioning itself), so test_gold_cot.py's own direct tests of
+    check_cot_positioning/compute_today_cot -- which patch those functions
+    directly -- aren't clobbered by this fixture running first."""
+    monkeypatch.setattr("mytrader.gold_cot._fetch_cot_history", lambda: None)

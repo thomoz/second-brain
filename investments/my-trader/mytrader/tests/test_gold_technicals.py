@@ -161,6 +161,15 @@ def test_compute_seasonality_filters_matching_month_across_years():
     assert result["n"] == 2
     assert result["mean"] == pytest.approx(0.0)
     assert result["median"] == pytest.approx(0.0)
+    assert result["win_rate"] == pytest.approx(50.0)  # 1 of 2 years was positive
+
+
+def test_compute_seasonality_returns_none_win_rate_when_no_data():
+    close = pd.Series([100.0], index=_dates(1))
+    from datetime import date as _date
+
+    result = gold_technicals.compute_seasonality(close, _date(2026, 6, 1))
+    assert result == {"n": 0, "mean": None, "median": None, "win_rate": None}
 
 
 def test_compute_today_technicals_returns_none_when_history_too_short(monkeypatch):

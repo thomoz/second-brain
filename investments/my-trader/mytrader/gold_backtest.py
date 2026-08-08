@@ -246,6 +246,22 @@ def state_stochastic_crossover(df: pd.DataFrame) -> pd.Series:
     return pd.Series(np.where(s["k"] > s["d"], "above", "below"), index=df.index)
 
 
+def state_cot_positioning(daily_index: pd.DatetimeIndex, net_cot: pd.Series) -> pd.Series:
+    """Forward-fills the weekly COT Index reading (see gold_cot.py) onto
+    daily_index -- a report published Friday for Tuesday's data stays the
+    "current" reading until the next weekly release, same logic a live check
+    would apply. Values are gold_cot.classify_cot_state()'s exact strings
+    ("extreme_long"/"extreme_short"/"neutral") -- must match
+    gold_outlook.py's live-state derivation character-for-character, same
+    join requirement as every other state classifier here."""
+    from . import gold_cot
+
+    index_series = gold_cot.cot_index_series(net_cot)
+    combined = daily_index.union(index_series.index)
+    filled = index_series.reindex(combined).sort_index().ffill().reindex(daily_index)
+    return filled.apply(lambda v: gold_cot.classify_cot_state(v) if pd.notna(v) else None)
+
+
 TECHNICAL_STATE_EXCLUDED_VALUES = ("equal", "flat", "neutral")  # not scored --
                                      # no bullish/bearish implication, same
                                      # treatment as a macro signal sitting
@@ -275,16 +291,20 @@ def compute_state_conditioned_stats(
 
 
 TECHNICAL_INDICATORS = (
-    "ma20_trend", "ma50_trend", "macd_histogram", "macd_crossover", "rsi_zone", "stochastic_crossover",
+    "ma20_trend", "ma50_trend", "macd_histogram", "macd_crossover", "rsi_zone",
+    "stochastic_crossover", "cot_positioning",
 )
 
 
 def run_backtest() -> dict[tuple[str, str, str, int], dict]:
+    from . import gold_cot
+
     gold_close = _yfinance_full_history_close(config.GOLD_FUTURES_TICKER)
     silver_close = _yfinance_full_history_close(config.SILVER_FUTURES_TICKER)
     vix_close = _yfinance_full_history_close(config.VIX_TICKER)
     real_yield_series = _fred_full_history_series(config.FRED_REAL_YIELD_10Y_SERIES)
     dxy_series = _fred_full_history_series(config.FRED_USD_INDEX_SERIES)
+    net_cot = gold_cot._fetch_cot_history()
     ohlcv = _fetch_ohlcv(config.GOLD_FUTURES_TICKER, config.GOLD_BACKTEST_HISTORY_START)
 
     if gold_close is None:
@@ -334,7 +354,7 @@ def run_backtest() -> dict[tuple[str, str, str, int], dict]:
             stats["baseline"] = baseline
             results[(signal, direction, "month", months)] = stats
 
-    # -- state-conditioned: 6 technical indicators, day(1,5) + month(1) only --
+    # -- state-conditioned: 7 technical/positioning indicators, day(1,5) + month(1) only --
     if ohlcv is not None:
         close = ohlcv["Close"]
         states = {
@@ -345,6 +365,8 @@ def run_backtest() -> dict[tuple[str, str, str, int], dict]:
             "rsi_zone": state_rsi_zone(close),
             "stochastic_crossover": state_stochastic_crossover(ohlcv),
         }
+        if net_cot is not None:
+            states["cot_positioning"] = state_cot_positioning(close.index, net_cot)
         for n_days in config.GOLD_BACKTEST_FORWARD_HORIZONS_TRADING_DAYS:
             baseline = compute_baseline_trading_days(close, n_days, split, last_available)
             for name, state in states.items():

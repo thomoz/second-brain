@@ -476,3 +476,25 @@ GOLD_BACKTEST_REFRESH_MAX_AGE_DAYS = 1  # Monitor calls
                                      # often. The on-demand `gold-backtest` CLI
                                      # subcommand always force-refreshes
                                      # regardless of this cache.
+
+# Added 2026-08-08 -- COT (Commitments of Traders) large-speculator positioning,
+# a real gap identified in conversation (positioning/sentiment data the Outlook had
+# zero coverage of) -- see .agent/plans/gold-tracker-phase2-outlook.md conversation
+# history. CFTC's public Socrata API, free, no login/key required, weekly cadence
+# (published every Friday, data as-of the prior Tuesday), history back to 1986
+# (confirmed live 2026-08-08: 1927 weekly reports for COMEX gold).
+COT_API_URL = "https://publicreporting.cftc.gov/resource/6dca-aqww.json"
+COT_MARKET_NAME = "GOLD - COMMODITY EXCHANGE INC."  # COMEX gold futures, Legacy
+                                     # report -- confirmed live 2026-08-08 against
+                                     # the real Socrata dataset (distinct from
+                                     # "PAX GOLD PERP STYLE", a crypto-synthetic
+                                     # contract that also matches a looser filter).
+COT_LOOKBACK_WEEKS = 156  # 3 years of weekly reports -- Larry Williams' original
+                             # COT Index formulation's standard lookback, a
+                             # widely-cited methodology (not an invented
+                             # threshold): (current net - rolling min) /
+                             # (rolling max - rolling min) * 100 over this window.
+COT_EXTREME_LONG_PCT = 90.0  # COT Index >= this -- large speculators near their
+                                # most-long in 3 years, the classic "crowded long"
+                                # contrarian-watch level (Williams' own convention).
+COT_EXTREME_SHORT_PCT = 10.0  # symmetric "crowded short" level.

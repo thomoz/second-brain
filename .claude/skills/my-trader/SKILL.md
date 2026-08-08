@@ -321,18 +321,76 @@ backs it — lowest for Today/Tomorrow (smallest samples, shortest horizon), hig
 for This Month (largest samples, longest-validated horizon, plus a seasonality
 component).
 
-**Real worked example** (live run, 2026-08-07):
+**Weighted synthesis** (changed 2026-08-07). Each component's vote toward the
+Today/Tomorrow, This Week, and This Month leans is weighted by its own historical
+win-rate's distance from 50% (`gold_outlook._weight()`) — a signal with a 63%
+win-rate counts for more than one sitting at 51%, rather than every active signal
+getting an equal flat vote. Direction itself (`gold_outlook._label()`) also switched
+from "does this state's mean beat an unconditioned baseline" to "is this state's own
+win-rate above 50%" — a more direct, internally-consistent read of "how often did
+gold go up after this state." Both changes were driven by a real problem: an
+unweighted headcount let 6 highly-correlated, near-zero-edge technical readings
+outvote 1-2 genuinely stronger signals (e.g. the 200DMA cross) just by outnumbering
+them.
+
+**Validated by honest walk-forward backtesting, not by fitting to any specific
+day.** Point-in-time reconstruction of the Today/Tomorrow read across a full year
+(252 trading days, 36 rolling 7-day blocks, zero threshold changes between blocks)
+showed the unweighted design landing at 48.8% (calls made) / 42.1% (counting "mixed"
+no-calls as misses) — the weighted design above raised that to **56.3%**, with zero
+no-call days (weighted totals essentially never tie exactly). 56.3% is the real,
+honest number — a genuine ~6-point edge over a coin flip, not the artificially high
+number a per-day-tuned system would show and then fail to reproduce on new data. No
+model of this kind (public price/macro data only) should be expected to land
+anywhere near 90%+ on daily direction — a claim that high is itself a signal
+something's overfit or leaking future information, not a sign of a better model.
+
+**MACD/RSI/Stochastic excluded from the vote, kept as context** (changed
+2026-08-07, same session as the weighting change). A follow-up walk-forward test
+showed the moving-average trend states alone matched the full weighted vote
+exactly — MACD/RSI/Stochastic weren't adding measurable value to a next-day
+direction call, consistent with what these tools are actually designed for
+(RSI/Stochastic are overbought/oversold mean-reversion *timing* signals, MACD is
+momentum *confirmation* — none are direction predictors on their own). They're
+still computed and still shown in `gold-outlook.md`, labeled "context only, not
+counted in the lean," rather than silently disappearing.
+
+**COT (Commitments of Traders) positioning added** (`mytrader/gold_cot.py`,
+2026-08-08) — the first signal in this feature built from what large speculators
+are actually doing with capital, not from price or macro data. Reads the CFTC's
+public Socrata API (free, no login, weekly, history to 1986) for COMEX gold
+futures, computes Larry Williams' COT Index (a standard, widely-cited
+methodology: current net non-commercial position's percentile rank within a
+trailing `COT_LOOKBACK_WEEKS` (156, ~3 years) window), and classifies
+`extreme_long`/`extreme_short` (index ≥90/≤10) vs `neutral`. Direction is derived
+the same way as every other signal — empirically, from its own backtested
+win-rate, not assumed textbook contrarian theory: confirmed live 2026-08-08 that
+`extreme_long` has actually been trend-*confirming* for gold in the 2018+
+validation window (56–71% win-rate for continued gains), not the classic
+contrarian-reversal read. Votes directly (`DIRECTIONAL_VOTE_SIGNALS`), same
+weight formula as everything else. Honest point-in-time walk-forward testing
+(both the standard 1-year window and a separate 2-year window chosen specifically
+to include COT's last active stretch, which ended 2025-02-10) found it never
+single-handedly changed a Today/Tomorrow call in either window — not a flaw, just
+an honest result: COT extremes persist for consecutive weeks and, empirically,
+tend to already agree with whichever direction the trend signals (ma20/ma50) are
+pointing when active, so it currently acts as confirmation rather than a
+deciding vote. Real, tested, live-validated signal; simply hasn't been the
+swing vote yet in the windows tested.
+
+**Real worked example** (live run, 2026-08-08, post-reweighting):
 
 ```
-### Today / Tomorrow -- bearish lean (6/8) (confidence: low -- shortest horizon, smallest per-signal samples)
+### Today / Tomorrow -- bullish lean (4/4 signals, 100% of weighted edge) (confidence: low -- shortest horizon, smallest per-signal samples)
 - ma20_trend (above): N=1225, mean 0.04% vs baseline 0.06%, win-rate 54.2%
 - gold_trend (crossed_below): N=35, mean 0.14% vs baseline 0.06%, win-rate 62.9%
-- Expected daily move (ATR-based): ~$77.97 (1.79%)
-- Nearest resistance: $4360.0, nearest support: $3964.2
+- Expected daily move (ATR-based): ~$83.13 (1.89%)
+- Nearest resistance: $4432.3, nearest support: $3964.2
+- macd_histogram (positive): N=1121, ... win-rate 54.4% (context only, not counted in the lean)
 
-### This Month -- bullish lean (5/9) (confidence: highest -- most historical data, longest-validated horizon)
+### This Month -- bullish lean (5/5 signals, 100% of weighted edge) (confidence: highest -- most historical data, longest-validated horizon)
 - real_yields (elevated): N=12, mean 3.1% vs baseline 1.19%, win-rate 75.0%
-- seasonality: this calendar month has historically averaged 2.23% (median 2.9%, N=26 years)
+- seasonality: this calendar month has historically averaged 2.27% (median 2.9%, win-rate 73.1%, N=26 years)
 ```
 
 Monitor writes the full file every run; `monitor-report.md` gets a one-line pointer

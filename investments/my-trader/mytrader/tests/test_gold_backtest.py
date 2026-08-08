@@ -201,6 +201,30 @@ def test_state_stochastic_crossover_below(monkeypatch):
     assert state.iloc[-1] == "below"
 
 
+def test_state_cot_positioning_forward_fills_weekly_reading_onto_daily_index():
+    # Enough weekly points to clear the real (bound-at-def-time) default lookback,
+    # ending at the bottom of its own range -> extreme_short.
+    values = [1000.0] * (config.COT_LOOKBACK_WEEKS - 1) + [0.0]
+    net = pd.Series(values, index=pd.date_range("2000-01-07", periods=len(values), freq="W-FRI"))
+    last_report_date = net.index[-1]
+    # Daily index spanning a few days before and after the last weekly release --
+    # every day on/after the release must forward-fill to the same state, days
+    # strictly before it (this synthetic net series' very first date) get None.
+    daily_index = pd.date_range(last_report_date - pd.Timedelta(days=2), periods=5, freq="D")
+
+    state = gold_backtest.state_cot_positioning(daily_index, net)
+
+    assert list(state.loc[daily_index >= last_report_date]) == ["extreme_short"] * 3
+    assert state.iloc[0] is None or pd.isna(state.iloc[0])
+
+
+def test_state_cot_positioning_returns_none_before_any_release():
+    net = pd.Series([100.0] * config.COT_LOOKBACK_WEEKS, index=pd.date_range("2020-01-03", periods=config.COT_LOOKBACK_WEEKS, freq="W-FRI"))
+    daily_index = pd.date_range("2015-01-01", periods=3, freq="D")  # long before any COT data exists
+    state = gold_backtest.state_cot_positioning(daily_index, net)
+    assert state.isna().all() or all(v is None for v in state)
+
+
 # -- State-conditioned sample-size correctness --------------------------------
 
 def test_compute_state_conditioned_stats_uses_every_day_state_holds():

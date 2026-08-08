@@ -146,11 +146,13 @@ def compute_seasonality(close: pd.Series, as_of: date) -> dict:
     monthly_returns = monthly.pct_change().dropna() * 100
     same_month = monthly_returns[monthly_returns.index.month == as_of.month]
     if same_month.empty:
-        return {"n": 0, "mean": None, "median": None}
+        return {"n": 0, "mean": None, "median": None, "win_rate": None}
+    wins = int((same_month > 0).sum())
     return {
         "n": len(same_month),
         "mean": round(float(same_month.mean()), 2),
         "median": round(float(same_month.median()), 2),
+        "win_rate": round(wins / len(same_month) * 100, 1),
     }
 
 
