@@ -11,6 +11,9 @@
 Add some sort of copper ETFs etc, two buckets for.
 Also turn Siri back on phone.
 
+## 2026-08-08 [WhatsApp save]
+Tally for me to check what skip button in WhatsApp goes for Shaun's Second Brain and see if I can create something that does that to stop the message thread.
+
 ## Email (All Accounts)
 - [ ] Unread Gmail messages across all accounts (SongbookDB support priority)
 - [ ] Unread Outlook messages
