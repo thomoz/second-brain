@@ -16,6 +16,7 @@ resolution-markers = [
 [manifest]
 members = [
     "briefs-finance",
+    "goat",
     "my-trader",
 ]
 
@@ -372,6 +373,36 @@ wheels = [
 ]
 
 [[package]]
+name = "goat"
+version = "0.1.0"
+source = { virtual = "goat" }
+dependencies = [
+    { name = "my-trader" },
+    { name = "pandas" },
+    { name = "yfinance" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "my-trader", editable = "my-trader" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8.0" },
+    { name = "pandas", specifier = ">=2.0.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
+    { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.12.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.2.0" },
+    { name = "yfinance", specifier = ">=0.2.40" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "idna"
 version = "3.18"
 source = { registry = "https://pypi.org/simple" }
@@ -484,7 +515,7 @@ wheels = [
 [[package]]
 name = "my-trader"
 version = "0.1.0"
-source = { virtual = "my-trader" }
+source = { editable = "my-trader" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "briefs-finance" },
