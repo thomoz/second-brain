@@ -40,3 +40,46 @@ def test_get_open_goat_alerts_lists_all_unacknowledged_across_tickers(db_conn):
     )
     open_alerts = db.get_open_goat_alerts(db_conn)
     assert {a["ticker"] for a in open_alerts} == {"AAPL", "MSFT"}
+
+
+def test_get_goat_pending_candidate_returns_none_when_absent(db_conn):
+    assert db.get_goat_pending_candidate(db_conn, "XLK") is None
+
+
+def test_insert_goat_pending_candidate_then_get_finds_it(db_conn):
+    db.insert_goat_pending_candidate(
+        db_conn, ticker="XLK", sector_label="Technology",
+        signal_detail="XLK crossed above its 50-day MA 3 trading day(s) ago",
+    )
+    row = db.get_goat_pending_candidate(db_conn, "XLK")
+    assert row is not None
+    assert row["sector_label"] == "Technology"
+    assert row["source"] == "goat_sector_rotation"
+
+
+def test_insert_goat_pending_candidate_twice_is_a_no_op(db_conn):
+    db.insert_goat_pending_candidate(
+        db_conn, ticker="XLK", sector_label="Technology", signal_detail="first detail",
+    )
+    db.insert_goat_pending_candidate(
+        db_conn, ticker="XLK", sector_label="Technology", signal_detail="second detail",
+    )
+    rows = db.get_all_goat_pending_candidates(db_conn)
+    assert len(rows) == 1
+    assert rows[0]["signal_detail"] == "first detail"
+
+
+def test_delete_goat_pending_candidate_removes_it(db_conn):
+    db.insert_goat_pending_candidate(
+        db_conn, ticker="XLK", sector_label="Technology", signal_detail="detail",
+    )
+    count = db.delete_goat_pending_candidate(db_conn, "XLK")
+    assert count == 1
+    assert db.get_goat_pending_candidate(db_conn, "XLK") is None
+
+
+def test_get_all_goat_pending_candidates_lists_ticker_sorted(db_conn):
+    db.insert_goat_pending_candidate(db_conn, ticker="XLV", sector_label="Health Care", signal_detail="d")
+    db.insert_goat_pending_candidate(db_conn, ticker="XLK", sector_label="Technology", signal_detail="d")
+    rows = db.get_all_goat_pending_candidates(db_conn)
+    assert [r["ticker"] for r in rows] == ["XLK", "XLV"]

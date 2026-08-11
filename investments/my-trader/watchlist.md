@@ -39,6 +39,8 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 | VT | Vanguard Total World Stock ETF | etf | unassigned | 1.58% | +219% | Not yet discussed. Broad world exposure |
 | VTI | Vanguard Total US Market ETF | etf | 1 | 0.76% | +289% | Not yet discussed. Broad index option — pick one (paired with VOO), depends on broker/domicile |
 | WM | Waste Management Inc | stock | 2 | 1.41% | +326% | Not yet discussed. Flagged for possible re-homing to Bucket 1 (defensive utility-like business) |
+| XLB |  | etf | unassigned | — | — | Goat-approved sector rotation candidate — XLB (Materials): crossed above its 50-day MA 4 trading day(s) ago, MA now sloping up -- breakout entry signal (webinar Step 1) |
+| XLK |  | etf | unassigned | — | — | Goat-approved sector rotation candidate — XLK (Technology): crossed above its 50-day MA 4 trading day(s) ago, MA now sloping up -- breakout entry signal (webinar Step 1) |
 | XLP | Consumer Staples Select Sector SPDR ETF | etf | 1 | 2.02% | +100% | Not yet discussed. Fee 0.08%; also flagged for bucket re-homing |
 | XLU | Utilities Select Sector SPDR ETF | etf | unassigned | 4.29% | +138% | Not yet discussed. Sector/thematic |
 

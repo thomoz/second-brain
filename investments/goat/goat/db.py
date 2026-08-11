@@ -25,6 +25,14 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
                 created_at      TEXT NOT NULL,
                 acknowledged    INTEGER NOT NULL DEFAULT 0
             );
+            CREATE TABLE IF NOT EXISTS goat_pending_candidates (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticker          TEXT NOT NULL UNIQUE,
+                sector_label    TEXT NOT NULL,
+                signal_detail   TEXT NOT NULL,
+                source          TEXT NOT NULL DEFAULT 'goat_sector_rotation',
+                flagged_at      TEXT NOT NULL
+            );
         """)
 
 
@@ -65,3 +73,36 @@ def get_open_goat_alerts(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return conn.execute(
         "SELECT * FROM goat_alert_history WHERE acknowledged = 0 ORDER BY created_at DESC"
     ).fetchall()
+
+
+def get_goat_pending_candidate(conn: sqlite3.Connection, ticker: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT * FROM goat_pending_candidates WHERE ticker = ?", (ticker,)
+    ).fetchone()
+
+
+def get_all_goat_pending_candidates(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute(
+        "SELECT * FROM goat_pending_candidates ORDER BY ticker"
+    ).fetchall()
+
+
+def insert_goat_pending_candidate(
+    conn: sqlite3.Connection, *, ticker: str, sector_label: str,
+    signal_detail: str, source: str = "goat_sector_rotation",
+) -> None:
+    with conn:
+        conn.execute(
+            """INSERT OR IGNORE INTO goat_pending_candidates
+               (ticker, sector_label, signal_detail, source, flagged_at)
+               VALUES (?, ?, ?, ?, ?)""",
+            (ticker, sector_label, signal_detail, source, _now()),
+        )
+
+
+def delete_goat_pending_candidate(conn: sqlite3.Connection, ticker: str) -> int:
+    with conn:
+        cur = conn.execute(
+            "DELETE FROM goat_pending_candidates WHERE ticker = ?", (ticker,)
+        )
+        return cur.rowcount

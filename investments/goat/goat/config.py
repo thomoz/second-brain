@@ -40,3 +40,46 @@ GOAT_150DMA_FLAG_PCT = 6.0  # close must be this many % below the 150DMA to coun
 GOAT_150DMA_MIN_CONSECUTIVE_DAYS = 2  # must hold for this many consecutive
                                          # trading days before flagging (standard
                                          # whipsaw filter).
+
+# Sector rotation ranking + breakout signal, per investments/goat/HANDOFF.md Phase 2.
+# Scope resolved with Shaun 2026-08-11: this signal is 50DMA cross-detection +
+# 50DMA slope-turn ONLY -- the "heartbeat" consolidation pattern stays deferred to
+# Phase 3 (unresearched, acknowledged hardest part of the project). Do not add a
+# heartbeat/consolidation threshold here.
+GOAT_SECTOR_ETFS: dict[str, str] = {
+    "XLK": "Technology", "XLF": "Financials", "XLE": "Energy",
+    "XLV": "Health Care", "XLY": "Consumer Discretionary", "XLP": "Consumer Staples",
+    "XLI": "Industrials", "XLB": "Materials", "XLU": "Utilities",
+    "XLRE": "Real Estate", "XLC": "Communication Services",
+}  # The 11 SPDR Select Sector ETFs -- State Street's own standard, free,
+   # GICS-aligned sector-rotation universe. Per HANDOFF.md's answer to Shaun's Q1
+   # ("is there a free way to see which sectors are rising/falling?").
+
+GOAT_SECTOR_HISTORY_LOOKBACK_DAYS = 400  # calendar days -- same margin philosophy
+                                            # as GOAT_MA_HISTORY_LOOKBACK_DAYS,
+                                            # comfortably exceeds the rank window +
+                                            # 50-day MA + slope lookback below.
+GOAT_SECTOR_RANK_WINDOW_TRADING_DAYS = 63  # ~3 calendar months of trading days --
+                                              # v1 starting guess per HANDOFF.md
+                                              # (Shaun's own webinar notes cite
+                                              # multi-month-to-multi-year heartbeat
+                                              # timeframes but state no exact
+                                              # rank-window number) -- flagged
+                                              # tunable, not literature-final.
+GOAT_SECTOR_MA_SHORT_DAYS = 50  # the moving average whose cross/slope IS the entry
+                                   # signal per the webinar notes (Step 1) --
+                                   # distinct from exit_check's 150-day exit MA.
+GOAT_SECTOR_SLOPE_LOOKBACK_DAYS = 5  # today vs. N trading days ago -- same idiom
+                                        # as gold_technicals.compute_trend's
+                                        # ma50_rising check (ma.iloc[-1] >
+                                        # ma.iloc[-6]).
+GOAT_SECTOR_CROSS_RECENCY_DAYS = 10  # a cross older than this no longer counts as
+                                        # "just crossed" (Shaun's own words
+                                        # describing the LULU chart that prompted
+                                        # this feature) -- keeps the breakout signal
+                                        # a fresh event rather than a standing
+                                        # condition that would re-fire indefinitely.
+                                        # v1/tunable, not literature-sourced.
+
+GOAT_SECTOR_RANKING_MD_PATH = GOAT_DIR / "sector-ranking.md"
+GOAT_SECTOR_CANDIDATES_MD_PATH = GOAT_DIR / "sector-candidates-pending-review.md"
