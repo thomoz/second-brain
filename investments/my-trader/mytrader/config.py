@@ -498,3 +498,13 @@ COT_EXTREME_LONG_PCT = 90.0  # COT Index >= this -- large speculators near their
                                 # most-long in 3 years, the classic "crowded long"
                                 # contrarian-watch level (Williams' own convention).
 COT_EXTREME_SHORT_PCT = 10.0  # symmetric "crowded short" level.
+
+# Added 2026-08-11 -- IBKR Holdings Sync (see investments/my-trader/ibkr-sync-handoff.md
+# and .agent/plans/ibkr-holdings-sync.md). Local-only, read-only, on-demand -- never
+# wired into monitor.py or any systemd unit. Live account confirmed with Shaun
+# 2026-08-11; IB Gateway (not TWS) is the app he's running.
+IBKR_HOST = "127.0.0.1"
+IBKR_PORT = 4001  # IB Gateway, live account. Paper would be 4002; TWS equivalents are
+                   # 7496 (live) / 7497 (paper), not used here.
+IBKR_CLIENT_ID = 27  # arbitrary, must be unique per simultaneous API client connected
+                      # to the same Gateway instance -- change if this ever collides.

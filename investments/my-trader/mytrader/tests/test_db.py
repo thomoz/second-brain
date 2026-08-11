@@ -142,6 +142,47 @@ def test_delete_pending_candidate_returns_zero_when_not_found(db_conn):
     assert db.delete_pending_candidate(db_conn, "NOPE") == 0
 
 
+def test_insert_ibkr_pending_position_then_get_finds_it(db_conn):
+    db.insert_ibkr_pending_position(
+        db_conn, ticker="MSFT", name=None, qty=5.0, avg_price=300.0,
+        currency="USD", asset_type="stock", exchange_raw="NASDAQ",
+    )
+    row = db.get_ibkr_pending_position(db_conn, "MSFT")
+    assert row is not None
+    assert row["qty"] == 5.0
+    assert row["avg_price"] == 300.0
+    assert row["exchange_raw"] == "NASDAQ"
+
+
+def test_insert_ibkr_pending_position_replaces_on_restage(db_conn):
+    db.insert_ibkr_pending_position(
+        db_conn, ticker="MSFT", name=None, qty=5.0, avg_price=300.0,
+        currency="USD", asset_type="stock", exchange_raw="NASDAQ",
+    )
+    db.insert_ibkr_pending_position(
+        db_conn, ticker="MSFT", name=None, qty=7.0, avg_price=310.0,
+        currency="USD", asset_type="stock", exchange_raw="NASDAQ",
+    )
+    assert len(db.get_all_ibkr_pending_positions(db_conn)) == 1
+    row = db.get_ibkr_pending_position(db_conn, "MSFT")
+    assert row["qty"] == 7.0
+    assert row["avg_price"] == 310.0
+
+
+def test_delete_ibkr_pending_position_removes_it(db_conn):
+    db.insert_ibkr_pending_position(
+        db_conn, ticker="MSFT", name=None, qty=5.0, avg_price=300.0,
+        currency="USD", asset_type="stock", exchange_raw="NASDAQ",
+    )
+    count = db.delete_ibkr_pending_position(db_conn, "MSFT")
+    assert count == 1
+    assert db.get_ibkr_pending_position(db_conn, "MSFT") is None
+
+
+def test_delete_ibkr_pending_position_returns_zero_when_not_found(db_conn):
+    assert db.delete_ibkr_pending_position(db_conn, "NOPE") == 0
+
+
 def test_delete_watchlist_row_removes_specific_bucket(db_conn):
     db.upsert_watchlist_row(
         db_conn, ticker="PMGOLD", name="Perth Mint Gold", asset_type="etf", bucket="3a",

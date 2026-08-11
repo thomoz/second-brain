@@ -79,6 +79,17 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 source          TEXT NOT NULL DEFAULT 'briefs_finance_ingest',
                 synced_at       TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS ibkr_pending_positions (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticker          TEXT NOT NULL UNIQUE,
+                name            TEXT,
+                asset_type      TEXT NOT NULL,
+                qty             REAL NOT NULL,
+                avg_price       REAL NOT NULL,
+                currency        TEXT,
+                exchange_raw    TEXT,
+                synced_at       TEXT NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS macro_snapshot_cache (
                 name            TEXT PRIMARY KEY,
                 verdict         TEXT NOT NULL,
@@ -274,6 +285,38 @@ def insert_pending_candidate(
 def delete_pending_candidate(conn: sqlite3.Connection, ticker: str) -> int:
     with conn:
         cur = conn.execute("DELETE FROM pending_candidates WHERE ticker = ?", (ticker,))
+        return cur.rowcount
+
+
+def get_ibkr_pending_position(conn: sqlite3.Connection, ticker: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT * FROM ibkr_pending_positions WHERE ticker = ?", (ticker,)
+    ).fetchone()
+
+
+def get_all_ibkr_pending_positions(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute("SELECT * FROM ibkr_pending_positions ORDER BY ticker").fetchall()
+
+
+def insert_ibkr_pending_position(
+    conn: sqlite3.Connection, *, ticker: str, name: str | None, qty: float,
+    avg_price: float, currency: str | None, asset_type: str, exchange_raw: str | None,
+) -> None:
+    """INSERT OR REPLACE (not OR IGNORE, unlike pending_candidates) -- a re-run of
+    sync-ibkr should refresh qty/avg_price if Shaun trades again before assigning a
+    bucket, not silently keep stale staged values."""
+    with conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO ibkr_pending_positions
+               (ticker, name, asset_type, qty, avg_price, currency, exchange_raw, synced_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (ticker, name, asset_type, qty, avg_price, currency, exchange_raw, _now()),
+        )
+
+
+def delete_ibkr_pending_position(conn: sqlite3.Connection, ticker: str) -> int:
+    with conn:
+        cur = conn.execute("DELETE FROM ibkr_pending_positions WHERE ticker = ?", (ticker,))
         return cur.rowcount
 
 
