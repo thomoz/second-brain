@@ -111,6 +111,17 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 detail              TEXT NOT NULL,
                 fetched_at          TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS holdings_price_history (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticker          TEXT NOT NULL,
+                bucket          TEXT NOT NULL,
+                date            TEXT NOT NULL,
+                price           REAL NOT NULL,
+                qty             REAL NOT NULL,
+                mkt_value       REAL NOT NULL,
+                recorded_at     TEXT NOT NULL,
+                UNIQUE(ticker, bucket, date)
+            );
             CREATE TABLE IF NOT EXISTS gold_backtest_results (
                 id                      INTEGER PRIMARY KEY AUTOINCREMENT,
                 signal                  TEXT NOT NULL,
@@ -464,6 +475,45 @@ def upsert_gold_backtest_results(conn: sqlite3.Connection, results: dict) -> Non
 def get_gold_backtest_results(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return conn.execute(
         "SELECT * FROM gold_backtest_results ORDER BY signal, direction, horizon_unit, horizon_value"
+    ).fetchall()
+
+
+def record_price_snapshot(
+    conn: sqlite3.Connection, *, ticker: str, bucket: str, date: str,
+    price: float, qty: float, mkt_value: float,
+) -> None:
+    """One row per (ticker, bucket, date) -- INSERT OR REPLACE so re-running Monitor
+    (or any other snapshot.regenerate_all() caller) multiple times in the same day
+    just overwrites with the latest price rather than accumulating duplicates."""
+    with conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO holdings_price_history
+               (ticker, bucket, date, price, qty, mkt_value, recorded_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (ticker, bucket, date, price, qty, mkt_value, _now()),
+        )
+
+
+def get_price_history(
+    conn: sqlite3.Connection, ticker: str, bucket: str | None = None
+) -> list[sqlite3.Row]:
+    if bucket is not None:
+        return conn.execute(
+            """SELECT * FROM holdings_price_history WHERE ticker = ? AND bucket = ?
+               ORDER BY date""",
+            (ticker, bucket),
+        ).fetchall()
+    return conn.execute(
+        "SELECT * FROM holdings_price_history WHERE ticker = ? ORDER BY date", (ticker,)
+    ).fetchall()
+
+
+def get_portfolio_value_history(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    """Total portfolio market value per day, summed across every ticker/bucket that
+    had a recorded snapshot that day -- an equity curve, not a single holding's."""
+    return conn.execute(
+        """SELECT date, SUM(mkt_value) AS total_mkt_value
+           FROM holdings_price_history GROUP BY date ORDER BY date"""
     ).fetchall()
 
 

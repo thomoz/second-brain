@@ -293,9 +293,9 @@ def test_build_today_week_month_reads_query_different_horizons():
     week = gold_outlook.build_week_read(technicals, macro_checks, backtest_results)
     month = gold_outlook.build_month_read(technicals, macro_checks, backtest_results)
 
-    assert "N=1, mean 100.0%" in today["notes"][-1]
-    assert "N=1, mean 200.0%" in week["notes"][-1]
-    assert any("N=1, mean 300.0%" in n for n in month["notes"])
+    assert "N=1, avg move 100.0%" in today["notes"][-1]
+    assert "N=1, avg move 200.0%" in week["notes"][-1]
+    assert any("N=1, avg move 300.0%" in n for n in month["notes"])
 
 
 def test_build_month_read_includes_seasonality_in_weighted_vote():
@@ -307,7 +307,7 @@ def test_build_month_read_includes_seasonality_in_weighted_vote():
     }
     month = gold_outlook.build_month_read(technicals, _macro_checks(vix="elevated"), backtest_results)
     assert month["direction_guess"].startswith("bullish lean")
-    assert any("seasonality" in n and "win-rate 70.0%" in n for n in month["notes"])
+    assert any("calendar month" in n and "70.0% of years" in n for n in month["notes"])
 
 
 def test_build_month_read_skips_seasonality_without_win_rate():

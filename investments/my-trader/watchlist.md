@@ -12,6 +12,7 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 | DG | Dollar General | stock | 1 | 1.86% | +55% | Not yet discussed. Dollar-store category |
 | DLTR | Dollar Tree | stock | 1 | — | +32% | Not yet discussed. Dollar-store category |
 | DOLLARAMA | Dollarama Inc | stock | 1 | — | — | Not yet discussed. Dollar-store category — "taking over reject shop" |
+| EQT | EQT Corporation | stock | unassigned | — | — | Natural gas producer. Rick Rule is invested in it. |
 | FIVE | Five Below | stock | 1 | — | +306% | Not yet discussed. Dollar-store category |
 | FPI | Farmland Partners Inc | reit | 2 | 2.75% | +28% | Not yet discussed. Farmland REIT — has a 2018 governance flag on record |
 | GDX | VanEck Gold Miners ETF | etf | 2 | 0.84% | +162% | Not yet discussed. Gold miners — separate product from gold itself (PMGOLD), higher volatility |
@@ -90,4 +91,4 @@ Major AI-boom names with real moats (chip/foundry monopoly, hyperscaler platform
 | SNDK | SanDisk | stock | ai_postcrash | — | +3663% | Major U.S.-listed NAND flash provider for AI long-term memory with sold-out enterprise inventory, rising margins, strong data center revenue growth, and a hard-to-replicate Kioxia manufacturing partnership. |
 | TSM | Taiwan Semiconductor Manufacturing Company Limited | stock | ai_postcrash | 2.93% | +1713% | Named as one of the companies powering AI that has been crushing it, fitting the report's AI chip supply-chain thesis. |
 
-Last auto-generated: 2026-08-08.
+Last auto-generated: 2026-08-11.

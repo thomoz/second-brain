@@ -48,6 +48,52 @@ GOLD_SIGNALS = (
 )  # cot_positioning added 2026-08-08 (gold_cot.py) -- large-speculator positioning,
    # merged into macro_checks by build_outlook() below before this dict is consulted.
 
+SIGNAL_DESCRIPTIONS: dict[tuple[str, str], str] = {
+    ("ma20_trend", "above"): "price is above its 20-day average (short-term uptrend)",
+    ("ma20_trend", "below"): "price is below its 20-day average (short-term downtrend)",
+    ("ma50_trend", "above"): "price is above its 50-day average (medium-term uptrend)",
+    ("ma50_trend", "below"): "price is below its 50-day average (medium-term downtrend)",
+    ("macd_histogram", "positive"): "MACD momentum is positive (upward momentum building)",
+    ("macd_histogram", "negative"): "MACD momentum is negative (downward momentum building)",
+    ("macd_crossover", "above"): "MACD line is above its signal line (a bullish momentum crossover)",
+    ("macd_crossover", "below"): "MACD line is below its signal line (a bearish momentum crossover)",
+    ("rsi_zone", "elevated"): "RSI is in overbought territory",
+    ("rsi_zone", "depressed"): "RSI is in oversold territory",
+    ("stochastic_crossover", "above"): "the stochastic %K line is above %D (a bullish momentum signal)",
+    ("stochastic_crossover", "below"): "the stochastic %K line is below %D (a bearish momentum signal)",
+    ("real_yields", "negative"): "real (inflation-adjusted) bond yields are negative -- "
+                                  "historically a bullish catalyst for gold",
+    ("real_yields", "elevated"): "real (inflation-adjusted) bond yields are elevated -- "
+                                  "historically this pressures gold hard",
+    ("dollar_index", "rising"): "the US dollar has been strengthening -- typically weighs on gold",
+    ("dollar_index", "falling"): "the US dollar has been weakening -- typically supports gold",
+    ("gold_trend", "crossed_above"): "gold just crossed above its 200-day average, a bullish "
+                                      "long-term trend signal",
+    ("gold_trend", "crossed_below"): "gold just crossed below its 200-day average, a bearish "
+                                      "long-term trend signal",
+    ("gold_silver_ratio", "high"): "gold is expensive relative to silver by historical standards",
+    ("gold_silver_ratio", "low"): "gold is cheap relative to silver by historical standards",
+    ("vix", "elevated"): "market volatility (VIX) is elevated -- this often boosts safe-haven "
+                          "demand for gold",
+    ("cot_positioning", "extreme_long"): "large speculators are near their most bullish positioning "
+                                          "in the lookback window -- a crowded-long read",
+    ("cot_positioning", "extreme_short"): "large speculators are near their most bearish positioning "
+                                           "in the lookback window -- a crowded-short read",
+}
+
+
+def _plain_note(name: str, state_value: str, stats: dict) -> str:
+    """Plain-English signal note -- see [[feedback_check_interpretation_convention]]:
+    a bare N/mean/win-rate line means nothing without a clause on what the signal
+    actually is. Falls back to the raw name if a state isn't in SIGNAL_DESCRIPTIONS
+    (shouldn't happen for any currently-live signal, but keeps this from raising)."""
+    description = SIGNAL_DESCRIPTIONS.get((name, state_value), f"{name} is {state_value}")
+    return (
+        f"{description}. Historically, gold rose over this horizon {stats['win_rate']}% of the "
+        f"time this was true (N={stats['n']}, avg move {stats['mean']}% vs {stats['baseline']['mean']}% baseline)."
+    )
+
+
 DIRECTIONAL_VOTE_SIGNALS = frozenset({
     "ma20_trend", "ma50_trend",  # trend filters -- genuine directional persistence
     "real_yields", "dollar_index", "gold_trend", "gold_silver_ratio", "vix",  # macro regime/catalyst signals
@@ -149,10 +195,7 @@ def _horizon_read(states: dict[str, str], backtest_results: dict, horizon_unit: 
         stats = backtest_results.get((name, state_value, horizon_unit, horizon_value))
         if not stats or stats["n"] == 0 or stats.get("win_rate") is None:
             continue
-        note = (
-            f"{name} ({state_value}): N={stats['n']}, mean {stats['mean']}% vs "
-            f"baseline {stats['baseline']['mean']}%, win-rate {stats['win_rate']}%"
-        )
+        note = _plain_note(name, state_value, stats)
         if name in DIRECTIONAL_VOTE_SIGNALS:
             components[name] = _label(stats["win_rate"])
             weights[name] = _weight(stats["win_rate"])
@@ -202,9 +245,9 @@ def build_month_read(technicals: dict, macro_checks: list, backtest_results: dic
     if seasonality["n"] > 0 and seasonality.get("win_rate") is not None:
         components["seasonality"] = _label(seasonality["win_rate"])
         weights["seasonality"] = _weight(seasonality["win_rate"])
-        notes.append(f"seasonality: this calendar month has historically averaged "
-                     f"{seasonality['mean']}% (median {seasonality['median']}%, "
-                     f"win-rate {seasonality['win_rate']}%, N={seasonality['n']} years)")
+        notes.append(f"It's currently this calendar month -- historically, gold has risen in this "
+                     f"month in {seasonality['win_rate']}% of years on record (N={seasonality['n']}), "
+                     f"averaging a {seasonality['mean']}% move (median {seasonality['median']}%).")
     return {
         "direction_guess": _synthesize_label(components, weights),
         "confidence": "highest -- most historical data, longest-validated horizon" if components else "unavailable",

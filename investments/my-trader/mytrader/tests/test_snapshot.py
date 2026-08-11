@@ -41,6 +41,33 @@ def test_regenerate_holdings_md_handles_missing_price(db_conn, monkeypatch, tmp_
     assert "| V | Visa Inc | 0.1 | — | $318.41 | — | 1 |" in content
 
 
+def test_regenerate_holdings_md_records_price_snapshot(db_conn, monkeypatch, tmp_path):
+    _patch_paths(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(ticker=ticker, info={"regularMarketPrice": 340.0}, dividends=None),
+    )
+
+    db.upsert_holding(db_conn, ticker="V", name="Visa Inc", asset_type="stock", bucket="1", qty=0.1, avg_price=318.41)
+    snapshot.regenerate_holdings_md(db_conn)
+
+    rows = db.get_price_history(db_conn, "V", "1")
+    assert len(rows) == 1
+    assert rows[0]["price"] == 340.0
+    assert rows[0]["qty"] == 0.1
+    assert rows[0]["mkt_value"] == 34.0
+
+
+def test_regenerate_holdings_md_skips_price_snapshot_when_price_missing(db_conn, monkeypatch, tmp_path):
+    _patch_paths(monkeypatch, tmp_path)
+    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
+
+    db.upsert_holding(db_conn, ticker="V", name="Visa Inc", asset_type="stock", bucket="1", qty=0.1, avg_price=318.41)
+    snapshot.regenerate_holdings_md(db_conn)
+
+    assert db.get_price_history(db_conn, "V", "1") == []
+
+
 def test_regenerate_watchlist_md_matches_expected(db_conn, monkeypatch, tmp_path):
     _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
 

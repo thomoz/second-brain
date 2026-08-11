@@ -4,6 +4,13 @@ The database (shared with briefs-finance) is the source of truth for current hol
 and the watchlist; these files are a glanceable markdown snapshot Shaun actually reads —
 he never looks at the database directly. Full overwrite on every run is intentional
 (per the "data source of truth" decision in tool-preplan.md) — not a diff/merge.
+
+regenerate_holdings_md() also records a daily price snapshot per holding (added
+2026-08-10, db.record_price_snapshot()) -- riding along on the yfinance fetch this
+function already makes for the P&L column, no new network calls. Previously that price
+was fetched and discarded every run; Shaun wanted the tools able to learn from their own
+history (portfolio value over time, checking past flags against what actually happened
+next) rather than only ever seeing today's snapshot.
 """
 
 from __future__ import annotations
@@ -32,6 +39,7 @@ def regenerate_holdings_md(conn: sqlite3.Connection) -> None:
         "| Ticker | Name | Qty | Mkt Value | Avg Price | Unrealized P&L | Bucket |",
         "|--------|------|-----|-----------|-----------|-----------------|--------|",
     ]
+    today = date.today().isoformat()
     for row in rows:
         price = _current_price(row["ticker"])
         cost_basis = row["qty"] * row["avg_price"]
@@ -40,6 +48,10 @@ def regenerate_holdings_md(conn: sqlite3.Connection) -> None:
             pnl = mkt_value - cost_basis
             mkt_value_str = f"${mkt_value:,.2f}"
             pnl_str = f"{'+' if pnl >= 0 else ''}${pnl:,.2f}"
+            db.record_price_snapshot(
+                conn, ticker=row["ticker"], bucket=row["bucket"], date=today,
+                price=price, qty=row["qty"], mkt_value=mkt_value,
+            )
         else:
             mkt_value_str = "—"
             pnl_str = "—"

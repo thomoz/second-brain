@@ -44,6 +44,17 @@ check_gold_trend() is deliberately always "info", never "flag" -- a 200DMA cross
 contested signal (gold specifically has a documented small-sample history of behaving
 as a contrarian buy signal rather than the standard trend-following "bearish" read), so
 it's reported as neutral fact, same philosophy as checks/price_action.py.
+
+Plain-English interpretation clauses (added 2026-08-10, retrofitted across move_index,
+housing_affordability, consumer_sentiment, recession_signal, inflation_expectations,
+credit_spreads, the three CPI checks, dollar_index, gold_silver_ratio, and vix -- the
+checks that previously reported only a number + threshold with no indication of what it
+meant) -- Shaun flagged that a line like "10Y breakeven 2.3%" means nothing without
+context. These are explanatory only ("wider spreads mean credit markets are pricing
+higher default/recession risk"), never a trade recommendation -- monitor.py's "advisor
+notes only, no trade action" rule (SOUL.md) still applies. Convention going forward:
+any new check added here, or to any future portfolio-monitoring tool, should include
+this kind of one-clause interpretation from the start rather than a bare number.
 """
 
 from __future__ import annotations
@@ -78,13 +89,14 @@ def check_move_index() -> CheckResult:
     if value >= config.MOVE_INDEX_FLAG_LEVEL:
         return CheckResult(
             name="move_index", verdict="flag",
-            detail=f"MOVE index at {value:.1f}, at/above the "
-                   f"{config.MOVE_INDEX_FLAG_LEVEL:.0f} bond-market-stress threshold",
+            detail=f"MOVE index (bond market volatility) at {value:.1f}, at/above the "
+                   f"{config.MOVE_INDEX_FLAG_LEVEL:.0f} bond-market-stress threshold — elevated "
+                   f"readings often precede stress spreading into equities and credit",
             data={"value": value},
         )
     return CheckResult(
         name="move_index", verdict="ok",
-        detail=f"MOVE index at {value:.1f}, below the flag threshold",
+        detail=f"MOVE index (bond market volatility) at {value:.1f}, below the flag threshold",
         data={"value": value},
     )
 
@@ -115,12 +127,13 @@ def check_housing_affordability() -> CheckResult:
         return CheckResult(
             name="housing_affordability", verdict="flag",
             detail=f"Housing price-to-income ratio at {ratio}x ({as_of}), at/above the "
-                   f"{config.HOUSING_P2I_FLAG_RATIO}x stress threshold",
+                   f"{config.HOUSING_P2I_FLAG_RATIO}x stress threshold — higher ratios mean "
+                   f"housing is more stretched relative to incomes, a headwind for future price growth",
             data=data,
         )
     return CheckResult(
         name="housing_affordability", verdict="ok",
-        detail=f"Housing price-to-income ratio at {ratio}x ({as_of})",
+        detail=f"Housing price-to-income ratio at {ratio}x ({as_of}, higher = less affordable)",
         data=data,
     )
 
@@ -139,7 +152,8 @@ def check_consumer_sentiment() -> CheckResult:
         return CheckResult(
             name="consumer_sentiment", verdict="flag",
             detail=f"UMich consumer sentiment at {value:.1f} ({as_of}), at/below the "
-                   f"{config.CONSUMER_SENTIMENT_FLAG_LEVEL:.0f} stress threshold",
+                   f"{config.CONSUMER_SENTIMENT_FLAG_LEVEL:.0f} stress threshold — readings this "
+                   f"low have historically coincided with households pulling back on spending",
             data={"value": value, "as_of": obs_date.isoformat()},
         )
     return CheckResult(
@@ -188,7 +202,8 @@ def check_recession_signal() -> CheckResult:
 
     detail = (
         f"10Y-2Y spread {curve_now:+.2f}pp (as of {curve_date.isoformat()}), "
-        f"recession probability {recession_prob:.1f}% (as of {prob_date.isoformat()})"
+        f"recession probability {recession_prob:.1f}% (as of {prob_date.isoformat()}) — higher "
+        f"probability means the market is pricing more chance of a downturn within the next year"
     )
     if curve_3m10y_obs is not None:
         curve_3m10y, curve_3m10y_date = curve_3m10y_obs
@@ -234,7 +249,10 @@ def check_inflation_expectations() -> CheckResult:
 
     detail = (
         f"10Y breakeven {breakeven:.2f}% (as of {breakeven_date.isoformat()}), "
-        f"5Y5Y forward {forward:.2f}% (as of {forward_date.isoformat()})"
+        f"5Y5Y forward {forward:.2f}% (as of {forward_date.isoformat()}) — breakevens reflect "
+        f"market demand for inflation protection, not a literal CPI forecast; a wide gap between "
+        f"the 10Y breakeven and the 5Y5Y forward often signals a short-term supply shock rather "
+        f"than durable inflation"
     )
     verdict = "flag" if forward >= config.INFLATION_EXPECTATION_FLAG_PCT else "ok"
     return CheckResult(
@@ -267,12 +285,13 @@ def check_credit_spreads() -> CheckResult:
         return CheckResult(
             name="credit_spreads", verdict="flag",
             detail=f"ICE BofA US HY OAS at {value:.2f}pp ({as_of}), at/above the "
-                   f"{config.CREDIT_SPREAD_FLAG_PCT:.1f}pp stress threshold",
+                   f"{config.CREDIT_SPREAD_FLAG_PCT:.1f}pp stress threshold — wider spreads mean "
+                   f"credit markets are pricing higher default/recession risk",
             data={"value": value, "as_of": obs_date.isoformat()},
         )
     return CheckResult(
         name="credit_spreads", verdict="ok",
-        detail=f"ICE BofA US HY OAS at {value:.2f}pp ({as_of})",
+        detail=f"ICE BofA US HY OAS at {value:.2f}pp ({as_of}, tighter = less credit stress priced in)",
         data={"value": value, "as_of": obs_date.isoformat()},
     )
 
@@ -293,11 +312,14 @@ def check_australia_cpi() -> CheckResult:
     as_of = f"reference month {ref_month.isoformat()}"
     data = {"value": value, "reference_month": ref_month.isoformat()}
     if value < config.RBA_TARGET_BAND_LOW_PCT or value > config.RBA_TARGET_BAND_HIGH_PCT:
+        direction = ("running hotter than" if value > config.RBA_TARGET_BAND_HIGH_PCT
+                     else "running cooler than (disinflation risk)")
         return CheckResult(
             name="australia_cpi", verdict="flag",
             detail=f"Australia headline CPI {value:.1f}% YoY ({as_of}), outside the "
                    f"RBA's {config.RBA_TARGET_BAND_LOW_PCT:.0f}-"
-                   f"{config.RBA_TARGET_BAND_HIGH_PCT:.0f}% target band",
+                   f"{config.RBA_TARGET_BAND_HIGH_PCT:.0f}% target band — inflation {direction} "
+                   f"the RBA's comfort zone",
             data=data,
         )
     return CheckResult(
@@ -324,12 +346,14 @@ def check_us_cpi() -> CheckResult:
     as_of = f"as of {obs_date.isoformat()}"
     data = {"value": value, "as_of": obs_date.isoformat()}
     if value < config.US_CPI_TARGET_BAND_LOW_PCT or value > config.US_CPI_TARGET_BAND_HIGH_PCT:
+        direction = ("running hotter than" if value > config.US_CPI_TARGET_BAND_HIGH_PCT
+                     else "running cooler than (disinflation risk)")
         return CheckResult(
             name="us_cpi", verdict="flag",
             detail=f"US headline CPI {value:.2f}% YoY ({as_of}), outside the "
                    f"{config.US_CPI_TARGET_BAND_LOW_PCT:.0f}-"
                    f"{config.US_CPI_TARGET_BAND_HIGH_PCT:.0f}% tolerance band around "
-                   f"the Fed's 2% target",
+                   f"the Fed's 2% target — inflation {direction} the Fed's comfort zone",
             data=data,
         )
     return CheckResult(
@@ -355,12 +379,14 @@ def check_uk_cpi() -> CheckResult:
     as_of = f"reference month {ref_month.isoformat()}"
     data = {"value": value, "reference_month": ref_month.isoformat()}
     if value < config.UK_CPI_TARGET_BAND_LOW_PCT or value > config.UK_CPI_TARGET_BAND_HIGH_PCT:
+        direction = ("running hotter than" if value > config.UK_CPI_TARGET_BAND_HIGH_PCT
+                     else "running cooler than (disinflation risk)")
         return CheckResult(
             name="uk_cpi", verdict="flag",
             detail=f"UK headline CPI {value:.1f}% YoY ({as_of}), outside the "
                    f"{config.UK_CPI_TARGET_BAND_LOW_PCT:.0f}-"
                    f"{config.UK_CPI_TARGET_BAND_HIGH_PCT:.0f}% tolerance band around "
-                   f"the BoE's 2% target",
+                   f"the BoE's 2% target — inflation {direction} the BoE's comfort zone",
             data=data,
         )
     return CheckResult(
@@ -462,6 +488,12 @@ def check_dollar_index() -> CheckResult:
         f"Broad USD index {now_value:.1f}, {pct_change:+.1f}% over the past "
         f"{config.DXY_LOOKBACK_DAYS} days"
     )
+    if data["direction"] == "rising":
+        detail += (" — a stronger dollar typically weighs on gold/commodities and tightens "
+                    "global dollar liquidity")
+    elif data["direction"] == "falling":
+        detail += (" — a weaker dollar typically supports gold/commodities and eases global "
+                    "dollar liquidity")
     if abs(pct_change) >= config.DXY_FLAG_MOVE_PCT:
         return CheckResult(name="dollar_index", verdict="flag", detail=detail, data=data)
     return CheckResult(name="dollar_index", verdict="ok", detail=detail, data=data)
@@ -559,7 +591,9 @@ def check_gold_silver_ratio() -> CheckResult:
         return CheckResult(
             name="gold_silver_ratio", verdict="flag",
             detail=f"Gold/silver ratio at {ratio}, at/above the "
-                   f"{config.GOLD_SILVER_RATIO_FLAG_HIGH:.0f} historical-extreme-high level",
+                   f"{config.GOLD_SILVER_RATIO_FLAG_HIGH:.0f} historical-extreme-high level — "
+                   f"gold is expensive relative to silver, a level some see as a mean-reversion "
+                   f"setup (contested signal)",
             data=data,
         )
     if ratio <= config.GOLD_SILVER_RATIO_FLAG_LOW:
@@ -567,7 +601,8 @@ def check_gold_silver_ratio() -> CheckResult:
         return CheckResult(
             name="gold_silver_ratio", verdict="flag",
             detail=f"Gold/silver ratio at {ratio}, at/below the "
-                   f"{config.GOLD_SILVER_RATIO_FLAG_LOW:.0f} historical-extreme-low level",
+                   f"{config.GOLD_SILVER_RATIO_FLAG_LOW:.0f} historical-extreme-low level — "
+                   f"gold is cheap relative to silver by this same contested measure",
             data=data,
         )
     return CheckResult(
@@ -588,7 +623,8 @@ def check_vix() -> CheckResult:
         return CheckResult(
             name="vix", verdict="flag",
             detail=f"VIX at {value:.1f}, at/above the "
-                   f"{config.VIX_FLAG_LEVEL:.0f} crisis-adjacent threshold",
+                   f"{config.VIX_FLAG_LEVEL:.0f} crisis-adjacent threshold — options markets are "
+                   f"pricing sharply higher near-term volatility",
             data={"value": value, "direction": "elevated"},
         )
     return CheckResult(
