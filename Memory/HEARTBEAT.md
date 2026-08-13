@@ -26,6 +26,9 @@ How do I empty the cholesterol pits in my liver?
 ## 2026-08-13 [WhatsApp save]
 Deep dive Disney.
 
+## 2026-08-13 [WhatsApp save]
+Did I invoice the Friendly in?
+
 ## Email (All Accounts)
 - [ ] Unread Gmail messages across all accounts (SongbookDB support priority)
 - [ ] Unread Outlook messages
