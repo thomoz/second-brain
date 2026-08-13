@@ -85,12 +85,48 @@ Note: use `uv run --directory <path> ...` rather than `cd`-ing into the director
   until explicitly promoted).
 - Strategy/criteria reference: `investments/my-trader/investment-strategy.md`
 
-## The 9 Assessment Checks
+## MLP Filter
 
-Every `find` / `watchlist-add` runs all 9:
+`mlp_filter.py` — added 2026-08-12, Shaun: "if i put in a stock to deep dive and it
+turns out to be an mlp, please flag it and don't do a deep dive - i don't want mlps"
+(K-1 tax filing, UBTI complications in retirement accounts). Runs first in
+`engine.run_assessment()`, right after the single `fetch_ticker_data` call needed to
+see the entity's own name — if `yfinance`'s `longName`/`shortName` ends in an
+`L.P.`/`LP`-style legal suffix (e.g. "Enterprise Products Partners L.P.", "Kimbell
+Royalty Partners, LP"), the assessment stops there: no backtest refresh, no
+briefs-finance score compute, no checks run at all, `find`/Monitor just report
+`MLP — skipped: <name> is structured as a Master Limited Partnership.` Detected from
+the data itself, not a hardcoded ticker list — unlike `scripts.ethical_filter`'s
+defense-contractor list, MLP structure is a fact already present in the entity's own
+name, not a curated judgment call.
+
+**Funds are never flagged**, even ones with "MLP" literally in the name — AMLP
+("Alerian MLP ETF") holds a basket of MLPs but isn't itself a partnership
+(`quoteType == "ETF"` short-circuits before the name-suffix check); its own C-corp
+fund wrapper is precisely what lets it issue a normal 1099 instead of passing K-1s
+through, the opposite of what's being screened for. AMLP still gets a full deep dive.
+
+## Company Profile Check
+
+`checks/company_profile.py` — added 2026-08-12, Shaun: "have the deep dive also give
+a brief explanation as to what each company/stock/etf does or represents." Always the
+first check shown, always `verdict="info"`. Pulled from yfinance's own
+`longBusinessSummary` (present for both individual equities and funds), trimmed to
+its first ~2 sentences rather than the full paragraph — a name ending in an
+abbreviation like "L.P." can consume one of those two sentence slots without adding
+content (naive `". "` split can't tell an abbreviation from a real sentence
+boundary), a known, accepted gap rather than a bug, same tradeoff class as the SEC/ASX
+filing-section heuristics below. Falls back to `sector`/`industry`/`category` when no
+summary is available at all.
+
+## The 12 Assessment Checks
+
+Every `find` / `watchlist-add` runs all 12 (unless the MLP filter above short-circuits
+first):
 
 | Check | What it looks at |
 |-------|-------------------|
+| Company profile | Brief plain-English description of what the ticker does/represents, from yfinance's `longBusinessSummary`. Added 2026-08-12 (see "Company Profile Check" above) |
 | Dividend trend | Trailing vs. prior 12-month dividend sum |
 | Valuation | Trailing/forward PE vs. configured rich/cheap bands |
 | Balance sheet | Debt/equity and current ratio; falls back to return on equity when both are unavailable (common for financials/banks) |
@@ -101,6 +137,7 @@ Every `find` / `watchlist-add` runs all 9:
 | Opportunity | Grounded in real investor-principle criteria — `verdict="interesting"` when any fire, gated on no active flags elsewhere. Added 2026-07-19 (see "Opportunity Signal" below) |
 | Price action | Plain 1-month + 3-month price return, `verdict` always `"info"` — never a signal, just the fact. Added 2026-07-19 (see below) |
 | Crash resilience | Peak-to-trough drawdown in each of 4 fixed historical windows (2008 GFC, Dec 2018 correction, COVID 2020, 2022 bear market), `verdict` always `"info"`/`"unknown"` — retrospective context, not gated into opportunity's flag-suppression list. Added 2026-07-25 (see below) |
+| Technical levels | Current price vs 50/150/200-day moving averages, `verdict` always `"info"` — a contested signal (bullish trend-following vs. Goat's own 150DMA exit rule), reported not judged. Added 2026-08-13, `checks/technical_levels.py` |
 
 Also, on every `run_assessment()` call (Find or Monitor): a ticker-scoped
 `scripts.backtest.run_backtest(ticker_filter=...)` refresh (cheap — yfinance price
@@ -111,8 +148,8 @@ everything you have at assessing it."
 
 ## Two Distinct Find Actions
 
-- **Ephemeral lookup** ("what do you think of TICKER") — runs the 10 checks, reports
-  back, persists nothing.
+- **Ephemeral lookup** ("what do you think of TICKER") — runs the 12 checks (or stops
+  early with an MLP flag), reports back, persists nothing.
 - **Explicit watchlist-add** ("add TICKER to the watchlist") — same checks, plus writes
   a `watchlist` row (`status="discussed"`) and regenerates the markdown snapshots.
 
@@ -213,12 +250,71 @@ non-flag auto-acknowledges its open alert, so a future re-flag raises a fresh on
 see "Opportunity Signal" above.
 
 Output is a standalone file, `investments/my-trader/monitor-report.md` (full overwrite
-every run — new alerts this run + all currently-open alerts + watchlist opportunities
-this run). A bare Windows toast notification fires only when there's at least one new
-alert (reuses `.claude/scripts/notifications.py`, same as heartbeat) — opportunities
-don't trigger a toast, only visible in the report. No Second Brain daily-log entry
-and no WhatsApp push — Monitor is a quieter, separate channel by design. Like Find,
-Monitor never suggests a specific trade action — advisor notes only.
+every run — upcoming economic releases + a full per-holding report + new alerts this
+run + all currently-open alerts + watchlist opportunities this run, in that order). A
+bare Windows toast notification fires only when there's at least one new alert (reuses
+`.claude/scripts/notifications.py`, same as heartbeat) — opportunities don't trigger a
+toast, only visible in the report. No Second Brain daily-log entry and no WhatsApp
+push — Monitor is a quieter, separate channel by design. Like Find, Monitor never
+suggests a specific trade action — advisor notes only.
+
+**Holdings section** — added 2026-08-13, Shaun: "the monitor report doesn't list my
+Holdings, or give a report for each holding." Rated the original report 35/100 for
+"would this help a trader decide what action to take" and rebuilt against 8 concrete
+gaps (all confirmed and closed the same session):
+
+1. **Live price + P&L** — `qty @ avg $X | now $Y | P&L +/-$Z (+/-N%)` on every
+   holding, via the new `market_data.fetch_current_price()` (moved out of
+   `snapshot.py`'s private `_current_price()` so both callers share one
+   implementation). Degrades to "current price unavailable" rather than guessing.
+2. **Bottom-line synthesis** — `monitor._bottom_line()` counts flags vs. `interesting`
+   verdicts across the holding's checks and renders one sentence ("N flag(s) active
+   (names) — worth a look" / "N opportunity signal(s)..." / "Nothing notable this
+   run"), so a trader doesn't have to mentally scan every check line on every holding.
+3. **Open alerts shown inline** — each holding's own open `alert_history` rows (from
+   `db.get_open_alerts`, matched by ticker+source_table) render directly under that
+   ticker as `OPEN ALERT (check_name, since DATE): message`, instead of only living in
+   the separate "All Open Alerts" section further down.
+4. **Noise suppression** — `monitor._NOISE_CHECKS` hides exact-match structural
+   boilerplate lines that never carry information (currently just `etf_mechanics:
+   "Not an ETF"` for non-fund tickers). `concentration`'s "unknown" verdict stays
+   visible even with no Berkshire data, since it still carries a real per-ticker
+   sector %.
+5. **Technical entry/exit context** — the new `technical_levels` check (see the 12
+   Assessment Checks table above) shows current price vs 50/150/200DMA on every
+   holding.
+6. **Bucket translated to plain English** — `config.BUCKET_LABELS` maps each bucket
+   code to a sentence ("Long-term hold — never timed, dips are expected...", "Crash-
+   trade tactical — bought for a crash trade, sold after recovery", etc.) rendered in
+   the holding's header instead of a bare code.
+7. **% of tracked portfolio** — `qty * current_price` summed across all priced
+   holdings (currency-naive, same known limitation as `checks/concentration.py`'s own
+   market-value aggregation), each holding shown as a % of that total.
+8. **Opportunity-signal clarification** — when a holding's `opportunity` check fires
+   `"interesting"`, the rendered line gets "(you already hold this — reads as an
+   add-to-position signal, not a new-buy signal)" appended, since the check's
+   Graham/Lynch/Buffett-Smith/Marks-Neilson signals were designed for a new-buy
+   decision, not sizing an existing position.
+
+Every check still renders (minus the noise-suppressed ones and minus
+`principles_fit`/`news_events`, which are opt-in and Find-only). An MLP holding (see
+"MLP Filter" above) renders as a one-line skip note instead of a check list, same as
+Find's own output.
+
+**Upcoming Economic Releases section** — added 2026-08-13 at the very top of the
+report, above Holdings, Shaun: "I also need alerts to any major releases that are due
+within the next 48 hours eg cpi, ppi reports, job data. That way I can deep dive them
+myself to see if i need to take action." `mytrader/econ_calendar.py` — sourced from
+FRED's own `/fred/releases/dates` endpoint (same `FRED_API_KEY` used everywhere else
+in this codebase), filtered client-side to three release-name keywords: "Consumer
+Price Index" (CPI), "Producer Price Index" (PPI), "Employment Situation" (the monthly
+jobs report — nonfarm payrolls + unemployment rate). Weekly jobless claims deliberately
+excluded — it fires almost every week, which would spam this section on nearly every
+run rather than flag something rare/notable. Rendered as a live snapshot every run (not
+deduped through `alert_history`) — the same real release should keep showing up on
+every run it falls within the 48-hour window, same reasoning as the Opportunity Signal.
+Degrades to "No CPI/PPI/jobs releases scheduled in the next 48 hours" if `FRED_API_KEY`
+is unset or the request fails.
 
 ## Macro Monitoring Indicators
 

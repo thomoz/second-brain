@@ -97,6 +97,29 @@ def test_fetch_ticker_data_falls_back_to_asx_when_bare_lookup_is_placeholder(mon
     assert data.info["quoteType"] == "ETF"
 
 
+def test_fetch_current_price_returns_none_when_no_data(monkeypatch):
+    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
+    assert market_data.fetch_current_price("VRTX") is None
+
+
+def test_fetch_current_price_prefers_regular_market_price(monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(
+            ticker=ticker, info={"regularMarketPrice": 19.14, "currentPrice": 19.0}, dividends=None
+        ),
+    )
+    assert market_data.fetch_current_price("AG") == 19.14
+
+
+def test_fetch_current_price_falls_back_to_current_price(monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(ticker=ticker, info={"currentPrice": 19.0}, dividends=None),
+    )
+    assert market_data.fetch_current_price("AG") == 19.0
+
+
 def _install_fake_yfinance(monkeypatch, balance_sheet=None, financials=None):
     class _FakeTicker:
         def __init__(self, symbol):

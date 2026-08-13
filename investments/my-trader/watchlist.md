@@ -13,7 +13,7 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 | DG | Dollar General | stock | 1 | 1.86% | +55% | Not yet discussed. Dollar-store category |
 | DLTR | Dollar Tree | stock | 1 | — | +32% | Not yet discussed. Dollar-store category |
 | DOLLARAMA | Dollarama Inc | stock | 1 | — | — | Not yet discussed. Dollar-store category — "taking over reject shop" |
-| EQT | EQT Corporation | stock | unassigned | — | — | Natural gas producer. Rick Rule is invested in it. |
+| EQT | EQT Corporation | stock | unassigned | — | — | Rick Rule holds this. PE 12.0 (cheap), dividend growing +4.4%, low leverage -- but current ratio 0.67 flags a real liquidity strain. Opportunity signal suppressed by that flag per tool's own gating rule. |
 | FIVE | Five Below | stock | 1 | — | +306% | Not yet discussed. Dollar-store category |
 | FPI | Farmland Partners Inc | reit | 2 | 2.75% | +28% | Not yet discussed. Farmland REIT — has a 2018 governance flag on record |
 | GDX | VanEck Gold Miners ETF | etf | 2 | 0.84% | +162% | Not yet discussed. Gold miners — separate product from gold itself (PMGOLD), higher volatility |
@@ -23,6 +23,7 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 | IXI.AX | iShares Global Consumer Staples ETF | etf | 1 | 1.78% | +84% | Not yet discussed. Fee 0.41% |
 | LAND | Gladstone Land Corp | reit | 2 | 6.26% | +16% | Not yet discussed. Farmland REIT |
 | MCD | McDonald's Corp | stock | 1 | 2.65% | +175% | Not yet discussed. Flagged "defensive?" |
+| MLPX | Global X MLP & Energy Infrastructure ETF | etf | unassigned | — | — | Fund (not an MLP itself, no K-1/UBTI issue) holding MLPs + midstream corporations (TC Energy, Enbridge, Williams). Expense ratio 0.45%, AUM 3.64B, dividend +7.7%. Watching for a better entry point -- no active flags at deep-dive 2026-08-12, PE 21.2 (good), amplifies crashes ~2x (COVID -62.3%). |
 | MOUS | Mous | private | unassigned | — | — | Private UK phone-case company (Airo Shock material), not publicly traded -- no ticker, no yfinance data, no SEC filings. Opened pre-registration for an investment round; terms/valuation not yet known. Inert placeholder: Find/Monitor cannot check this (no market data source exists for a private company), so this row will never populate price/PE/dividend fields or receive automated re-checks -- requires manual follow-up when pre-registration details firm up. |
 | NU | Nu Holdings | stock | 1 | — | +32% | Digital-first Latin American bank with 135 million customers, profit up 41%, four million new customers in one quarter, and shares down about 24% in 2026 despite nearly 40% annual business expansion. |
 | OLLI | Ollie's Bargain Outlet | stock | 1 | — | +159% | Not yet discussed. Dollar-store category |
@@ -94,4 +95,4 @@ Major AI-boom names with real moats (chip/foundry monopoly, hyperscaler platform
 | SNDK | SanDisk | stock | ai_postcrash | — | +3663% | Major U.S.-listed NAND flash provider for AI long-term memory with sold-out enterprise inventory, rising margins, strong data center revenue growth, and a hard-to-replicate Kioxia manufacturing partnership. |
 | TSM | Taiwan Semiconductor Manufacturing Company Limited | stock | ai_postcrash | 2.93% | +1713% | Named as one of the companies powering AI that has been crushing it, fitting the report's AI chip supply-chain thesis. |
 
-Last auto-generated: 2026-08-11.
+Last auto-generated: 2026-08-13.

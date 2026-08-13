@@ -12,11 +12,11 @@ def test_run_assessment_includes_all_ten_checks(db_conn, monkeypatch):
     )
     result = engine.run_assessment("VRTX", db_conn)
     assert result["ticker"] == "VRTX"
-    assert len(result["checks"]) == 10
+    assert len(result["checks"]) == 12
     assert {c.name for c in result["checks"]} == {
-        "dividend", "valuation", "balance_sheet", "fx", "concentration",
+        "company_profile", "dividend", "valuation", "balance_sheet", "fx", "concentration",
         "sector_risk", "etf_mechanics", "opportunity", "price_action",
-        "crash_resilience",
+        "crash_resilience", "technical_levels",
     }
     assert result["excluded"] is False
     assert result["data_available"] is True
@@ -205,7 +205,7 @@ def test_run_assessment_excludes_principles_fit_by_default(db_conn, monkeypatch)
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
     result = engine.run_assessment("VRTX", db_conn)
     assert "principles_fit" not in {c.name for c in result["checks"]}
-    assert len(result["checks"]) == 10
+    assert len(result["checks"]) == 12
 
 
 def test_run_assessment_includes_principles_fit_when_opted_in(db_conn, monkeypatch):
@@ -219,7 +219,7 @@ def test_run_assessment_includes_principles_fit_when_opted_in(db_conn, monkeypat
     )
     result = engine.run_assessment("VRTX", db_conn, include_principles_fit=True)
     assert "principles_fit" in {c.name for c in result["checks"]}
-    assert len(result["checks"]) == 11
+    assert len(result["checks"]) == 13
 
 
 def test_run_assessment_includes_news_events_when_opted_in(db_conn, monkeypatch):
@@ -233,7 +233,7 @@ def test_run_assessment_includes_news_events_when_opted_in(db_conn, monkeypatch)
     )
     result = engine.run_assessment("VRTX", db_conn, include_news_events=True)
     assert "news_events" in {c.name for c in result["checks"]}
-    assert len(result["checks"]) == 11
+    assert len(result["checks"]) == 13
 
 
 def test_news_events_flag_suppresses_opportunity(db_conn, monkeypatch):
@@ -256,6 +256,46 @@ def test_news_events_flag_suppresses_opportunity(db_conn, monkeypatch):
     opportunity_result = next(c for c in result["checks"] if c.name == "opportunity")
     assert opportunity_result.verdict == "ok"
     assert "Active risk flag" in opportunity_result.detail
+
+
+def test_run_assessment_skips_mlp_entirely(db_conn, monkeypatch):
+    """Shaun's standing preference: MLPs get flagged, not deep-dived -- no checks run,
+    no backtest refresh, no briefs-finance score compute (confirmed 2026-08-12)."""
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(
+            ticker=ticker, info={"longName": "Enterprise Products Partners L.P.", "quoteType": "EQUITY"},
+            dividends=None,
+        ),
+    )
+    backtest_calls = []
+    monkeypatch.setattr("mytrader.engine._refresh_backtest_for_ticker", lambda ticker: backtest_calls.append(ticker))
+    score_calls = []
+    monkeypatch.setattr(
+        "mytrader.engine._lookup_or_compute_briefs_finance_score",
+        lambda ticker, conn: score_calls.append(ticker),
+    )
+
+    result = engine.run_assessment("EPD", db_conn)
+
+    assert result["mlp"] is True
+    assert result["mlp_name"] == "Enterprise Products Partners L.P."
+    assert result["checks"] == []
+    assert result["briefs_finance_score"] is None
+    assert backtest_calls == []
+    assert score_calls == []
+
+
+def test_run_assessment_does_not_flag_non_mlp_or_mlp_holding_etf(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(
+            ticker=ticker, info={"longName": "Alerian MLP ETF", "quoteType": "ETF"}, dividends=None,
+        ),
+    )
+    result = engine.run_assessment("AMLP", db_conn)
+    assert result.get("mlp") is None
+    assert len(result["checks"]) > 0
 
 
 def test_run_assessment_score_stays_none_when_no_recommendation_exists(db_conn, monkeypatch):

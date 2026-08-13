@@ -39,6 +39,14 @@ def _no_macro_or_sync_by_default(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _no_real_econ_calendar_by_default(monkeypatch):
+    """run_monitor() calls econ_calendar.fetch_upcoming_releases() every run, which
+    hits FRED's live API when FRED_API_KEY is set -- stub it the same way as the
+    macro/candidate-sync/gold-outlook fixtures above so these tests stay hermetic."""
+    monkeypatch.setattr("mytrader.monitor.econ_calendar.fetch_upcoming_releases", lambda: [])
+
+
+@pytest.fixture(autouse=True)
 def _no_real_gold_outlook_by_default(monkeypatch):
     """run_monitor() calls gold_outlook.build_outlook() every run, which does a
     real yfinance/FRED fetch + full historical backtest when not stubbed --
@@ -180,6 +188,7 @@ def test_render_report_lists_new_and_open_alerts():
         "macro_checks": [],
         "synced_candidates": [],
         "opportunities": [],
+        "holdings_report": [],
     }
     report = monitor.render_report(result)
     assert "VRTX" in report
@@ -190,11 +199,257 @@ def test_render_report_lists_new_and_open_alerts():
 
     empty = {
         "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
-        "macro_checks": [], "synced_candidates": [], "opportunities": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [], "holdings_report": [],
     }
     empty_report = monitor.render_report(empty)
     assert "No new material changes." in empty_report
     assert "None." in empty_report
+    assert "No holdings tracked." in empty_report
+
+
+def _holding_entry(**overrides) -> dict:
+    base = {
+        "ticker": "VRTX", "name": "Vertex Pharmaceuticals", "bucket": "1",
+        "qty": 1.0, "avg_price": 100.0,
+        "current_price": 110.0, "mkt_value": 110.0, "pnl": 10.0, "pnl_pct": 10.0,
+        "pct_of_portfolio": 50.0,
+        "mlp": False, "mlp_name": None,
+        "open_alerts": [],
+        "checks": [
+            {"name": "dividend", "verdict": "ok", "detail": "Dividend stable"},
+            {"name": "valuation", "verdict": "flag", "detail": "PE 40 above rich threshold"},
+        ],
+    }
+    base.update(overrides)
+    return base
+
+
+def test_render_report_lists_each_holding_with_its_checks():
+    """Added 2026-08-13, Shaun: "the monitor report doesn't list my Holdings, or
+    give a report for each holding" -- every tracked holding + all its check
+    results should render, not just alerts/opportunities."""
+    result = {
+        "checked_holdings": 1, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
+        "holdings_report": [_holding_entry()],
+    }
+    report = monitor.render_report(result)
+    assert "### Holdings (this run)" in report
+    assert "**VRTX** (Vertex Pharmaceuticals, Long-term hold" in report
+    assert "[ok] dividend: Dividend stable" in report
+    assert "[flag] valuation: PE 40 above rich threshold" in report
+
+
+def test_render_report_shows_current_price_and_pnl():
+    result = {
+        "checked_holdings": 1, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
+        "holdings_report": [_holding_entry(qty=40.0, avg_price=19.06, current_price=19.14,
+                                             mkt_value=765.6, pnl=3.2, pnl_pct=0.4, pct_of_portfolio=8.9)],
+    }
+    report = monitor.render_report(result)
+    assert "40.0 @ avg $19.06" in report
+    assert "now $19.14" in report
+    assert "+$3.20" in report
+    assert "(+0.4%)" in report
+    assert "8.9% of tracked portfolio" in report
+
+
+def test_render_report_shows_negative_pnl_and_missing_price():
+    result = {
+        "checked_holdings": 2, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
+        "holdings_report": [
+            _holding_entry(ticker="LULU", current_price=121.30, mkt_value=606.35, pnl=-36.70, pnl_pct=-5.7),
+            _holding_entry(ticker="OOO", current_price=None, mkt_value=None, pnl=None, pnl_pct=None,
+                            pct_of_portfolio=None),
+        ],
+    }
+    report = monitor.render_report(result)
+    assert "$-36.70" in report  # same sign convention as snapshot.py's own P&L formatting
+    assert "(-5.7%)" in report
+    assert "current price unavailable" in report
+
+
+def test_render_report_shows_bottom_line_summary():
+    flagged = _holding_entry(checks=[
+        {"name": "valuation", "verdict": "flag", "detail": "rich"},
+        {"name": "balance_sheet", "verdict": "flag", "detail": "weak"},
+    ])
+    clean = _holding_entry(ticker="V", checks=[{"name": "dividend", "verdict": "ok", "detail": "fine"}])
+    opportunity = _holding_entry(ticker="AG", checks=[
+        {"name": "opportunity", "verdict": "interesting", "detail": "dip"},
+    ])
+    result = {
+        "checked_holdings": 3, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
+        "holdings_report": [flagged, clean, opportunity],
+    }
+    report = monitor.render_report(result)
+    assert "Bottom line: 2 flag(s) active (valuation, balance_sheet) — worth a look." in report
+    assert "Bottom line: Nothing notable this run." in report
+    assert "Bottom line: 1 opportunity signal(s) (opportunity), no active flags." in report
+
+
+def test_render_report_shows_open_alerts_inline():
+    result = {
+        "checked_holdings": 1, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
+        "holdings_report": [_holding_entry(open_alerts=[
+            {"check_name": "balance_sheet", "message": "debt/equity too high", "created_at": "2026-08-07T00:00:00"},
+        ])],
+    }
+    report = monitor.render_report(result)
+    assert "OPEN ALERT (balance_sheet, since 2026-08-07): debt/equity too high" in report
+
+    no_alerts_result = {
+        "checked_holdings": 1, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
+        "holdings_report": [_holding_entry(open_alerts=[])],
+    }
+    assert "Open alerts: none" in monitor.render_report(no_alerts_result)
+
+
+def test_render_report_suppresses_not_an_etf_noise_line():
+    result = {
+        "checked_holdings": 1, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
+        "holdings_report": [_holding_entry(checks=[
+            {"name": "dividend", "verdict": "ok", "detail": "Dividend stable"},
+            {"name": "etf_mechanics", "verdict": "unknown", "detail": "Not an ETF"},
+        ])],
+    }
+    report = monitor.render_report(result)
+    assert "etf_mechanics" not in report
+    assert "Not an ETF" not in report
+
+
+def test_render_report_clarifies_opportunity_signal_on_existing_holding():
+    result = {
+        "checked_holdings": 1, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
+        "holdings_report": [_holding_entry(checks=[
+            {"name": "opportunity", "verdict": "interesting", "detail": "PE cheap"},
+        ])],
+    }
+    report = monitor.render_report(result)
+    assert "you already hold this — reads as an add-to-position signal, not a new-buy signal" in report
+
+
+def test_render_report_shows_mlp_skip_in_holdings_section():
+    result = {
+        "checked_holdings": 1, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [],
+        "holdings_report": [
+            {
+                "ticker": "EPD", "name": "Enterprise Products Partners", "bucket": "1",
+                "qty": 10.0, "avg_price": 30.0, "mlp": True,
+                "mlp_name": "Enterprise Products Partners L.P.", "checks": [],
+            },
+        ],
+    }
+    report = monitor.render_report(result)
+    assert "MLP — skipped: Enterprise Products Partners L.P." in report
+
+
+def test_render_report_lists_upcoming_releases_before_holdings():
+    result = {
+        "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [], "holdings_report": [],
+        "upcoming_releases": [
+            {"release_name": "Consumer Price Index", "date": "2026-08-14", "days_until": 1},
+            {"release_name": "Employment Situation", "date": "2026-08-13", "days_until": 0},
+        ],
+    }
+    report = monitor.render_report(result)
+    assert "### Upcoming Economic Releases (next 48h)" in report
+    assert "Consumer Price Index" in report
+    assert "tomorrow" in report
+    assert "Employment Situation" in report
+    assert "today" in report
+    assert report.index("### Upcoming Economic Releases") < report.index("### Holdings (this run)")
+
+    empty = {
+        "checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": [],
+        "macro_checks": [], "synced_candidates": [], "opportunities": [], "holdings_report": [],
+        "upcoming_releases": [],
+    }
+    empty_report = monitor.render_report(empty)
+    assert "No CPI/PPI/jobs releases scheduled in the next 48 hours." in empty_report
+
+
+def test_run_monitor_includes_upcoming_releases(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.monitor.econ_calendar.fetch_upcoming_releases",
+        lambda: [{"release_name": "Producer Price Index", "date": "2026-08-14", "days_until": 1}],
+    )
+    result = monitor.run_monitor(db_conn)
+    assert result["upcoming_releases"] == [
+        {"release_name": "Producer Price Index", "date": "2026-08-14", "days_until": 1}
+    ]
+
+
+def test_run_monitor_survives_econ_calendar_error(db_conn, monkeypatch):
+    def _boom():
+        raise RuntimeError("network down")
+
+    monkeypatch.setattr("mytrader.monitor.econ_calendar.fetch_upcoming_releases", _boom)
+    result = monitor.run_monitor(db_conn)  # must not raise
+    assert result["upcoming_releases"] == []
+
+
+def test_run_monitor_includes_holdings_report(db_conn, monkeypatch):
+    _seed_holding(db_conn)
+    monkeypatch.setattr(
+        "mytrader.monitor.engine.run_assessment",
+        lambda ticker, conn: _fake_result(
+            [CheckResult(name="dividend", verdict="ok", detail="Dividend stable")]
+        ),
+    )
+    result = monitor.run_monitor(db_conn)
+    assert len(result["holdings_report"]) == 1
+    h = result["holdings_report"][0]
+    assert h["ticker"] == "VRTX"
+    assert h["bucket"] == "1"
+    assert h["checks"] == [{"name": "dividend", "verdict": "ok", "detail": "Dividend stable"}]
+    # market_data.fetch_ticker_data is stubbed to None by the module-level
+    # _no_real_yfinance fixture -- current_price/mkt_value/pnl/pct all degrade to None.
+    assert h["current_price"] is None
+    assert h["pnl"] is None
+    assert h["pct_of_portfolio"] is None
+    assert h["open_alerts"] == []
+
+
+def test_run_monitor_computes_pnl_and_pct_of_portfolio(db_conn, monkeypatch):
+    _seed_holding(db_conn, ticker="VRTX", bucket="1")
+    monkeypatch.setattr(
+        "mytrader.monitor.engine.run_assessment",
+        lambda ticker, conn: _fake_result([]),
+    )
+    monkeypatch.setattr("mytrader.monitor.market_data.fetch_current_price", lambda ticker: 150.0)
+    result = monitor.run_monitor(db_conn)
+    h = result["holdings_report"][0]
+    # _seed_holding uses qty=1.0, avg_price=100.0 -- cost basis 100, mkt value 150.
+    assert h["current_price"] == 150.0
+    assert h["mkt_value"] == 150.0
+    assert h["pnl"] == 50.0
+    assert h["pnl_pct"] == 50.0
+    assert h["pct_of_portfolio"] == 100.0  # only holding tracked, so it's 100% of the total
+
+
+def test_run_monitor_attaches_open_alert_to_matching_holding(db_conn, monkeypatch):
+    _seed_holding(db_conn, ticker="VRTX", bucket="1")
+    monkeypatch.setattr(
+        "mytrader.monitor.engine.run_assessment",
+        lambda ticker, conn: _fake_result(
+            [CheckResult(name="balance_sheet", verdict="flag", detail="debt too high")]
+        ),
+    )
+    result = monitor.run_monitor(db_conn)
+    h = result["holdings_report"][0]
+    assert len(h["open_alerts"]) == 1
+    assert h["open_alerts"][0]["check_name"] == "balance_sheet"
+    assert h["open_alerts"][0]["message"] == "debt too high"
 
 
 def test_write_report_writes_to_configured_path(tmp_path, monkeypatch):

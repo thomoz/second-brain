@@ -142,6 +142,15 @@ def _no_real_cot_fetch(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _no_real_technical_levels_fetch(monkeypatch):
+    """engine.run_assessment() calls checks/technical_levels.check() (added
+    2026-08-13), which does its own yfinance history() fetch via
+    technical_levels._fetch_close_series() -- global/autouse for the same reason as
+    _no_real_crash_drawdown_fetch above."""
+    monkeypatch.setattr("mytrader.checks.technical_levels._fetch_close_series", lambda ticker: None)
+
+
+@pytest.fixture(autouse=True)
 def _no_real_ibkr_connection(monkeypatch):
     """ibkr_sync fetch functions connect to a real local IB Gateway socket via
     ib_async -- there is no CI/local Gateway running during pytest, so an unstubbed

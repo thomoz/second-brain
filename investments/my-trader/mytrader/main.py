@@ -19,6 +19,9 @@ def _open_conn():
 
 def _print_assessment(result: dict) -> None:
     print(f"\n=== {result['ticker']} ===")
+    if result.get("mlp"):
+        print(f"MLP — skipped: {result['mlp_name']} is structured as a Master Limited Partnership.")
+        return
     if result["excluded"]:
         print(f"EXCLUDED: {result['exclusion_reason']}")
         return

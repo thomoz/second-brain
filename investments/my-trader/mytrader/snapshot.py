@@ -21,13 +21,6 @@ from datetime import date
 from . import config, db, market_data
 
 
-def _current_price(ticker: str) -> float | None:
-    data = market_data.fetch_ticker_data(ticker)
-    if data is None:
-        return None
-    return data.info.get("regularMarketPrice") or data.info.get("currentPrice")
-
-
 def regenerate_holdings_md(conn: sqlite3.Connection) -> None:
     rows = db.get_all_holdings(conn)
     lines = [
@@ -41,7 +34,7 @@ def regenerate_holdings_md(conn: sqlite3.Connection) -> None:
     ]
     today = date.today().isoformat()
     for row in rows:
-        price = _current_price(row["ticker"])
+        price = market_data.fetch_current_price(row["ticker"])
         cost_basis = row["qty"] * row["avg_price"]
         if price is not None:
             mkt_value = row["qty"] * price

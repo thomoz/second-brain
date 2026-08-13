@@ -83,6 +83,18 @@ def fetch_ticker_data(ticker: str) -> TickerData | None:
     return data
 
 
+def fetch_current_price(ticker: str) -> float | None:
+    """Current price for a holding, via the same fetch_ticker_data() path used
+    everywhere else (cached within a cached_session() context). Moved here from
+    snapshot.py's private _current_price() (2026-08-13) so monitor.py's Holdings
+    report can show live price/P&L per holding without a second, independently
+    -drifting implementation."""
+    data = fetch_ticker_data(ticker)
+    if data is None:
+        return None
+    return data.info.get("regularMarketPrice") or data.info.get("currentPrice")
+
+
 def fetch_fx_change_pct(base: str, quote: str = "AUD", period: str = "3mo") -> float | None:
     import yfinance as yf
 

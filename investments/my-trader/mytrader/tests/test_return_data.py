@@ -125,6 +125,48 @@ def test_fetch_recent_return_pct_computes_cumulative_return(monkeypatch):
     assert return_data._fetch_cumulative_return_pct("VRTX", "3mo") == 15.0
 
 
+def test_fetch_cumulative_return_pct_drops_leading_nan_row(monkeypatch):
+    """Real bug caught 2026-08-13: V's 3mo yfinance history came back with a NaN
+    first-row close (a Yahoo data glitch), and float(NaN) != 0 so the old start==0
+    guard never caught it -- the check silently rendered "3mo +nan%" in
+    monitor-report.md. Fix: dropna() the Close series before indexing [0]/[-1]."""
+    import types
+
+    import pandas as pd
+
+    class _FakeTicker:
+        def __init__(self, symbol):
+            self.symbol = symbol
+
+        def history(self, period, auto_adjust):
+            return pd.DataFrame({"Close": [float("nan"), 100.0, 115.0]})
+
+    fake_yf = types.ModuleType("yfinance")
+    fake_yf.Ticker = _FakeTicker
+    monkeypatch.setitem(__import__("sys").modules, "yfinance", fake_yf)
+
+    assert return_data._fetch_cumulative_return_pct("V", "3mo") == 15.0
+
+
+def test_fetch_cumulative_return_pct_returns_none_when_fewer_than_two_valid_closes(monkeypatch):
+    import types
+
+    import pandas as pd
+
+    class _FakeTicker:
+        def __init__(self, symbol):
+            self.symbol = symbol
+
+        def history(self, period, auto_adjust):
+            return pd.DataFrame({"Close": [float("nan"), 100.0]})
+
+    fake_yf = types.ModuleType("yfinance")
+    fake_yf.Ticker = _FakeTicker
+    monkeypatch.setitem(__import__("sys").modules, "yfinance", fake_yf)
+
+    assert return_data._fetch_cumulative_return_pct("V", "3mo") is None
+
+
 def test_refresh_watchlist_return_data_updates_rows(db_conn, monkeypatch):
     db.upsert_watchlist_row(
         db_conn, ticker="VRTX", name="Vertex Pharmaceuticals", asset_type="stock", bucket="1",

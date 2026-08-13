@@ -28,6 +28,25 @@ CRASH_DISCOUNT_BUCKET = "4"  # Bucket 4, added 2026-07-25: great, durable compan
                               # actually bought, migrates to Bucket 1. Rendered as its
                               # own section in watchlist.md by snapshot.py.
 
+# Bucket code -> plain-English framing, added 2026-08-13 for monitor.py's Holdings
+# report (Shaun rated the report 35/100 for trader decision-usefulness -- a raw
+# bucket code like "1" doesn't tell you a -20% dip is expected/acceptable there,
+# vs the same move on a Bucket 2 tactical position). Buckets 3a/3b are gold's own
+# core/tactical split (tool-preplan.md's "Bucket 3" section); "unassigned" is a
+# plain watchlist-style holding with no strategic category yet (see
+# feedback_watchlist_bucket_terminology memory: say "on the Watchlist", not
+# "bucket unassigned", when talking to Shaun -- this label is for report text,
+# not conversational framing).
+BUCKET_LABELS = {
+    "1": "Long-term hold — never timed, dips are expected and not a reason to act alone",
+    "2": "Crash-trade tactical — bought for a crash trade, sold after recovery",
+    "3a": "Gold core — permanent ballast position, never timed",
+    "3b": "Gold tactical — timed sleeve, evaluate against your entry thesis",
+    CRASH_DISCOUNT_BUCKET: "Crash-discount buy — watching to add more at a crash-driven discount",
+    AI_POSTCRASH_BUCKET: "Post-Crash AI Watch — deliberately not buying at today's valuation",
+    "unassigned": "No strategic bucket assigned yet",
+}
+
 BERKSHIRE_HOLDINGS: frozenset[str] = frozenset({
     # Manually maintained — update periodically from Berkshire's 13F filings
     # (quiverquant.com/insiders/berkshire-hathaway or cnbc.com/berkshire-hathaway-portfolio).
