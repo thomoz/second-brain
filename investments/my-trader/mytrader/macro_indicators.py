@@ -33,6 +33,28 @@ multi-series report-ingestion-time snapshot, while this module needs individual
 point-in-time reads at two different dates (today + a lookback date, for the
 steepener comparison), a different access pattern. Duplicating two short strings was
 judged simpler than reshaping shared code across two independently-versioned projects.
+
+check_real_yields(), check_dollar_index(), check_gold_trend(), check_gold_silver_ratio(),
+and check_vix() (added 2026-08-07, taking this module from 9 to 14 checks) are Phase 1
+of the gold-tracking feature (see .agent/plans/gold-tracker-handoff.md) -- Shaun holds
+gold via PMGOLD and wanted daily visibility into the macro drivers that actually move
+it (real yields, USD strength) plus the gold price itself and a general risk-sentiment
+gauge, none of which the existing 9 checks (portfolio-wide but gold-agnostic) surface.
+check_gold_trend() is deliberately always "info", never "flag" -- a 200DMA cross is a
+contested signal (gold specifically has a documented small-sample history of behaving
+as a contrarian buy signal rather than the standard trend-following "bearish" read), so
+it's reported as neutral fact, same philosophy as checks/price_action.py.
+
+Plain-English interpretation clauses (added 2026-08-10, retrofitted across move_index,
+housing_affordability, consumer_sentiment, recession_signal, inflation_expectations,
+credit_spreads, the three CPI checks, dollar_index, gold_silver_ratio, and vix -- the
+checks that previously reported only a number + threshold with no indication of what it
+meant) -- Shaun flagged that a line like "10Y breakeven 2.3%" means nothing without
+context. These are explanatory only ("wider spreads mean credit markets are pricing
+higher default/recession risk"), never a trade recommendation -- monitor.py's "advisor
+notes only, no trade action" rule (SOUL.md) still applies. Convention going forward:
+any new check added here, or to any future portfolio-monitoring tool, should include
+this kind of one-clause interpretation from the start rather than a bare number.
 """
 
 from __future__ import annotations
@@ -41,7 +63,7 @@ from datetime import date, timedelta
 
 from scripts.macro import fred_observation_on, fred_value_on
 
-from . import abs_cpi, config, ons_cpi
+from . import abs_cpi, config, market_data, ons_cpi
 from .checks import CheckResult
 
 
@@ -67,13 +89,14 @@ def check_move_index() -> CheckResult:
     if value >= config.MOVE_INDEX_FLAG_LEVEL:
         return CheckResult(
             name="move_index", verdict="flag",
-            detail=f"MOVE index at {value:.1f}, at/above the "
-                   f"{config.MOVE_INDEX_FLAG_LEVEL:.0f} bond-market-stress threshold",
+            detail=f"MOVE index (bond market volatility) at {value:.1f}, at/above the "
+                   f"{config.MOVE_INDEX_FLAG_LEVEL:.0f} bond-market-stress threshold — elevated "
+                   f"readings often precede stress spreading into equities and credit",
             data={"value": value},
         )
     return CheckResult(
         name="move_index", verdict="ok",
-        detail=f"MOVE index at {value:.1f}, below the flag threshold",
+        detail=f"MOVE index (bond market volatility) at {value:.1f}, below the flag threshold",
         data={"value": value},
     )
 
@@ -104,12 +127,13 @@ def check_housing_affordability() -> CheckResult:
         return CheckResult(
             name="housing_affordability", verdict="flag",
             detail=f"Housing price-to-income ratio at {ratio}x ({as_of}), at/above the "
-                   f"{config.HOUSING_P2I_FLAG_RATIO}x stress threshold",
+                   f"{config.HOUSING_P2I_FLAG_RATIO}x stress threshold — higher ratios mean "
+                   f"housing is more stretched relative to incomes, a headwind for future price growth",
             data=data,
         )
     return CheckResult(
         name="housing_affordability", verdict="ok",
-        detail=f"Housing price-to-income ratio at {ratio}x ({as_of})",
+        detail=f"Housing price-to-income ratio at {ratio}x ({as_of}, higher = less affordable)",
         data=data,
     )
 
@@ -128,7 +152,8 @@ def check_consumer_sentiment() -> CheckResult:
         return CheckResult(
             name="consumer_sentiment", verdict="flag",
             detail=f"UMich consumer sentiment at {value:.1f} ({as_of}), at/below the "
-                   f"{config.CONSUMER_SENTIMENT_FLAG_LEVEL:.0f} stress threshold",
+                   f"{config.CONSUMER_SENTIMENT_FLAG_LEVEL:.0f} stress threshold — readings this "
+                   f"low have historically coincided with households pulling back on spending",
             data={"value": value, "as_of": obs_date.isoformat()},
         )
     return CheckResult(
@@ -177,7 +202,8 @@ def check_recession_signal() -> CheckResult:
 
     detail = (
         f"10Y-2Y spread {curve_now:+.2f}pp (as of {curve_date.isoformat()}), "
-        f"recession probability {recession_prob:.1f}% (as of {prob_date.isoformat()})"
+        f"recession probability {recession_prob:.1f}% (as of {prob_date.isoformat()}) — higher "
+        f"probability means the market is pricing more chance of a downturn within the next year"
     )
     if curve_3m10y_obs is not None:
         curve_3m10y, curve_3m10y_date = curve_3m10y_obs
@@ -223,7 +249,10 @@ def check_inflation_expectations() -> CheckResult:
 
     detail = (
         f"10Y breakeven {breakeven:.2f}% (as of {breakeven_date.isoformat()}), "
-        f"5Y5Y forward {forward:.2f}% (as of {forward_date.isoformat()})"
+        f"5Y5Y forward {forward:.2f}% (as of {forward_date.isoformat()}) — breakevens reflect "
+        f"market demand for inflation protection, not a literal CPI forecast; a wide gap between "
+        f"the 10Y breakeven and the 5Y5Y forward often signals a short-term supply shock rather "
+        f"than durable inflation"
     )
     verdict = "flag" if forward >= config.INFLATION_EXPECTATION_FLAG_PCT else "ok"
     return CheckResult(
@@ -256,12 +285,13 @@ def check_credit_spreads() -> CheckResult:
         return CheckResult(
             name="credit_spreads", verdict="flag",
             detail=f"ICE BofA US HY OAS at {value:.2f}pp ({as_of}), at/above the "
-                   f"{config.CREDIT_SPREAD_FLAG_PCT:.1f}pp stress threshold",
+                   f"{config.CREDIT_SPREAD_FLAG_PCT:.1f}pp stress threshold — wider spreads mean "
+                   f"credit markets are pricing higher default/recession risk",
             data={"value": value, "as_of": obs_date.isoformat()},
         )
     return CheckResult(
         name="credit_spreads", verdict="ok",
-        detail=f"ICE BofA US HY OAS at {value:.2f}pp ({as_of})",
+        detail=f"ICE BofA US HY OAS at {value:.2f}pp ({as_of}, tighter = less credit stress priced in)",
         data={"value": value, "as_of": obs_date.isoformat()},
     )
 
@@ -282,11 +312,14 @@ def check_australia_cpi() -> CheckResult:
     as_of = f"reference month {ref_month.isoformat()}"
     data = {"value": value, "reference_month": ref_month.isoformat()}
     if value < config.RBA_TARGET_BAND_LOW_PCT or value > config.RBA_TARGET_BAND_HIGH_PCT:
+        direction = ("running hotter than" if value > config.RBA_TARGET_BAND_HIGH_PCT
+                     else "running cooler than (disinflation risk)")
         return CheckResult(
             name="australia_cpi", verdict="flag",
             detail=f"Australia headline CPI {value:.1f}% YoY ({as_of}), outside the "
                    f"RBA's {config.RBA_TARGET_BAND_LOW_PCT:.0f}-"
-                   f"{config.RBA_TARGET_BAND_HIGH_PCT:.0f}% target band",
+                   f"{config.RBA_TARGET_BAND_HIGH_PCT:.0f}% target band — inflation {direction} "
+                   f"the RBA's comfort zone",
             data=data,
         )
     return CheckResult(
@@ -313,12 +346,14 @@ def check_us_cpi() -> CheckResult:
     as_of = f"as of {obs_date.isoformat()}"
     data = {"value": value, "as_of": obs_date.isoformat()}
     if value < config.US_CPI_TARGET_BAND_LOW_PCT or value > config.US_CPI_TARGET_BAND_HIGH_PCT:
+        direction = ("running hotter than" if value > config.US_CPI_TARGET_BAND_HIGH_PCT
+                     else "running cooler than (disinflation risk)")
         return CheckResult(
             name="us_cpi", verdict="flag",
             detail=f"US headline CPI {value:.2f}% YoY ({as_of}), outside the "
                    f"{config.US_CPI_TARGET_BAND_LOW_PCT:.0f}-"
                    f"{config.US_CPI_TARGET_BAND_HIGH_PCT:.0f}% tolerance band around "
-                   f"the Fed's 2% target",
+                   f"the Fed's 2% target — inflation {direction} the Fed's comfort zone",
             data=data,
         )
     return CheckResult(
@@ -344,18 +379,258 @@ def check_uk_cpi() -> CheckResult:
     as_of = f"reference month {ref_month.isoformat()}"
     data = {"value": value, "reference_month": ref_month.isoformat()}
     if value < config.UK_CPI_TARGET_BAND_LOW_PCT or value > config.UK_CPI_TARGET_BAND_HIGH_PCT:
+        direction = ("running hotter than" if value > config.UK_CPI_TARGET_BAND_HIGH_PCT
+                     else "running cooler than (disinflation risk)")
         return CheckResult(
             name="uk_cpi", verdict="flag",
             detail=f"UK headline CPI {value:.1f}% YoY ({as_of}), outside the "
                    f"{config.UK_CPI_TARGET_BAND_LOW_PCT:.0f}-"
                    f"{config.UK_CPI_TARGET_BAND_HIGH_PCT:.0f}% tolerance band around "
-                   f"the BoE's 2% target",
+                   f"the BoE's 2% target — inflation {direction} the BoE's comfort zone",
             data=data,
         )
     return CheckResult(
         name="uk_cpi", verdict="ok",
         detail=f"UK headline CPI {value:.1f}% YoY ({as_of}), within tolerance band",
         data=data,
+    )
+
+
+def _yfinance_history_close(ticker: str, lookback_days: int):
+    """Long-range close history for a single non-ASX (futures/index) ticker -- mirrors
+    crash_windows._fetch_close_series, simplified since futures/index tickers never
+    need the .AX equity fallback that function carries for ASX-listed stocks.
+    """
+    import yfinance as yf
+
+    try:
+        start = (date.today() - timedelta(days=lookback_days)).isoformat()
+        hist = yf.Ticker(ticker).history(start=start, auto_adjust=True)
+        if hist.empty:
+            return None
+        close = hist["Close"]
+        if getattr(close.index, "tz", None) is not None:
+            close.index = close.index.tz_localize(None)
+        return close
+    except Exception:
+        return None
+
+
+def check_real_yields() -> CheckResult:
+    """10Y TIPS real yield (FRED DFII10) -- the opportunity cost of holding
+    non-yielding gold, the single most important gold driver per the handoff
+    research. Two-sided band: negative real yields are a bullish catalyst for gold,
+    while elevated real yields historically pressure it hard -- opposite-direction
+    signals, so the detail text always states which side triggered rather than a
+    generic "outside band" message.
+    """
+    obs = fred_observation_on(config.FRED_REAL_YIELD_10Y_SERIES, date.today())
+    if obs is None:
+        return CheckResult(
+            name="real_yields", verdict="unknown",
+            detail="FRED 10Y TIPS real yield data unavailable "
+                   "(FRED_API_KEY not set, or series unavailable)",
+        )
+    value, obs_date = obs
+    as_of = f"as of {obs_date.isoformat()}"
+    data = {"value": value, "as_of": obs_date.isoformat(), "direction": None}
+    if value < config.REAL_YIELD_FLAG_NEGATIVE_PCT:
+        data["direction"] = "negative"
+        return CheckResult(
+            name="real_yields", verdict="flag",
+            detail=f"10Y real yield {value:+.2f}% ({as_of}), negative -- historically "
+                   f"a bullish catalyst for gold",
+            data=data,
+        )
+    if value > config.REAL_YIELD_FLAG_HIGH_PCT:
+        data["direction"] = "elevated"
+        return CheckResult(
+            name="real_yields", verdict="flag",
+            detail=f"10Y real yield {value:+.2f}% ({as_of}), above the "
+                   f"{config.REAL_YIELD_FLAG_HIGH_PCT:.1f}% threshold -- elevated real "
+                   f"yields historically pressure gold hard",
+            data=data,
+        )
+    return CheckResult(
+        name="real_yields", verdict="ok",
+        detail=f"10Y real yield {value:+.2f}% ({as_of}), within neutral range",
+        data=data,
+    )
+
+
+def check_dollar_index() -> CheckResult:
+    """Broad trade-weighted USD index (FRED DTWEXBGS) -- gold is priced in USD and
+    usually inverse-correlated with dollar strength. Flags on a large move over the
+    lookback window rather than an absolute level, since DXY has no natural high/low
+    the way a bounded ratio does -- same today/prior lookback shape as
+    check_recession_signal()'s steepener comparison.
+    """
+    today = date.today()
+    prior = today - timedelta(days=config.DXY_LOOKBACK_DAYS)
+    now_value = fred_value_on(config.FRED_USD_INDEX_SERIES, today)
+    prior_value = fred_value_on(config.FRED_USD_INDEX_SERIES, prior)
+    if now_value is None or prior_value is None:
+        return CheckResult(
+            name="dollar_index", verdict="unknown",
+            detail="FRED broad USD index data unavailable "
+                   "(FRED_API_KEY not set, or series unavailable)",
+        )
+    pct_change = round((now_value - prior_value) / prior_value * 100, 2)
+    data = {
+        "value": now_value, "pct_change": pct_change,
+        "lookback_days": config.DXY_LOOKBACK_DAYS, "direction": None,
+    }
+    if pct_change >= config.DXY_FLAG_MOVE_PCT:
+        data["direction"] = "rising"
+    elif pct_change <= -config.DXY_FLAG_MOVE_PCT:
+        data["direction"] = "falling"
+    detail = (
+        f"Broad USD index {now_value:.1f}, {pct_change:+.1f}% over the past "
+        f"{config.DXY_LOOKBACK_DAYS} days"
+    )
+    if data["direction"] == "rising":
+        detail += (" — a stronger dollar typically weighs on gold/commodities and tightens "
+                    "global dollar liquidity")
+    elif data["direction"] == "falling":
+        detail += (" — a weaker dollar typically supports gold/commodities and eases global "
+                    "dollar liquidity")
+    if abs(pct_change) >= config.DXY_FLAG_MOVE_PCT:
+        return CheckResult(name="dollar_index", verdict="flag", detail=detail, data=data)
+    return CheckResult(name="dollar_index", verdict="ok", detail=detail, data=data)
+
+
+def check_gold_trend() -> CheckResult:
+    """Gold futures price vs its 50/200-day moving averages, the most recent
+    price/200DMA cross event, and PMGOLD/AUD context for Shaun's actual holding.
+    Deliberately always "info" (or "unknown" on total fetch failure) -- see module
+    docstring for why a 200DMA cross is reported as neutral fact rather than judged.
+    PMGOLD price and AUD/USD context are enrichment only: the GC=F fetch is the
+    required leg, and either enrichment fetch is allowed to independently fail
+    without failing the whole check.
+    """
+    close = _yfinance_history_close(config.GOLD_FUTURES_TICKER, config.GOLD_MA_HISTORY_LOOKBACK_DAYS)
+    if close is None or len(close) < config.GOLD_MA_LONG_DAYS:
+        return CheckResult(
+            name="gold_trend", verdict="unknown",
+            detail=f"{config.GOLD_FUTURES_TICKER} price history unavailable via yfinance",
+        )
+
+    ma_short = close.rolling(config.GOLD_MA_SHORT_DAYS).mean()
+    ma_long = close.rolling(config.GOLD_MA_LONG_DAYS).mean()
+
+    price = float(close.iloc[-1])
+    short_dma = float(ma_short.iloc[-1])
+    long_dma = float(ma_long.iloc[-1])
+    pct_from_long = round((price - long_dma) / long_dma * 100, 1)
+
+    # Sign-flip cross detection: dropna() first so the leading NaN block (before
+    # GOLD_MA_LONG_DAYS rows of history exist) doesn't corrupt the comparison.
+    diff = (close - ma_long).dropna()
+    sign = diff.gt(0).astype(int) - diff.lt(0).astype(int)
+    sign_changed = sign.diff().fillna(0) != 0  # first row's diff() is NaN -> not a change
+    sign_changes = sign[sign_changed]
+
+    if sign_changes.empty:
+        cross_note = f"no cross in the past {config.GOLD_MA_HISTORY_LOOKBACK_DAYS} days of history"
+        cross_date_str = None
+        cross_direction = None
+    else:
+        cross_date = sign_changes.index[-1]
+        cross_direction = "crossed above" if sign_changes.iloc[-1] > 0 else "crossed below"
+        cross_price = float(close.loc[cross_date])
+        cross_date_str = cross_date.date().isoformat()
+        cross_note = (
+            f"{cross_direction} 200DMA on {cross_date_str} at ${cross_price:,.0f}, "
+            f"no cross back since"
+        )
+
+    direction = None
+    if cross_direction == "crossed above":
+        direction = "crossed_above"
+    elif cross_direction == "crossed below":
+        direction = "crossed_below"
+
+    pmgold_price = _yfinance_latest_close(config.PMGOLD_YFINANCE_TICKER)
+    fx_change = market_data.fetch_fx_change_pct("USD")
+
+    detail = (
+        f"{config.GOLD_FUTURES_TICKER} ${price:,.0f} (50DMA ${short_dma:,.0f}, "
+        f"200DMA ${long_dma:,.0f}, {pct_from_long:+.1f}% from 200DMA); {cross_note}; "
+        f"PMGOLD {'$' + format(pmgold_price, ',.2f') + ' AUD' if pmgold_price is not None else 'price unavailable'}; "
+        f"AUD/USD 3mo move {f'{fx_change:+.1f}%' if fx_change is not None else 'unavailable'}"
+    )
+
+    return CheckResult(
+        name="gold_trend", verdict="info", detail=detail,
+        data={
+            "price": price, "ma_short": short_dma, "ma_long": long_dma,
+            "pct_from_200dma": pct_from_long,
+            "cross_date": cross_date_str, "cross_direction": cross_direction,
+            "direction": direction,
+            "pmgold_price": pmgold_price, "aud_usd_3mo_change_pct": fx_change,
+        },
+    )
+
+
+def check_gold_silver_ratio() -> CheckResult:
+    """Gold/silver price ratio (GC=F / SI=F) -- flagged at commonly-cited
+    historical-extreme high/low bands.
+    """
+    gold = _yfinance_latest_close(config.GOLD_FUTURES_TICKER)
+    silver = _yfinance_latest_close(config.SILVER_FUTURES_TICKER)
+    if gold is None or silver is None or silver == 0:
+        return CheckResult(
+            name="gold_silver_ratio", verdict="unknown",
+            detail=f"{config.GOLD_FUTURES_TICKER}/{config.SILVER_FUTURES_TICKER} "
+                   f"price data unavailable via yfinance",
+        )
+    ratio = round(gold / silver, 1)
+    data: dict[str, float | str | None] = {"gold": gold, "silver": silver, "ratio": ratio, "direction": None}
+    if ratio >= config.GOLD_SILVER_RATIO_FLAG_HIGH:
+        data["direction"] = "high"
+        return CheckResult(
+            name="gold_silver_ratio", verdict="flag",
+            detail=f"Gold/silver ratio at {ratio}, at/above the "
+                   f"{config.GOLD_SILVER_RATIO_FLAG_HIGH:.0f} historical-extreme-high level — "
+                   f"gold is expensive relative to silver, a level some see as a mean-reversion "
+                   f"setup (contested signal)",
+            data=data,
+        )
+    if ratio <= config.GOLD_SILVER_RATIO_FLAG_LOW:
+        data["direction"] = "low"
+        return CheckResult(
+            name="gold_silver_ratio", verdict="flag",
+            detail=f"Gold/silver ratio at {ratio}, at/below the "
+                   f"{config.GOLD_SILVER_RATIO_FLAG_LOW:.0f} historical-extreme-low level — "
+                   f"gold is cheap relative to silver by this same contested measure",
+            data=data,
+        )
+    return CheckResult(
+        name="gold_silver_ratio", verdict="ok",
+        detail=f"Gold/silver ratio at {ratio}",
+        data=data,
+    )
+
+
+def check_vix() -> CheckResult:
+    value = _yfinance_latest_close(config.VIX_TICKER)
+    if value is None:
+        return CheckResult(
+            name="vix", verdict="unknown",
+            detail=f"{config.VIX_TICKER} data unavailable via yfinance",
+        )
+    if value >= config.VIX_FLAG_LEVEL:
+        return CheckResult(
+            name="vix", verdict="flag",
+            detail=f"VIX at {value:.1f}, at/above the "
+                   f"{config.VIX_FLAG_LEVEL:.0f} crisis-adjacent threshold — options markets are "
+                   f"pricing sharply higher near-term volatility",
+            data={"value": value, "direction": "elevated"},
+        )
+    return CheckResult(
+        name="vix", verdict="ok",
+        detail=f"VIX at {value:.1f}, below the flag threshold",
+        data={"value": value, "direction": None},
     )
 
 
@@ -370,4 +645,9 @@ def run_all() -> list[CheckResult]:
         check_australia_cpi(),
         check_us_cpi(),
         check_uk_cpi(),
+        check_real_yields(),
+        check_dollar_index(),
+        check_gold_trend(),
+        check_gold_silver_ratio(),
+        check_vix(),
     ]

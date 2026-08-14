@@ -122,6 +122,45 @@ def test_thesis_includes_macro_snapshot_when_provided():
     assert "credit_spreads [ok] HY OAS 3.2%" in thesis
 
 
+def test_thesis_excludes_gold_specific_macro_checks_for_unrelated_ticker():
+    """Regression test for the 2026-08-08 GMG.V bug: gold_trend/real_yields/etc.
+    detail text mentions "gold" explicitly and repeatedly (e.g. "elevated real
+    yields historically pressure gold hard") -- confirmed live to make the
+    grading LLM describe an unrelated ticker's macro backdrop as being about
+    gold. These 5 checks must never reach a non-gold ticker's thesis."""
+    other_checks = [CheckResult(name="valuation", verdict="ok", detail="fine", data={"pe": 17.5})]
+    macro_rows = [
+        {"name": "real_yields", "verdict": "flag",
+         "detail": "10Y real yield +2.43%, elevated real yields historically pressure gold hard",
+         "computed_at": "2026-08-08T00:00:00+00:00"},
+        {"name": "dollar_index", "verdict": "ok", "detail": "Broad USD index 119.7",
+         "computed_at": "2026-08-08T00:00:00+00:00"},
+        {"name": "gold_trend", "verdict": "info", "detail": "GC=F $4,401...",
+         "computed_at": "2026-08-08T00:00:00+00:00"},
+        {"name": "gold_silver_ratio", "verdict": "ok", "detail": "Gold/silver ratio at 69.0",
+         "computed_at": "2026-08-08T00:00:00+00:00"},
+        {"name": "vix", "verdict": "ok", "detail": "VIX at 14.9",
+         "computed_at": "2026-08-08T00:00:00+00:00"},
+        {"name": "move_index", "verdict": "ok", "detail": "MOVE index at 72.0",
+         "computed_at": "2026-08-08T00:00:00+00:00"},
+    ]
+    thesis = principles_fit._build_thesis("GMG.V", other_checks, None, None, None, macro_rows=macro_rows)
+    assert "gold" not in thesis.lower()
+    assert "real_yields" not in thesis
+    assert "dollar_index" not in thesis
+    assert "vix" not in thesis
+    assert "move_index [ok] MOVE index at 72.0" in thesis  # general checks still included
+
+
+def test_thesis_omits_macro_section_when_only_gold_checks_present():
+    other_checks = [CheckResult(name="valuation", verdict="ok", detail="fine", data={"pe": 17.5})]
+    macro_rows = [
+        {"name": "vix", "verdict": "ok", "detail": "VIX at 14.9", "computed_at": "2026-08-08T00:00:00+00:00"},
+    ]
+    thesis = principles_fit._build_thesis("GMG.V", other_checks, None, None, None, macro_rows=macro_rows)
+    assert "Macro regime" not in thesis
+
+
 def test_check_reads_macro_snapshot_from_db_conn(db_conn, monkeypatch, tmp_path):
     from mytrader import db as mytrader_db
 
@@ -145,6 +184,38 @@ def test_check_reads_macro_snapshot_from_db_conn(db_conn, monkeypatch, tmp_path)
     assert "Macro regime" in captured_thesis["value"]
     assert "move_index [ok] MOVE at 90.0" in captured_thesis["value"]
     assert result.data["macro_snapshot_as_of"] is not None
+
+
+def test_check_end_to_end_excludes_gold_checks_from_real_db_snapshot(db_conn, monkeypatch, tmp_path):
+    """End-to-end regression test for the GMG.V bug, through check() (not just
+    _build_thesis directly) against a real db_conn snapshot shaped exactly like
+    Monitor's run_all() output -- 9 general + 5 gold-specific checks together."""
+    from mytrader import db as mytrader_db
+
+    (tmp_path / "buffett.md").write_text("Buffett criteria", encoding="utf-8")
+    monkeypatch.setattr("scripts.config.PRINCIPLES_DIR", tmp_path)
+
+    captured_thesis = {}
+
+    def _fake_score(thesis, principle_name, file_content):
+        captured_thesis["value"] = thesis
+        return (80, "great fit")
+
+    monkeypatch.setattr("scripts.score.score_thesis_against_principle", _fake_score)
+    mytrader_db.upsert_macro_snapshot(db_conn, [
+        CheckResult(name="move_index", verdict="ok", detail="MOVE at 90.0"),
+        CheckResult(
+            name="real_yields", verdict="flag",
+            detail="10Y real yield +2.43%, elevated real yields historically pressure gold hard",
+        ),
+        CheckResult(name="gold_trend", verdict="info", detail="GC=F $4,401 (50DMA $4,170...)"),
+    ])
+
+    data = TickerData(ticker="GMG.V", info={}, dividends=None)
+    principles_fit.check("GMG.V", data, [_OK], None, None, None, db_conn)
+
+    assert "gold" not in captured_thesis["value"].lower()
+    assert "move_index [ok] MOVE at 90.0" in captured_thesis["value"]
 
 
 def test_check_macro_snapshot_as_of_none_without_conn(monkeypatch, tmp_path):

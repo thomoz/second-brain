@@ -19,6 +19,9 @@ def _open_conn():
 
 def _print_assessment(result: dict) -> None:
     print(f"\n=== {result['ticker']} ===")
+    if result.get("mlp"):
+        print(f"MLP — skipped: {result['mlp_name']} is structured as a Master Limited Partnership.")
+        return
     if result["excluded"]:
         print(f"EXCLUDED: {result['exclusion_reason']}")
         return
@@ -224,6 +227,137 @@ def cmd_dismiss_candidate(args) -> None:
     print(f"Dismissed {count} pending candidate(s) for {ticker}.")
 
 
+def cmd_sync_ibkr(args) -> None:
+    from .db import get_all_holdings, get_holding_row, insert_ibkr_pending_position, upsert_holding
+    from .ibkr_sync import compute_diff, fetch_account_summary, fetch_positions
+    from .snapshot import regenerate_all
+
+    try:
+        positions = fetch_positions()
+    except Exception as e:
+        print(
+            f"Could not connect to IB Gateway: {e}\n"
+            "Make sure IB Gateway is open and logged in — see "
+            "investments/my-trader/ibkr-setup-guide.md for setup and troubleshooting."
+        )
+        return
+
+    summary = fetch_account_summary()
+    if summary is not None:
+        cash_part = (
+            f", TotalCashValue {summary['total_cash']} {summary['currency']}"
+            if summary["total_cash"] is not None else ""
+        )
+        print(f"Account summary: NetLiquidation {summary['net_liquidation']} {summary['currency']}{cash_part}")
+    else:
+        print("Account summary: unavailable.")
+
+    print(f"\nFound {len(positions)} IBKR position(s).")
+
+    conn = _open_conn()
+    holdings = get_all_holdings(conn)
+    diff = compute_diff(positions, holdings)
+
+    print(f"\nMatched, no change ({len(diff['matched_no_change'])}):")
+    for row in diff["matched_no_change"]:
+        print(f"  {row['ticker']}: qty {row['holdings_qty']}, avg_price {row['holdings_avg_price']}")
+
+    print(f"\nMatched, mismatch ({len(diff['matched_with_mismatch'])}):")
+    for row in diff["matched_with_mismatch"]:
+        print(
+            f"  {row['ticker']} (bucket {row['bucket']}): tracked qty={row['holdings_qty']} "
+            f"avg_price={row['holdings_avg_price']} -> IBKR qty={row['ibkr_qty']} "
+            f"avg_price={row['ibkr_avg_price']}"
+        )
+
+    print(f"\nNew to IBKR, not tracked ({len(diff['new_to_ibkr'])}):")
+    for row in diff["new_to_ibkr"]:
+        print(f"  {row['ticker']}: qty {row['qty']}, avg_price {row['avg_price']}")
+
+    print(f"\nTracked but missing from IBKR ({len(diff['missing_from_ibkr'])}):")
+    for row in diff["missing_from_ibkr"]:
+        print(
+            f"  {row['ticker']} (bucket {row['bucket']}): qty {row['qty']} — sold outside "
+            "this tool, or run holding-sell if confirmed"
+        )
+
+    if not args.apply:
+        conn.close()
+        print("\nDry run only — no writes made. Re-run with --apply to commit corrections and stage new positions.")
+        return
+
+    corrected = 0
+    for row in diff["matched_with_mismatch"]:
+        existing = get_holding_row(conn, row["ticker"], row["bucket"])
+        upsert_holding(
+            conn, ticker=row["ticker"], name=existing["name"], asset_type=existing["asset_type"],
+            bucket=row["bucket"], qty=row["ibkr_qty"], avg_price=row["ibkr_avg_price"],
+            currency=existing["currency"], last_expense_ratio=existing["last_expense_ratio"],
+        )
+        corrected += 1
+
+    staged = 0
+    for row in diff["new_to_ibkr"]:
+        insert_ibkr_pending_position(
+            conn, ticker=row["ticker"], name=row["name"], qty=row["qty"], avg_price=row["avg_price"],
+            currency=row["currency"], asset_type=row["asset_type"], exchange_raw=row["exchange_raw"],
+        )
+        staged += 1
+
+    if corrected:
+        regenerate_all(conn)
+    conn.close()
+    print(
+        f"\nApplied: {corrected} correction(s), {staged} new position(s) staged, "
+        f"{len(diff['missing_from_ibkr'])} missing (reported only)."
+    )
+
+
+def cmd_ibkr_assign_bucket(args) -> None:
+    from .db import delete_ibkr_pending_position, get_ibkr_pending_position, upsert_holding
+    from .snapshot import regenerate_all
+    from .tickers import normalize
+
+    conn = _open_conn()
+    ticker = normalize(args.ticker)
+    pending = get_ibkr_pending_position(conn, ticker)
+    if pending is None:
+        conn.close()
+        print(f"No staged IBKR position found for {ticker}.")
+        return
+
+    upsert_holding(
+        conn, ticker=ticker, name=pending["name"], asset_type=args.asset_type or pending["asset_type"],
+        bucket=args.bucket, qty=pending["qty"], avg_price=pending["avg_price"], currency=pending["currency"],
+    )
+    delete_ibkr_pending_position(conn, ticker)
+    regenerate_all(conn)
+    conn.close()
+    print(f"Assigned {ticker} to bucket {args.bucket} and added to holdings.")
+
+
+def cmd_ibkr_dismiss_position(args) -> None:
+    from .db import delete_ibkr_pending_position
+    from .tickers import normalize
+
+    conn = _open_conn()
+    ticker = normalize(args.ticker)
+    count = delete_ibkr_pending_position(conn, ticker)
+    conn.close()
+    print(f"Dismissed {count} staged IBKR position(s) for {ticker}.")
+
+
+def cmd_gold_backtest(args) -> None:
+    from .db import upsert_gold_backtest_results
+    from .gold_backtest import print_stats, run_backtest
+
+    conn = _open_conn()
+    results = run_backtest()
+    upsert_gold_backtest_results(conn, results)
+    conn.close()
+    print_stats(results)
+
+
 def cmd_monitor(args) -> None:
     from .monitor import maybe_notify, run_monitor, write_report
 
@@ -288,6 +422,10 @@ def main() -> None:
         "sync-candidates",
         help="Pull new Briefs Finance recommendations into synced-candidates-pending-review.md",
     )
+    subparsers.add_parser(
+        "gold-backtest",
+        help="Force a fresh backtest of gold's macro signals + technical indicators (slow, on-demand)",
+    )
 
     p_promote = subparsers.add_parser(
         "promote-candidate", help="Move a pending synced candidate into the real watchlist",
@@ -302,6 +440,29 @@ def main() -> None:
     )
     p_dismiss.add_argument("--ticker", required=True)
 
+    p_sync_ibkr = subparsers.add_parser(
+        "sync-ibkr",
+        help="Connect to a local IB Gateway and diff real positions against tracked holdings "
+             "(read-only, on-demand, local-only — see ibkr-setup-guide.md)",
+    )
+    p_sync_ibkr.add_argument(
+        "--apply", action="store_true",
+        help="Commit qty/avg-price corrections for matched tickers and stage new IBKR positions "
+             "(default: dry run, prints the diff only)",
+    )
+
+    p_ibkr_assign = subparsers.add_parser(
+        "ibkr-assign-bucket", help="Assign a bucket to a staged new IBKR position and add it to holdings",
+    )
+    p_ibkr_assign.add_argument("--ticker", required=True)
+    p_ibkr_assign.add_argument("--bucket", required=True)
+    p_ibkr_assign.add_argument("--asset-type", dest="asset_type", default=None)
+
+    p_ibkr_dismiss = subparsers.add_parser(
+        "ibkr-dismiss-position", help="Discard a staged IBKR position without adding it to holdings",
+    )
+    p_ibkr_dismiss.add_argument("--ticker", required=True)
+
     args = parser.parse_args()
 
     dispatch = {
@@ -315,9 +476,13 @@ def main() -> None:
         "seed": cmd_seed,
         "monitor": cmd_monitor,
         "sync-candidates": cmd_sync_candidates,
+        "gold-backtest": cmd_gold_backtest,
         "promote-candidate": cmd_promote_candidate,
         "dismiss-candidate": cmd_dismiss_candidate,
         "refresh-watchlist-data": cmd_refresh_watchlist_data,
+        "sync-ibkr": cmd_sync_ibkr,
+        "ibkr-assign-bucket": cmd_ibkr_assign_bucket,
+        "ibkr-dismiss-position": cmd_ibkr_dismiss_position,
     }
 
     if args.command in dispatch:

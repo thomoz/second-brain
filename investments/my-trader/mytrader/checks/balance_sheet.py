@@ -20,11 +20,25 @@ between the contracted and prevailing market rate for the rest of the term, the 
 basic mechanic as a bond default claim. Yahoo's raw debtToEquity below is already the
 more conservative, defensible number; a lease-excluded variant would understate real
 risk, not correct a bug.
+
+Extended 2026-08-06 (market_data.fetch_balance_sheet_financials): the ROE fallback
+above only ever checked .info.get("returnOnEquity"), which is ALSO None for some
+tickers even though the raw balance_sheet/financials statements have real numbers --
+confirmed against GROW.L (Molten Ventures, a UK investment trust): Total Debt,
+Stockholders Equity, and Net Income all present via yfinance's statement endpoints
+despite all three .info ratio fields being empty. Before giving up to "unknown", now
+tries computing ROE (and, when available, debt/equity) from those statements. Kept
+to the same ROE-only OUTPUT shape as the original bank fallback rather than also
+introducing a separate debt/equity-only path -- deliberately not scope-creeping into
+a third fallback shape. Detail text flags when a figure was derived this way, with a
+caveat: for a fund/investment-trust entity, "Net Income" includes unrealized
+fair-value gains/losses on the portfolio, so a single year's ROE is lumpier and less
+comparable to an operating company's than the same number would be for, say, a bank.
 """
 
 from __future__ import annotations
 
-from .. import config
+from .. import config, market_data
 from . import CheckResult
 from .scale import format_scale
 
@@ -38,6 +52,12 @@ def check(data) -> CheckResult:
 
     if debt_to_equity is None and current_ratio is None:
         roe = data.info.get("returnOnEquity")
+        derived = False
+        if roe is None:
+            computed = market_data.fetch_balance_sheet_financials(data.ticker)
+            if computed is not None and computed.get("returnOnEquity") is not None:
+                roe = computed["returnOnEquity"]
+                derived = True
         if roe is None:
             return CheckResult(name="balance_sheet", verdict="unknown", detail="No balance sheet data available")
         roe_pct = roe * 100
@@ -45,18 +65,23 @@ def check(data) -> CheckResult:
         # the fallback flag floor (below) and Buffett/Smith's own stated 15%+ "good"
         # bar (opportunity.py) -- 15%+ clamps to 10/10, not a new number.
         roe_scale = format_scale(roe_pct, config.OPPORTUNITY_ROE_MIN_PCT, config.ROE_FLAG_THRESHOLD_PCT)
+        source_note = (
+            " (derived from balance sheet/income statement -- unrealized fair-value "
+            "gains/losses can make a single year's figure lumpy for a fund/trust)"
+            if derived else ""
+        )
         if roe_pct <= config.ROE_FLAG_THRESHOLD_PCT:
             return CheckResult(
                 name="balance_sheet", verdict="flag",
                 detail=f"debt/equity and current ratio unavailable (common for financials); "
                        f"return on equity {roe_pct:.1f}% <= {config.ROE_FLAG_THRESHOLD_PCT}% fallback threshold "
-                       f"({roe_scale})",
+                       f"({roe_scale}){source_note}",
                 data={"return_on_equity_pct": round(roe_pct, 2)},
             )
         return CheckResult(
             name="balance_sheet", verdict="ok",
             detail=f"debt/equity and current ratio unavailable (common for financials); "
-                   f"return on equity {roe_pct:.1f}% used as fallback health proxy ({roe_scale})",
+                   f"return on equity {roe_pct:.1f}% used as fallback health proxy ({roe_scale}){source_note}",
             data={"return_on_equity_pct": round(roe_pct, 2)},
         )
 

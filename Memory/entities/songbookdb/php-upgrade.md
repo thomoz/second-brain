@@ -181,7 +181,38 @@ Loose integer/string comparisons throughout the codebase may silently change beh
 
 ---
 
-### `mobilePWA/` — audit COMPLETE 2026-07-08
+### `mobilePWA/` — audit COMPLETE 2026-07-08, gaps found and closed 2026-08-08
+
+**Gap found 2026-08-08:** the "complete" audit missed `accountTest.php`, `checkIfDJHasThisSong.php`, `checkIfDJHasThisSongFixMarch2024.php`, `checkSessionAndAntiXSS.php`, `comDJDataPrepend.php` (alphabetically between `appleSignIn.php` and `contact.php`), plus `deleteKioskVenueCookie.php`, `djSearch.php`, `favNoteAdd.php`, `getDJ.php`, `getKioskVenues.php`, `gigGuide.php`, `poll.php` (never mentioned in any fix/clean/skip list for this folder — real gaps, not the documented `convertToFullAccount*`/`getMessages.php`/`loginFacebookV5chat.php` skips).
+
+Found via production `error_log` (a real copy now sits locally at `mobilePWA/error_log`, 555k lines back to Jul 2024 — use it directly instead of asking Shaun to paste log lines).
+
+| File | Issue | Fix | Commit |
+|---|---|---|---|
+| `checkIfDJHasThisSong.php` | Unguarded `fetch_assoc()` on the `comDJDataPrepend` join — undefined `showVersions`/`user_email` keys if DJ/rig doesn't match | `if (!$arr['djData']) send('4084','e');` guard | `a66929c` — uploaded + tested working on production 2026-08-07 |
+| `checkIfDJHasThisSongFixMarch2024.php` | N/A | Confirmed dead code — the `public_html/pwa/checkIfDJHasThisSongFixMarch2024.php` router stub actually requires `mobilePWA/checkIfDJHasThisSong.php`, not this file. Out of scope. | — |
+| `checkSessionAndAntiXSS.php` | — | Audited, clean (no direct array/session access) | — |
+| `comDJDataPrepend.php` | — | Audited, clean (static SQL string builder) | — |
+| `getDJ.php` | Unguarded `fetch_assoc()` on the same `comDJDataPrepend` join (line 57) — cascades into `$_SESSION['djEmail_S']` (line 60) then into `accountTest.php` (`subscribed`/`betaTester`/`subsType`). Confirmed via `error_log` tally: all four fire exactly 55,591 times each — one repeating cascade, not four separate bugs. Root cause: client holds a cached `djID`/`rigID` whose `user_tokens` row has since expired/regenerated (an `INNER JOIN`, so any missing token row returns zero rows) — routine, not corruption. Second, separate bug at line 99: `$venues[0]['vName']` when a DJ has zero venues (19,874 occurrences) | `?? ''` guards on both reads. Confirmed no behavior change — the existing `if (!isset($x['djData']['user_id'])) unset($x['djData']);` safety net already discards `djData` in this case regardless of these values, so client falls back to homescreen either way | `4f49778` |
+| `accountTest.php` | Reads `$x['djData']['subscribed']`/`betaTester`/`subsType'` — undefined whenever `getDJ.php`'s djData lookup returns nothing (see above) | `?? 0` guards on all three | `4f49778` |
+
+**Not yet fixed (found via `error_log` tally, ranked by frequency — bigger than anything above):**
+| Count | File:Line | Issue |
+|---|---|---|
+| 92,215 | `search.php:272` | Undefined index: `_actualVenueID` |
+| 60,226 | `reqAddLogoutFix.php:344` | Undefined index: `venueID_S` (different line than the already-fixed line 163) |
+| 30,284 | `login.php:1284` | Undefined variable: `row` |
+| 27,366 / 27,345 | `login.php:1135` / `1251` | Undefined index: `townCity` |
+| 12,031 | `getToken.php:146` | Undefined index: `townCity` |
+| 3,319 | `setKioskVenue.php:27` | Undefined index: `rig` |
+| ~2,400 each | `login.php` (2 lines), `comUserObjectReload.php:18` | null array offset |
+| 2,301 | `gigGuide.php:38` | Undefined variable: `username` |
+| 2,190 ×2 | `searchRequests.php:61` | null array offset |
+| (longer tail below 2,000 each — `setUpGuestAccount.php`, `noSongHit.php`, `appleSignIn.php`, `loginFacebookV5.php`, `setVenue.php`, etc.) | | |
+
+Remaining unaudited gap files: `deleteKioskVenueCookie.php` (audited — has a harmless self-referencing `require_once` copy-paste bug, not a PHP 8 issue, not yet fixed), `djSearch.php`, `favNoteAdd.php`, `getKioskVenues.php`, `gigGuide.php`, `poll.php`.
+
+---
 
 ~83 PHP files total. Full scan complete. Working through fixes in order.
 

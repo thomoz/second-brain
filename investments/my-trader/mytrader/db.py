@@ -79,6 +79,17 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 source          TEXT NOT NULL DEFAULT 'briefs_finance_ingest',
                 synced_at       TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS ibkr_pending_positions (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticker          TEXT NOT NULL UNIQUE,
+                name            TEXT,
+                asset_type      TEXT NOT NULL,
+                qty             REAL NOT NULL,
+                avg_price       REAL NOT NULL,
+                currency        TEXT,
+                exchange_raw    TEXT,
+                synced_at       TEXT NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS macro_snapshot_cache (
                 name            TEXT PRIMARY KEY,
                 verdict         TEXT NOT NULL,
@@ -110,6 +121,36 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 verdict             TEXT NOT NULL,
                 detail              TEXT NOT NULL,
                 fetched_at          TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS holdings_price_history (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticker          TEXT NOT NULL,
+                bucket          TEXT NOT NULL,
+                date            TEXT NOT NULL,
+                price           REAL NOT NULL,
+                qty             REAL NOT NULL,
+                mkt_value       REAL NOT NULL,
+                recorded_at     TEXT NOT NULL,
+                UNIQUE(ticker, bucket, date)
+            );
+            CREATE TABLE IF NOT EXISTS gold_backtest_results (
+                id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+                signal                  TEXT NOT NULL,
+                direction               TEXT NOT NULL,
+                horizon_unit            TEXT NOT NULL,  -- 'day' or 'month'
+                horizon_value           INTEGER NOT NULL,
+                n                       INTEGER NOT NULL,
+                mean_return_pct         REAL,
+                median_return_pct       REAL,
+                win_rate_pct            REAL,
+                best_return_pct         REAL,
+                worst_return_pct        REAL,
+                baseline_n              INTEGER NOT NULL,
+                baseline_mean_pct       REAL,
+                baseline_median_pct     REAL,
+                baseline_win_rate_pct   REAL,
+                computed_at             TEXT NOT NULL,
+                UNIQUE(signal, direction, horizon_unit, horizon_value)
             );
         """)
     _ensure_watchlist_return_columns(conn)
@@ -244,6 +285,38 @@ def insert_pending_candidate(
 def delete_pending_candidate(conn: sqlite3.Connection, ticker: str) -> int:
     with conn:
         cur = conn.execute("DELETE FROM pending_candidates WHERE ticker = ?", (ticker,))
+        return cur.rowcount
+
+
+def get_ibkr_pending_position(conn: sqlite3.Connection, ticker: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT * FROM ibkr_pending_positions WHERE ticker = ?", (ticker,)
+    ).fetchone()
+
+
+def get_all_ibkr_pending_positions(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute("SELECT * FROM ibkr_pending_positions ORDER BY ticker").fetchall()
+
+
+def insert_ibkr_pending_position(
+    conn: sqlite3.Connection, *, ticker: str, name: str | None, qty: float,
+    avg_price: float, currency: str | None, asset_type: str, exchange_raw: str | None,
+) -> None:
+    """INSERT OR REPLACE (not OR IGNORE, unlike pending_candidates) -- a re-run of
+    sync-ibkr should refresh qty/avg_price if Shaun trades again before assigning a
+    bucket, not silently keep stale staged values."""
+    with conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO ibkr_pending_positions
+               (ticker, name, asset_type, qty, avg_price, currency, exchange_raw, synced_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (ticker, name, asset_type, qty, avg_price, currency, exchange_raw, _now()),
+        )
+
+
+def delete_ibkr_pending_position(conn: sqlite3.Connection, ticker: str) -> int:
+    with conn:
+        cur = conn.execute("DELETE FROM ibkr_pending_positions WHERE ticker = ?", (ticker,))
         return cur.rowcount
 
 
@@ -422,6 +495,69 @@ def upsert_news_events_cache(
                VALUES (?, ?, ?, ?)""",
             (ticker, verdict, detail, _now()),
         )
+
+
+def upsert_gold_backtest_results(conn: sqlite3.Connection, results: dict) -> None:
+    now = _now()
+    with conn:
+        for (signal, direction, horizon_unit, horizon_value), stats in results.items():
+            b = stats["baseline"]
+            conn.execute(
+                """INSERT OR REPLACE INTO gold_backtest_results
+                   (signal, direction, horizon_unit, horizon_value, n, mean_return_pct,
+                    median_return_pct, win_rate_pct, best_return_pct, worst_return_pct,
+                    baseline_n, baseline_mean_pct, baseline_median_pct,
+                    baseline_win_rate_pct, computed_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (signal, direction, horizon_unit, horizon_value, stats["n"], stats["mean"],
+                 stats["median"], stats["win_rate"], stats["best"], stats["worst"],
+                 b["n"], b["mean"], b["median"], b["win_rate"], now),
+            )
+
+
+def get_gold_backtest_results(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute(
+        "SELECT * FROM gold_backtest_results ORDER BY signal, direction, horizon_unit, horizon_value"
+    ).fetchall()
+
+
+def record_price_snapshot(
+    conn: sqlite3.Connection, *, ticker: str, bucket: str, date: str,
+    price: float, qty: float, mkt_value: float,
+) -> None:
+    """One row per (ticker, bucket, date) -- INSERT OR REPLACE so re-running Monitor
+    (or any other snapshot.regenerate_all() caller) multiple times in the same day
+    just overwrites with the latest price rather than accumulating duplicates."""
+    with conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO holdings_price_history
+               (ticker, bucket, date, price, qty, mkt_value, recorded_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (ticker, bucket, date, price, qty, mkt_value, _now()),
+        )
+
+
+def get_price_history(
+    conn: sqlite3.Connection, ticker: str, bucket: str | None = None
+) -> list[sqlite3.Row]:
+    if bucket is not None:
+        return conn.execute(
+            """SELECT * FROM holdings_price_history WHERE ticker = ? AND bucket = ?
+               ORDER BY date""",
+            (ticker, bucket),
+        ).fetchall()
+    return conn.execute(
+        "SELECT * FROM holdings_price_history WHERE ticker = ? ORDER BY date", (ticker,)
+    ).fetchall()
+
+
+def get_portfolio_value_history(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    """Total portfolio market value per day, summed across every ticker/bucket that
+    had a recorded snapshot that day -- an equity curve, not a single holding's."""
+    return conn.execute(
+        """SELECT date, SUM(mkt_value) AS total_mkt_value
+           FROM holdings_price_history GROUP BY date ORDER BY date"""
+    ).fetchall()
 
 
 def touch_checked(

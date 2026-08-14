@@ -7,9 +7,10 @@ from typing import Any
 
 from scripts.ethical_filter import check_ticker as ethical_check
 
-from . import db, market_data, return_data, tickers
+from . import db, market_data, mlp_filter, return_data, tickers
 from .checks import (
     balance_sheet,
+    company_profile,
     concentration,
     crash_resilience,
     dividend,
@@ -20,6 +21,7 @@ from .checks import (
     price_action,
     principles_fit,
     sector_risk,
+    technical_levels,
     valuation,
 )
 
@@ -105,6 +107,24 @@ def run_assessment(
     verdict here participates in opportunity.py's existing risk-flag gate."""
     normalized = tickers.normalize(ticker)
     data = market_data.fetch_ticker_data(normalized)
+
+    mlp_name = mlp_filter.detect(data.info) if data is not None else None
+    if mlp_name is not None:
+        # Skip the deep dive entirely for MLPs -- Shaun's standing preference (K-1 tax
+        # filing, UBTI complications), confirmed 2026-08-12. No backtest refresh, no
+        # briefs-finance score compute, no checks -- none of that work is worth doing
+        # for a ticker that's out of scope regardless of what it would show.
+        return {
+            "ticker": normalized,
+            "excluded": False,
+            "exclusion_reason": None,
+            "mlp": True,
+            "mlp_name": mlp_name,
+            "checks": [],
+            "briefs_finance_score": None,
+            "data_available": True,
+        }
+
     excluded, exclusion_reason = ethical_check(normalized)
     existing_row = db.get_holding_row(conn, normalized) or db.get_watchlist_row(conn, normalized)
 
@@ -114,6 +134,7 @@ def run_assessment(
     recent_return_3mo = return_data.fetch_recent_return_pct(normalized, period="3mo") if data is not None else None
 
     other_checks = [
+        company_profile.check(data),
         dividend.check(data),
         valuation.check(data),
         balance_sheet.check(data),
@@ -129,6 +150,7 @@ def run_assessment(
         opportunity.check(data, other_checks, briefs_score, recent_return_3mo),
         price_action.check(recent_return_1mo, recent_return_3mo),
         crash_resilience.check(data),
+        technical_levels.check(data),
     ]
     if include_principles_fit:
         results.append(

@@ -117,3 +117,50 @@ def _no_real_news_events_search(monkeypatch):
         "mytrader.checks.news_events.news_search.get_news_events_for_ticker",
         lambda ticker, conn: None,
     )
+
+
+@pytest.fixture(autouse=True)
+def _no_real_balance_sheet_statement_fetch(monkeypatch):
+    """checks/balance_sheet.check() calls market_data.fetch_balance_sheet_financials()
+    as a second-tier ROE fallback (added 2026-08-06) whenever .info has none of
+    debtToEquity/currentRatio/returnOnEquity -- a real yfinance network call --
+    global/autouse for the same reason as the fixtures above."""
+    monkeypatch.setattr("mytrader.market_data.fetch_balance_sheet_financials", lambda ticker: None)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_cot_fetch(monkeypatch):
+    """gold_outlook.build_outlook() calls gold_cot.check_cot_positioning() every
+    run (added 2026-08-08), which does a real CFTC network fetch when not
+    stubbed -- global/autouse for the same reason as the fixtures above: don't
+    let a real network call hit every test in the suite that exercises
+    build_outlook by default. Patches the underlying fetch (not
+    check_cot_positioning itself), so test_gold_cot.py's own direct tests of
+    check_cot_positioning/compute_today_cot -- which patch those functions
+    directly -- aren't clobbered by this fixture running first."""
+    monkeypatch.setattr("mytrader.gold_cot._fetch_cot_history", lambda: None)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_technical_levels_fetch(monkeypatch):
+    """engine.run_assessment() calls checks/technical_levels.check() (added
+    2026-08-13), which does its own yfinance history() fetch via
+    technical_levels._fetch_close_series() -- global/autouse for the same reason as
+    _no_real_crash_drawdown_fetch above."""
+    monkeypatch.setattr("mytrader.checks.technical_levels._fetch_close_series", lambda ticker: None)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_ibkr_connection(monkeypatch):
+    """ibkr_sync fetch functions connect to a real local IB Gateway socket via
+    ib_async -- there is no CI/local Gateway running during pytest, so an unstubbed
+    real call would hang or error. Stubbing _connect() (the sole real-I/O boundary,
+    same shape as gold_cot._fetch_cot_history) means tests that exercise
+    fetch_positions()/fetch_account_summary() directly still need their own
+    monkeypatch of ib.positions()/ib.accountSummary() -- this fixture only prevents
+    an accidental real socket connection from any test in the suite by default."""
+
+    def _raise_no_gateway():
+        raise ConnectionError("no real IB Gateway available in tests")
+
+    monkeypatch.setattr("mytrader.ibkr_sync._connect", _raise_no_gateway)

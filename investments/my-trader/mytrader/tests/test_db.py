@@ -142,6 +142,47 @@ def test_delete_pending_candidate_returns_zero_when_not_found(db_conn):
     assert db.delete_pending_candidate(db_conn, "NOPE") == 0
 
 
+def test_insert_ibkr_pending_position_then_get_finds_it(db_conn):
+    db.insert_ibkr_pending_position(
+        db_conn, ticker="MSFT", name=None, qty=5.0, avg_price=300.0,
+        currency="USD", asset_type="stock", exchange_raw="NASDAQ",
+    )
+    row = db.get_ibkr_pending_position(db_conn, "MSFT")
+    assert row is not None
+    assert row["qty"] == 5.0
+    assert row["avg_price"] == 300.0
+    assert row["exchange_raw"] == "NASDAQ"
+
+
+def test_insert_ibkr_pending_position_replaces_on_restage(db_conn):
+    db.insert_ibkr_pending_position(
+        db_conn, ticker="MSFT", name=None, qty=5.0, avg_price=300.0,
+        currency="USD", asset_type="stock", exchange_raw="NASDAQ",
+    )
+    db.insert_ibkr_pending_position(
+        db_conn, ticker="MSFT", name=None, qty=7.0, avg_price=310.0,
+        currency="USD", asset_type="stock", exchange_raw="NASDAQ",
+    )
+    assert len(db.get_all_ibkr_pending_positions(db_conn)) == 1
+    row = db.get_ibkr_pending_position(db_conn, "MSFT")
+    assert row["qty"] == 7.0
+    assert row["avg_price"] == 310.0
+
+
+def test_delete_ibkr_pending_position_removes_it(db_conn):
+    db.insert_ibkr_pending_position(
+        db_conn, ticker="MSFT", name=None, qty=5.0, avg_price=300.0,
+        currency="USD", asset_type="stock", exchange_raw="NASDAQ",
+    )
+    count = db.delete_ibkr_pending_position(db_conn, "MSFT")
+    assert count == 1
+    assert db.get_ibkr_pending_position(db_conn, "MSFT") is None
+
+
+def test_delete_ibkr_pending_position_returns_zero_when_not_found(db_conn):
+    assert db.delete_ibkr_pending_position(db_conn, "NOPE") == 0
+
+
 def test_delete_watchlist_row_removes_specific_bucket(db_conn):
     db.upsert_watchlist_row(
         db_conn, ticker="PMGOLD", name="Perth Mint Gold", asset_type="etf", bucket="3a",
@@ -321,3 +362,56 @@ def test_upsert_filing_summary_cache_replaces_on_same_key(db_conn):
     row = db.get_cached_filing_summary(db_conn, "KO", "10-K")
     assert row["accession_number"] == "0000021344-26-000010"
     assert row["summary"] == "New summary."
+
+
+def test_record_price_snapshot_then_get_price_history(db_conn):
+    db.record_price_snapshot(
+        db_conn, ticker="V", bucket="1", date="2026-08-01", price=340.0, qty=0.1, mkt_value=34.0,
+    )
+    db.record_price_snapshot(
+        db_conn, ticker="V", bucket="1", date="2026-08-02", price=345.0, qty=0.1, mkt_value=34.5,
+    )
+    rows = db.get_price_history(db_conn, "V", "1")
+    assert [r["date"] for r in rows] == ["2026-08-01", "2026-08-02"]
+    assert rows[1]["price"] == 345.0
+
+
+def test_record_price_snapshot_same_day_replaces_not_duplicates(db_conn):
+    db.record_price_snapshot(
+        db_conn, ticker="V", bucket="1", date="2026-08-01", price=340.0, qty=0.1, mkt_value=34.0,
+    )
+    db.record_price_snapshot(
+        db_conn, ticker="V", bucket="1", date="2026-08-01", price=342.0, qty=0.1, mkt_value=34.2,
+    )
+    rows = db.get_price_history(db_conn, "V", "1")
+    assert len(rows) == 1
+    assert rows[0]["price"] == 342.0
+
+
+def test_get_price_history_filters_by_ticker_across_buckets(db_conn):
+    db.record_price_snapshot(
+        db_conn, ticker="PMGOLD", bucket="3a", date="2026-08-01", price=57.0, qty=10.0, mkt_value=570.0,
+    )
+    db.record_price_snapshot(
+        db_conn, ticker="PMGOLD", bucket="3b", date="2026-08-01", price=57.0, qty=5.0, mkt_value=285.0,
+    )
+    rows = db.get_price_history(db_conn, "PMGOLD")
+    assert len(rows) == 2
+    assert {r["bucket"] for r in rows} == {"3a", "3b"}
+
+
+def test_get_portfolio_value_history_sums_across_tickers_per_day(db_conn):
+    db.record_price_snapshot(
+        db_conn, ticker="V", bucket="1", date="2026-08-01", price=340.0, qty=0.1, mkt_value=34.0,
+    )
+    db.record_price_snapshot(
+        db_conn, ticker="PMGOLD", bucket="3a", date="2026-08-01", price=57.0, qty=10.0, mkt_value=570.0,
+    )
+    db.record_price_snapshot(
+        db_conn, ticker="V", bucket="1", date="2026-08-02", price=345.0, qty=0.1, mkt_value=34.5,
+    )
+    rows = db.get_portfolio_value_history(db_conn)
+    assert [dict(r) for r in rows] == [
+        {"date": "2026-08-01", "total_mkt_value": 604.0},
+        {"date": "2026-08-02", "total_mkt_value": 34.5},
+    ]

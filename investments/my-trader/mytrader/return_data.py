@@ -65,10 +65,17 @@ def _fetch_cumulative_return_pct(ticker: str, period: str) -> float | None:
             hist = yf.Ticker(candidate).history(period=period, auto_adjust=True)
         except Exception:
             continue
-        if hist.empty or len(hist) < 2:
+        if hist.empty:
             continue
-        start = float(hist["Close"].iloc[0])
-        end = float(hist["Close"].iloc[-1])
+        # A leading or trailing row can come back NaN from yfinance (confirmed live
+        # 2026-08-13 against V's 3mo window: the very first close was NaN) -- drop
+        # NaN rows first rather than blindly indexing [0]/[-1], so one bad boundary
+        # row doesn't poison an otherwise-good series with a "+nan%" result.
+        closes = hist["Close"].dropna()
+        if len(closes) < 2:
+            continue
+        start = float(closes.iloc[0])
+        end = float(closes.iloc[-1])
         if start == 0:
             continue
         return round((end / start - 1) * 100, 1)

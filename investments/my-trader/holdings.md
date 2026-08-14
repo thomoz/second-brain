@@ -4,11 +4,13 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 
 | Ticker | Name | Qty | Mkt Value | Avg Price | Unrealized P&L | Bucket |
 |--------|------|-----|-----------|-----------|-----------------|--------|
+| AG | First Majestic Silver Corp. | 40.0 | $766.40 | $19.06 | +$4.00 | unassigned |
 | ETPMAG | BetaShares Global Physical Silver ETF | 10.0 | — | $78.64 | — | 1 |
-| LLY | Eli Lilly & Co | 0.0001 | $0.11 | $1,148.00 | $-0.00 | 1 |
-| LYV | Live Nation Entertainment Inc | 0.4 | $73.48 | $167.29 | +$6.56 | 1 |
+| GGOV.AX | Betashares US Treasury Bond 20+ Year Currency Hedged ETF | 159.0 | $1,984.32 | $12.65 | $-27.03 | 2 |
+| LLY | Eli Lilly & Co | 0.0001 | $0.12 | $1,148.00 | +$0.01 | 1 |
+| LULU | lululemon athletica inc. | 5.0 | $604.35 | $128.62 | $-38.75 | 1 |
+| LYV | Live Nation Entertainment Inc | 0.4 | $74.13 | $167.29 | +$7.22 | 1 |
 | OOO | BetaShares Crude Oil Index ETF (Currency Hedged) | 500.0 | — | $8.48 | — | 1 |
-| PMGOLD | Perth Mint Gold Structured Product | 69.0 | $1,237.86 | $58.27 | $-2,782.77 | 3a |
-| V | Visa Inc (Class A) | 0.1001 | $37.00 | $318.41 | +$5.12 | 1 |
+| V | Visa Inc (Class A) | 0.1001 | $35.98 | $318.41 | +$4.11 | 1 |
 
-Last auto-generated: 2026-08-05.
+Last auto-generated: 2026-08-13.
