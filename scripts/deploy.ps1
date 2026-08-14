@@ -10,9 +10,11 @@ $BRANCH = git rev-parse --abbrev-ref HEAD
 # Every timer that touches the repo (git commits/writes files inside it) must be
 # stopped for the duration of the deploy — vaultsync runs every 2 minutes and does
 # its own git commit/pull/push, so left running it can race the steps below.
+# NOTE: investments/ (my-trader + briefs-finance) is deliberately not run on the VPS —
+# investment tooling stays local-only. Its systemd unit is stopped/disabled and the
+# VPS checkout excludes investments/ via sparse-checkout. Do not re-add its timer here.
 $TIMERS = @(
     "second-brain-heartbeat.timer",
-    "second-brain-mytrader-monitor.timer",
     "second-brain-vaultsync.timer",
     "second-brain-reflect.timer"
 )
