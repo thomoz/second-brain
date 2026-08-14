@@ -100,11 +100,19 @@ the data itself, not a hardcoded ticker list — unlike `scripts.ethical_filter`
 defense-contractor list, MLP structure is a fact already present in the entity's own
 name, not a curated judgment call.
 
-**Funds are never flagged**, even ones with "MLP" literally in the name — AMLP
-("Alerian MLP ETF") holds a basket of MLPs but isn't itself a partnership
-(`quoteType == "ETF"` short-circuits before the name-suffix check); its own C-corp
-fund wrapper is precisely what lets it issue a normal 1099 instead of passing K-1s
-through, the opposite of what's being screened for. AMLP still gets a full deep dive.
+**Not gated on `quoteType`** (changed 2026-08-14) — an earlier version blanket-exempted
+`quoteType == "ETF"` on the theory that a fund holding MLPs (e.g. AMLP, "Alerian MLP
+ETF") shouldn't itself be flagged. That was right for AMLP (a C-corp fund, hence a
+normal 1099), but the blanket exemption was still a real gap: CPER ("United States
+Copper Index Fund, LP") is labeled `quoteType == "ETF"` by yfinance but is itself
+organized and taxed as a limited partnership — confirmed live 2026-08-14 via USCF's
+own K-1 info page, it genuinely issues a Schedule K-1 (Form 1065) every year, same
+pattern as the rest of USCF's "United States X Fund" commodity-pool family (USO, UNG,
+etc.). The end-anchored suffix regex alone already gets AMLP right without a
+`quoteType` carve-out — "Alerian MLP ETF" ends in "ETF", not "LP" ("MLP" only appears
+as a substring in the middle) — so the guard was solving a problem the regex didn't
+have, while creating a real one for commodity-pool funds. AMLP/MLPX still get a full
+deep dive; CPER-style commodity-pool ETFs are now correctly skipped.
 
 ## Company Profile Check
 

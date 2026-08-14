@@ -8,10 +8,21 @@ entity's legal form that's already present in the data, not a curated judgment c
 Confirmed live 2026-08-12 against EPD ("Enterprise Products Partners L.P.") and KRP
 ("Kimbell Royalty Partners, LP") -- both end their legal name in an L.P./LP suffix.
 
-An ETF that merely holds MLPs (e.g. AMLP, "Alerian MLP ETF") is deliberately NOT
-flagged -- AMLP itself is a fund (quoteType == "ETF"), not a partnership; its own
-C-corp fund structure is precisely what lets it issue a normal 1099 instead of
-passing K-1s through, the opposite of the thing being screened for.
+Deliberately does NOT exempt funds by quoteType=="ETF" -- an earlier version did, on
+the theory that AMLP ("Alerian MLP ETF") shouldn't be flagged just for holding MLPs.
+That theory was right for AMLP (it's a C-corp fund, which is why it issues a normal
+1099), but the blanket ETF exemption was still wrong: CPER ("United States Copper
+Index Fund, LP") is labeled quoteType=="ETF" by yfinance but is itself organized and
+taxed as a limited partnership -- confirmed live 2026-08-14 via USCF's own K-1
+information page, it genuinely issues a Schedule K-1 (Form 1065) to unitholders every
+year, exactly the thing being screened for. Same pattern applies to the rest of the
+USCF "United States X Fund" commodity-pool family (USO, UNG, etc.).
+
+The end-anchored suffix regex already does the real work here without a quoteType
+carve-out: AMLP's name ends in "ETF", not "LP" ("Alerian MLP ETF" only has "MLP" as a
+substring in the middle), so it was never going to match regardless -- the ETF guard
+was solving a problem the regex didn't actually have, while creating a real gap for
+commodity-pool funds whose own legal name genuinely does end in ", LP".
 """
 
 from __future__ import annotations
@@ -26,9 +37,8 @@ _MLP_SUFFIX_RE = re.compile(r"[,.\s]L\.?\s?P\.?\s*$", re.IGNORECASE)
 
 def detect(info: dict[str, Any]) -> str | None:
     """Returns the matched legal entity name if this ticker looks like an MLP,
-    else None. Funds (quoteType == "ETF") are never flagged, regardless of name."""
-    if info.get("quoteType") == "ETF":
-        return None
+    else None. Not gated on quoteType -- see module docstring for why a fund label
+    alone (e.g. CPER) doesn't mean K-1-free."""
     name = info.get("longName") or info.get("shortName")
     if not name:
         return None
