@@ -130,6 +130,9 @@ USER_FILE = VAULT_DIR / "USER.md"
 MEMORY_FILE = VAULT_DIR / "MEMORY.md"
 HABITS_FILE = VAULT_DIR / "HABITS.md"
 HEARTBEAT_FILE = VAULT_DIR / "HEARTBEAT.md"
+# Own file (not a HEARTBEAT.md section) since 2026-08-14 -- a section name inside a
+# differently-named file was how real WhatsApp handoffs went unseen for days.
+HANDOFF_FILE = VAULT_DIR / "whatsapp-handoff-messages-for-local-session.md"
 
 # State file constants
 HEARTBEAT_STATE_FILE = STATE_DIR / "heartbeat-state.json"

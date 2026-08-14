@@ -55,6 +55,19 @@ Register-ScheduledTask -TaskName "SecondBrain-MyTraderMonitor" -Action $mtAction
     -Trigger $mtTrigger -RunLevel Limited -Force
 Write-Output "Registered: SecondBrain-MyTraderMonitor"
 
+# Handoff check — every hour, deterministic toast alert on new VPS Handoff Inbox
+# entries (Memory/HEARTBEAT.md). Separate from Heartbeat: no LLM in the loop, and
+# meant to run locally since toast notifications only mean anything here.
+$hoPython = Join-Path $ProjectPath ".claude\scripts\.venv\Scripts\python.exe"
+$hoAction = New-ScheduledTaskAction -Execute $hoPython `
+    -Argument (Join-Path $ProjectPath ".claude\scripts\handoff_check.py") `
+    -WorkingDirectory (Join-Path $ProjectPath ".claude\scripts")
+$hoTrigger = New-ScheduledTaskTrigger -RepetitionInterval (New-TimeSpan -Hours 1) `
+    -Once -At (Get-Date) -RepetitionDuration (New-TimeSpan -Days 3650)
+Register-ScheduledTask -TaskName "SecondBrain-HandoffCheck" -Action $hoAction `
+    -Trigger $hoTrigger -RunLevel Limited -Force
+Write-Output "Registered: SecondBrain-HandoffCheck"
+
 Write-Output "`nAll tasks registered. View in Task Scheduler (taskschd.msc)"
 Write-Output "After VPS is live, disable Heartbeat, Reflection, WhatsAppBot (keep VaultSync):"
 Write-Output "  Disable-ScheduledTask -TaskName 'SecondBrain-Heartbeat'"
