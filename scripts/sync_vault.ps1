@@ -32,6 +32,16 @@ if ($before -ne $after) {
         $python = Join-Path $ProjectPath ".claude\scripts\.venv\Scripts\python.exe"
         & $python (Join-Path $ProjectPath ".claude\scripts\memory_index.py") 2>&1 | Add-Content -Path $log
     }
+
+    # Handoff toast fires immediately off this same pull instead of waiting for the
+    # hourly SecondBrain-HandoffCheck task -- that task stays registered as a
+    # fallback in case this sync itself stalls (see handoff_check.py docstring).
+    $handoffChanged = $changed | Where-Object { $_ -eq "Memory/whatsapp-handoff-messages-for-local-session.md" }
+    if ($handoffChanged) {
+        Add-Content -Path $log -Value "[$timestamp] handoff file changed - checking for new entries..."
+        $python = Join-Path $ProjectPath ".claude\scripts\.venv\Scripts\python.exe"
+        & $python (Join-Path $ProjectPath ".claude\scripts\handoff_check.py") 2>&1 | Add-Content -Path $log
+    }
 }
 
 git push origin HEAD 2>&1 | Add-Content -Path $log
