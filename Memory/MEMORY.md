@@ -38,7 +38,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - Deploy target: Windows local + DigitalOcean VPS (cloud sync via git)
 - LLM backend: Codex (ChatGPT flat-rate) via codex_sdk_compat.py
 - Never auto-send emails, messages, or social posts
-- VPS-to-local handoffs for next `/prime` should go in `Memory/HEARTBEAT.md` under `## VPS Handoff Inbox`
+- VPS-to-local handoffs for next `/prime` should go in `Memory/whatsapp-handoff-messages-for-local-session.md` under `## Active handoffs` (checked hourly by `.claude/scripts/handoff_check.py`, toast alert on new entries)
 - Prefer the simpler phrase "leave a message for local computer" for VPS-to-local handoffs
 
 - For SongbookDB upgrade work, make and test changes one by one; avoid bulk uploads or commits
