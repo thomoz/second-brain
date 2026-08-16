@@ -18,7 +18,7 @@ from __future__ import annotations
 from datetime import timedelta
 from pathlib import Path
 
-from config import DAILY_DIR, MEMORY_DIR, get_log_path_for_date, now_local
+from config import DAILY_DIR, HANDOFF_FILE, MEMORY_DIR, get_log_path_for_date, now_local
 
 MAX_DAILY_LOG_LINES = 30
 # ~15,000 tokens. SOUL.md + USER.md + MEMORY.md + HEARTBEAT.md + recent logs
@@ -62,6 +62,20 @@ def build_context(source: str = "startup") -> str:
 
     today = now_local()
     parts.append(f"## Today\n{today.strftime('%A, %B')} {today.day}, {today.strftime('%Y')}")
+
+    # Pending WhatsApp handoffs — surfaced here (not just via toast) so a session
+    # started away from the desktop that fired the toast still opens knowing about
+    # them. Read-only: entries stay in the file until deliberately cleared, same as
+    # any other Memory/ content — this never deletes or archives them.
+    handoff_text = read_file_safe(HANDOFF_FILE)
+    if handoff_text:
+        from handoff_check import parse_handoff_entries
+
+        handoff_entries = parse_handoff_entries(handoff_text)
+        if handoff_entries:
+            lines = [f"{len(handoff_entries)} pending WhatsApp handoff(s) — mention these to Shaun at the start of this session:"]
+            lines += [f"- [{e['date']}] {e['text']}" for e in handoff_entries]
+            parts.append("## Pending WhatsApp Handoffs\n" + "\n".join(lines))
 
     bootstrap = read_file_safe(MEMORY_DIR / "BOOTSTRAP.md")
     if bootstrap:
