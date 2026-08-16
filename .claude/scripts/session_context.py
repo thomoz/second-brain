@@ -73,7 +73,11 @@ def build_context(source: str = "startup") -> str:
 
         handoff_entries = parse_handoff_entries(handoff_text)
         if handoff_entries:
-            lines = [f"{len(handoff_entries)} pending WhatsApp handoff(s) — mention these to Shaun at the start of this session:"]
+            lines = [
+                f"{len(handoff_entries)} pending WhatsApp handoff(s). In your first reply this "
+                "session, surface these under their own heading, exactly '## WhatsApp Handoff "
+                "Messages' — not folded into other text or prose:"
+            ]
             lines += [f"- [{e['date']}] {e['text']}" for e in handoff_entries]
             parts.append("## Pending WhatsApp Handoffs\n" + "\n".join(lines))
 
