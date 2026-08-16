@@ -69,3 +69,8 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-07-19 Reflection
 - (Jul 19) GREEN-API recovery may require full logout and fresh QR relink after LID issues
+
+## 2026-08-16 Reflection
+- (Aug 16) GOAT Phase 1 exit check is live on VPS via systemd timer
+- (Aug 16) GOAT 150DMA daily check runs at 21:35 UTC / 07:35 AEST
+- (Aug 16) GOAT interim intraday alert config uses pct 0.0 and min consecutive days 1
