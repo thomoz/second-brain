@@ -10,13 +10,15 @@ $BRANCH = git rev-parse --abbrev-ref HEAD
 # Every timer that touches the repo (git commits/writes files inside it) must be
 # stopped for the duration of the deploy — vaultsync runs every 2 minutes and does
 # its own git commit/pull/push, so left running it can race the steps below.
-# NOTE: investments/ (my-trader + briefs-finance) is deliberately not run on the VPS —
-# investment tooling stays local-only. Its systemd unit is stopped/disabled and the
-# VPS checkout excludes investments/ via sparse-checkout. Do not re-add its timer here.
+# NOTE: investments/ is checked out on the VPS (needed for goat-monitor below,
+# which imports mytrader + briefs-finance's scripts package), but my-trader's own
+# monitor and any briefs-finance ingestion stay local-only, deliberately never
+# enabled here — do not re-add second-brain-mytrader-monitor.timer to this list.
 $TIMERS = @(
     "second-brain-heartbeat.timer",
     "second-brain-vaultsync.timer",
-    "second-brain-reflect.timer"
+    "second-brain-reflect.timer",
+    "second-brain-goat-monitor.timer"
 )
 
 function Invoke-Remote {

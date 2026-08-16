@@ -111,17 +111,24 @@ def maybe_notify(result: dict[str, Any], new_sector_candidates: int = 0) -> None
 
     _scripts_dir = Path(__file__).resolve().parent.parent.parent.parent / ".claude" / "scripts"
     sys.path.insert(0, str(_scripts_dir))
-    from notifications import send_toast_notification
+    from notifications import send_toast_notification, send_whatsapp_notification
 
     parts = []
     if n_alerts:
         parts.append(f"{n_alerts} holding(s) below 150DMA exit threshold")
     if new_sector_candidates:
         parts.append(f"{new_sector_candidates} new sector breakout candidate(s)")
-    send_toast_notification(
-        "Goat Monitor",
-        "; ".join(parts) + " -- check investments/goat/",
-    )
+    summary = "; ".join(parts)
+
+    # Toast only reaches whichever desktop happens to be running this (and is a
+    # no-op fallback to console on the headless VPS) -- WhatsApp is the channel
+    # that actually reaches Shaun's phone regardless of where monitor runs.
+    send_toast_notification("Goat Monitor", summary + " -- check investments/goat/")
+
+    lines = [f"Goat Monitor: {summary}."]
+    if n_alerts:
+        lines += [f"- {a['ticker']}: {a['message']}" for a in result["new_alerts"]]
+    send_whatsapp_notification("\n".join(lines))
 
 
 def _stage_new_sector_candidates(

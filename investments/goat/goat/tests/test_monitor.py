@@ -111,36 +111,50 @@ def test_write_report_writes_to_configured_path(tmp_path, monkeypatch):
     assert report_path.read_text(encoding="utf-8") == monitor.render_report(result)
 
 
-def test_maybe_notify_skips_when_no_new_alerts(monkeypatch):
-    calls = []
+def _fake_notifications_module(toast_calls, whatsapp_calls):
     fake_module = types.ModuleType("notifications")
-    fake_module.send_toast_notification = lambda *a, **k: calls.append((a, k))
-    monkeypatch.setitem(sys.modules, "notifications", fake_module)
+    fake_module.send_toast_notification = lambda *a, **k: toast_calls.append((a, k))
+    fake_module.send_whatsapp_notification = lambda *a, **k: whatsapp_calls.append((a, k))
+    return fake_module
+
+
+def test_maybe_notify_skips_when_no_new_alerts(monkeypatch):
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
 
     monitor.maybe_notify({"new_alerts": []})
-    assert calls == []
+    assert toast_calls == []
+    assert whatsapp_calls == []
 
 
 def test_maybe_notify_calls_toast_when_new_alerts_present(monkeypatch):
-    calls = []
-    fake_module = types.ModuleType("notifications")
-    fake_module.send_toast_notification = lambda *a, **k: calls.append((a, k))
-    monkeypatch.setitem(sys.modules, "notifications", fake_module)
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
 
     monitor.maybe_notify({"new_alerts": [{"ticker": "VRTX", "message": "closed 8.0% below its 150-day MA"}]})
-    assert len(calls) == 1
-    args, kwargs = calls[0]
+    assert len(toast_calls) == 1
+    args, kwargs = toast_calls[0]
     assert any("1" in str(a) for a in args)
 
 
 def test_maybe_notify_fires_on_sector_candidates_alone(monkeypatch):
-    calls = []
-    fake_module = types.ModuleType("notifications")
-    fake_module.send_toast_notification = lambda *a, **k: calls.append((a, k))
-    monkeypatch.setitem(sys.modules, "notifications", fake_module)
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
 
     monitor.maybe_notify({"new_alerts": []}, new_sector_candidates=2)
-    assert len(calls) == 1
+    assert len(toast_calls) == 1
+    assert len(whatsapp_calls) == 1
+
+
+def test_maybe_notify_sends_whatsapp_with_ticker_detail(monkeypatch):
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+
+    monitor.maybe_notify({"new_alerts": [{"ticker": "VRTX", "message": "closed 8.0% below its 150-day MA"}]})
+    assert len(whatsapp_calls) == 1
+    (message,), _kwargs = whatsapp_calls[0]
+    assert "VRTX" in message
+    assert "150-day MA" in message
 
 
 # --- Phase 2: sector rotation scan --------------------------------------------
