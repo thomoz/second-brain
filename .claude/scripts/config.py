@@ -138,6 +138,9 @@ HANDOFF_FILE = VAULT_DIR / "whatsapp-handoff-messages-for-local-session.md"
 HEARTBEAT_STATE_FILE = STATE_DIR / "heartbeat-state.json"
 REFLECTION_STATE_FILE = STATE_DIR / "reflection-state.json"
 WHATSAPP_HEALTH_STATE_FILE = STATE_DIR / "whatsapp-health-state.json"
+# Tracks which handoff entries have already been surfaced in a session's context
+# (separate from handoff_check.py's own seen_hashes, which gates the hourly toast).
+HANDOFF_SURFACED_STATE_FILE = STATE_DIR / "handoff-surfaced-state.json"
 
 # WhatsApp bot's own stdout/stderr log (path set via the systemd unit's
 # StandardOutput/StandardError=append: directives, not written by Python directly —

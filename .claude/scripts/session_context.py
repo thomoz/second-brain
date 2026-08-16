@@ -18,7 +18,14 @@ from __future__ import annotations
 from datetime import timedelta
 from pathlib import Path
 
-from config import DAILY_DIR, HANDOFF_FILE, MEMORY_DIR, get_log_path_for_date, now_local
+from config import (
+    DAILY_DIR,
+    HANDOFF_FILE,
+    HANDOFF_SURFACED_STATE_FILE,
+    MEMORY_DIR,
+    get_log_path_for_date,
+    now_local,
+)
 
 MAX_DAILY_LOG_LINES = 30
 # ~15,000 tokens. SOUL.md + USER.md + MEMORY.md + HEARTBEAT.md + recent logs
@@ -65,21 +72,32 @@ def build_context(source: str = "startup") -> str:
 
     # Pending WhatsApp handoffs — surfaced here (not just via toast) so a session
     # started away from the desktop that fired the toast still opens knowing about
-    # them. Read-only: entries stay in the file until deliberately cleared, same as
-    # any other Memory/ content — this never deletes or archives them.
+    # them. The source .md file is never touched (SOUL.md: never delete anything,
+    # anywhere) — full history always stays there. What IS tracked is which entries
+    # have already been surfaced in a session, in a separate state file (mirrors
+    # handoff_check.py's own seen_hashes, which gates the hourly toast independently),
+    # so already-shown entries stop repeating every session.
     handoff_text = read_file_safe(HANDOFF_FILE)
     if handoff_text:
         from handoff_check import parse_handoff_entries
+        from shared import load_state, save_state
 
         handoff_entries = parse_handoff_entries(handoff_text)
-        if handoff_entries:
+        surfaced_state = load_state(HANDOFF_SURFACED_STATE_FILE)
+        surfaced_hashes = set(surfaced_state.get("surfaced_hashes", []))
+        new_entries = [e for e in handoff_entries if e["hash"] not in surfaced_hashes]
+        if new_entries:
             lines = [
-                f"{len(handoff_entries)} pending WhatsApp handoff(s). In your first reply this "
+                f"{len(new_entries)} pending WhatsApp handoff(s). In your first reply this "
                 "session, surface these under their own heading, exactly '## WhatsApp Handoff "
                 "Messages' — not folded into other text or prose:"
             ]
-            lines += [f"- [{e['date']}] {e['text']}" for e in handoff_entries]
+            lines += [f"- [{e['date']}] {e['text']}" for e in new_entries]
             parts.append("## Pending WhatsApp Handoffs\n" + "\n".join(lines))
+            save_state(
+                HANDOFF_SURFACED_STATE_FILE,
+                {"surfaced_hashes": [e["hash"] for e in handoff_entries]},
+            )
 
     bootstrap = read_file_safe(MEMORY_DIR / "BOOTSTRAP.md")
     if bootstrap:
