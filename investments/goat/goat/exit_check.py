@@ -37,11 +37,18 @@ def check_150dma_exit(ticker: str, close: pd.Series) -> CheckResult:
     }
 
     if flagged:
+        # Deliberately separates the magnitude (today's snapshot, latest_pct_below)
+        # from the duration (how long the >= FLAG_PCT condition has held) -- an
+        # earlier phrasing folded both into one "closed X% below ... for N+
+        # consecutive days" sentence, which read as if X% applied on each of the N
+        # days and accumulated (it doesn't; X% is today only, N is a separate
+        # persistence check). Shaun flagged the ambiguity 2026-08-16.
         return CheckResult(
             name="below_150dma", verdict="flag",
-            detail=f"{ticker}: closed {latest_pct_below:.1f}% below its "
-                   f"{config.GOAT_MA_LONG_DAYS}-day MA for "
-                   f"{config.GOAT_150DMA_MIN_CONSECUTIVE_DAYS}+ consecutive days -- "
+            detail=f"{ticker}: now {latest_pct_below:.1f}% below its "
+                   f"{config.GOAT_MA_LONG_DAYS}-day MA as of today's close; has stayed "
+                   f">={config.GOAT_150DMA_FLAG_PCT:.0f}% below for "
+                   f"{config.GOAT_150DMA_MIN_CONSECUTIVE_DAYS}+ consecutive trading days -- "
                    f"exit-rule threshold (Stage Analysis 6% envelope) triggered",
             data=data,
         )
