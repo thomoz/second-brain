@@ -45,6 +45,20 @@ def cmd_monitor(args) -> None:
     )
 
 
+def cmd_check_live(args) -> None:
+    from .live_monitor import run_live_monitor
+    from .monitor import maybe_notify
+
+    conn = _open_conn()
+    result = run_live_monitor(conn)
+    conn.close()
+    maybe_notify(result)
+    print(
+        f"Goat live check complete: checked {result['checked_holdings']} open-market "
+        f"holding(s), {len(result['new_alerts'])} new alert(s)."
+    )
+
+
 def cmd_scan_sectors(args) -> None:
     from .monitor import run_sector_scan, write_sector_candidates_report, write_sector_ranking_report
 
@@ -108,6 +122,10 @@ def main() -> None:
         "scan-sectors",
         help="On-demand sector rotation ranking + breakout scan (also runs daily as part of monitor)",
     )
+    subparsers.add_parser(
+        "check-live",
+        help="Intraday 150DMA live-price check against currently-open-market holdings",
+    )
 
     p_promote = subparsers.add_parser(
         "promote-candidate", help="Write a pending Goat sector candidate into my-trader's real watchlist",
@@ -126,6 +144,7 @@ def main() -> None:
     dispatch = {
         "monitor": cmd_monitor,
         "scan-sectors": cmd_scan_sectors,
+        "check-live": cmd_check_live,
         "promote-candidate": cmd_promote_candidate,
         "dismiss-candidate": cmd_dismiss_candidate,
     }

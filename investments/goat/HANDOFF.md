@@ -1,6 +1,6 @@
 # Goat — Session Handoff
 
-## Status: Phase 1 complete 2026-08-11 — see `.agent/plans/goat-phase1-150dma-exit-check.md` (150DMA holdings exit check). `investments/goat/` is a working uv workspace member; `python -m goat.main monitor` runs against the real shared DB, checks all holdings, writes only to `goat_alert_history` and `investments/goat/monitor-report.md`. systemd units exist but are NOT enabled on the VPS — needs Shaun's explicit go-ahead. Phase 2 complete 2026-08-11 — see `.agent/plans/goat-phase2-sector-rotation-ranking.md` (11 SPDR sector ETF ranking + 50DMA cross/slope breakout signal; 39/39 tests passing; `scan-sectors`/`monitor` run live against the real shared DB — real breakouts fired on XLB/XLI/XLK during validation; `promote-candidate` confirmed writing correctly-labeled Goat-approved rows into my-trader's real `watchlist.md` (XLB and XLK promoted live), `dismiss-candidate` confirmed to leave `watchlist.md` untouched (XLI dismissed live) — this is real production watchlist state, not test fixtures, see NOTES below). Phase 3 (S&P 500 heartbeat-pattern scanner) not yet planned.
+## Status: Phase 1 complete 2026-08-11 — see `.agent/plans/goat-phase1-150dma-exit-check.md` (150DMA holdings exit check). `investments/goat/` is a working uv workspace member; `python -m goat.main monitor` runs against the real shared DB, checks all holdings, writes only to `goat_alert_history` and `investments/goat/monitor-report.md`. systemd units exist but are NOT enabled on the VPS — needs Shaun's explicit go-ahead. Phase 2 complete 2026-08-11 — see `.agent/plans/goat-phase2-sector-rotation-ranking.md` (11 SPDR sector ETF ranking + 50DMA cross/slope breakout signal; 39/39 tests passing; `scan-sectors`/`monitor` run live against the real shared DB — real breakouts fired on XLB/XLI/XLK during validation; `promote-candidate` confirmed writing correctly-labeled Goat-approved rows into my-trader's real `watchlist.md` (XLB and XLK promoted live), `dismiss-candidate` confirmed to leave `watchlist.md` untouched (XLI dismissed live) — this is real production watchlist state, not test fixtures, see NOTES below). Phase 3 (S&P 500 heartbeat-pattern scanner) not yet planned. Intraday 150DMA Alerting built 2026-08-16 — see that section below; systemd units exist but are NOT enabled on the VPS, needs Shaun's explicit go-ahead.
 
 ## What This Is
 
@@ -137,6 +137,13 @@ for reference; Goat's own scan results/pending-candidates go in its own new tabl
 
 ### Phase 3 — Stock/index "heartbeat" scanner within rising sectors (build last — hardest, most open questions)
 
+**Reference chart**: `investments/goat/references/heartbeat-pattern-example-2026-08-16.png` — a
+real chart Shaun annotated showing the pattern this phase needs to detect: a low-volatility
+sideways consolidation (candles ranging within a flat channel) followed by a breakout above the
+top of the range. Use as a visual sanity-check against whatever consolidation-flatness metric
+gets chosen during planning (e.g. does the metric correctly flag this exact shape as a
+qualifying heartbeat, and not flag ordinary chop that never breaks out).
+
 - For each candidate ticker (see Open Questions on where this list comes from):
   fetch price history, detect:
   1. A "heartbeat" consolidation — low-volatility sideways range sustained for a
@@ -173,6 +180,52 @@ for reference; Goat's own scan results/pending-candidates go in its own new tabl
   Matches the existing Monitor (scheduled) / Find (on-demand) split already used by
   my-trader — e.g. "scan tech sector for heartbeat setups" callable anytime, such as
   when news moves a sector, in addition to the automatic weekly run.
+
+### Intraday 150DMA Alerting — built 2026-08-16 (cross-cutting timing change to Phase 1, not its own numbered phase)
+
+**Status: built, not yet enabled on the VPS.** See `.agent/plans/goat-intraday-150dma-alerting.md`. New `goat/market_hours.py` (zoneinfo-based ASX/US regular-session gating, no holiday calendar), `exit_check.check_150dma_exit_live()` (live price vs. a 150DMA computed only from completed daily closes — never live-updating), `goat/live_monitor.py::run_live_monitor()` (filters holdings to whichever market is currently open, fetches live quotes via `mytrader.market_data.fetch_current_price`, reconciles alerts through the same `goat.monitor.reconcile_alerts`/`goat_alert_history` dedup the daily check uses — the two checks share one dedup row per ticker+check_name so they can never double-alert), new `check-live` CLI subcommand, new `second-brain-goat-live-check.service`/`.timer` (`OnCalendar=*:0/10`, `GOAT_LIVE_POLL_INTERVAL_MINUTES=10` in config.py), `deploy.ps1`'s `$TIMERS` array updated. 61/61 tests passing (8 new market-hours tests, 8 new live-monitor tests, 5 new live-exit-check tests), ruff + mypy clean. Systemd units exist but are **NOT enabled on the VPS** — needs Shaun's explicit go-ahead, same as Phase 1's original rollout, plus a real open-market manual validation run per the plan's Level 4 before flipping it on.
+
+**Problem**: Phase 1's exit check (`goat/exit_check.py` + `goat/monitor.py`) is fully built and
+live (systemd timer, enabled + active on the VPS since 2026-08-16, WhatsApp alerts firing via
+`send_whatsapp_notification`) — but it only runs **once daily**, at 21:35 UTC (07:35 AEST), after
+markets have closed, checking that day's final close price. Shaun explicitly wants to be alerted
+the moment a holding's price crosses below its 150DMA **while the market is still open**, not
+found out about it at next morning's batch run ("I need to be alerted via whatsapp AS SOON AS IT
+DROPS BELOW THE 150DMA"). As an interim step, `GOAT_150DMA_FLAG_PCT` was dropped to `0.0` and
+`GOAT_150DMA_MIN_CONSECUTIVE_DAYS` to `1` (2026-08-16, see `goat/config.py` comments) — this
+removes the *within-a-run* confirmation delay (whipsaw filter) but does **not** change the once-
+daily cadence itself, so it does not satisfy this request on its own.
+
+**What's actually needed**: a live/intraday variant of the same check, running repeatedly during
+market hours instead of once after close.
+
+**Open design questions — needs real research/decisions during `/plan-feature`, not assumptions:**
+
+1. **Live price source.** `goat/price_history.py`'s `fetch_close_history()` uses
+   `yf.Ticker(ticker).history(...)` for daily bars — need to confirm/research the right yfinance
+   call for a current/live quote (e.g. `fast_info`, `.info`, or short-interval `history(period="1d",
+   interval="1m")`) and how reliable/rate-limited it is under frequent polling.
+2. **Polling cadence during market hours** — how often is "as soon as" (every 5 min? 15? 30?),
+   trading off alert latency against yfinance rate-limit/reliability risk and VPS load.
+3. **Two separate market-hours windows.** Holdings include both ASX-listed tickers (trade Sydney
+   daytime, ~10am-4pm AEST) and US-listed tickers (trade Sydney overnight, ~11:30pm-6am AEST/
+   12:30-7am AEDT) — a single daily-hours polling window doesn't cover both; scheduling needs to
+   either run near-continuously or dispatch per-ticker based on its listed exchange.
+4. **What "crosses" means against a live price.** The 150DMA itself is still computed from daily
+   closes (recomputing it intraday from partial-day data doesn't make sense) — so this is "does
+   the *current live price* sit below the *most recently completed* 150DMA," not a live-updating
+   MA. Needs to reuse `exit_check.check_150dma_exit`'s MA computation but swap in a live price
+   for the "close" input.
+5. **Dedup/re-alert behavior at this cadence.** Existing `goat_alert_history` dedup (one open
+   alert per ticker+check_name until acknowledged) should still prevent repeat pings for a
+   standing breach — confirm this still holds when checks run every few minutes instead of once
+   daily, rather than assuming.
+6. **Cost/reliability**: yfinance is a scraping-based, free, unofficial API — confirm during
+   planning whether frequent intraday polling risks getting rate-limited/blocked in a way the
+   once-daily cadence doesn't, and whether a fallback/backoff is needed.
+
+**Not scoped here**: any change to the sector-rotation (Phase 2) or heartbeat-scanner (Phase 3)
+cadence — this is scoped only to the holdings 150DMA exit check.
 
 ## Explicitly deferred (do not build as part of this handoff)
 

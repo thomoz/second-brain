@@ -19,7 +19,11 @@ def _flagging_series(flat_price: float = 100.0, drop_price: float = 80.0) -> pd.
 
 
 def _non_flagging_series(flat_price: float = 100.0) -> pd.Series:
-    prices = [flat_price] * 152
+    # 150 flat days establish the MA, then two days slightly ABOVE it -- with
+    # GOAT_150DMA_FLAG_PCT at 0.0 (Shaun's 2026-08-16 override), a price sitting
+    # exactly ON the MA now also qualifies as a flag ("at or below"), so this
+    # must be strictly above flat_price to represent genuine recovery.
+    prices = [flat_price] * 150 + [flat_price + 0.5, flat_price + 0.5]
     return pd.Series(prices, index=_dates(len(prices)))
 
 

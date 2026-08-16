@@ -18,7 +18,11 @@ SEVERITY = "flag"
 SOURCE_TABLE = "holdings"
 
 
-def _reconcile_alerts(
+# Public (not module-private) because goat/live_monitor.py also calls this
+# directly -- shared dedup state (goat_alert_history) is riskier to duplicate
+# than a pure computation would be, so this is imported properly rather than
+# ported/copied the way price_history.py's crash_windows-derived logic was.
+def reconcile_alerts(
     ticker: str, checks: list[CheckResult], conn: sqlite3.Connection
 ) -> list[dict[str, Any]]:
     new_alerts: list[dict[str, Any]] = []
@@ -52,7 +56,7 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
                 print(f"[goat-monitor] no price history for {ticker}, skipping")
                 continue
             check = exit_check.check_150dma_exit(ticker, close)
-            new_alerts.extend(_reconcile_alerts(ticker, [check], conn))
+            new_alerts.extend(reconcile_alerts(ticker, [check], conn))
             checked += 1
         except Exception as e:
             print(f"[goat-monitor] error checking {ticker}: {e}")

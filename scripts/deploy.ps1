@@ -18,7 +18,8 @@ $TIMERS = @(
     "second-brain-heartbeat.timer",
     "second-brain-vaultsync.timer",
     "second-brain-reflect.timer",
-    "second-brain-goat-monitor.timer"
+    "second-brain-goat-monitor.timer",
+    "second-brain-goat-live-check.timer"
 )
 
 function Invoke-Remote {
