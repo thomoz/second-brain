@@ -113,3 +113,78 @@ GOAT_ASX_MARKET_CLOSE = (16, 0)  # 4:00pm Sydney local
 GOAT_US_TZ = "America/New_York"
 GOAT_US_MARKET_OPEN = (9, 30)    # 9:30am US Eastern
 GOAT_US_MARKET_CLOSE = (16, 0)   # 4:00pm US Eastern
+
+# S&P 500 heartbeat scanner, per investments/goat/HANDOFF.md Phase 3. See
+# .agent/plans/goat-phase3-heartbeat-scanner.md's "RESEARCH RESOLVED" section
+# for why BBW-percentile-squeeze was chosen over Minervini's VCP.
+GOAT_HEARTBEAT_HISTORY_LOOKBACK_DAYS = 500  # calendar days -- same margin
+                                               # philosophy as GOLD_MA_HISTORY_LOOKBACK_DAYS
+                                               # (500 calendar days for a 200-day MA in
+                                               # mytrader/config.py); here it must
+                                               # comfortably cover the 252-trading-day BBW
+                                               # percentile lookback below plus the 20-day
+                                               # Bollinger period plus weekday/holiday margin.
+GOAT_HEARTBEAT_BBW_PERIOD_DAYS = 20  # textbook Bollinger default -- same value as
+                                        # mytrader.config.GOLD_TA_BOLLINGER_PERIOD_DAYS,
+                                        # reused for consistency, not re-derived.
+GOAT_HEARTBEAT_BBW_STD_MULTIPLIER = 2.0  # textbook default -- same value as
+                                            # mytrader.config.GOLD_TA_BOLLINGER_STD_MULTIPLIER.
+GOAT_HEARTBEAT_BBW_PERCENTILE_LOOKBACK_DAYS = 252  # ~1 trading year -- the window BBW's
+                                                       # own rolling percentile is measured
+                                                       # against (self-relative to each
+                                                       # ticker's own volatility regime, not
+                                                       # a universal fixed %). v1/tunable.
+GOAT_HEARTBEAT_BBW_PERCENTILE = 10  # flag when BBW sits at/below its own trailing
+                                       # GOAT_HEARTBEAT_BBW_PERCENTILE_LOOKBACK_DAYS-day
+                                       # 10th percentile -- "near a 1-year volatility low".
+                                       # v1/tunable, not literature-final, same status as
+                                       # GOAT_SECTOR_CROSS_RECENCY_DAYS.
+GOAT_HEARTBEAT_MIN_DURATION_DAYS = 63  # ~3 calendar months of trading days -- matches the
+                                          # webinar's own "3 months minimum" and this
+                                          # codebase's existing GOAT_SECTOR_RANK_WINDOW_TRADING_DAYS
+                                          # precedent for that exact figure.
+GOAT_HEARTBEAT_SQUEEZE_MIN_FRACTION = 0.8  # at least 80% of the trailing
+                                              # GOAT_HEARTBEAT_MIN_DURATION_DAYS days must be
+                                              # in-squeeze -- the webinar describes "smooth
+                                              # up-down-up-down", not a perfectly unbroken
+                                              # flat line, so a strict 100%-of-days
+                                              # requirement would misfire on ordinary
+                                              # single-day noise. v1/tunable.
+
+# Fundamentals survival context, per HANDOFF.md's debt -> cash runway -> margins ->
+# revenue growth -> cash generation priority order. Informational on every candidate,
+# NOT a pass/fail gate -- confirmed with Shaun 2026-08-17 (gating on all 5 would
+# disqualify almost the entire S&P 500). debt/equity reuses mytrader.config's existing
+# DEBT_TO_EQUITY_FLAG threshold directly, not a new number.
+GOAT_CASH_RUNWAY_FLAG_YEARS = 1.0  # cash-burning companies with less than this many
+                                      # years of runway (totalCash / abs(freeCashflow))
+                                      # combined with high debt/equity trip the
+                                      # insolvency-risk suppression check below --
+                                      # 1 year is a conservative, common
+                                      # cash-runway-concern floor. v1/tunable.
+
+GOAT_SP500_WIKI_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+GOAT_SP500_CACHE_TTL_DAYS = 7  # matches the weekly scan cadence -- no point
+                                  # re-scraping Wikipedia more often than the scan itself
+                                  # runs.
+GOAT_SP500_USER_AGENT = "Mozilla/5.0 (compatible; SecondBrainGoat/1.0)"
+
+# GICS Sector (Wikipedia's own column values) -> GOAT_SECTOR_ETFS label mapping.
+# Only "Information Technology" actually differs from GOAT_SECTOR_ETFS's "Technology"
+# -- the rest are written out explicitly anyway so a future Wikipedia label change
+# fails loudly (KeyError on an unmapped sector) rather than silently dropping tickers.
+GOAT_GICS_TO_ETF_SECTOR_LABEL: dict[str, str] = {
+    "Information Technology": "Technology",
+    "Financials": "Financials",
+    "Energy": "Energy",
+    "Health Care": "Health Care",
+    "Consumer Discretionary": "Consumer Discretionary",
+    "Consumer Staples": "Consumer Staples",
+    "Industrials": "Industrials",
+    "Materials": "Materials",
+    "Utilities": "Utilities",
+    "Real Estate": "Real Estate",
+    "Communication Services": "Communication Services",
+}
+
+GOAT_HEARTBEAT_CANDIDATES_MD_PATH = GOAT_DIR / "heartbeat-candidates-pending-review.md"

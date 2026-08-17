@@ -33,6 +33,12 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
                 source          TEXT NOT NULL DEFAULT 'goat_sector_rotation',
                 flagged_at      TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS goat_sp500_constituents (
+                ticker      TEXT PRIMARY KEY,
+                security    TEXT NOT NULL,
+                gics_sector TEXT NOT NULL,
+                fetched_at  TEXT NOT NULL
+            );
         """)
 
 
@@ -106,3 +112,29 @@ def delete_goat_pending_candidate(conn: sqlite3.Connection, ticker: str) -> int:
             "DELETE FROM goat_pending_candidates WHERE ticker = ?", (ticker,)
         )
         return cur.rowcount
+
+
+def get_sp500_constituents_fetched_at(conn: sqlite3.Connection) -> str | None:
+    """The whole table is refreshed atomically (replace_sp500_constituents), so
+    every row shares the same fetched_at -- MAX is just "the" value, not really
+    an aggregation."""
+    row = conn.execute("SELECT MAX(fetched_at) AS fetched_at FROM goat_sp500_constituents").fetchone()
+    return row["fetched_at"] if row is not None else None
+
+
+def replace_sp500_constituents(conn: sqlite3.Connection, rows: list[dict]) -> None:
+    """Delete-all-then-insert-all, not a per-row upsert -- the constituent list
+    changes membership (additions/removals) between refreshes, and a stale row
+    for a ticker that's dropped out of the index must not linger."""
+    now = _now()
+    with conn:
+        conn.execute("DELETE FROM goat_sp500_constituents")
+        conn.executemany(
+            """INSERT INTO goat_sp500_constituents (ticker, security, gics_sector, fetched_at)
+               VALUES (?, ?, ?, ?)""",
+            [(r["ticker"], r["security"], r["gics_sector"], now) for r in rows],
+        )
+
+
+def get_sp500_constituents(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute("SELECT * FROM goat_sp500_constituents ORDER BY ticker").fetchall()

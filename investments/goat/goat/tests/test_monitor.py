@@ -145,7 +145,7 @@ def test_maybe_notify_fires_on_sector_candidates_alone(monkeypatch):
     toast_calls, whatsapp_calls = [], []
     monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
 
-    monitor.maybe_notify({"new_alerts": []}, new_sector_candidates=2)
+    monitor.maybe_notify({"new_alerts": []}, new_candidates=2)
     assert len(toast_calls) == 1
     assert len(whatsapp_calls) == 1
 

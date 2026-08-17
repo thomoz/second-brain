@@ -30,6 +30,9 @@ def db_conn(db_path):
 def _isolate_goat_report_path(monkeypatch, tmp_path):
     import goat.config as goat_config
     monkeypatch.setattr(goat_config, "GOAT_MONITOR_REPORT_PATH", tmp_path / "monitor-report.md")
+    monkeypatch.setattr(
+        goat_config, "GOAT_HEARTBEAT_CANDIDATES_MD_PATH", tmp_path / "heartbeat-candidates-pending-review.md"
+    )
 
 
 @pytest.fixture(autouse=True)

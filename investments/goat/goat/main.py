@@ -37,7 +37,7 @@ def cmd_monitor(args) -> None:
     write_report(result)
     write_sector_ranking_report(sector_result)
     write_sector_candidates_report(sector_result)
-    maybe_notify(result, new_sector_candidates=len(sector_result["new_candidates"]))
+    maybe_notify(result, new_candidates=len(sector_result["new_candidates"]))
     print(
         f"Goat Monitor complete: {len(result['new_alerts'])} new exit alert(s), "
         f"{len(sector_result['new_candidates'])} new sector candidate(s). "
@@ -71,6 +71,23 @@ def cmd_scan_sectors(args) -> None:
         f"Sector scan complete: {len(result['new_candidates'])} new candidate(s), "
         f"{len(result['pending_candidates'])} pending. "
         f"See investments/goat/sector-ranking.md and sector-candidates-pending-review.md"
+    )
+
+
+def cmd_scan_heartbeat(args) -> None:
+    from .heartbeat_scan import run_heartbeat_scan, write_heartbeat_candidates_report
+    from .monitor import maybe_notify
+
+    conn = _open_conn()
+    result = run_heartbeat_scan(conn)
+    conn.close()
+    write_heartbeat_candidates_report(result)
+    maybe_notify({"new_alerts": []}, new_candidates=len(result["new_candidates"]))
+    print(
+        f"Heartbeat scan complete: scanned {result['scanned']} ticker(s) across "
+        f"{len(result['rising_sectors'])} rising sector(s), "
+        f"{len(result['new_candidates'])} new candidate(s). "
+        f"See investments/goat/heartbeat-candidates-pending-review.md"
     )
 
 
@@ -126,6 +143,10 @@ def main() -> None:
         "check-live",
         help="Intraday 150DMA live-price check against currently-open-market holdings",
     )
+    subparsers.add_parser(
+        "scan-heartbeat",
+        help="On-demand S&P 500 heartbeat-pattern scan within currently-rising sectors",
+    )
 
     p_promote = subparsers.add_parser(
         "promote-candidate", help="Write a pending Goat sector candidate into my-trader's real watchlist",
@@ -145,6 +166,7 @@ def main() -> None:
         "monitor": cmd_monitor,
         "scan-sectors": cmd_scan_sectors,
         "check-live": cmd_check_live,
+        "scan-heartbeat": cmd_scan_heartbeat,
         "promote-candidate": cmd_promote_candidate,
         "dismiss-candidate": cmd_dismiss_candidate,
     }

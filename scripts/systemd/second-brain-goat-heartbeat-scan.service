@@ -1,0 +1,11 @@
+[Unit]
+Description=Goat Heartbeat Scan
+After=network.target
+
+[Service]
+Type=oneshot
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain/investments/goat
+ExecStart=/home/secondbrain/second-brain/investments/.venv/bin/python -m goat.main scan-heartbeat
+StandardOutput=append:/home/secondbrain/second-brain/investments/goat/heartbeat_scan_runs.log
+StandardError=append:/home/secondbrain/second-brain/investments/goat/heartbeat_scan_runs.log

@@ -106,9 +106,9 @@ def write_report(result: dict[str, Any]) -> None:
     config.GOAT_MONITOR_REPORT_PATH.write_text(render_report(result), encoding="utf-8")
 
 
-def maybe_notify(result: dict[str, Any], new_sector_candidates: int = 0) -> None:
+def maybe_notify(result: dict[str, Any], new_candidates: int = 0) -> None:
     n_alerts = len(result["new_alerts"])
-    if not n_alerts and not new_sector_candidates:
+    if not n_alerts and not new_candidates:
         return
     import sys
     from pathlib import Path
@@ -120,8 +120,8 @@ def maybe_notify(result: dict[str, Any], new_sector_candidates: int = 0) -> None
     parts = []
     if n_alerts:
         parts.append(f"{n_alerts} holding(s) below 150DMA exit threshold")
-    if new_sector_candidates:
-        parts.append(f"{new_sector_candidates} new sector breakout candidate(s)")
+    if new_candidates:
+        parts.append(f"{new_candidates} new sector breakout candidate(s)")
     summary = "; ".join(parts)
 
     # Toast only reaches whichever desktop happens to be running this (and is a
