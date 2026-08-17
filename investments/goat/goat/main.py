@@ -37,7 +37,7 @@ def cmd_monitor(args) -> None:
     write_report(result)
     write_sector_ranking_report(sector_result)
     write_sector_candidates_report(sector_result)
-    maybe_notify(result, new_candidates=len(sector_result["new_candidates"]))
+    maybe_notify(result, new_candidates=sector_result["new_candidates"])
     print(
         f"Goat Monitor complete: {len(result['new_alerts'])} new exit alert(s), "
         f"{len(sector_result['new_candidates'])} new sector candidate(s). "
@@ -60,13 +60,19 @@ def cmd_check_live(args) -> None:
 
 
 def cmd_scan_sectors(args) -> None:
-    from .monitor import run_sector_scan, write_sector_candidates_report, write_sector_ranking_report
+    from .monitor import (
+        maybe_notify,
+        run_sector_scan,
+        write_sector_candidates_report,
+        write_sector_ranking_report,
+    )
 
     conn = _open_conn()
     result = run_sector_scan(conn)
     conn.close()
     write_sector_ranking_report(result)
     write_sector_candidates_report(result)
+    maybe_notify({"new_alerts": []}, new_candidates=result["new_candidates"])
     print(
         f"Sector scan complete: {len(result['new_candidates'])} new candidate(s), "
         f"{len(result['pending_candidates'])} pending. "
@@ -82,7 +88,7 @@ def cmd_scan_heartbeat(args) -> None:
     result = run_heartbeat_scan(conn)
     conn.close()
     write_heartbeat_candidates_report(result)
-    maybe_notify({"new_alerts": []}, new_candidates=len(result["new_candidates"]))
+    maybe_notify({"new_alerts": []}, new_candidates=result["new_candidates"])
     print(
         f"Heartbeat scan complete: scanned {result['scanned']} ticker(s) across "
         f"{len(result['rising_sectors'])} rising sector(s), "

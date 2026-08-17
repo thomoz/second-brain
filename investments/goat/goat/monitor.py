@@ -106,9 +106,15 @@ def write_report(result: dict[str, Any]) -> None:
     config.GOAT_MONITOR_REPORT_PATH.write_text(render_report(result), encoding="utf-8")
 
 
-def maybe_notify(result: dict[str, Any], new_candidates: int = 0) -> None:
+def maybe_notify(result: dict[str, Any], new_candidates: list[dict[str, Any]] | None = None) -> None:
+    """new_candidates takes the actual staged-candidate dicts (ticker/sector_label/
+    detail), not just a count -- 2026-08-17 fix: the previous int-only signature
+    meant a WhatsApp alert could tell Shaun "1 new sector breakout candidate(s)"
+    with no way to say which ticker/sector, forcing him to go check the report
+    file for something the alert should have said outright."""
+    candidates = new_candidates or []
     n_alerts = len(result["new_alerts"])
-    if not n_alerts and not new_candidates:
+    if not n_alerts and not candidates:
         return
     import sys
     from pathlib import Path
@@ -120,8 +126,8 @@ def maybe_notify(result: dict[str, Any], new_candidates: int = 0) -> None:
     parts = []
     if n_alerts:
         parts.append(f"{n_alerts} holding(s) below 150DMA exit threshold")
-    if new_candidates:
-        parts.append(f"{new_candidates} new sector breakout candidate(s)")
+    if candidates:
+        parts.append(f"{len(candidates)} new sector breakout candidate(s)")
     summary = "; ".join(parts)
 
     # Toast only reaches whichever desktop happens to be running this (and is a
@@ -132,6 +138,8 @@ def maybe_notify(result: dict[str, Any], new_candidates: int = 0) -> None:
     lines = [f"Goat Monitor: {summary}."]
     if n_alerts:
         lines += [f"- {a['ticker']}: {a['message']}" for a in result["new_alerts"]]
+    if candidates:
+        lines += [f"- {c['ticker']} ({c['sector_label']}): {c['detail']}" for c in candidates]
     send_whatsapp_notification("\n".join(lines))
 
 

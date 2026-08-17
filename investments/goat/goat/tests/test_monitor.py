@@ -145,9 +145,32 @@ def test_maybe_notify_fires_on_sector_candidates_alone(monkeypatch):
     toast_calls, whatsapp_calls = [], []
     monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
 
-    monitor.maybe_notify({"new_alerts": []}, new_candidates=2)
+    candidates = [
+        {"ticker": "XLK", "sector_label": "Technology", "detail": "XLK breakout detail"},
+        {"ticker": "XLI", "sector_label": "Industrials", "detail": "XLI breakout detail"},
+    ]
+    monitor.maybe_notify({"new_alerts": []}, new_candidates=candidates)
     assert len(toast_calls) == 1
     assert len(whatsapp_calls) == 1
+
+
+def test_maybe_notify_whatsapp_message_names_ticker_and_sector_for_candidates(monkeypatch):
+    """Regression test for the 2026-08-17 gap: a candidate notification used to
+    say only "N new sector breakout candidate(s)" with no way to tell which
+    ticker/sector fired, forcing a manual check of the report file."""
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+
+    candidates = [{"ticker": "XLI", "sector_label": "Industrials", "detail": "crossed above its 50-day MA"}]
+    monitor.maybe_notify({"new_alerts": []}, new_candidates=candidates)
+    (message,), _kwargs = whatsapp_calls[0]
+    assert "XLI" in message
+    assert "Industrials" in message
+    assert "crossed above its 50-day MA" in message
+
+
+def test_maybe_notify_skips_when_no_candidates_and_no_alerts():
+    monitor.maybe_notify({"new_alerts": []}, new_candidates=[])  # must not raise, no notification module needed
 
 
 def test_maybe_notify_sends_whatsapp_with_ticker_detail(monkeypatch):
