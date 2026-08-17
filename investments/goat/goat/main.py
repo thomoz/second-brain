@@ -101,10 +101,15 @@ def cmd_promote_candidate(args) -> None:
     from mytrader.db import upsert_watchlist_row
     from mytrader.snapshot import regenerate_all
 
+    from . import config
     from .db import delete_goat_pending_candidate, get_goat_pending_candidate
 
     conn = _open_conn()
     ticker = args.ticker.strip().upper()
+    if ticker in config.GOAT_BANNED_TICKERS:
+        conn.close()
+        print(f"{ticker} is banned (see GOAT_BANNED_TICKERS) and cannot be promoted.")
+        return
     pending = get_goat_pending_candidate(conn, ticker)
     if pending is None:
         conn.close()

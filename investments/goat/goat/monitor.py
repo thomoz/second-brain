@@ -155,6 +155,8 @@ def _stage_new_sector_candidates(
     for ticker, sector_label, check in checks:
         if check.verdict != "interesting":
             continue
+        if ticker in config.GOAT_BANNED_TICKERS:
+            continue
         if mt_db.get_holding_row(conn, ticker) is not None:
             continue
         if mt_db.get_watchlist_row(conn, ticker) is not None:

@@ -54,6 +54,13 @@ GOAT_SECTOR_ETFS: dict[str, str] = {
    # GICS-aligned sector-rotation universe. Per HANDOFF.md's answer to Shaun's Q1
    # ("is there a free way to see which sectors are rising/falling?").
 
+GOAT_BANNED_TICKERS: set[str] = {"XLI"}  # Banned per Shaun 2026-08-17 -- RTX Corp
+    # (defense contractor) is a top-5 holding (~5.2%). Stays in GOAT_SECTOR_ETFS
+    # above (still shown in sector-ranking.md for rotation-comparison context) but
+    # is never staged as a breakout candidate and can never be promoted, even
+    # manually -- see monitor._stage_new_sector_candidates and
+    # main.cmd_promote_candidate.
+
 GOAT_SECTOR_HISTORY_LOOKBACK_DAYS = 400  # calendar days -- same margin philosophy
                                             # as GOAT_MA_HISTORY_LOOKBACK_DAYS,
                                             # comfortably exceeds the rank window +
