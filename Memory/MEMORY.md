@@ -44,6 +44,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - For SongbookDB upgrade work, make and test changes one by one; avoid bulk uploads or commits
 - No em dashes in drafted content
 - For SongbookDB PHP upgrade work, read the file, propose the fix, wait for approval, then commit
+- Hand off blocked commands as one pasteable `&&` block unless shell context changes
 ---
 
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_

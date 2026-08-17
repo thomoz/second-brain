@@ -74,3 +74,8 @@ Skip drafts for: Newsletters, automated notifications, spam
 - (Aug 16) GOAT Phase 1 exit check is live on VPS via systemd timer
 - (Aug 16) GOAT 150DMA daily check runs at 21:35 UTC / 07:35 AEST
 - (Aug 16) GOAT interim intraday alert config uses pct 0.0 and min consecutive days 1
+
+## 2026-08-17 Reflection
+- (Aug 17) Goat handoff canonical file is `investments/goat/HANDOFF.md`
+- (Aug 17) `second-brain-goat-live-check.timer` is enabled on the VPS
+- (Aug 17) Goat S&P 500 heartbeat scanner is live on the VPS
