@@ -83,3 +83,118 @@ def test_get_all_goat_pending_candidates_lists_ticker_sorted(db_conn):
     db.insert_goat_pending_candidate(db_conn, ticker="XLK", sector_label="Technology", signal_detail="d")
     rows = db.get_all_goat_pending_candidates(db_conn)
     assert [r["ticker"] for r in rows] == ["XLK", "XLV"]
+
+
+def test_insert_goat_insider_filing_seen_returns_true_on_first_insert(db_conn):
+    result = db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="AAPL|2026-08-15|2026-08-14|Jane Doe|P|150000.00",
+        ticker="AAPL", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="Jane Doe", trade_type="P", value=150000.0, kind="holdings_watch",
+    )
+    assert result is True
+
+
+def test_insert_goat_insider_filing_seen_returns_false_on_duplicate_dedup_key(db_conn):
+    kwargs = dict(
+        dedup_key="AAPL|2026-08-15|2026-08-14|Jane Doe|P|150000.00",
+        ticker="AAPL", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="Jane Doe", trade_type="P", value=150000.0, kind="holdings_watch",
+    )
+    db.insert_goat_insider_filing_seen(db_conn, **kwargs)
+    result = db.insert_goat_insider_filing_seen(db_conn, **kwargs)
+    assert result is False
+
+
+def test_get_recent_insider_filings_seen_filters_by_kind(db_conn):
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="AAPL", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="Jane Doe", trade_type="P", value=150000.0, kind="holdings_watch",
+    )
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k2", ticker="MSFT", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="John Smith", trade_type="P", value=30000.0, kind="discovery",
+    )
+    rows = db.get_recent_insider_filings_seen(db_conn, kind="discovery")
+    assert len(rows) == 1
+    assert rows[0]["ticker"] == "MSFT"
+
+
+def test_get_recent_insider_filings_seen_orders_newest_first(db_conn):
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="AAPL", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="Jane Doe", trade_type="P", value=150000.0, kind="holdings_watch",
+    )
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k2", ticker="MSFT", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="John Smith", trade_type="P", value=30000.0, kind="holdings_watch",
+    )
+    rows = db.get_recent_insider_filings_seen(db_conn)
+    assert rows[0]["ticker"] == "MSFT"
+    assert rows[1]["ticker"] == "AAPL"
+
+
+def test_insert_goat_insider_filing_seen_stores_pct_owned_change(db_conn):
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="AAPL", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="Jane Doe", trade_type="S", value=150000.0, kind="holdings_watch",
+        pct_owned_change=-12.5,
+    )
+    rows = db.get_recent_insider_filings_seen(db_conn)
+    assert rows[0]["pct_owned_change"] == -12.5
+
+
+def test_insert_goat_insider_filing_seen_defaults_pct_owned_change_to_none(db_conn):
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="AAPL", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="Jane Doe", trade_type="P", value=150000.0, kind="holdings_watch",
+    )
+    rows = db.get_recent_insider_filings_seen(db_conn)
+    assert rows[0]["pct_owned_change"] is None
+
+
+def test_count_insider_sales_since_counts_only_matching_ticker_and_insider(db_conn):
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="AAPL", filing_date="2026-08-01", trade_date="2026-08-01",
+        insider_name="Jane Doe", trade_type="S", value=50000.0, kind="holdings_watch",
+    )
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k2", ticker="AAPL", filing_date="2026-08-01", trade_date="2026-08-01",
+        insider_name="John Smith", trade_type="S", value=50000.0, kind="holdings_watch",
+    )
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k3", ticker="MSFT", filing_date="2026-08-01", trade_date="2026-08-01",
+        insider_name="Jane Doe", trade_type="S", value=50000.0, kind="holdings_watch",
+    )
+    count = db.count_insider_sales_since(
+        db_conn, ticker="AAPL", insider_name="Jane Doe", start_date="2026-05-01", before_date="2026-08-17",
+    )
+    assert count == 1
+
+
+def test_count_insider_sales_since_excludes_filings_outside_window(db_conn):
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="AAPL", filing_date="2026-01-01", trade_date="2026-01-01",
+        insider_name="Jane Doe", trade_type="S", value=50000.0, kind="holdings_watch",
+    )
+    count = db.count_insider_sales_since(
+        db_conn, ticker="AAPL", insider_name="Jane Doe", start_date="2026-05-01", before_date="2026-08-17",
+    )
+    assert count == 0
+
+
+def test_count_insider_sales_since_excludes_purchases(db_conn):
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="AAPL", filing_date="2026-08-01", trade_date="2026-08-01",
+        insider_name="Jane Doe", trade_type="P", value=50000.0, kind="holdings_watch",
+    )
+    count = db.count_insider_sales_since(
+        db_conn, ticker="AAPL", insider_name="Jane Doe", start_date="2026-05-01", before_date="2026-08-17",
+    )
+    assert count == 0
+
+
+def test_init_goat_tables_migration_is_idempotent(db_conn):
+    from goat.db import init_goat_tables
+
+    init_goat_tables(db_conn)  # second call must not raise (column already exists)
+    init_goat_tables(db_conn)

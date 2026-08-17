@@ -195,3 +195,42 @@ GOAT_GICS_TO_ETF_SECTOR_LABEL: dict[str, str] = {
 }
 
 GOAT_HEARTBEAT_CANDIDATES_MD_PATH = GOAT_DIR / "heartbeat-candidates-pending-review.md"
+
+# Insider trading scanner (OpenInsider), per investments/insider-trading-scanner-handoff.md
+# and Shaun's 2026-08-17 clarification: he's after large open-market sells (potential
+# "board member expects bad news" signal, plausibly $1M+) and $25k+ open-market buys.
+# P/S trade-type codes only -- excludes grants (A), option exercises (M), gifts (G),
+# tax-withholding sales (F), none of which reflect the same conviction signal.
+GOAT_OPENINSIDER_BASE_URL = "http://openinsider.com"
+GOAT_OPENINSIDER_USER_AGENT = "Mozilla/5.0 (compatible; SecondBrainGoat/1.0)"
+GOAT_INSIDER_PURCHASE_MIN_VALUE = 25_000  # matches OpenInsider's own
+                                              # /latest-insider-purchases-25k floor.
+                                              # Purchases stay dollar-gated -- Shaun's
+                                              # 2026-08-17 "thresholds aren't helpful"
+                                              # feedback was specifically about sells
+                                              # (a CEO "bailing out"), not buys.
+GOAT_INSIDER_SALE_MIN_VALUE = 1_000  # Shaun 2026-08-17: $25k/$100k dollar floors are
+    # meaningless for a large-cap exec trying to exit quietly -- a $5M sale is trivial
+    # against a $500M stake but alarming against a $5.5M one. Dropped to a near-zero
+    # noise floor (filters literal fractional-share administrative trades only); the
+    # real gate for sales is now GOAT_INSIDER_SALE_PCT_THRESHOLD_FIRST/_REPEAT below.
+GOAT_INSIDER_SALE_LOOKBACK_DAYS = 90  # rolling window for detecting repeated smaller
+    # sales by the same insider on the same ticker. Shaun 2026-08-17: "they could easily
+    # sell most of their stock at 1% per day over three months" while staying under any
+    # single-sale threshold every time. v1/tunable -- Shaun flagged this window itself
+    # as something to revisit.
+GOAT_INSIDER_SALE_PCT_THRESHOLD_FIRST = 10.0  # % of the insider's own position --
+    # gates a sale when this insider has had no OTHER sale on this ticker within
+    # GOAT_INSIDER_SALE_LOOKBACK_DAYS. Shaun's number, 2026-08-17.
+GOAT_INSIDER_SALE_PCT_THRESHOLD_REPEAT = 1.0  # % of position -- much lower bar once
+    # ANY prior sale by this same insider/ticker exists in the lookback window, to
+    # catch the "salami slicing" pattern described above. Shaun's number, 2026-08-17.
+GOAT_INSIDER_HOLDINGS_WATCH_LOOKBACK_DAYS = 5  # Form 4 must be filed within 2 US
+    # business days of the trade -- 5 calendar days of slack covers weekends/holidays
+    # on top of this scan's own daily cadence, without re-surfacing anything genuinely
+    # stale. v1/tunable. NOTE: this gates which filings this RUN considers "fresh
+    # enough to process" -- distinct from GOAT_INSIDER_SALE_LOOKBACK_DAYS's 90-day
+    # pattern-detection window, which looks back across many runs' worth of history.
+GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS = 5  # same reasoning as above -- a safety net on
+    # top of OpenInsider's own latest-first page ordering.
+GOAT_INSIDER_SCAN_REPORT_PATH = GOAT_DIR / "insider-scan-report.md"

@@ -39,7 +39,29 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
                 gics_sector TEXT NOT NULL,
                 fetched_at  TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS goat_insider_filings_seen (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                dedup_key       TEXT NOT NULL UNIQUE,
+                ticker          TEXT NOT NULL,
+                filing_date     TEXT NOT NULL,
+                trade_date      TEXT NOT NULL,
+                insider_name    TEXT NOT NULL,
+                trade_type      TEXT NOT NULL,
+                value           REAL NOT NULL,
+                kind            TEXT NOT NULL,
+                seen_at         TEXT NOT NULL
+            );
         """)
+    # Migration for DBs created before pct_owned_change existed (added
+    # 2026-08-17 for the repeated-small-sales pattern -- see
+    # count_insider_sales_since) -- SQLite has no "ADD COLUMN IF NOT EXISTS",
+    # so this is guarded by catching the duplicate-column error instead.
+    # Safe to call every init_goat_tables run (idempotent).
+    with conn:
+        try:
+            conn.execute("ALTER TABLE goat_insider_filings_seen ADD COLUMN pct_owned_change REAL")
+        except sqlite3.OperationalError:
+            pass
 
 
 def get_open_goat_alert(
@@ -138,3 +160,54 @@ def replace_sp500_constituents(conn: sqlite3.Connection, rows: list[dict]) -> No
 
 def get_sp500_constituents(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return conn.execute("SELECT * FROM goat_sp500_constituents ORDER BY ticker").fetchall()
+
+
+def insert_goat_insider_filing_seen(
+    conn: sqlite3.Connection, *, dedup_key: str, ticker: str, filing_date: str,
+    trade_date: str, insider_name: str, trade_type: str, value: float, kind: str,
+    pct_owned_change: float | None = None,
+) -> bool:
+    """Returns True if this filing was newly seen (inserted), False if it's a
+    duplicate of a filing already alerted/staged in a prior run. Every sale
+    filing gets recorded here regardless of whether it was alert-worthy --
+    count_insider_sales_since relies on the full history, not just alerted
+    filings, to catch a run of individually-small sales."""
+    with conn:
+        cur = conn.execute(
+            """INSERT OR IGNORE INTO goat_insider_filings_seen
+               (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, seen_at, pct_owned_change)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, _now(), pct_owned_change),
+        )
+        return cur.rowcount == 1
+
+
+def get_recent_insider_filings_seen(
+    conn: sqlite3.Connection, kind: str | None = None, limit: int = 50
+) -> list[sqlite3.Row]:
+    if kind is not None:
+        return conn.execute(
+            "SELECT * FROM goat_insider_filings_seen WHERE kind = ? ORDER BY seen_at DESC LIMIT ?",
+            (kind, limit),
+        ).fetchall()
+    return conn.execute(
+        "SELECT * FROM goat_insider_filings_seen ORDER BY seen_at DESC LIMIT ?", (limit,)
+    ).fetchall()
+
+
+def count_insider_sales_since(
+    conn: sqlite3.Connection, *, ticker: str, insider_name: str, start_date: str, before_date: str,
+) -> int:
+    """Counts this insider's prior 'S' filings on this ticker with
+    start_date <= trade_date < before_date -- strictly before, so a filing
+    can never count itself regardless of insert order. Used to detect a
+    pattern of repeated smaller sales (each individually under the
+    single-sale threshold) that only look alarming in aggregate -- see
+    insider_scan.run_holdings_watch."""
+    row = conn.execute(
+        """SELECT COUNT(*) AS n FROM goat_insider_filings_seen
+           WHERE ticker = ? AND insider_name = ? AND trade_type = 'S'
+             AND trade_date >= ? AND trade_date < ?""",
+        (ticker, insider_name, start_date, before_date),
+    ).fetchone()
+    return row["n"]

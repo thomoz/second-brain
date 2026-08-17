@@ -33,6 +33,9 @@ def _isolate_goat_report_path(monkeypatch, tmp_path):
     monkeypatch.setattr(
         goat_config, "GOAT_HEARTBEAT_CANDIDATES_MD_PATH", tmp_path / "heartbeat-candidates-pending-review.md"
     )
+    monkeypatch.setattr(
+        goat_config, "GOAT_INSIDER_SCAN_REPORT_PATH", tmp_path / "insider-scan-report.md"
+    )
 
 
 @pytest.fixture(autouse=True)

@@ -106,7 +106,10 @@ def write_report(result: dict[str, Any]) -> None:
     config.GOAT_MONITOR_REPORT_PATH.write_text(render_report(result), encoding="utf-8")
 
 
-def maybe_notify(result: dict[str, Any], new_candidates: list[dict[str, Any]] | None = None) -> None:
+def maybe_notify(
+    result: dict[str, Any], new_candidates: list[dict[str, Any]] | None = None,
+    alert_label: str = "below 150DMA exit threshold",
+) -> None:
     """new_candidates takes the actual staged-candidate dicts (ticker/sector_label/
     detail), not just a count -- 2026-08-17 fix: the previous int-only signature
     meant a WhatsApp alert could tell Shaun "1 new sector breakout candidate(s)"
@@ -125,7 +128,7 @@ def maybe_notify(result: dict[str, Any], new_candidates: list[dict[str, Any]] | 
 
     parts = []
     if n_alerts:
-        parts.append(f"{n_alerts} holding(s) below 150DMA exit threshold")
+        parts.append(f"{n_alerts} holding(s) {alert_label}")
     if candidates:
         parts.append(f"{len(candidates)} new sector breakout candidate(s)")
     summary = "; ".join(parts)

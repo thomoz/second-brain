@@ -97,6 +97,27 @@ def cmd_scan_heartbeat(args) -> None:
     )
 
 
+def cmd_scan_insiders(args) -> None:
+    from .insider_scan import run_discovery_scan, run_holdings_watch, write_insider_scan_report
+    from .monitor import maybe_notify
+
+    conn = _open_conn()
+    watch_result = run_holdings_watch(conn)
+    discovery_result = run_discovery_scan(conn)
+    conn.close()
+    write_insider_scan_report(watch_result, discovery_result)
+    maybe_notify(
+        {"new_alerts": watch_result["new_alerts"]},
+        new_candidates=discovery_result["new_candidates"],
+        alert_label="insider P/S filing(s) on current holdings",
+    )
+    print(
+        f"Insider scan complete: {len(watch_result['new_alerts'])} holdings-watch alert(s), "
+        f"{len(discovery_result['new_candidates'])} new discovery candidate(s). "
+        f"See investments/goat/insider-scan-report.md"
+    )
+
+
 def cmd_promote_candidate(args) -> None:
     from mytrader.db import upsert_watchlist_row
     from mytrader.snapshot import regenerate_all
@@ -158,6 +179,10 @@ def main() -> None:
         "scan-heartbeat",
         help="On-demand S&P 500 heartbeat-pattern scan within currently-rising sectors",
     )
+    subparsers.add_parser(
+        "scan-insiders",
+        help="Daily OpenInsider Form 4 scan -- holdings-watch (P/S on held tickers) + market-wide $25k+ purchase discovery",
+    )
 
     p_promote = subparsers.add_parser(
         "promote-candidate", help="Write a pending Goat sector candidate into my-trader's real watchlist",
@@ -178,6 +203,7 @@ def main() -> None:
         "scan-sectors": cmd_scan_sectors,
         "check-live": cmd_check_live,
         "scan-heartbeat": cmd_scan_heartbeat,
+        "scan-insiders": cmd_scan_insiders,
         "promote-candidate": cmd_promote_candidate,
         "dismiss-candidate": cmd_dismiss_candidate,
     }

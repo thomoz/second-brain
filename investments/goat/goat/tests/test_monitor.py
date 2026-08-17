@@ -184,6 +184,19 @@ def test_maybe_notify_sends_whatsapp_with_ticker_detail(monkeypatch):
     assert "150-day MA" in message
 
 
+def test_maybe_notify_uses_custom_alert_label(monkeypatch):
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+
+    monitor.maybe_notify(
+        {"new_alerts": [{"ticker": "VRTX", "message": "sold $2,000,000 of VRTX"}]},
+        alert_label="insider P/S filing(s) on current holdings",
+    )
+    (message,), _kwargs = whatsapp_calls[0]
+    assert "insider P/S filing(s) on current holdings" in message
+    assert "below 150DMA exit threshold" not in message
+
+
 # --- Phase 2: sector rotation scan --------------------------------------------
 
 _FAKE_SECTOR_ETFS = {"XLK": "Technology", "XLF": "Financials"}
