@@ -27,15 +27,17 @@ def test_healthy_balance_sheet_ok():
     data = TickerData(ticker="X", info={"debtToEquity": 50.0, "currentRatio": 2.0}, dividends=None)
     result = balance_sheet.check(data)
     assert result.verdict == "ok"
-    assert "debt/equity 50.0" in result.detail
-    assert "current ratio 2.00" in result.detail
+    assert "Debt/Equity 50.0" in result.detail
+    assert "Current Ratio 2.00" in result.detail
+    assert "lower is generally safer" in result.detail
+    assert "higher is generally safer" in result.detail
 
 
 def test_falls_back_to_roe_when_debt_equity_and_current_ratio_missing():
     data = TickerData(ticker="NU", info={"returnOnEquity": 0.30055}, dividends=None)
     result = balance_sheet.check(data)
     assert result.verdict == "ok"
-    assert "return on equity" in result.detail
+    assert "Return on Equity" in result.detail
     assert result.data["return_on_equity_pct"] == 30.05
 
 

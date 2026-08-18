@@ -73,15 +73,16 @@ def check(data) -> CheckResult:
         if roe_pct <= config.ROE_FLAG_THRESHOLD_PCT:
             return CheckResult(
                 name="balance_sheet", verdict="flag",
-                detail=f"debt/equity and current ratio unavailable (common for financials); "
-                       f"return on equity {roe_pct:.1f}% <= {config.ROE_FLAG_THRESHOLD_PCT}% fallback threshold "
-                       f"({roe_scale}){source_note}",
+                detail=f"Debt/Equity and Current Ratio unavailable (common for financials); "
+                       f"Return on Equity {roe_pct:.1f}% <= {config.ROE_FLAG_THRESHOLD_PCT}% fallback threshold "
+                       f"-- higher is generally better ({roe_scale}){source_note}",
                 data={"return_on_equity_pct": round(roe_pct, 2)},
             )
         return CheckResult(
             name="balance_sheet", verdict="ok",
-            detail=f"debt/equity and current ratio unavailable (common for financials); "
-                   f"return on equity {roe_pct:.1f}% used as fallback health proxy ({roe_scale}){source_note}",
+            detail=f"Debt/Equity and Current Ratio unavailable (common for financials); "
+                   f"Return on Equity {roe_pct:.1f}% used as fallback health proxy "
+                   f"-- higher is generally better ({roe_scale}){source_note}",
             data={"return_on_equity_pct": round(roe_pct, 2)},
         )
 
@@ -96,9 +97,15 @@ def check(data) -> CheckResult:
 
     flags = []
     if debt_to_equity is not None and debt_to_equity >= config.DEBT_TO_EQUITY_FLAG:
-        flags.append(f"debt/equity {debt_to_equity:.1f} >= {config.DEBT_TO_EQUITY_FLAG} ({de_scale})")
+        flags.append(
+            f"Debt/Equity {debt_to_equity:.1f} >= {config.DEBT_TO_EQUITY_FLAG} "
+            f"-- lower is generally safer ({de_scale})"
+        )
     if current_ratio is not None and current_ratio <= config.CURRENT_RATIO_FLAG:
-        flags.append(f"current ratio {current_ratio:.2f} <= {config.CURRENT_RATIO_FLAG} ({cr_scale})")
+        flags.append(
+            f"Current Ratio {current_ratio:.2f} <= {config.CURRENT_RATIO_FLAG} "
+            f"-- higher is generally safer, up to a point ({cr_scale})"
+        )
 
     data_out = {"debt_to_equity": debt_to_equity, "current_ratio": current_ratio}
     if flags:
@@ -106,9 +113,11 @@ def check(data) -> CheckResult:
 
     parts = []
     if debt_to_equity is not None:
-        parts.append(f"debt/equity {debt_to_equity:.1f} ({de_scale})")
+        parts.append(f"Debt/Equity {debt_to_equity:.1f} -- lower is generally safer ({de_scale})")
     if current_ratio is not None:
-        parts.append(f"current ratio {current_ratio:.2f} ({cr_scale})")
-    detail = f"{', '.join(parts)} — within thresholds" if parts else "Debt/equity and current ratio within thresholds"
+        parts.append(
+            f"Current Ratio {current_ratio:.2f} -- higher is generally safer, up to a point ({cr_scale})"
+        )
+    detail = f"{', '.join(parts)} — within thresholds" if parts else "Debt/Equity and Current Ratio within thresholds"
 
     return CheckResult(name="balance_sheet", verdict="ok", detail=detail, data=data_out)

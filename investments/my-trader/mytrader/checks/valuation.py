@@ -24,12 +24,18 @@ def check(data) -> CheckResult:
     pe_scale = format_scale(pe, config.PE_CHEAP_THRESHOLD, config.PE_RICH_THRESHOLD)
 
     if pe >= config.PE_RICH_THRESHOLD:
-        verdict, detail = "flag", f"PE {pe:.1f} above rich threshold ({config.PE_RICH_THRESHOLD}) ({pe_scale})"
+        verdict, detail = "flag", (
+            f"PE {pe:.1f} above rich threshold ({config.PE_RICH_THRESHOLD}) "
+            f"-- lower is generally cheaper ({pe_scale})"
+        )
     elif pe < 0:
         verdict, detail = "unknown", f"PE {pe:.1f} is negative (loss-making) — not a valid cheapness signal"
     elif pe <= config.PE_CHEAP_THRESHOLD:
-        verdict, detail = "ok", f"PE {pe:.1f} at/below cheap threshold ({config.PE_CHEAP_THRESHOLD}) ({pe_scale})"
+        verdict, detail = "ok", (
+            f"PE {pe:.1f} at/below cheap threshold ({config.PE_CHEAP_THRESHOLD}) "
+            f"-- lower is generally cheaper ({pe_scale})"
+        )
     else:
-        verdict, detail = "ok", f"PE {pe:.1f} within normal range ({pe_scale})"
+        verdict, detail = "ok", f"PE {pe:.1f} within normal range -- lower is generally cheaper ({pe_scale})"
 
     return CheckResult(name="valuation", verdict=verdict, detail=detail, data={"pe": pe})
