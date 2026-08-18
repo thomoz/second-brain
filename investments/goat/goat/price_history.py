@@ -25,7 +25,9 @@ def fetch_close_history(ticker: str, lookback_days: int) -> pd.Series | None:
             continue
         if hist.empty:
             continue
-        close = hist["Close"]
+        close = hist["Close"].dropna()
+        if close.empty:
+            continue
         if getattr(close.index, "tz", None) is not None:
             close.index = close.index.tz_localize(None)
         return close
