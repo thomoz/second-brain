@@ -51,6 +51,11 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
                 kind            TEXT NOT NULL,
                 seen_at         TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS goat_macro_state (
+                key         TEXT PRIMARY KEY,
+                value       TEXT NOT NULL,
+                updated_at  TEXT NOT NULL
+            );
         """)
     # Migration for DBs created before pct_owned_change existed (added
     # 2026-08-17 for the repeated-small-sales pattern -- see
@@ -252,3 +257,21 @@ def count_insider_sales_since(
         (ticker, insider_name, start_date, before_date),
     ).fetchone()
     return row["n"]
+
+
+def get_macro_state(conn: sqlite3.Connection, key: str) -> str | None:
+    """Generic single-scalar state store for macro checks that need to detect
+    a change since last run (e.g. hormuz_risk's last-seen JWC circular number)
+    -- deliberately a plain key/value table rather than a bespoke column
+    somewhere, since this is the first of what may be several such checks."""
+    row = conn.execute("SELECT value FROM goat_macro_state WHERE key = ?", (key,)).fetchone()
+    return row["value"] if row is not None else None
+
+
+def set_macro_state(conn: sqlite3.Connection, key: str, value: str) -> None:
+    with conn:
+        conn.execute(
+            """INSERT INTO goat_macro_state (key, value, updated_at) VALUES (?, ?, ?)
+               ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at""",
+            (key, value, _now()),
+        )

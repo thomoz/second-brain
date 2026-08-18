@@ -146,6 +146,20 @@ def cmd_scan_insiders(args) -> None:
     )
 
 
+def cmd_scan_hormuz(args) -> None:
+    from .hormuz_risk import maybe_notify, run_hormuz_scan, write_hormuz_report
+
+    conn = _open_conn()
+    result = run_hormuz_scan(conn)
+    conn.close()
+    write_hormuz_report(result)
+    maybe_notify(result["new_alerts"])
+    print(
+        f"Hormuz risk scan complete: {len(result['new_alerts'])} new flag(s). "
+        f"See investments/goat/hormuz-risk-report.md"
+    )
+
+
 def cmd_promote_candidate(args) -> None:
     from mytrader.db import upsert_watchlist_row
     from mytrader.snapshot import regenerate_all
@@ -211,6 +225,10 @@ def main() -> None:
         "scan-insiders",
         help="Daily OpenInsider Form 4 scan -- holdings-watch (P/S on held tickers) + market-wide $25k+ purchase discovery",
     )
+    subparsers.add_parser(
+        "scan-hormuz",
+        help="Strait of Hormuz war-risk check -- BWET tanker-freight ETF move + LMA JWC Listed Areas circular change",
+    )
 
     p_promote = subparsers.add_parser(
         "promote-candidate", help="Write a pending Goat sector candidate into my-trader's real watchlist",
@@ -232,6 +250,7 @@ def main() -> None:
         "check-live": cmd_check_live,
         "scan-heartbeat": cmd_scan_heartbeat,
         "scan-insiders": cmd_scan_insiders,
+        "scan-hormuz": cmd_scan_hormuz,
         "promote-candidate": cmd_promote_candidate,
         "dismiss-candidate": cmd_dismiss_candidate,
     }

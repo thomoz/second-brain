@@ -242,4 +242,27 @@ GOAT_INSIDER_PRICE_FLAG_PCT = 15.0  # Shaun 2026-08-18: flag price-since-trade m
 GOAT_INSIDER_PRICE_STALE_DAYS = 90  # matches GOAT_INSIDER_SALE_LOOKBACK_DAYS's window --
     # past this many days since the trade, a price move is more likely broad market
     # drift than a reaction to the insider signal, so it's annotated, not hidden
+
+# Strait of Hormuz war-risk tracking, per Shaun's 2026-08-18 request -- two free/
+# scrapeable proxies since neither the Baltic Exchange's TD3C index nor JWC's
+# lloydswordings.com circular archive offer a free API (confirmed via research
+# before building this). Deliberately reports "info"/"changed since last check"
+# rather than an auto-classified escalation/de-escalation verdict -- reading
+# whether a move or a new circular means de-escalating or escalating requires
+# judgment this tool can't make reliably, same philosophy as check_gold_trend's
+# "info, not flag" treatment in mytrader/macro_indicators.py.
+GOAT_BWET_TICKER = "BWET"  # Breakwave Tanker Shipping ETF -- 90% TD3C VLCC / 10%
+    # TD20 Suezmax freight futures, the closest free (yfinance) proxy for
+    # Gulf/Hormuz tanker war-risk cost; also reflects broader tanker-cycle noise
+    # unrelated to Hormuz specifically, so the report says this explicitly rather
+    # than presenting it as a clean signal.
+GOAT_BWET_LOOKBACK_DAYS = 14  # shorter than DXY_LOOKBACK_DAYS's 90 -- tanker rates
+    # can move sharply within days around a Hormuz escalation/de-escalation event,
+    # a multi-month window would smear that out.
+GOAT_BWET_FLAG_MOVE_PCT = 15.0  # both directions meaningful: a spike often reflects
+    # rising war-risk premiums/reduced ship availability, a sharp drop often
+    # reflects risk easing -- so this flags on abs(move), not a one-sided threshold.
+GOAT_LMA_JWC_URL = "https://lmalloyds.com/committee/joint-war-committee/"
+GOAT_LMA_JWC_USER_AGENT = "Mozilla/5.0 (compatible; SecondBrainGoat/1.0)"
+GOAT_HORMUZ_REPORT_PATH = GOAT_DIR / "hormuz-risk-report.md"
     # (candidates are never auto-removed, per my-trader's no-auto-delete convention).

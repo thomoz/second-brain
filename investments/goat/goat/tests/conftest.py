@@ -36,6 +36,9 @@ def _isolate_goat_report_path(monkeypatch, tmp_path):
     monkeypatch.setattr(
         goat_config, "GOAT_INSIDER_SCAN_REPORT_PATH", tmp_path / "insider-scan-report.md"
     )
+    monkeypatch.setattr(
+        goat_config, "GOAT_HORMUZ_REPORT_PATH", tmp_path / "hormuz-risk-report.md"
+    )
 
 
 @pytest.fixture(autouse=True)
