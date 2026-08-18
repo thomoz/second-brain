@@ -120,7 +120,7 @@ def test_fetch_current_price_falls_back_to_current_price(monkeypatch):
     assert market_data.fetch_current_price("AG") == 19.0
 
 
-def _install_fake_yfinance(monkeypatch, balance_sheet=None, financials=None):
+def _install_fake_yfinance(monkeypatch, balance_sheet=None, financials=None, cashflow=None):
     class _FakeTicker:
         def __init__(self, symbol):
             self._symbol = symbol
@@ -132,6 +132,10 @@ def _install_fake_yfinance(monkeypatch, balance_sheet=None, financials=None):
         @property
         def financials(self):
             return financials if financials is not None else pd.DataFrame()
+
+        @property
+        def cashflow(self):
+            return cashflow if cashflow is not None else pd.DataFrame()
 
     fake_yf = types.ModuleType("yfinance")
     fake_yf.Ticker = _FakeTicker
@@ -178,3 +182,41 @@ def test_fetch_balance_sheet_financials_partial_when_financials_missing(monkeypa
     result = market_data.fetch_balance_sheet_financials("X")
     assert "debtToEquity" in result
     assert "returnOnEquity" not in result
+
+
+def test_fetch_cash_flow_statement_happy_path(monkeypatch):
+    cf = pd.DataFrame(
+        {pd.Timestamp("2026-05-31"): [-23_686_000_000.0, -55_663_000_000.0, 31_977_000_000.0]},
+        index=["Free Cash Flow", "Capital Expenditure", "Operating Cash Flow"],
+    )
+    _install_fake_yfinance(monkeypatch, cashflow=cf)
+    result = market_data.fetch_cash_flow_statement("ORCL")
+    assert result["free_cash_flow"] == -23_686_000_000.0
+    assert result["capital_expenditure"] == -55_663_000_000.0
+    assert result["operating_cash_flow"] == 31_977_000_000.0
+    assert result["period_end"] == "2026-05-31"
+
+
+def test_fetch_cash_flow_statement_returns_none_when_empty(monkeypatch):
+    _install_fake_yfinance(monkeypatch)
+    assert market_data.fetch_cash_flow_statement("X") is None
+
+
+def test_fetch_cash_flow_statement_returns_none_when_free_cash_flow_row_missing(monkeypatch):
+    cf = pd.DataFrame(
+        {pd.Timestamp("2026-05-31"): [-55_663_000_000.0]},
+        index=["Capital Expenditure"],
+    )
+    _install_fake_yfinance(monkeypatch, cashflow=cf)
+    assert market_data.fetch_cash_flow_statement("X") is None
+
+
+def test_fetch_cash_flow_statement_partial_when_capital_expenditure_missing(monkeypatch):
+    cf = pd.DataFrame(
+        {pd.Timestamp("2026-05-31"): [-23_686_000_000.0, 31_977_000_000.0]},
+        index=["Free Cash Flow", "Operating Cash Flow"],
+    )
+    _install_fake_yfinance(monkeypatch, cashflow=cf)
+    result = market_data.fetch_cash_flow_statement("X")
+    assert result["free_cash_flow"] == -23_686_000_000.0
+    assert "capital_expenditure" not in result

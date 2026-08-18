@@ -16,7 +16,7 @@ _real_get_filing_summaries_for_ticker = sec_filings.get_filing_summaries_for_tic
 
 def test_get_cik_returns_none_when_ticker_not_in_map(db_conn, monkeypatch):
     monkeypatch.setattr(sec_filings, "_fetch_cik_map_bulk", lambda: {"KO": "21344"})
-    assert sec_filings._get_cik(db_conn, "BXB") is None
+    assert sec_filings.get_cik(db_conn, "BXB") is None
 
 
 def test_refresh_cik_map_skips_when_fresh(db_conn, monkeypatch):
@@ -33,7 +33,7 @@ def test_refresh_cik_map_skips_when_fresh(db_conn, monkeypatch):
 
 def test_refresh_cik_map_fetches_when_stale_or_missing(db_conn, monkeypatch):
     monkeypatch.setattr(sec_filings, "_fetch_cik_map_bulk", lambda: {"KO": "21344"})
-    sec_filings._get_cik(db_conn, "KO")
+    sec_filings.get_cik(db_conn, "KO")
     assert db.get_cik_for_ticker(db_conn, "KO") == "21344"
     assert db.get_sync_watermark(db_conn, "sec_cik_map_refreshed_at") is not None
 
@@ -69,6 +69,7 @@ def test_extract_10k_sections_against_real_fixture():
     assert sections.get("business")
     assert sections.get("risk_factors")
     assert sections.get("mda")
+    assert sections.get("financial_statements")
 
 
 def test_extract_10q_sections_against_real_fixture():
@@ -76,6 +77,7 @@ def test_extract_10q_sections_against_real_fixture():
     sections = sec_filings._extract_sections(html, "10-Q")
     assert sections.get("mda")
     assert sections.get("risk_factors")
+    assert sections.get("financial_statements")
 
 
 def test_extract_def14a_sections_against_real_fixture():
@@ -90,15 +92,15 @@ def test_summarize_sections_returns_none_on_empty_input():
 
 
 def test_get_filing_summaries_returns_none_for_unmapped_ticker(db_conn, monkeypatch):
-    monkeypatch.setattr(sec_filings, "_get_cik", lambda conn, ticker: None)
+    monkeypatch.setattr(sec_filings, "get_cik", lambda conn, ticker: None)
     monkeypatch.setattr(sec_filings, "get_filing_summaries_for_ticker", _real_get_filing_summaries_for_ticker)
     assert sec_filings.get_filing_summaries_for_ticker("BXB", db_conn) is None
 
 
 def test_get_filing_summaries_uses_cache_when_accession_unchanged(db_conn, monkeypatch):
-    monkeypatch.setattr(sec_filings, "_get_cik", lambda conn, ticker: "21344")
+    monkeypatch.setattr(sec_filings, "get_cik", lambda conn, ticker: "21344")
     monkeypatch.setattr(
-        sec_filings, "_fetch_filing_index",
+        sec_filings, "fetch_filing_index",
         lambda cik: {"filings": {"recent": {
             "form": ["10-K"], "accessionNumber": ["ACC-1"], "primaryDocument": ["doc.htm"],
             "filingDate": ["2026-02-20"],
@@ -111,7 +113,7 @@ def test_get_filing_summaries_uses_cache_when_accession_unchanged(db_conn, monke
     def _raise(*a, **k):
         raise AssertionError("should not fetch document when cache is fresh")
 
-    monkeypatch.setattr(sec_filings, "_fetch_filing_document", _raise)
+    monkeypatch.setattr(sec_filings, "fetch_filing_document", _raise)
 
     monkeypatch.setattr(sec_filings, "get_filing_summaries_for_ticker", _real_get_filing_summaries_for_ticker)
     result = sec_filings.get_filing_summaries_for_ticker("KO", db_conn)
@@ -119,9 +121,9 @@ def test_get_filing_summaries_uses_cache_when_accession_unchanged(db_conn, monke
 
 
 def test_get_filing_summaries_refetches_on_new_accession(db_conn, monkeypatch):
-    monkeypatch.setattr(sec_filings, "_get_cik", lambda conn, ticker: "21344")
+    monkeypatch.setattr(sec_filings, "get_cik", lambda conn, ticker: "21344")
     monkeypatch.setattr(
-        sec_filings, "_fetch_filing_index",
+        sec_filings, "fetch_filing_index",
         lambda cik: {"filings": {"recent": {
             "form": ["10-K"], "accessionNumber": ["ACC-2"], "primaryDocument": ["doc.htm"],
             "filingDate": ["2026-02-20"],
@@ -130,7 +132,7 @@ def test_get_filing_summaries_refetches_on_new_accession(db_conn, monkeypatch):
     db.upsert_filing_summary_cache(
         db_conn, ticker="KO", filing_type="10-K", accession_number="ACC-1", summary="Old summary.",
     )
-    monkeypatch.setattr(sec_filings, "_fetch_filing_document", lambda cik, acc, doc: "<html>real</html>")
+    monkeypatch.setattr(sec_filings, "fetch_filing_document", lambda cik, acc, doc: "<html>real</html>")
     monkeypatch.setattr(sec_filings, "_extract_sections", lambda html, ft: {"business": "New content."})
     monkeypatch.setattr(sec_filings, "_summarize_sections", lambda ticker, ft, sections: "New summary.")
 
@@ -143,9 +145,9 @@ def test_get_filing_summaries_refetches_on_new_accession(db_conn, monkeypatch):
 
 
 def test_get_filing_summaries_falls_back_to_stale_cache_on_fetch_failure(db_conn, monkeypatch):
-    monkeypatch.setattr(sec_filings, "_get_cik", lambda conn, ticker: "21344")
+    monkeypatch.setattr(sec_filings, "get_cik", lambda conn, ticker: "21344")
     monkeypatch.setattr(
-        sec_filings, "_fetch_filing_index",
+        sec_filings, "fetch_filing_index",
         lambda cik: {"filings": {"recent": {
             "form": ["10-K"], "accessionNumber": ["ACC-2"], "primaryDocument": ["doc.htm"],
             "filingDate": ["2026-02-20"],
@@ -154,7 +156,7 @@ def test_get_filing_summaries_falls_back_to_stale_cache_on_fetch_failure(db_conn
     db.upsert_filing_summary_cache(
         db_conn, ticker="KO", filing_type="10-K", accession_number="ACC-1", summary="Stale summary.",
     )
-    monkeypatch.setattr(sec_filings, "_fetch_filing_document", lambda cik, acc, doc: None)
+    monkeypatch.setattr(sec_filings, "fetch_filing_document", lambda cik, acc, doc: None)
 
     monkeypatch.setattr(sec_filings, "get_filing_summaries_for_ticker", _real_get_filing_summaries_for_ticker)
     result = sec_filings.get_filing_summaries_for_ticker("KO", db_conn)

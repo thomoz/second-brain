@@ -73,14 +73,14 @@ def _refresh_cik_map_if_stale(conn: sqlite3.Connection) -> None:
     db.set_sync_watermark(conn, "sec_cik_map_refreshed_at", datetime.now(timezone.utc).isoformat())
 
 
-def _get_cik(conn: sqlite3.Connection, ticker: str) -> str | None:
+def get_cik(conn: sqlite3.Connection, ticker: str) -> str | None:
     _refresh_cik_map_if_stale(conn)
     return db.get_cik_for_ticker(conn, ticker)
 
 # --- Filing index + document fetch ------------------------------------------
 
 
-def _fetch_filing_index(cik: str) -> dict[str, Any] | None:
+def fetch_filing_index(cik: str) -> dict[str, Any] | None:
     url = config.SEC_SUBMISSIONS_URL_TEMPLATE.format(cik_padded=f"{int(cik):010d}")
     try:
         r = requests.get(url, headers=_HEADERS, timeout=15)
@@ -91,7 +91,7 @@ def _fetch_filing_index(cik: str) -> dict[str, Any] | None:
         return None
 
 
-def _latest_filing_entry(index: dict[str, Any], form_type: str) -> dict[str, str] | None:
+def latest_filing_entry(index: dict[str, Any], form_type: str) -> dict[str, str] | None:
     recent = index.get("filings", {}).get("recent", {})
     forms = recent.get("form", [])
     for i, form in enumerate(forms):
@@ -106,7 +106,7 @@ def _latest_filing_entry(index: dict[str, Any], form_type: str) -> dict[str, str
                  # "recent" array per SEC's own docs (~last ~1000 filings).
 
 
-def _fetch_filing_document(cik: str, accession_number: str, document: str) -> str | None:
+def fetch_filing_document(cik: str, accession_number: str, document: str) -> str | None:
     url = config.SEC_ARCHIVES_URL_TEMPLATE.format(
         cik=str(int(cik)), accession_no_dashes=accession_number.replace("-", ""),
         document=document,
@@ -122,7 +122,7 @@ def _fetch_filing_document(cik: str, accession_number: str, document: str) -> st
 # --- Section extraction ------------------------------------------------------
 
 
-def _strip_html(html: str) -> str:
+def strip_html(html: str) -> str:
     from bs4 import BeautifulSoup
 
     soup = BeautifulSoup(html, "html.parser")
@@ -171,6 +171,8 @@ def _extract_10k_sections(text: str) -> dict[str, str]:
         sections["risk_factors"] = items["1A"]
     if "7" in items:
         sections["mda"] = items["7"]
+    if "8" in items:
+        sections["financial_statements"] = items["8"]
     return sections
 
 
@@ -187,6 +189,8 @@ def _extract_10q_sections(text: str) -> dict[str, str]:
         sections["mda"] = part1_items["2"]
     if "1A" in part2_items:
         sections["risk_factors"] = part2_items["1A"]
+    if "1" in part1_items:
+        sections["financial_statements"] = part1_items["1"]
     return sections
 
 
@@ -236,7 +240,7 @@ def _extract_def14a_sections(text: str) -> dict[str, str]:
 
 
 def _extract_sections(html: str, filing_type: str) -> dict[str, str]:
-    text = _strip_html(html)
+    text = strip_html(html)
     if filing_type == "10-K":
         return _extract_10k_sections(text)
     if filing_type == "10-Q":
@@ -280,16 +284,16 @@ def _summarize_sections(ticker: str, filing_type: str, sections: dict[str, str])
 
 
 def get_filing_summaries_for_ticker(ticker: str, conn: sqlite3.Connection) -> dict[str, str] | None:
-    cik = _get_cik(conn, ticker.upper())
+    cik = get_cik(conn, ticker.upper())
     if cik is None:
         return None
-    index = _fetch_filing_index(cik)
+    index = fetch_filing_index(cik)
     if index is None:
         return None
 
     summaries: dict[str, str] = {}
     for filing_type in config.SEC_FILING_TYPES:
-        latest = _latest_filing_entry(index, filing_type)
+        latest = latest_filing_entry(index, filing_type)
         if latest is None:
             continue
         cached = db.get_cached_filing_summary(conn, ticker, filing_type)
@@ -297,7 +301,7 @@ def get_filing_summaries_for_ticker(ticker: str, conn: sqlite3.Connection) -> di
             summaries[filing_type] = cached["summary"]
             continue
 
-        html = _fetch_filing_document(cik, latest["accession_number"], latest["primary_document"])
+        html = fetch_filing_document(cik, latest["accession_number"], latest["primary_document"])
         summary = None
         if html is not None:
             sections = _extract_sections(html, filing_type)

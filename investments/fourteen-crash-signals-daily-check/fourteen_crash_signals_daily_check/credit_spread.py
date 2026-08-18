@@ -44,10 +44,16 @@ def check_credit_spread_streak() -> CheckResult:
                    f"trading day(s) -- the video's single most reliable historical marker",
             data={"value": latest_value, "streak_days": streak_days, "as_of": latest_date.isoformat()},
         )
+    watch = latest_value >= config.SIGNALS_CREDIT_SPREAD_WATCH_PCT
+    detail = (
+        f"ICE BofA US HY OAS at {latest_value:.2f}pp (as of {latest_date.isoformat()}); "
+        f"{streak_days} consecutive day(s) at/above {config.SIGNALS_CREDIT_SPREAD_STREAK_FLAG_PCT:.1f}pp "
+        f"(needs {config.SIGNALS_CREDIT_SPREAD_STREAK_TRADING_DAYS} to flag)"
+    )
+    if watch:
+        gap = config.SIGNALS_CREDIT_SPREAD_STREAK_FLAG_PCT - config.SIGNALS_CREDIT_SPREAD_WATCH_PCT
+        detail += f" -- WATCH: within {gap:.1f}pp of the flag threshold"
     return CheckResult(
-        name="credit_spread_streak", verdict="ok",
-        detail=f"ICE BofA US HY OAS at {latest_value:.2f}pp (as of {latest_date.isoformat()}); "
-               f"{streak_days} consecutive day(s) at/above {config.SIGNALS_CREDIT_SPREAD_STREAK_FLAG_PCT:.1f}pp "
-               f"(needs {config.SIGNALS_CREDIT_SPREAD_STREAK_TRADING_DAYS} to flag)",
-        data={"value": latest_value, "streak_days": streak_days, "as_of": latest_date.isoformat()},
+        name="credit_spread_streak", verdict="ok", detail=detail,
+        data={"value": latest_value, "streak_days": streak_days, "as_of": latest_date.isoformat(), "watch": watch},
     )

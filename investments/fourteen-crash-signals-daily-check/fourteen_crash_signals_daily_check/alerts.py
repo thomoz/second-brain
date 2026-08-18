@@ -36,3 +36,26 @@ def maybe_notify(conn: sqlite3.Connection, results: list[dict[str, Any]]) -> Non
     lines = [f"14 Crash Signals: {summary}."]
     lines += [f"- {r['detail']}" for r in newly_firing]
     send_whatsapp_notification("\n".join(lines))
+
+
+def notify_credit_spread_streak_daily(result) -> None:
+    """Deliberate exception to this module's transition-only alert rule above -- Shaun
+    explicitly asked for a daily 'day N and counting' WhatsApp ping while Marker 14's
+    streak continues, not just once on first firing (2026-08-18, Phase 2 handoff). Does
+    not touch db.upsert_signal_state -- main.py still calls that separately for
+    credit_spread_streak, for state-tracking/report consistency; this function's firing
+    decision is independent of that transition gate."""
+    if result.verdict != "flag":
+        return
+    streak_days = result.data.get("streak_days", "?")
+
+    import sys
+    from pathlib import Path
+
+    _scripts_dir = Path(__file__).resolve().parent.parent.parent.parent / ".claude" / "scripts"
+    sys.path.insert(0, str(_scripts_dir))
+    from notifications import send_whatsapp_notification
+
+    send_whatsapp_notification(
+        f"14 Crash Signals: credit spread streak, day {streak_days} and counting -- {result.detail}"
+    )

@@ -44,3 +44,129 @@ def test_get_all_signal_states_orders_by_marker_key(db_conn):
     db.upsert_signal_state(db_conn, marker_key="aaa", is_firing=True, detail="a")
     rows = db.get_all_signal_states(db_conn)
     assert [r["marker_key"] for r in rows] == ["aaa", "zzz"]
+
+
+def test_upsert_lease_commitment_history_inserts(db_conn):
+    db.upsert_lease_commitment_history(
+        db_conn, ticker="ORCL", accession_number="ACC-1", figure=1.5e9, filing_date="2026-06-30",
+    )
+    row = db.get_lease_commitment_history(db_conn, "ORCL")
+    assert row["accession_number"] == "ACC-1"
+    assert row["figure"] == 1.5e9
+    assert row["filing_date"] == "2026-06-30"
+
+
+def test_upsert_lease_commitment_history_overwrites_on_conflict(db_conn):
+    db.upsert_lease_commitment_history(
+        db_conn, ticker="ORCL", accession_number="ACC-1", figure=1.5e9, filing_date="2026-06-30",
+    )
+    db.upsert_lease_commitment_history(
+        db_conn, ticker="ORCL", accession_number="ACC-2", figure=2.0e9, filing_date="2026-09-30",
+    )
+    row = db.get_lease_commitment_history(db_conn, "ORCL")
+    assert row["accession_number"] == "ACC-2"
+    assert row["figure"] == 2.0e9
+    assert row["filing_date"] == "2026-09-30"
+
+
+def test_get_lease_commitment_history_none_when_absent(db_conn):
+    assert db.get_lease_commitment_history(db_conn, "ORCL") is None
+
+
+def test_upsert_bond_cusip_inserts(db_conn):
+    db.upsert_bond_cusip(db_conn, ticker="ORCL", cusip="68389XBM1", accession_number="ACC-1")
+    row = db.get_bond_cusip(db_conn, "ORCL")
+    assert row["cusip"] == "68389XBM1"
+    assert row["accession_number"] == "ACC-1"
+
+
+def test_upsert_bond_cusip_overwrites_on_conflict(db_conn):
+    db.upsert_bond_cusip(db_conn, ticker="ORCL", cusip="68389XBM1", accession_number="ACC-1")
+    db.upsert_bond_cusip(db_conn, ticker="ORCL", cusip="68389XBN9", accession_number="ACC-2")
+    row = db.get_bond_cusip(db_conn, "ORCL")
+    assert row["cusip"] == "68389XBN9"
+    assert row["accession_number"] == "ACC-2"
+
+
+def test_get_bond_cusip_none_when_absent(db_conn):
+    assert db.get_bond_cusip(db_conn, "ORCL") is None
+
+
+def test_record_issuer_spread_inserts(db_conn):
+    from datetime import date
+
+    db.record_issuer_spread(db_conn, ticker="ORCL", spread_value=1.25)
+    row = db.get_issuer_spread_near(db_conn, "ORCL", date.today(), tolerance_days=0)
+    assert row["spread_value"] == 1.25
+
+
+def test_record_issuer_spread_overwrites_same_day(db_conn):
+    db.record_issuer_spread(db_conn, ticker="ORCL", spread_value=1.25)
+    db.record_issuer_spread(db_conn, ticker="ORCL", spread_value=1.50)
+    from datetime import date
+
+    row = db.get_issuer_spread_near(db_conn, "ORCL", date.today(), tolerance_days=0)
+    assert row["spread_value"] == 1.50
+
+
+def test_get_issuer_spread_near_exact_match(db_conn):
+    from datetime import date
+
+    target = date(2026, 5, 1)
+    db_conn.execute(
+        "INSERT INTO signals_issuer_spread_history (ticker, spread_value, observed_at) VALUES (?, ?, ?)",
+        ("ORCL", 1.1, "2026-05-01"),
+    )
+    db_conn.commit()
+    row = db.get_issuer_spread_near(db_conn, "ORCL", target, tolerance_days=10)
+    assert row["spread_value"] == 1.1
+
+
+def test_get_issuer_spread_near_closest_within_tolerance(db_conn):
+    from datetime import date
+
+    for d, v in (("2026-04-25", 1.0), ("2026-05-05", 2.0)):
+        db_conn.execute(
+            "INSERT INTO signals_issuer_spread_history (ticker, spread_value, observed_at) VALUES (?, ?, ?)",
+            ("ORCL", v, d),
+        )
+    db_conn.commit()
+    row = db.get_issuer_spread_near(db_conn, "ORCL", date(2026, 5, 1), tolerance_days=10)
+    assert row["spread_value"] == 2.0  # 2026-05-05 is 4 days away, closer than 2026-04-25's 6 days
+
+
+def test_get_issuer_spread_near_none_outside_tolerance(db_conn):
+    from datetime import date
+
+    db_conn.execute(
+        "INSERT INTO signals_issuer_spread_history (ticker, spread_value, observed_at) VALUES (?, ?, ?)",
+        ("ORCL", 1.0, "2026-01-01"),
+    )
+    db_conn.commit()
+    row = db.get_issuer_spread_near(db_conn, "ORCL", date(2026, 5, 1), tolerance_days=10)
+    assert row is None
+
+
+def test_get_issuer_spread_near_none_when_empty(db_conn):
+    from datetime import date
+
+    assert db.get_issuer_spread_near(db_conn, "ORCL", date(2026, 5, 1), tolerance_days=10) is None
+
+
+def test_set_manual_bond_yield_inserts(db_conn):
+    db.set_manual_bond_yield(db_conn, ticker="ORCL", cusip="68389XBM1", yield_pct=5.75)
+    row = db.get_manual_bond_yield(db_conn, "ORCL")
+    assert row["yield_pct"] == 5.75
+    assert row["cusip"] == "68389XBM1"
+
+
+def test_set_manual_bond_yield_overwrites_on_conflict(db_conn):
+    db.set_manual_bond_yield(db_conn, ticker="ORCL", cusip="68389XBM1", yield_pct=5.75)
+    db.set_manual_bond_yield(db_conn, ticker="ORCL", cusip=None, yield_pct=6.00)
+    row = db.get_manual_bond_yield(db_conn, "ORCL")
+    assert row["yield_pct"] == 6.00
+    assert row["cusip"] is None
+
+
+def test_get_manual_bond_yield_none_when_absent(db_conn):
+    assert db.get_manual_bond_yield(db_conn, "ORCL") is None

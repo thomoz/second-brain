@@ -5,6 +5,7 @@ the full 14-marker fact-check and both rounds of resolved decisions."""
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 from scripts.config import DB_PATH  # noqa: F401  (re-exported for this package's callers)
@@ -49,3 +50,41 @@ SIGNALS_INSIDER_TREND_NET_SELL_FLAG_RATIO = 3.0  # v1/tunable -- see the plan's 
 
 # Marker 10 -- most-valuable-company milestone.
 SIGNALS_MARKET_CAP_MILESTONE_STEP = 500_000_000_000  # $500B round-number rungs
+
+# Marker 2 -- off-balance-sheet lease commitments (SEC EDGAR 10-K/10-Q "Leases" note,
+# LLM-extracted dollar figure). See the Phase 2 handoff, Marker #2 resolution.
+SIGNALS_LEASE_COMMITMENT_GROWTH_FLAG_PCT = 50.0  # v1/tunable, unbacktestable -- no
+    # historical time series for this disclosure exists; Shaun's own framing, 2026-08-18:
+    # retune after a few quarters of real report output.
+SIGNALS_LEASE_NOTE_WINDOW_CHARS = 8000  # trailing window after the heading match --
+    # mirrors sec_filings._find_def14a_heading_index's own window size.
+
+# Marker 4 -- capex outruns cash flow (negative free cash flow while capex is large).
+SIGNALS_CAPEX_MIN_FLAG_ABS = 10_000_000_000  # $10B sanity floor -- should never bind in
+    # practice since watchlist.py already mega-cap-filters at $100B; insurance against a
+    # data glitch, not a real threshold.
+
+# Marker 9 -- the Super Bowl signal (date-reminder + manual-check-flag; no structured
+# free data source exists for "% of ads that were AI-related" -- see the handoff).
+SIGNALS_NEXT_SUPER_BOWL_DATE = date(2027, 2, 14)  # Super Bowl LXI, SoFi Stadium --
+    # human-maintained, bump forward by hand once Shaun records that year's ad-share
+    # reading (see super_bowl.py's module docstring for the manual reset flow).
+
+# Marker 12 -- credit turns in the hot sector (bond yield vs Treasury proxy, per-issuer).
+SIGNALS_CREDIT_SPREAD_ISSUER_TREASURY_SERIES = "DGS10"  # v1 simplification: a fixed
+    # 10Y Treasury comparator, not maturity-matched per-bond -- parsing each prospectus's
+    # own maturity date was out of scope for this phase; a known follow-up, not a silent
+    # shortcut (flagged explicitly in this plan's NOTES).
+SIGNALS_CREDIT_SPREAD_ISSUER_DIVERGENCE_FLAG_RATIO = 1.3  # v1/tunable -- current spread
+    # >=1.3x the reading from 90 days ago.
+SIGNALS_ISSUER_SPREAD_LOOKBACK_DAYS = 90
+SIGNALS_ISSUER_SPREAD_LOOKBACK_TOLERANCE_DAYS = 10  # daily-granularity data, much
+    # tighter than margin_debt's 20-day monthly-bucket tolerance.
+SIGNALS_BOND_CUSIP_REFRESH_DAYS = 30  # mirrors SEC_CIK_MAP_REFRESH_DAYS -- a company
+    # could issue a new bond; don't cache a resolved CUSIP forever.
+SIGNALS_BOND_PROSPECTUS_FORM_TYPES = ("424B2", "424B5", "FWP")
+
+# Marker 14 enhancement -- "watch" tier below the flag threshold (added 2026-08-18;
+# confirmed with Shaun: keep verdict="ok" + data={"watch": True} rather than a new verdict
+# string, so nothing else that branches on verdict needs to change).
+SIGNALS_CREDIT_SPREAD_WATCH_PCT = 3.2  # within 0.3pp of the 3.5pp flag threshold.

@@ -155,3 +155,37 @@ def fetch_balance_sheet_financials(ticker: str) -> dict[str, float] | None:
         return result or None
     except Exception:
         return None
+
+
+def fetch_cash_flow_statement(ticker: str) -> dict[str, float] | None:
+    """Latest ANNUAL cash-flow statement (not quarterly/TTM -- Phase 2 handoff, Marker #4
+    resolution: matches the fact-check's own cited Oracle numbers, which are FY26 annual,
+    and avoids quarterly noise). Confirmed live 2026-08-18 against real ORCL data:
+    yf.Ticker(ticker).cashflow already exposes a precomputed "Free Cash Flow" row --
+    Free Cash Flow = Operating Cash Flow + Capital Expenditure (capex is stored as a
+    negative outflow, so this is addition not subtraction). Mirrors
+    fetch_balance_sheet_financials's exact try/except/return-None shape."""
+    import yfinance as yf
+
+    try:
+        t = yf.Ticker(ticker)
+        cf = t.cashflow
+        if cf is None or cf.empty:
+            return None
+        latest_col = cf.columns[0]  # most recent annual period, leftmost column
+        result: dict[str, float] = {}
+        for row_label, key in (
+            ("Free Cash Flow", "free_cash_flow"),
+            ("Capital Expenditure", "capital_expenditure"),
+            ("Operating Cash Flow", "operating_cash_flow"),
+        ):
+            if row_label in cf.index:
+                value = cf.loc[row_label, latest_col]
+                if value is not None:
+                    result[key] = float(value)
+        if "free_cash_flow" not in result:
+            return None
+        result["period_end"] = latest_col.date().isoformat() if hasattr(latest_col, "date") else str(latest_col)
+        return result
+    except Exception:
+        return None

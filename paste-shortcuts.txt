@@ -1,3 +1,5 @@
 Paste shortcuts:
 
 claude --dangerously-skip-permissions
+
+
