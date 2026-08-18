@@ -1,0 +1,11 @@
+[Unit]
+Description=Fourteen Crash Signals Daily Check
+After=network.target
+
+[Service]
+Type=oneshot
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain/investments/fourteen-crash-signals-daily-check
+ExecStart=/home/secondbrain/second-brain/investments/.venv/bin/python -m fourteen_crash_signals_daily_check.main daily-check
+StandardOutput=append:/home/secondbrain/second-brain/investments/fourteen-crash-signals-daily-check/daily_check_runs.log
+StandardError=append:/home/secondbrain/second-brain/investments/fourteen-crash-signals-daily-check/daily_check_runs.log

@@ -1,0 +1,10 @@
+[Unit]
+Description=Fourteen Crash Signals Daily Check Timer
+Requires=second-brain-fourteen-signals.service
+
+[Timer]
+OnCalendar=*-*-* 22:05:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

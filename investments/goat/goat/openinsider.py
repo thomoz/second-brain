@@ -156,7 +156,7 @@ def _fetch(url: str, params: dict | None = None) -> list[dict] | None:
 
 
 def fetch_screener_filings(
-    tickers_list: list[str], trade_type: str, min_value: float
+    tickers_list: list[str], trade_type: str, min_value: float, filing_date_days: int = 7
 ) -> list[dict] | None:
     if not tickers_list:
         return []
@@ -165,6 +165,7 @@ def fetch_screener_filings(
     params["vl"] = str(int(min_value / 1000))
     params["xp"] = "1" if trade_type == "P" else ""
     params["xs"] = "1" if trade_type == "S" else ""
+    params["fd"] = str(filing_date_days)
     rows = _fetch(f"{config.GOAT_OPENINSIDER_BASE_URL}/screener", params=params)
     if rows is None:
         return None

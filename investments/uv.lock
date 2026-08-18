@@ -16,6 +16,7 @@ resolution-markers = [
 [manifest]
 members = [
     "briefs-finance",
+    "fourteen-crash-signals-daily-check",
     "goat",
     "my-trader",
 ]
@@ -385,9 +386,41 @@ wheels = [
 ]
 
 [[package]]
+name = "fourteen-crash-signals-daily-check"
+version = "0.1.0"
+source = { editable = "fourteen-crash-signals-daily-check" }
+dependencies = [
+    { name = "goat" },
+    { name = "my-trader" },
+    { name = "openpyxl" },
+    { name = "requests" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "goat", editable = "goat" },
+    { name = "my-trader", editable = "my-trader" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8.0" },
+    { name = "openpyxl", specifier = ">=3.1.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
+    { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.12.0" },
+    { name = "requests", specifier = ">=2.31.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.2.0" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "goat"
 version = "0.1.0"
-source = { virtual = "goat" }
+source = { editable = "goat" }
 dependencies = [
     { name = "my-trader" },
     { name = "pandas" },

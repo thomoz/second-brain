@@ -1,21 +1,23 @@
 [project]
-name = "goat"
+name = "fourteen-crash-signals-daily-check"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "my-trader",
-    "yfinance>=0.2.40",
-    "pandas>=2.0.0",
+    "goat",
+    "requests>=2.31.0",
+    "openpyxl>=3.1.0",
 ]
 
 [tool.uv.sources]
 my-trader = { workspace = true }
+goat = { workspace = true }
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0.0", "pytest-mock>=3.12.0", "ruff>=0.2.0", "mypy>=1.8.0"]
 
 [tool.pytest.ini_options]
-testpaths = ["goat/tests"]
+testpaths = ["fourteen_crash_signals_daily_check/tests"]
 pythonpath = ["."]
 
 [tool.ruff]
@@ -31,4 +33,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["goat"]
+packages = ["fourteen_crash_signals_daily_check"]
