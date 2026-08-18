@@ -88,7 +88,10 @@ def cmd_scan_heartbeat(args) -> None:
     result = run_heartbeat_scan(conn)
     conn.close()
     write_heartbeat_candidates_report(result)
-    maybe_notify({"new_alerts": []}, new_candidates=result["new_candidates"])
+    maybe_notify(
+        {"new_alerts": []}, new_candidates=result["new_candidates"],
+        candidate_label="new S&P 500 heartbeat candidate(s)",
+    )
     print(
         f"Heartbeat scan complete: scanned {result['scanned']} ticker(s) across "
         f"{len(result['rising_sectors'])} rising sector(s), "
@@ -98,18 +101,34 @@ def cmd_scan_heartbeat(args) -> None:
 
 
 def cmd_scan_insiders(args) -> None:
-    from .insider_scan import run_discovery_scan, run_holdings_watch, write_insider_scan_report
+    from .insider_scan import (
+        compute_discovery_price_performance,
+        compute_holdings_watch_price_performance,
+        run_discovery_scan,
+        run_holdings_watch,
+        write_insider_scan_report,
+    )
     from .monitor import maybe_notify
 
     conn = _open_conn()
     watch_result = run_holdings_watch(conn)
     discovery_result = run_discovery_scan(conn)
     conn.close()
+    # Price-since-trade is recalculated fresh every run (Shaun 2026-08-18) --
+    # network calls, so deliberately kept outside run_discovery_scan/
+    # run_holdings_watch (DB-only, cheap, easy to test without mocking yfinance).
+    discovery_result["pending_candidates"] = compute_discovery_price_performance(
+        discovery_result["pending_candidates"]
+    )
+    watch_result["recent_filings"] = compute_holdings_watch_price_performance(
+        watch_result.get("recent_filings") or []
+    )
     write_insider_scan_report(watch_result, discovery_result)
     maybe_notify(
         {"new_alerts": watch_result["new_alerts"]},
         new_candidates=discovery_result["new_candidates"],
         alert_label="insider P/S filing(s) on current holdings",
+        candidate_label="new insider discovery candidate(s)",
     )
     print(
         f"Insider scan complete: {len(watch_result['new_alerts'])} holdings-watch alert(s), "

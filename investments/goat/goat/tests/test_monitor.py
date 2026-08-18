@@ -197,6 +197,24 @@ def test_maybe_notify_uses_custom_alert_label(monkeypatch):
     assert "below 150DMA exit threshold" not in message
 
 
+def test_maybe_notify_uses_custom_candidate_label(monkeypatch):
+    """Regression test for the 2026-08-18 fix: candidate_label used to be
+    hardcoded to "sector breakout candidate(s)" regardless of what actually
+    triggered the notify (e.g. insider discovery buys, heartbeat picks) --
+    see maybe_notify's docstring."""
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+
+    candidates = [{"ticker": "ACME", "sector_label": "Insider Buy", "detail": "bought $30,000 of ACME"}]
+    monitor.maybe_notify(
+        {"new_alerts": []}, new_candidates=candidates,
+        candidate_label="new insider discovery candidate(s)",
+    )
+    (message,), _kwargs = whatsapp_calls[0]
+    assert "new insider discovery candidate(s)" in message
+    assert "sector breakout candidate" not in message
+
+
 # --- Phase 2: sector rotation scan --------------------------------------------
 
 _FAKE_SECTOR_ETFS = {"XLK": "Technology", "XLF": "Financials"}

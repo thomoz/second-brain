@@ -12,9 +12,10 @@ import sqlite3
 from datetime import date, datetime, timedelta
 from typing import Any
 
+import pandas as pd
 from mytrader import db as mt_db
 
-from . import config, db, openinsider
+from . import config, db, openinsider, price_history
 
 
 def _within_lookback(trade_date_str: str, lookback_days: int) -> bool:
@@ -160,6 +161,7 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         db.insert_goat_pending_candidate(
             conn, ticker=ticker, sector_label="Insider Buy",
             signal_detail=signal_detail, source="goat_insider_discovery",
+            trade_date=row.get("trade_date"),
         )
         new_candidates.append({"ticker": ticker, "sector_label": "Insider Buy", "detail": signal_detail})
 
@@ -169,6 +171,87 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
             dict(r) for r in db.get_all_goat_pending_candidates(conn) if r["source"] == "goat_insider_discovery"
         ],
     }
+
+
+def _price_move_since(ticker: str, trade_date_str: str) -> dict[str, Any] | None:
+    """% price move from the close on/after trade_date_str to the latest close,
+    plus days elapsed. Returns None on unparsable date, a future date, or a
+    price-fetch miss (delisted/no data) -- callers must treat that as "unknown",
+    not zero."""
+    try:
+        trade_date_obj = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+    days_since = (date.today() - trade_date_obj).days
+    if days_since < 0:
+        return None
+
+    # +10 days of slack so the fetch window still includes the trade date itself
+    # even if it landed right at the start of a weekend/holiday run.
+    close = price_history.fetch_close_history(ticker, days_since + 10)
+    if close is None or close.empty:
+        return None
+    on_or_after = close[close.index >= pd.Timestamp(trade_date_obj)]
+    if on_or_after.empty:
+        return None
+    start_price = float(on_or_after.iloc[0])
+    latest_price = float(close.iloc[-1])
+    if start_price == 0:
+        return None
+    return {
+        "pct_change": (latest_price - start_price) / start_price * 100,
+        "days_since": days_since,
+    }
+
+
+def _confirms_signal(trade_type_code: str, pct_change: float, threshold: float) -> bool:
+    """Direction-aware only -- a buy is flagged on a rise, a sale on a fall.
+    The contrarian direction is deliberately never flagged here (Shaun
+    2026-08-18): that's a distinct read ("insider was early/wrong") he wants
+    to judge himself, not have the tool call out as noteworthy."""
+    if trade_type_code == "P":
+        return pct_change >= threshold
+    if trade_type_code == "S":
+        return pct_change <= -threshold
+    return False
+
+
+def _price_note(pct_change: float, days_since: int, trade_type_code: str) -> str:
+    flag = " \U0001F6A9 confirms signal" if _confirms_signal(
+        trade_type_code, pct_change, config.GOAT_INSIDER_PRICE_FLAG_PCT
+    ) else ""
+    stale = (
+        f"; {days_since}d -- may not reflect the insider signal anymore"
+        if days_since > config.GOAT_INSIDER_PRICE_STALE_DAYS else ""
+    )
+    return f"{pct_change:+.1f}% since trade{flag}{stale}"
+
+
+def compute_discovery_price_performance(pending_candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Annotates each discovery candidate with a 'price_note' field (network
+    call per row, via yfinance) -- kept separate from run_discovery_scan so
+    that function stays DB-only and cheap to test/call on every dedup check."""
+    for row in pending_candidates:
+        trade_date = row.get("trade_date")
+        move = _price_move_since(row["ticker"], trade_date) if trade_date else None
+        row["price_note"] = (
+            _price_note(move["pct_change"], move["days_since"], "P") if move else "price unavailable"
+        )
+    return pending_candidates
+
+
+def compute_holdings_watch_price_performance(recent_filings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Same as compute_discovery_price_performance but direction-aware per
+    row's own trade_type (P or S), since Holdings Watch filings mix buys and
+    sells."""
+    for row in recent_filings:
+        trade_date = row.get("trade_date")
+        move = _price_move_since(row["ticker"], trade_date) if trade_date else None
+        row["price_note"] = (
+            _price_note(move["pct_change"], move["days_since"], row.get("trade_type", ""))
+            if move else "price unavailable"
+        )
+    return recent_filings
 
 
 def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: dict[str, Any]) -> str:
@@ -197,14 +280,38 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
         "real watchlist, labeled Goat-approved) or `dismiss-candidate` (discards it). "
         "Edits here are overwritten on the next `scan-insiders` run.",
         "",
-        "| Ticker | Sector | Signal | Flagged |",
-        "|--------|--------|--------|---------|",
+        "| Ticker | Sector | Signal | Price Since Trade | Flagged |",
+        "|--------|--------|--------|--------------------|---------|",
     ]
     for row in discovery_result["pending_candidates"]:
         lines.append(
             f"| {row['ticker']} | {row['sector_label']} | {row['signal_detail']} "
-            f"| {row['flagged_at'][:10]} |"
+            f"| {row.get('price_note', 'n/a')} | {row['flagged_at'][:10]} |"
         )
+
+    recent_filings = watch_result.get("recent_filings") or []
+    lines += [
+        "",
+        "## Price Performance — Recent Holdings Filings",
+        "Price move since trade date for P/S filings seen on your holdings "
+        "(most recent 20, including ones below the alert threshold). "
+        "\U0001F6A9 marks a move that confirms the insider's signal direction "
+        "(buy -> price rose, sale -> price fell) by "
+        f"{config.GOAT_INSIDER_PRICE_FLAG_PCT:.0f}%+.",
+        "",
+    ]
+    if recent_filings:
+        lines += ["| Ticker | Action | Value | Trade Date | Price Since Trade |",
+                   "|--------|--------|-------|------------|--------------------|"]
+        for row in recent_filings[:20]:
+            action = "Bought" if row.get("trade_type") == "P" else "Sold"
+            lines.append(
+                f"| {row['ticker']} | {action} | ${row['value']:,.0f} | {row['trade_date']} "
+                f"| {row.get('price_note', 'n/a')} |"
+            )
+    else:
+        lines.append("No insider filings recorded yet for current holdings.")
+
     lines += ["", f"Last auto-generated: {date.today().isoformat()}."]
     return "\n".join(lines) + "\n"
 

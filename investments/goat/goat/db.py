@@ -62,6 +62,15 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
             conn.execute("ALTER TABLE goat_insider_filings_seen ADD COLUMN pct_owned_change REAL")
         except sqlite3.OperationalError:
             pass
+    # Migration for DBs created before trade_date existed on pending_candidates
+    # (added 2026-08-18 for price-since-trade tracking -- see
+    # insider_scan.compute_discovery_price_performance). NULL for non-insider
+    # candidate sources (e.g. sector rotation), which have no single trade date.
+    with conn:
+        try:
+            conn.execute("ALTER TABLE goat_pending_candidates ADD COLUMN trade_date TEXT")
+        except sqlite3.OperationalError:
+            pass
 
 
 def get_open_goat_alert(
@@ -118,13 +127,14 @@ def get_all_goat_pending_candidates(conn: sqlite3.Connection) -> list[sqlite3.Ro
 def insert_goat_pending_candidate(
     conn: sqlite3.Connection, *, ticker: str, sector_label: str,
     signal_detail: str, source: str = "goat_sector_rotation",
+    trade_date: str | None = None,
 ) -> None:
     with conn:
         conn.execute(
             """INSERT OR IGNORE INTO goat_pending_candidates
-               (ticker, sector_label, signal_detail, source, flagged_at)
-               VALUES (?, ?, ?, ?, ?)""",
-            (ticker, sector_label, signal_detail, source, _now()),
+               (ticker, sector_label, signal_detail, source, flagged_at, trade_date)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (ticker, sector_label, signal_detail, source, _now(), trade_date),
         )
 
 

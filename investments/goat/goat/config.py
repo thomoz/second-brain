@@ -234,3 +234,12 @@ GOAT_INSIDER_HOLDINGS_WATCH_LOOKBACK_DAYS = 5  # Form 4 must be filed within 2 U
 GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS = 5  # same reasoning as above -- a safety net on
     # top of OpenInsider's own latest-first page ordering.
 GOAT_INSIDER_SCAN_REPORT_PATH = GOAT_DIR / "insider-scan-report.md"
+
+GOAT_INSIDER_PRICE_FLAG_PCT = 15.0  # Shaun 2026-08-18: flag price-since-trade moves
+    # at +/-15% in the direction that CONFIRMS the insider signal only (buy -> price
+    # rose, sale -> price fell) -- the contrarian direction (e.g. a big rise after a
+    # sale) is deliberately not flagged, that's a separate judgment call for Shaun.
+GOAT_INSIDER_PRICE_STALE_DAYS = 90  # matches GOAT_INSIDER_SALE_LOOKBACK_DAYS's window --
+    # past this many days since the trade, a price move is more likely broad market
+    # drift than a reaction to the insider signal, so it's annotated, not hidden
+    # (candidates are never auto-removed, per my-trader's no-auto-delete convention).

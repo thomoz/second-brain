@@ -109,12 +109,20 @@ def write_report(result: dict[str, Any]) -> None:
 def maybe_notify(
     result: dict[str, Any], new_candidates: list[dict[str, Any]] | None = None,
     alert_label: str = "below 150DMA exit threshold",
+    candidate_label: str = "new sector breakout candidate(s)",
 ) -> None:
     """new_candidates takes the actual staged-candidate dicts (ticker/sector_label/
     detail), not just a count -- 2026-08-17 fix: the previous int-only signature
     meant a WhatsApp alert could tell Shaun "1 new sector breakout candidate(s)"
     with no way to say which ticker/sector, forcing him to go check the report
-    file for something the alert should have said outright."""
+    file for something the alert should have said outright.
+
+    candidate_label -- 2026-08-18 fix: this used to be hardcoded to "sector
+    breakout candidate(s)" regardless of what actually triggered maybe_notify,
+    so the heartbeat scan and insider discovery scan (both call this with their
+    own candidate lists) sent WhatsApp alerts that mislabeled S&P 500 heartbeat
+    picks and insider buys as sector-ETF breakouts. Callers must now say what
+    kind of candidate they're staging."""
     candidates = new_candidates or []
     n_alerts = len(result["new_alerts"])
     if not n_alerts and not candidates:
@@ -130,7 +138,7 @@ def maybe_notify(
     if n_alerts:
         parts.append(f"{n_alerts} holding(s) {alert_label}")
     if candidates:
-        parts.append(f"{len(candidates)} new sector breakout candidate(s)")
+        parts.append(f"{len(candidates)} {candidate_label}")
     summary = "; ".join(parts)
 
     # Toast only reaches whichever desktop happens to be running this (and is a

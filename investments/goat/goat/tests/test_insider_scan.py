@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
+import pandas as pd
 from mytrader import db as mt_db
 
 from goat import config as goat_config, db as goat_db, insider_scan
@@ -301,3 +302,95 @@ def test_render_insider_scan_report_lists_alerts_and_pending_candidates():
     empty_discovery = {"pending_candidates": []}
     empty_report = insider_scan.render_insider_scan_report(empty_watch, empty_discovery)
     assert "No new insider activity on current holdings." in empty_report
+    assert "No insider filings recorded yet for current holdings." in empty_report
+
+
+def _price_series(days_ago: int, start_price: float, end_price: float) -> tuple[str, pd.Series]:
+    """A close series that starts exactly on trade_date (days_ago days back)
+    at start_price and sits at end_price for every day since, so
+    _price_move_since's on/after-trade_date slice picks up start_price first
+    and end_price last -- gives a deterministic pct_change for testing."""
+    trade_date = date.today() - timedelta(days=days_ago)
+    idx = pd.date_range(trade_date, periods=max(days_ago, 1) + 1, freq="D")
+    prices = [start_price] + [end_price] * (len(idx) - 1)
+    return trade_date.isoformat(), pd.Series(prices, index=idx)
+
+
+def test_compute_discovery_price_performance_flags_buy_that_rose_past_threshold(monkeypatch):
+    trade_date, series = _price_series(days_ago=30, start_price=100.0, end_price=125.0)
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    candidates = [{"ticker": "ACME", "trade_date": trade_date}]
+    result = insider_scan.compute_discovery_price_performance(candidates)
+    assert "+25.0%" in result[0]["price_note"]
+    assert "confirms signal" in result[0]["price_note"]
+
+
+def test_compute_discovery_price_performance_does_not_flag_below_threshold(monkeypatch):
+    trade_date, series = _price_series(days_ago=30, start_price=100.0, end_price=105.0)
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    candidates = [{"ticker": "ACME", "trade_date": trade_date}]
+    result = insider_scan.compute_discovery_price_performance(candidates)
+    assert "confirms signal" not in result[0]["price_note"]
+
+
+def test_compute_discovery_price_performance_notes_staleness_past_90_days(monkeypatch):
+    trade_date, series = _price_series(days_ago=95, start_price=100.0, end_price=130.0)
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    candidates = [{"ticker": "ACME", "trade_date": trade_date}]
+    result = insider_scan.compute_discovery_price_performance(candidates)
+    assert "may not reflect the insider signal anymore" in result[0]["price_note"]
+
+
+def test_compute_discovery_price_performance_unavailable_without_trade_date():
+    candidates = [{"ticker": "ACME", "trade_date": None}]
+    result = insider_scan.compute_discovery_price_performance(candidates)
+    assert result[0]["price_note"] == "price unavailable"
+
+
+def test_compute_discovery_price_performance_unavailable_on_fetch_miss(monkeypatch):
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: None)
+    candidates = [{"ticker": "ACME", "trade_date": date.today().isoformat()}]
+    result = insider_scan.compute_discovery_price_performance(candidates)
+    assert result[0]["price_note"] == "price unavailable"
+
+
+def test_compute_holdings_watch_price_performance_flags_sale_that_fell(monkeypatch):
+    trade_date, series = _price_series(days_ago=20, start_price=100.0, end_price=80.0)
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    filings = [{"ticker": "VRTX", "trade_date": trade_date, "trade_type": "S"}]
+    result = insider_scan.compute_holdings_watch_price_performance(filings)
+    assert "-20.0%" in result[0]["price_note"]
+    assert "confirms signal" in result[0]["price_note"]
+
+
+def test_compute_holdings_watch_price_performance_ignores_contrarian_direction(monkeypatch):
+    # A sale followed by a big price RISE is the contrarian case -- Shaun
+    # 2026-08-18 wants only the confirming direction flagged (sale -> fall).
+    trade_date, series = _price_series(days_ago=20, start_price=100.0, end_price=130.0)
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    filings = [{"ticker": "VRTX", "trade_date": trade_date, "trade_type": "S"}]
+    result = insider_scan.compute_holdings_watch_price_performance(filings)
+    assert "confirms signal" not in result[0]["price_note"]
+
+
+def test_render_insider_scan_report_includes_price_note_and_recent_filings_section():
+    watch_result = {
+        "checked_holdings": 1,
+        "new_alerts": [],
+        "recent_filings": [
+            {"ticker": "VRTX", "trade_type": "S", "value": 2_000_000.0,
+             "trade_date": "2026-08-01", "price_note": "-22.0% since trade \U0001F6A9 confirms signal"},
+        ],
+    }
+    discovery_result = {
+        "pending_candidates": [
+            {"ticker": "ACME", "sector_label": "Insider Buy",
+             "signal_detail": "John Smith (Director) bought $30,000 of ACME on 2026-08-17",
+             "flagged_at": "2026-08-17T00:00:00+00:00", "price_note": "+18.0% since trade \U0001F6A9 confirms signal"},
+        ],
+    }
+    report = insider_scan.render_insider_scan_report(watch_result, discovery_result)
+    assert "+18.0% since trade" in report
+    assert "-22.0% since trade" in report
+    assert "Price Performance — Recent Holdings Filings" in report
+    assert "Sold" in report and "2,000,000" in report
