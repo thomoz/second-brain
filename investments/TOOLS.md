@@ -17,6 +17,7 @@ whenever a tool's schedule or command changes; it isn't regenerated automaticall
 | **Goat Intraday Live-Check** | Live-price 150DMA check against currently-open-market holdings (ASX or US session) | VPS systemd (`second-brain-goat-live-check.timer`) | Every 10 minutes, around the clock (no-ops outside ASX/US regular session hours, so it's cheap off-hours) |
 | **Goat Heartbeat Scan** (S&P 500) | Screens S&P 500 constituents in currently-rising sectors for the low-volatility-consolidation-then-breakout "heartbeat" pattern, with fundamentals survival context attached | VPS systemd (`second-brain-goat-heartbeat-scan.timer`) | Weekly, **Saturday 8:00am Sydney local** (timezone-aware, stays correct across DST) |
 | **Goat Insider Scan** (OpenInsider) | Checks P/S Form 4 filings on current holdings (Holdings Watch), and stages market-wide $25k+ open-market insider buys as new watchlist candidates (Discovery). Every pending/tracked ticker also gets a **price-since-trade-date** figure, recalculated fresh each run, 🚩-flagged when the move confirms the insider's signal direction (buy → price up, sale → price down) by 15%+; past 90 days it's annotated as possibly stale rather than hidden | VPS systemd (`second-brain-goat-insider-scan.timer`) | Daily, 21:50 UTC (07:50 AEST / 08:50 AEDT — fixed UTC time, runs ~15min after Goat Monitor) |
+| **Fourteen Crash Signals Daily Check** | Tracks 4 of the 14 crash-warning markers (credit spread streak, margin debt YoY, insider selling trend, market-cap milestone) against a dynamically-recomputed hot-company watchlist; other 10 markers pending future phases | VPS systemd (`second-brain-fourteen-signals.timer`) | Daily, 22:05 UTC |
 
 ## Manual / on-demand only
 
@@ -31,11 +32,13 @@ whenever a tool's schedule or command changes; it isn't regenerated automaticall
 | **Goat live-check (on-demand)** | Same intraday 150DMA check the timer runs, right now | `uv run --directory investments/goat python -m goat.main check-live` |
 | **Goat heartbeat scan (on-demand)** | Same S&P 500 heartbeat scan the weekly timer runs, right now — doesn't wait for Saturday | `uv run --directory investments/goat python -m goat.main scan-heartbeat` |
 | **Goat insider scan (on-demand)** | Same OpenInsider holdings-watch + discovery scan (with price-since-trade tracking) the daily timer runs, right now | `uv run --directory investments/goat python -m goat.main scan-insiders` |
+| **Goat Hormuz risk scan (on-demand)** | Strait of Hormuz war-risk check -- BWET (tanker freight ETF, proxy for TD3C) price move over 14 days, flagged at 15%+ either direction; LMA Joint War Committee "Listed Areas" circular number, flagged when it changes since the last check. Reports raw detail/excerpt, not an auto-classified escalation/de-escalation verdict -- not yet on a scheduled timer, manual only | `uv run --directory investments/goat python -m goat.main scan-hormuz` |
 | **Goat promote/dismiss candidate** | Move a staged Goat candidate (sector ETF, heartbeat stock, or insider-buy discovery) into my-trader's real watchlist, or discard it | `goat.main promote-candidate --ticker TICKER` / `goat.main dismiss-candidate --ticker TICKER` |
 | **Briefs Finance ingest** | Ingest a PDF report into the scoring pipeline | `uv run --directory investments/briefs-finance python -m scripts.main ingest ...` (also conversational: "ingest this report") |
 | **Briefs Finance backtest** | Backtest historical recommendations against real market data | `scripts.main backtest` |
 | **Briefs Finance score** | Compute 0–100% likelihood scores for new recommendations | `scripts.main score` |
 | **Briefs Finance assess / context / stats / excluded** | Full ticker assessment / sector+macro context / track-record summary / defense-filtered exclusion list | `scripts.main assess --ticker TICKER` / `context` / `stats` / `excluded` |
+| **Fourteen Crash Signals (on-demand)** | Same daily check the timer runs, right now | `uv run --directory investments/fourteen-crash-signals-daily-check python -m fourteen_crash_signals_daily_check.main daily-check` |
 
 Run any `investments/goat` or `investments/my-trader` command from the repo root with
 `uv run --directory investments/<package> python -m <module> <subcommand>`. On the
