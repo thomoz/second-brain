@@ -9,6 +9,7 @@ Checked 7 holding(s) against the 150-day moving-average exit rule.
 No new material changes.
 
 ### All Open Alerts
+- **HORMUZ** -- BWET (tanker freight ETF, 90% TD3C VLCC futures) $379.12, +41.2% over the past 14 days -- a proxy for Gulf/Hormuz tanker war-risk cost, but also moves on ordinary tanker-cycle supply/demand unrelated to Hormuz, so treat a move here as a prompt to check the news, not a standalone signal (first flagged 2026-08-18)
 - **LULU** -- LULU: now 18.4% below its 150-day MA as of today's close; has stayed >=0% below for 1+ consecutive trading day(s) -- 150DMA exit-rule threshold triggered (first flagged 2026-08-17)
 - **AG** -- AG: now 6.3% below its 150-day MA as of today's close; has stayed >=0% below for 1+ consecutive trading day(s) -- 150DMA exit-rule threshold triggered (first flagged 2026-08-17)
 - **GGOV.AX** -- GGOV.AX: LIVE price now 3.0% below its 150-day MA (intraday -- not yet a confirmed close); has stayed >=0% below for 1+ trading day(s) including today -- 150DMA exit-rule threshold triggered (first flagged 2026-08-17)
