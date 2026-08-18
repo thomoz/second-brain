@@ -28,3 +28,6 @@ Test 5.
 
 ## 2026-08-16 [WhatsApp save]
 Deep dive Main, XLK.
+
+## 2026-08-18 [WhatsApp save]
+Guitar strings for Eric.
