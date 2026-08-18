@@ -71,6 +71,23 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
             conn.execute("ALTER TABLE goat_pending_candidates ADD COLUMN trade_date TEXT")
         except sqlite3.OperationalError:
             pass
+    # Migration for DBs created before price_flag_notified existed (added
+    # 2026-08-18 -- guards the one-time "price move just confirmed the
+    # signal" WhatsApp ping so it fires once per ticker/filing, not every
+    # run while the flag stays up). Default 0 (not yet notified).
+    with conn:
+        try:
+            conn.execute(
+                "ALTER TABLE goat_pending_candidates ADD COLUMN price_flag_notified INTEGER NOT NULL DEFAULT 0"
+            )
+        except sqlite3.OperationalError:
+            pass
+        try:
+            conn.execute(
+                "ALTER TABLE goat_insider_filings_seen ADD COLUMN price_flag_notified INTEGER NOT NULL DEFAULT 0"
+            )
+        except sqlite3.OperationalError:
+            pass
 
 
 def get_open_goat_alert(
@@ -135,6 +152,13 @@ def insert_goat_pending_candidate(
                (ticker, sector_label, signal_detail, source, flagged_at, trade_date)
                VALUES (?, ?, ?, ?, ?, ?)""",
             (ticker, sector_label, signal_detail, source, _now(), trade_date),
+        )
+
+
+def mark_pending_candidate_price_flag_notified(conn: sqlite3.Connection, ticker: str) -> None:
+    with conn:
+        conn.execute(
+            "UPDATE goat_pending_candidates SET price_flag_notified = 1 WHERE ticker = ?", (ticker,)
         )
 
 
@@ -203,6 +227,13 @@ def get_recent_insider_filings_seen(
     return conn.execute(
         "SELECT * FROM goat_insider_filings_seen ORDER BY seen_at DESC LIMIT ?", (limit,)
     ).fetchall()
+
+
+def mark_insider_filing_price_flag_notified(conn: sqlite3.Connection, dedup_key: str) -> None:
+    with conn:
+        conn.execute(
+            "UPDATE goat_insider_filings_seen SET price_flag_notified = 1 WHERE dedup_key = ?", (dedup_key,)
+        )
 
 
 def count_insider_sales_since(

@@ -227,31 +227,77 @@ def _price_note(pct_change: float, days_since: int, trade_type_code: str) -> str
     return f"{pct_change:+.1f}% since trade{flag}{stale}"
 
 
-def compute_discovery_price_performance(pending_candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def compute_discovery_price_performance(
+    conn: sqlite3.Connection, pending_candidates: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     """Annotates each discovery candidate with a 'price_note' field (network
     call per row, via yfinance) -- kept separate from run_discovery_scan so
-    that function stays DB-only and cheap to test/call on every dedup check."""
+    that function stays DB-only and cheap to test/call on every dedup check.
+
+    Also sets 'newly_flagged' and persists price_flag_notified the first time
+    a ticker's move crosses the confirms-signal threshold (Shaun 2026-08-18:
+    a report-only flag was easy to miss for days) -- guarded by the DB column
+    so the WhatsApp ping fires once per ticker, not every run it stays up."""
     for row in pending_candidates:
         trade_date = row.get("trade_date")
         move = _price_move_since(row["ticker"], trade_date) if trade_date else None
-        row["price_note"] = (
-            _price_note(move["pct_change"], move["days_since"], "P") if move else "price unavailable"
-        )
+        if move is None:
+            row["price_note"] = "price unavailable"
+            row["newly_flagged"] = False
+            continue
+        row["price_note"] = _price_note(move["pct_change"], move["days_since"], "P")
+        flagged = _confirms_signal("P", move["pct_change"], config.GOAT_INSIDER_PRICE_FLAG_PCT)
+        row["newly_flagged"] = flagged and not row.get("price_flag_notified")
+        if row["newly_flagged"]:
+            db.mark_pending_candidate_price_flag_notified(conn, row["ticker"])
     return pending_candidates
 
 
-def compute_holdings_watch_price_performance(recent_filings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def compute_holdings_watch_price_performance(
+    conn: sqlite3.Connection, recent_filings: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     """Same as compute_discovery_price_performance but direction-aware per
     row's own trade_type (P or S), since Holdings Watch filings mix buys and
-    sells."""
+    sells, and guarded per-filing (dedup_key) rather than per-ticker, since a
+    ticker can have multiple tracked filings."""
     for row in recent_filings:
         trade_date = row.get("trade_date")
+        trade_type = row.get("trade_type", "")
         move = _price_move_since(row["ticker"], trade_date) if trade_date else None
-        row["price_note"] = (
-            _price_note(move["pct_change"], move["days_since"], row.get("trade_type", ""))
-            if move else "price unavailable"
-        )
+        if move is None:
+            row["price_note"] = "price unavailable"
+            row["newly_flagged"] = False
+            continue
+        row["price_note"] = _price_note(move["pct_change"], move["days_since"], trade_type)
+        flagged = _confirms_signal(trade_type, move["pct_change"], config.GOAT_INSIDER_PRICE_FLAG_PCT)
+        row["newly_flagged"] = flagged and not row.get("price_flag_notified")
+        if row["newly_flagged"]:
+            db.mark_insider_filing_price_flag_notified(conn, row["dedup_key"])
     return recent_filings
+
+
+def maybe_notify_price_flags(newly_flagged: list[dict[str, Any]]) -> None:
+    """Fires once per ticker/filing the run its price move first crosses the
+    confirms-signal threshold -- see compute_discovery_price_performance's
+    docstring for why this is separate from monitor.maybe_notify (that one
+    fires on new alerts/candidates being staged, not on a price move against
+    an already-staged one)."""
+    if not newly_flagged:
+        return
+    import sys
+    from pathlib import Path
+
+    _scripts_dir = Path(__file__).resolve().parent.parent.parent.parent / ".claude" / "scripts"
+    sys.path.insert(0, str(_scripts_dir))
+    from notifications import send_toast_notification, send_whatsapp_notification
+
+    summary = f"{len(newly_flagged)} insider price move(s) just confirmed the signal"
+    send_toast_notification("Goat Insider Scan", summary + " -- check investments/goat/insider-scan-report.md")
+
+    lines = [f"Goat Insider Scan: {summary}."] + [
+        f"- {row['ticker']}: {row['price_note']}" for row in newly_flagged
+    ]
+    send_whatsapp_notification("\n".join(lines))
 
 
 def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: dict[str, Any]) -> str:

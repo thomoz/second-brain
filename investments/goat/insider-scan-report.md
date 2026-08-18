@@ -69,6 +69,7 @@ Market-wide $25k+ open-market insider purchases, staged for explicit review. Rev
 | MATW | Insider Buy | Richards Aleta W. (Dir) bought $69,180 of MATW (31% of position) on 2026-08-14 | -1.1% since trade | 2026-08-18 |
 | MDXH | Insider Buy | Mvm Partners, LLC (Dir) bought $1,000,000 of MDXH (47% of position) on 2026-08-13 | +85.2% since trade 🚩 confirms signal | 2026-08-18 |
 | MLAB | Insider Buy | Kadia Siddhartha (Pres, CEO) bought $800,090 of MLAB on 2026-08-13 | -4.9% since trade | 2026-08-18 |
+| MOBI | Insider Buy | Tansey Casey M (Dir) bought $797,173 of MOBI (29% of position) on 2026-08-13 | +0.5% since trade | 2026-08-18 |
 | MSS | Insider Buy | Hrt Financial LP (10%) bought $42,608 of MSS on 2026-08-12 | +3.5% since trade | 2026-08-17 |
 | MTDR | Insider Buy | Foran Joseph Wm (COB, CEO) bought $778,800 of MTDR on 2026-08-12 | +6.5% since trade | 2026-08-17 |
 | MXF | Insider Buy | Saba Capital Management, L.P. (10%) bought $63,202 of MXF (0% of position) on 2026-08-13 | +0.0% since trade | 2026-08-18 |
@@ -86,7 +87,7 @@ Market-wide $25k+ open-market insider purchases, staged for explicit review. Rev
 | REZI | Insider Buy | Foster Joshua Peter (SVP, GC, Corp Sec) bought $315,224 of REZI (9% of position) on 2026-08-14 | +0.7% since trade | 2026-08-18 |
 | RICK | Insider Buy | Langan Eric Scott (Dir) bought $50,204 of RICK (0% of position) on 2026-08-14 | +0.7% since trade | 2026-08-18 |
 | RSG | Insider Buy | Cascade Investment, L.L.C. (10%) bought $78,329,177 of RSG on 2026-08-12 | +0.5% since trade | 2026-08-17 |
-| RWAY | Insider Buy | Thomson Carmela (CFO, Treasurer, Secretary) bought $55,743 of RWAY (165% of position) on 2026-08-13 | -7.5% since trade | 2026-08-18 |
+| RWAY | Insider Buy | Thomson Carmela (CFO, Treasurer, Secretary) bought $55,743 of RWAY (165% of position) on 2026-08-13 | -2.8% since trade | 2026-08-18 |
 | SELF | Insider Buy | Winmill & Co. Inc (See "Explanation of Responses") bought $60,788 of SELF on 2026-08-13 | +2.1% since trade | 2026-08-17 |
 | SKAS | Insider Buy | Eriksen Howard Timothy (10%) bought $32,120 of SKAS (3% of position) on 2026-08-14 | +0.0% since trade | 2026-08-18 |
 | SLGL | Insider Buy | Opaleye Management Inc. (10%) bought $67,997 of SLGL on 2026-08-12 | +16.1% since trade 🚩 confirms signal | 2026-08-17 |

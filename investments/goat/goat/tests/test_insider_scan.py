@@ -316,61 +316,122 @@ def _price_series(days_ago: int, start_price: float, end_price: float) -> tuple[
     return trade_date.isoformat(), pd.Series(prices, index=idx)
 
 
-def test_compute_discovery_price_performance_flags_buy_that_rose_past_threshold(monkeypatch):
+def test_compute_discovery_price_performance_flags_buy_that_rose_past_threshold(db_conn, monkeypatch):
     trade_date, series = _price_series(days_ago=30, start_price=100.0, end_price=125.0)
     monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
-    candidates = [{"ticker": "ACME", "trade_date": trade_date}]
-    result = insider_scan.compute_discovery_price_performance(candidates)
+    candidates = [{"ticker": "ACME", "trade_date": trade_date, "price_flag_notified": 0}]
+    result = insider_scan.compute_discovery_price_performance(db_conn, candidates)
     assert "+25.0%" in result[0]["price_note"]
     assert "confirms signal" in result[0]["price_note"]
 
 
-def test_compute_discovery_price_performance_does_not_flag_below_threshold(monkeypatch):
+def test_compute_discovery_price_performance_does_not_flag_below_threshold(db_conn, monkeypatch):
     trade_date, series = _price_series(days_ago=30, start_price=100.0, end_price=105.0)
     monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
-    candidates = [{"ticker": "ACME", "trade_date": trade_date}]
-    result = insider_scan.compute_discovery_price_performance(candidates)
+    candidates = [{"ticker": "ACME", "trade_date": trade_date, "price_flag_notified": 0}]
+    result = insider_scan.compute_discovery_price_performance(db_conn, candidates)
     assert "confirms signal" not in result[0]["price_note"]
 
 
-def test_compute_discovery_price_performance_notes_staleness_past_90_days(monkeypatch):
+def test_compute_discovery_price_performance_notes_staleness_past_90_days(db_conn, monkeypatch):
     trade_date, series = _price_series(days_ago=95, start_price=100.0, end_price=130.0)
     monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
-    candidates = [{"ticker": "ACME", "trade_date": trade_date}]
-    result = insider_scan.compute_discovery_price_performance(candidates)
+    candidates = [{"ticker": "ACME", "trade_date": trade_date, "price_flag_notified": 0}]
+    result = insider_scan.compute_discovery_price_performance(db_conn, candidates)
     assert "may not reflect the insider signal anymore" in result[0]["price_note"]
 
 
-def test_compute_discovery_price_performance_unavailable_without_trade_date():
-    candidates = [{"ticker": "ACME", "trade_date": None}]
-    result = insider_scan.compute_discovery_price_performance(candidates)
+def test_compute_discovery_price_performance_unavailable_without_trade_date(db_conn):
+    candidates = [{"ticker": "ACME", "trade_date": None, "price_flag_notified": 0}]
+    result = insider_scan.compute_discovery_price_performance(db_conn, candidates)
     assert result[0]["price_note"] == "price unavailable"
 
 
-def test_compute_discovery_price_performance_unavailable_on_fetch_miss(monkeypatch):
+def test_compute_discovery_price_performance_unavailable_on_fetch_miss(db_conn, monkeypatch):
     monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: None)
-    candidates = [{"ticker": "ACME", "trade_date": date.today().isoformat()}]
-    result = insider_scan.compute_discovery_price_performance(candidates)
+    candidates = [{"ticker": "ACME", "trade_date": date.today().isoformat(), "price_flag_notified": 0}]
+    result = insider_scan.compute_discovery_price_performance(db_conn, candidates)
     assert result[0]["price_note"] == "price unavailable"
 
 
-def test_compute_holdings_watch_price_performance_flags_sale_that_fell(monkeypatch):
+def test_compute_discovery_price_performance_marks_newly_flagged_once(db_conn, monkeypatch):
+    """Regression test for the 2026-08-18 'notify on crossing' feature: the
+    first run over threshold sets newly_flagged + persists the DB guard; a
+    second run (flag still up) must not re-fire it."""
+    trade_date, series = _price_series(days_ago=30, start_price=100.0, end_price=125.0)
+    goat_db.insert_goat_pending_candidate(
+        db_conn, ticker="ACME", sector_label="Insider Buy", signal_detail="d",
+        source="goat_insider_discovery", trade_date=trade_date,
+    )
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+
+    row = dict(goat_db.get_goat_pending_candidate(db_conn, "ACME"))
+    result = insider_scan.compute_discovery_price_performance(db_conn, [row])
+    assert result[0]["newly_flagged"] is True
+    assert goat_db.get_goat_pending_candidate(db_conn, "ACME")["price_flag_notified"] == 1
+
+    row_again = dict(goat_db.get_goat_pending_candidate(db_conn, "ACME"))
+    result_again = insider_scan.compute_discovery_price_performance(db_conn, [row_again])
+    assert result_again[0]["newly_flagged"] is False
+
+
+def test_compute_holdings_watch_price_performance_flags_sale_that_fell(db_conn, monkeypatch):
     trade_date, series = _price_series(days_ago=20, start_price=100.0, end_price=80.0)
     monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
-    filings = [{"ticker": "VRTX", "trade_date": trade_date, "trade_type": "S"}]
-    result = insider_scan.compute_holdings_watch_price_performance(filings)
+    filings = [{"ticker": "VRTX", "trade_date": trade_date, "trade_type": "S",
+                "dedup_key": "key-1", "price_flag_notified": 0}]
+    result = insider_scan.compute_holdings_watch_price_performance(db_conn, filings)
     assert "-20.0%" in result[0]["price_note"]
     assert "confirms signal" in result[0]["price_note"]
+    assert result[0]["newly_flagged"] is True
 
 
-def test_compute_holdings_watch_price_performance_ignores_contrarian_direction(monkeypatch):
+def test_compute_holdings_watch_price_performance_ignores_contrarian_direction(db_conn, monkeypatch):
     # A sale followed by a big price RISE is the contrarian case -- Shaun
     # 2026-08-18 wants only the confirming direction flagged (sale -> fall).
     trade_date, series = _price_series(days_ago=20, start_price=100.0, end_price=130.0)
     monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
-    filings = [{"ticker": "VRTX", "trade_date": trade_date, "trade_type": "S"}]
-    result = insider_scan.compute_holdings_watch_price_performance(filings)
+    filings = [{"ticker": "VRTX", "trade_date": trade_date, "trade_type": "S",
+                "dedup_key": "key-2", "price_flag_notified": 0}]
+    result = insider_scan.compute_holdings_watch_price_performance(db_conn, filings)
     assert "confirms signal" not in result[0]["price_note"]
+    assert result[0]["newly_flagged"] is False
+
+
+def test_compute_holdings_watch_price_performance_does_not_reflag_already_notified(db_conn, monkeypatch):
+    trade_date, series = _price_series(days_ago=20, start_price=100.0, end_price=80.0)
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    filings = [{"ticker": "VRTX", "trade_date": trade_date, "trade_type": "S",
+                "dedup_key": "key-3", "price_flag_notified": 1}]
+    result = insider_scan.compute_holdings_watch_price_performance(db_conn, filings)
+    assert result[0]["newly_flagged"] is False
+
+
+def _fake_notifications_module(toast_calls, whatsapp_calls):
+    import types
+    fake_module = types.ModuleType("notifications")
+    fake_module.send_toast_notification = lambda *a, **k: toast_calls.append((a, k))
+    fake_module.send_whatsapp_notification = lambda *a, **k: whatsapp_calls.append((a, k))
+    return fake_module
+
+
+def test_maybe_notify_price_flags_skips_when_nothing_newly_flagged():
+    insider_scan.maybe_notify_price_flags([])  # must not raise, no notification module needed
+
+
+def test_maybe_notify_price_flags_sends_whatsapp_with_ticker_and_note(monkeypatch):
+    import sys
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+
+    insider_scan.maybe_notify_price_flags(
+        [{"ticker": "ACME", "price_note": "+25.0% since trade \U0001F6A9 confirms signal"}]
+    )
+    assert len(toast_calls) == 1
+    assert len(whatsapp_calls) == 1
+    (message,), _kwargs = whatsapp_calls[0]
+    assert "ACME" in message
+    assert "+25.0% since trade" in message
 
 
 def test_render_insider_scan_report_includes_price_note_and_recent_filings_section():

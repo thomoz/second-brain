@@ -104,6 +104,7 @@ def cmd_scan_insiders(args) -> None:
     from .insider_scan import (
         compute_discovery_price_performance,
         compute_holdings_watch_price_performance,
+        maybe_notify_price_flags,
         run_discovery_scan,
         run_holdings_watch,
         write_insider_scan_report,
@@ -113,16 +114,18 @@ def cmd_scan_insiders(args) -> None:
     conn = _open_conn()
     watch_result = run_holdings_watch(conn)
     discovery_result = run_discovery_scan(conn)
-    conn.close()
     # Price-since-trade is recalculated fresh every run (Shaun 2026-08-18) --
     # network calls, so deliberately kept outside run_discovery_scan/
     # run_holdings_watch (DB-only, cheap, easy to test without mocking yfinance).
+    # conn stays open here: these also persist the price_flag_notified guard
+    # (see their docstrings) so the "just confirmed the signal" ping fires once.
     discovery_result["pending_candidates"] = compute_discovery_price_performance(
-        discovery_result["pending_candidates"]
+        conn, discovery_result["pending_candidates"]
     )
     watch_result["recent_filings"] = compute_holdings_watch_price_performance(
-        watch_result.get("recent_filings") or []
+        conn, watch_result.get("recent_filings") or []
     )
+    conn.close()
     write_insider_scan_report(watch_result, discovery_result)
     maybe_notify(
         {"new_alerts": watch_result["new_alerts"]},
@@ -130,9 +133,15 @@ def cmd_scan_insiders(args) -> None:
         alert_label="insider P/S filing(s) on current holdings",
         candidate_label="new insider discovery candidate(s)",
     )
+    newly_flagged = (
+        [r for r in discovery_result["pending_candidates"] if r.get("newly_flagged")]
+        + [r for r in watch_result["recent_filings"] if r.get("newly_flagged")]
+    )
+    maybe_notify_price_flags(newly_flagged)
     print(
         f"Insider scan complete: {len(watch_result['new_alerts'])} holdings-watch alert(s), "
-        f"{len(discovery_result['new_candidates'])} new discovery candidate(s). "
+        f"{len(discovery_result['new_candidates'])} new discovery candidate(s), "
+        f"{len(newly_flagged)} price move(s) newly confirmed the signal. "
         f"See investments/goat/insider-scan-report.md"
     )
 
