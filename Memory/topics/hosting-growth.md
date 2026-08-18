@@ -31,3 +31,4 @@ Active
 - (Jun 26) Onboarding focus: get a new DJ to first live request, not full-system redesign
 - (Jul 08) Meta ad approved; verify timing and budget before launch
 - (Aug 12) WhatsOnSydney has no karaoke or trivia categories, so that listing path is closed.
+- (Aug 18) Meta approved the ad and delivery should now begin

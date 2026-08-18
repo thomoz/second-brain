@@ -79,3 +79,9 @@ Skip drafts for: Newsletters, automated notifications, spam
 - (Aug 17) Goat handoff canonical file is `investments/goat/HANDOFF.md`
 - (Aug 17) `second-brain-goat-live-check.timer` is enabled on the VPS
 - (Aug 17) Goat S&P 500 heartbeat scanner is live on the VPS
+
+## 2026-08-18 Reflection
+- (Aug 18) Goat insider scanner is live on VPS; runs daily at 21:50 UTC / about 07:50 AEST
+- (Aug 18) Goat insider sell alerts use 10% first-sale and 1% repeat-sale-in-90-days thresholds
+- (Aug 18) Goat insider buy alerts require at least $25k
+- (Aug 18) Fourteen Crash Signals Phases 1 and 2 are deployed on VPS; 8 markers are live

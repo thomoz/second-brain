@@ -45,6 +45,8 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - No em dashes in drafted content
 - For SongbookDB PHP upgrade work, read the file, propose the fix, wait for approval, then commit
 - Hand off blocked commands as one pasteable `&&` block unless shell context changes
+- For investment reports, use `Debt/Equity` instead of `d/e`
+- In investment reports, add plain-English metric notes like `Lower is generally safer`
 ---
 
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_
