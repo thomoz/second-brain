@@ -85,3 +85,7 @@ Skip drafts for: Newsletters, automated notifications, spam
 - (Aug 18) Goat insider sell alerts use 10% first-sale and 1% repeat-sale-in-90-days thresholds
 - (Aug 18) Goat insider buy alerts require at least $25k
 - (Aug 18) Fourteen Crash Signals Phases 1 and 2 are deployed on VPS; 8 markers are live
+
+## 2026-08-19 Reflection
+- (Aug 19) Fourteen Crash Signals Phase 3 is live on VPS; all 14 markers are now real
+- (Aug 19) Goat Monitor now runs insider-selling checks on the broader watchlist
