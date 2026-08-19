@@ -3,6 +3,7 @@
 # Must be run from project root.
 
 set -euo pipefail
+shopt -s nullglob  # so investments/*/*.md globs vanish (not literal-match-fail) if a dir is ever empty
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$PROJECT_ROOT"
 
@@ -11,12 +12,16 @@ LOG="$PROJECT_ROOT/.claude/scripts/vault_sync_runs.log"
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] vault sync start" >> "$LOG"
 
-# Stage and commit any local Memory/ changes. Scoped to Memory/ on both the diff
-# check and the commit itself so this never sweeps up unrelated staged changes into
-# a mislabeled "vault sync" commit — anything else staged stays staged, untouched.
-git add Memory/
-if ! git diff --quiet --cached -- Memory/; then
-    git commit -m "vault sync $(date '+%Y-%m-%d %H:%M')" -- Memory/ >> "$LOG" 2>&1
+# Stage and commit any local Memory/ changes, plus the goat/my-trader auto-generated
+# report .md files (investments.db itself is deliberately excluded -- binary SQLite
+# conflicts get resolved manually via additive-union merges, see deploy.ps1's
+# Show-ConflictHelp). Scoped on both the diff check and the commit itself so this
+# never sweeps up unrelated staged changes into a mislabeled "vault sync" commit --
+# anything else staged stays staged, untouched.
+SYNC_PATHS=(Memory/ investments/goat/*.md investments/my-trader/*.md)
+git add "${SYNC_PATHS[@]}"
+if ! git diff --quiet --cached -- "${SYNC_PATHS[@]}"; then
+    git commit -m "vault sync $(date '+%Y-%m-%d %H:%M')" -- "${SYNC_PATHS[@]}" >> "$LOG" 2>&1
 fi
 
 # Pull remote changes; note which Memory/ files changed
