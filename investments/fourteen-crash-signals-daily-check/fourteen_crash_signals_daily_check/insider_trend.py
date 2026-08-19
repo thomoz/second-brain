@@ -1,15 +1,18 @@
 """Marker 8 -- insider selling, aggregate 365-day trend against the dynamic hot
-watchlist. Reuses goat.openinsider's screener scraper directly (a pure
+watchlist. Reuses mytrader.openinsider's screener scraper directly (a pure
 data-fetch function, not coupled to Goat's own per-filing holdings-watch
 orchestration) with the new filing_date_days param this package added. This is
 an aggregate sum over a year, not a per-filing alert -- do not confuse with
-goat.insider_scan.run_holdings_watch, which is a different check shape."""
+goat.insider_scan.run_holdings_watch, which is a different check shape.
+
+NOTE: the scraper moved from goat/goat/openinsider.py to mytrader/openinsider.py
+2026-08-19 -- this import updated accordingly, no behavior change."""
 
 from __future__ import annotations
 
 import sqlite3
 
-from goat import openinsider
+from mytrader import openinsider
 from mytrader.checks import CheckResult
 
 from . import config, db

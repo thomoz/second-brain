@@ -14,8 +14,9 @@ from typing import Any
 
 import pandas as pd
 from mytrader import db as mt_db
+from mytrader import openinsider
 
-from . import config, db, openinsider, price_history
+from . import config, db, price_history
 
 
 def _within_lookback(trade_date_str: str, lookback_days: int) -> bool:

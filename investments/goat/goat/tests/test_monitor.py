@@ -34,6 +34,13 @@ def _seed_holding(conn, ticker="VRTX", bucket="1"):
     )
 
 
+def _seed_watchlist(conn, ticker="MCD", bucket="1", status="raw"):
+    mt_db.upsert_watchlist_row(
+        conn, ticker=ticker, name="McDonald's Corp", asset_type="stock",
+        bucket=bucket, status=status,
+    )
+
+
 def test_run_monitor_creates_new_alert_for_first_flag(db_conn, monkeypatch):
     _seed_holding(db_conn)
     monkeypatch.setattr(
@@ -86,12 +93,62 @@ def test_run_monitor_skips_ticker_with_no_price_history(db_conn, monkeypatch):
     assert result["checked_holdings"] == 1
 
 
+def test_run_monitor_creates_new_alert_for_raw_watchlist_ticker(db_conn, monkeypatch):
+    """Shaun 2026-08-19: watchlist coverage must include status="raw" rows (not
+    just "discussed", unlike mytrader's own Monitor) so he can be prompted to
+    discuss a not-yet-vetted candidate the moment it breaks its 150DMA."""
+    _seed_watchlist(db_conn, ticker="MCD", status="raw")
+    monkeypatch.setattr(
+        "goat.monitor.price_history.fetch_close_history",
+        lambda ticker, lookback_days: _flagging_series(),
+    )
+    result = monitor.run_monitor(db_conn)
+    assert len(result["new_alerts"]) == 1
+    assert result["new_alerts"][0]["ticker"] == "MCD"
+    assert result["new_alerts"][0]["source_table"] == "watchlist"
+    assert result["checked_watchlist"] == 1
+    assert result["checked_holdings"] == 0
+
+
+def test_run_monitor_dedups_holding_and_watchlist_alerts_independently(db_conn, monkeypatch):
+    """A ticker held AND separately watchlisted (e.g. re-added at a different
+    bucket) must not have its watchlist alert suppressed just because the
+    holdings alert already fired, or vice versa -- source_table keeps the two
+    dedup states independent."""
+    _seed_holding(db_conn, ticker="VRTX", bucket="1")
+    _seed_watchlist(db_conn, ticker="VRTX", bucket="2", status="raw")
+    monkeypatch.setattr(
+        "goat.monitor.price_history.fetch_close_history",
+        lambda ticker, lookback_days: _flagging_series(),
+    )
+    result = monitor.run_monitor(db_conn)
+    assert len(result["new_alerts"]) == 2
+    assert {a["source_table"] for a in result["new_alerts"]} == {"holdings", "watchlist"}
+    assert len(result["open_alerts"]) == 2
+
+
+def test_run_monitor_watchlist_alert_stays_quiet_on_repeat_flag(db_conn, monkeypatch):
+    _seed_watchlist(db_conn, ticker="MCD", status="discussed")
+    monkeypatch.setattr(
+        "goat.monitor.price_history.fetch_close_history",
+        lambda ticker, lookback_days: _flagging_series(),
+    )
+    monitor.run_monitor(db_conn)
+    result = monitor.run_monitor(db_conn)
+    assert result["new_alerts"] == []
+    assert len(result["open_alerts"]) == 1
+
+
 def test_render_report_lists_new_and_open_alerts():
     result = {
         "checked_holdings": 3,
-        "new_alerts": [{"ticker": "VRTX", "message": "closed 8.0% below its 150-day MA"}],
+        "checked_watchlist": 5,
+        "new_alerts": [
+            {"ticker": "VRTX", "source_table": "holdings", "message": "closed 8.0% below its 150-day MA"},
+            {"ticker": "MCD", "source_table": "watchlist", "message": "closed 9.0% below its 150-day MA"},
+        ],
         "open_alerts": [
-            {"ticker": "VRTX", "message": "closed 8.0% below its 150-day MA",
+            {"ticker": "VRTX", "source_table": "holdings", "message": "closed 8.0% below its 150-day MA",
              "created_at": "2026-08-11T00:00:00+00:00"}
         ],
     }
@@ -99,8 +156,12 @@ def test_render_report_lists_new_and_open_alerts():
     assert "VRTX" in report
     assert "8.0% below" in report
     assert "3 holding(s)" in report
+    assert "5 watchlist ticker(s)" in report
+    assert "MCD" in report
+    assert "(watchlist)" in report
+    assert "(holdings)" in report
 
-    empty = {"checked_holdings": 0, "new_alerts": [], "open_alerts": []}
+    empty = {"checked_holdings": 0, "checked_watchlist": 0, "new_alerts": [], "open_alerts": []}
     empty_report = monitor.render_report(empty)
     assert "No new material changes." in empty_report
     assert "None." in empty_report
@@ -182,6 +243,22 @@ def test_maybe_notify_sends_whatsapp_with_ticker_detail(monkeypatch):
     (message,), _kwargs = whatsapp_calls[0]
     assert "VRTX" in message
     assert "150-day MA" in message
+
+
+def test_maybe_notify_labels_watchlist_alerts_distinctly_from_holdings(monkeypatch):
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+
+    monitor.maybe_notify({
+        "new_alerts": [
+            {"ticker": "VRTX", "source_table": "holdings", "message": "closed 8.0% below its 150-day MA"},
+            {"ticker": "MCD", "source_table": "watchlist", "message": "closed 9.0% below its 150-day MA"},
+        ],
+    })
+    (message,), _kwargs = whatsapp_calls[0]
+    assert "2 ticker(s)" in message
+    assert "VRTX (holdings)" in message
+    assert "MCD (watchlist)" in message
 
 
 def test_maybe_notify_uses_custom_alert_label(monkeypatch):

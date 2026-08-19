@@ -527,3 +527,28 @@ IBKR_PORT = 4001  # IB Gateway, live account. Paper would be 4002; TWS equivalen
                    # 7496 (live) / 7497 (paper), not used here.
 IBKR_CLIENT_ID = 27  # arbitrary, must be unique per simultaneous API client connected
                       # to the same Gateway instance -- change if this ever collides.
+
+# OpenInsider.com scraper config (mytrader/openinsider.py), moved here from
+# goat/goat/config.py 2026-08-19 -- goat's insider_scan.py and
+# fourteen_crash_signals_daily_check's insider_trend.py both already depend on
+# my-trader, not the reverse, and the scraper itself only ever depended on
+# mytrader.tickers -- this was the correct import direction to let a new Find-only
+# check (checks/insider_selling.py) reuse it without a circular workspace dependency.
+OPENINSIDER_BASE_URL = "http://openinsider.com"
+OPENINSIDER_USER_AGENT = "Mozilla/5.0 (compatible; SecondBrainGoat/1.0)"
+
+# Insider selling check (Find-only deep-dive, checks/insider_selling.py). Added
+# 2026-08-19 after Shaun asked whether Chevron's Michael Wirth selling 90%+ of his
+# CVX position would have been caught -- it wasn't, since goat's Holdings Watch only
+# tracks tickers Shaun already holds. This closes that gap at Find time instead.
+INSIDER_SELLING_LOOKBACK_DAYS = 30  # deliberately wider than goat's
+    # GOAT_INSIDER_HOLDINGS_WATCH_LOOKBACK_DAYS (5d, tuned for a daily incremental
+    # poll) -- Find is a one-shot deep dive with no persisted state between runs to
+    # catch a sale a narrow window would miss. Shaun's number, 2026-08-19.
+INSIDER_SELLING_MIN_VALUE = 1_000  # same near-zero noise floor as
+    # GOAT_INSIDER_SALE_MIN_VALUE -- filters fractional-share administrative trades
+    # only; the real gate is the pct-of-position threshold below.
+INSIDER_SELLING_FLAG_PCT_THRESHOLD = 10.0  # % of the insider's own position --
+    # matches GOAT_INSIDER_SALE_PCT_THRESHOLD_FIRST. No repeat-sale state exists in a
+    # one-shot Find check (unlike goat's Holdings Watch), so there's one threshold
+    # here, not a first/repeat pair.

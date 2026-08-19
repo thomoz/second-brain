@@ -6,6 +6,7 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 
 | Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |
 |--------|------|------|--------|----------|------------|--------|
+| 1211.HK | BYD Company Limited | stock | unassigned | — | — | Added at Shaun's request 2026-08-19 |
 | 3750.HK | Contemporary Amperex Technology Co., Limited (CATL) | stock | unassigned | — | — | Not yet discussed. HK-listed (HKD). World's largest EV battery maker. |
 | CEG | Constellation Energy Corp | stock | unassigned | — | — | Nuclear power generation — largest US carbon-free/nuclear generator |
 | CPRT | Copart Inc | stock | 1 | — | — | Vehicle salvage/insurance auction near-duopoly (land-bank moat). Fair-price-today case, not a crash-timing trade: PE 17.4, clean balance sheet (D/E 1.1), ROE 17.6%, opportunity check fired 2 signals on a -15.8% 3mo dip. Crash-resilience check shows it amplifies broad-market crashes ~1.3x (COVID -43.8% vs S&P -33.9%, 2022 -35.4% vs S&P -25.4%) -- moat protects market position, not stock price, so doesn't fit the AI-postcrash 'wait for a bubble to deflate' framing either. |
@@ -98,4 +99,4 @@ Major AI-boom names with real moats (chip/foundry monopoly, hyperscaler platform
 | SNDK | SanDisk | stock | ai_postcrash | — | +3663% | Major U.S.-listed NAND flash provider for AI long-term memory with sold-out enterprise inventory, rising margins, strong data center revenue growth, and a hard-to-replicate Kioxia manufacturing partnership. |
 | TSM | Taiwan Semiconductor Manufacturing Company Limited | stock | ai_postcrash | 2.93% | +1713% | Named as one of the companies powering AI that has been crushing it, fitting the report's AI chip supply-chain thesis. |
 
-Last auto-generated: 2026-08-18.
+Last auto-generated: 2026-08-19.

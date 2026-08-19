@@ -21,15 +21,19 @@ def test_lookup_ticker_persists_nothing(db_conn, monkeypatch):
 def test_lookup_ticker_opts_in_to_principles_fit_and_news_events(db_conn, monkeypatch):
     captured = {}
 
-    def _fake_run_assessment(ticker, conn, include_principles_fit=False, include_news_events=False):
+    def _fake_run_assessment(
+        ticker, conn, include_principles_fit=False, include_news_events=False, include_insider_selling=False,
+    ):
         captured["include_principles_fit"] = include_principles_fit
         captured["include_news_events"] = include_news_events
+        captured["include_insider_selling"] = include_insider_selling
         return {"ticker": ticker}
 
     monkeypatch.setattr("mytrader.find.engine.run_assessment", _fake_run_assessment)
     find.lookup_ticker("VRTX", db_conn)
     assert captured["include_principles_fit"] is True
     assert captured["include_news_events"] is True
+    assert captured["include_insider_selling"] is True
 
 
 def test_add_to_watchlist_persists_row(db_conn, monkeypatch, tmp_path):

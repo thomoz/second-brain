@@ -1,15 +1,21 @@
-"""OpenInsider.com scraper -- Goat insider trading scanner. Scrapes SEC Form 4
-open-market insider purchase/sale filings (aggregated by OpenInsider, no official
-free API exists), mirroring sp500_universe.py's direct-fetch style (requests +
-BeautifulSoup, headers dict, timeout, try/except-returns-None-on-any-failure)."""
+"""OpenInsider.com scraper. Scrapes SEC Form 4 open-market insider purchase/sale
+filings (aggregated by OpenInsider, no official free API exists), mirroring
+sp500_universe.py's direct-fetch style (requests + BeautifulSoup, headers dict,
+timeout, try/except-returns-None-on-any-failure).
+
+Moved here from goat/goat/openinsider.py 2026-08-19 -- both goat's insider_scan.py
+and fourteen_crash_signals_daily_check's insider_trend.py already depend on
+my-trader (not the reverse), and this module's only internal dependency was
+mytrader.tickers, so this was the correct import direction for a new Find-only
+check (mytrader/checks/insider_selling.py) to reuse the same scraper. Both existing
+callers now do `from mytrader import openinsider` instead of `from . import
+openinsider` / `from goat import openinsider` -- no behavior change."""
 
 from __future__ import annotations
 
-from mytrader import tickers
+from . import config, tickers
 
-from . import config
-
-_HEADERS = {"User-Agent": config.GOAT_OPENINSIDER_USER_AGENT}
+_HEADERS = {"User-Agent": config.OPENINSIDER_USER_AGENT}
 
 # /screener ignores a bare s=/vl= query -- it silently falls back to rendering
 # the blank search form unless the FULL form field set is present (confirmed
@@ -166,14 +172,14 @@ def fetch_screener_filings(
     params["xp"] = "1" if trade_type == "P" else ""
     params["xs"] = "1" if trade_type == "S" else ""
     params["fd"] = str(filing_date_days)
-    rows = _fetch(f"{config.GOAT_OPENINSIDER_BASE_URL}/screener", params=params)
+    rows = _fetch(f"{config.OPENINSIDER_BASE_URL}/screener", params=params)
     if rows is None:
         return None
     return [r for r in rows if r["trade_type_code"] == trade_type]
 
 
 def fetch_discovery_purchases() -> list[dict] | None:
-    rows = _fetch(f"{config.GOAT_OPENINSIDER_BASE_URL}/latest-insider-purchases-25k")
+    rows = _fetch(f"{config.OPENINSIDER_BASE_URL}/latest-insider-purchases-25k")
     if rows is None:
         return None
     return [r for r in rows if r["trade_type_code"] == "P"]

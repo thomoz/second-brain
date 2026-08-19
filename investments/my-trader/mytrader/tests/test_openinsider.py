@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from goat import openinsider
+from mytrader import openinsider
 
 _FAKE_HTML = """
 <table class="tinytable">

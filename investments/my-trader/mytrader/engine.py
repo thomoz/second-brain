@@ -16,6 +16,7 @@ from .checks import (
     dividend,
     etf_mechanics,
     fx,
+    insider_selling,
     news_events,
     opportunity,
     price_action,
@@ -96,6 +97,7 @@ def run_assessment(
     conn: sqlite3.Connection,
     include_principles_fit: bool = False,
     include_news_events: bool = False,
+    include_insider_selling: bool = False,
 ) -> dict[str, Any]:
     """include_principles_fit: opt-in, Find-only (see checks/principles_fit.py) — 9
     extra LLM calls per assessment, so defaulted off. Monitor never passes True, so
@@ -104,7 +106,14 @@ def run_assessment(
     include_news_events: opt-in, Find-only (see checks/news_events.py) — one
     LLM+web-search call per assessment, same reasoning as include_principles_fit.
     Added to other_checks (not appended after, like principles_fit) so a "flag"
-    verdict here participates in opportunity.py's existing risk-flag gate."""
+    verdict here participates in opportunity.py's existing risk-flag gate.
+
+    include_insider_selling: opt-in, Find-only (see checks/insider_selling.py) —
+    a "look before you buy" check, not something Monitor's daily re-check of
+    already-held positions needs. Cheap (one OpenInsider scrape, no LLM call)
+    unlike the other two opt-ins, but kept Find-only anyway since it's about
+    deep-dive due diligence, not ongoing position monitoring. Also added to
+    other_checks so a "flag" here gates opportunity.py the same way."""
     normalized = tickers.normalize(ticker)
     data = market_data.fetch_ticker_data(normalized)
 
@@ -145,6 +154,8 @@ def run_assessment(
     ]
     if include_news_events:
         other_checks.append(news_events.check(normalized, conn))
+    if include_insider_selling:
+        other_checks.append(insider_selling.check(normalized))
     results = [
         *other_checks,
         opportunity.check(data, other_checks, briefs_score, recent_return_3mo),

@@ -201,8 +201,10 @@ GOAT_HEARTBEAT_CANDIDATES_MD_PATH = GOAT_DIR / "heartbeat-candidates-pending-rev
 # "board member expects bad news" signal, plausibly $1M+) and $25k+ open-market buys.
 # P/S trade-type codes only -- excludes grants (A), option exercises (M), gifts (G),
 # tax-withholding sales (F), none of which reflect the same conviction signal.
-GOAT_OPENINSIDER_BASE_URL = "http://openinsider.com"
-GOAT_OPENINSIDER_USER_AGENT = "Mozilla/5.0 (compatible; SecondBrainGoat/1.0)"
+# NOTE: the scraper itself (openinsider.py, incl. OPENINSIDER_BASE_URL/USER_AGENT)
+# moved to mytrader/openinsider.py + mytrader/config.py 2026-08-19 -- goat depends on
+# my-trader, not the reverse, so that's the only workspace-safe place for a module
+# both this package and fourteen_crash_signals_daily_check's insider_trend.py share.
 GOAT_INSIDER_PURCHASE_MIN_VALUE = 25_000  # matches OpenInsider's own
                                               # /latest-insider-purchases-25k floor.
                                               # Purchases stay dollar-gated -- Shaun's

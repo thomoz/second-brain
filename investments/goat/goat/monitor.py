@@ -1,7 +1,15 @@
 """Goat Monitor -- scheduled daily 150DMA exit-rule check against every my-trader
-holding. Read-only against my-trader's holdings table; writes only to Goat's own
+holding, plus (2026-08-19) the same check against every my-trader watchlist row.
+Read-only against my-trader's holdings/watchlist tables; writes only to Goat's own
 goat_alert_history table and goat-monitor-report.md. Never touches my-trader's
-alert_history, monitor-report.md, holdings.md, or watchlist.md."""
+alert_history, monitor-report.md, holdings.md, or watchlist.md.
+
+Watchlist coverage is deliberately unfiltered by status (Shaun 2026-08-19: "it
+should include raw too. I can then discuss if the price breaks above the
+150dma") -- unlike mytrader's own Monitor, which only re-checks status=="discussed"
+watchlist rows. A 150DMA break on a not-yet-vetted candidate is still worth
+surfacing here since it's the trigger for a discussion, not a re-check of an
+existing thesis."""
 
 from __future__ import annotations
 
@@ -16,26 +24,31 @@ from . import config, db, exit_check, price_history, sector_rotation
 
 SEVERITY = "flag"
 SOURCE_TABLE = "holdings"
+WATCHLIST_SOURCE_TABLE = "watchlist"
 
 
 # Public (not module-private) because goat/live_monitor.py also calls this
 # directly -- shared dedup state (goat_alert_history) is riskier to duplicate
 # than a pure computation would be, so this is imported properly rather than
 # ported/copied the way price_history.py's crash_windows-derived logic was.
+# source_table defaults to "holdings" so live_monitor.py's existing (holdings-only)
+# call site is unaffected -- run_monitor passes WATCHLIST_SOURCE_TABLE explicitly
+# for its watchlist loop so a ticker's holdings alert and watchlist alert never
+# collide in the same dedup key.
 def reconcile_alerts(
-    ticker: str, checks: list[CheckResult], conn: sqlite3.Connection
+    ticker: str, checks: list[CheckResult], conn: sqlite3.Connection, source_table: str = SOURCE_TABLE
 ) -> list[dict[str, Any]]:
     new_alerts: list[dict[str, Any]] = []
     for check in checks:
-        existing = db.get_open_goat_alert(conn, ticker, SOURCE_TABLE, check.name)
+        existing = db.get_open_goat_alert(conn, ticker, source_table, check.name)
         if check.verdict == "flag":
             if existing is None:
                 db.insert_goat_alert(
-                    conn, ticker=ticker, source_table=SOURCE_TABLE,
+                    conn, ticker=ticker, source_table=source_table,
                     check_name=check.name, severity=SEVERITY, message=check.detail,
                 )
                 new_alerts.append({
-                    "ticker": ticker, "source_table": SOURCE_TABLE,
+                    "ticker": ticker, "source_table": source_table,
                     "check_name": check.name, "message": check.detail,
                 })
         elif existing is not None:
@@ -45,9 +58,11 @@ def reconcile_alerts(
 
 def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
     holdings = mt_db.get_all_holdings(conn)
+    watchlist = mt_db.get_all_watchlist(conn)  # every row regardless of status -- see
+                                                 # module docstring.
 
     new_alerts: list[dict[str, Any]] = []
-    checked = 0
+    checked_holdings = 0
     for row in holdings:
         ticker = row["ticker"]
         try:
@@ -56,13 +71,28 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
                 print(f"[goat-monitor] no price history for {ticker}, skipping")
                 continue
             check = exit_check.check_150dma_exit(ticker, close)
-            new_alerts.extend(reconcile_alerts(ticker, [check], conn))
-            checked += 1
+            new_alerts.extend(reconcile_alerts(ticker, [check], conn, source_table=SOURCE_TABLE))
+            checked_holdings += 1
         except Exception as e:
             print(f"[goat-monitor] error checking {ticker}: {e}")
 
+    checked_watchlist = 0
+    for row in watchlist:
+        ticker = row["ticker"]
+        try:
+            close = price_history.fetch_close_history(ticker, config.GOAT_MA_HISTORY_LOOKBACK_DAYS)
+            if close is None:
+                print(f"[goat-monitor] no price history for watchlist {ticker}, skipping")
+                continue
+            check = exit_check.check_150dma_exit(ticker, close)
+            new_alerts.extend(reconcile_alerts(ticker, [check], conn, source_table=WATCHLIST_SOURCE_TABLE))
+            checked_watchlist += 1
+        except Exception as e:
+            print(f"[goat-monitor] error checking watchlist {ticker}: {e}")
+
     return {
-        "checked_holdings": checked,
+        "checked_holdings": checked_holdings,
+        "checked_watchlist": checked_watchlist,
         "new_alerts": new_alerts,
         "open_alerts": [dict(a) for a in db.get_open_goat_alerts(conn)],
     }
@@ -76,20 +106,23 @@ def render_report(result: dict[str, Any]) -> str:
         "only; no trade action is ever suggested here (see SOUL.md).",
         "",
         f"## Run: {date.today().isoformat()}",
-        f"Checked {result['checked_holdings']} holding(s) against the 150-day "
-        "moving-average exit rule.",
+        f"Checked {result['checked_holdings']} holding(s) and "
+        f"{result.get('checked_watchlist', 0)} watchlist ticker(s) (incl. "
+        "not-yet-discussed candidates) against the 150-day moving-average exit rule.",
         "",
         "### New Alerts This Run",
     ]
     if result["new_alerts"]:
         for a in result["new_alerts"]:
-            lines.append(f"- **{a['ticker']}** -- {a['message']}")
+            label = f" ({a['source_table']})" if a.get("source_table") else ""
+            lines.append(f"- **{a['ticker']}**{label} -- {a['message']}")
     else:
         lines.append("No new material changes.")
     lines += ["", "### All Open Alerts"]
     if result["open_alerts"]:
         for a in result["open_alerts"]:
-            lines.append(f"- **{a['ticker']}** -- {a['message']} (first flagged {a['created_at'][:10]})")
+            label = f" ({a['source_table']})" if a.get("source_table") else ""
+            lines.append(f"- **{a['ticker']}**{label} -- {a['message']} (first flagged {a['created_at'][:10]})")
     else:
         lines.append("None.")
     lines += [
@@ -136,7 +169,10 @@ def maybe_notify(
 
     parts = []
     if n_alerts:
-        parts.append(f"{n_alerts} holding(s) {alert_label}")
+        # "ticker(s)" not "holding(s)" -- new_alerts can now mix holdings and
+        # watchlist rows (see run_monitor's watchlist loop, added 2026-08-19);
+        # each line below still names which one via source_table.
+        parts.append(f"{n_alerts} ticker(s) {alert_label}")
     if candidates:
         parts.append(f"{len(candidates)} {candidate_label}")
     summary = "; ".join(parts)
@@ -148,7 +184,10 @@ def maybe_notify(
 
     lines = [f"Goat Monitor: {summary}."]
     if n_alerts:
-        lines += [f"- {a['ticker']}: {a['message']}" for a in result["new_alerts"]]
+        lines += [
+            f"- {a['ticker']}" + (f" ({a['source_table']})" if a.get("source_table") else "") + f": {a['message']}"
+            for a in result["new_alerts"]
+        ]
     if candidates:
         lines += [f"- {c['ticker']} ({c['sector_label']}): {c['detail']}" for c in candidates]
     send_whatsapp_notification("\n".join(lines))
