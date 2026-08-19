@@ -37,6 +37,7 @@ Market-wide $25k+ open-market insider purchases, staged for explicit review. Rev
 | BGDE | Insider Buy | Endeavor Blockchain, LLC (SEE REMARKS, 10%) bought $475,048 of BGDE (4% of position) on 2026-08-14 | +2.6% since trade | 2026-08-19 |
 | BHRB | Insider Buy | Poillon Diane (Dir) bought $88,398 of BHRB on 2026-08-12 | -3.3% since trade | 2026-08-17 |
 | BKKT | Insider Buy | Alfred Michael (Dir) bought $2,111,557 of BKKT (33% of position) on 2026-08-18 | +11.7% since trade | 2026-08-19 |
+| BLND | Insider Buy | Haveli Investments, L.P. (Dir, 10%) bought $25,120 of BLND (0% of position) on 2026-08-17 | +1.4% since trade | 2026-08-19 |
 | BORR | Insider Buy | Troim Tor Olav (Dir) bought $6,036,750 of BORR on 2026-08-13 | +8.9% since trade | 2026-08-17 |
 | BPRN | Insider Buy | Tuchman Martin (Dir, 10%) bought $452,730 of BPRN on 2026-08-12 | -2.7% since trade | 2026-08-17 |
 | BRCC | Insider Buy | Dickson Kathryn P (Dir) bought $42,475 of BRCC (11% of position) on 2026-08-19 | +0.0% since trade | 2026-08-19 |
@@ -92,6 +93,7 @@ Market-wide $25k+ open-market insider purchases, staged for explicit review. Rev
 | MAIN | Insider Buy | McHugh Ryan (VP, CAO, Assistant Treasurer) bought $150,577 of MAIN on 2026-08-13 | -1.8% since trade | 2026-08-17 |
 | MATW | Insider Buy | Richards Aleta W. (Dir) bought $69,180 of MATW (31% of position) on 2026-08-14 | -5.5% since trade | 2026-08-18 |
 | MDXH | Insider Buy | Mvm Partners, LLC (Dir) bought $1,000,000 of MDXH (47% of position) on 2026-08-13 | +64.3% since trade 🚩 confirms signal | 2026-08-18 |
+| MFP | Insider Buy | Nerbonne Robert A (Dir) bought $491,045 of MFP (30% of position) on 2026-08-17 | +1.6% since trade | 2026-08-19 |
 | MLAB | Insider Buy | Kadia Siddhartha (Pres, CEO) bought $800,090 of MLAB on 2026-08-13 | +5.8% since trade | 2026-08-18 |
 | MLPT | Insider Buy | Catalyst4, Inc. (10%) bought $50,072,000 of MLPT (21% of position) on 2026-08-14 | price unavailable | 2026-08-19 |
 | MOBI | Insider Buy | Tansey Casey M (Dir) bought $797,173 of MOBI (29% of position) on 2026-08-13 | -2.2% since trade | 2026-08-18 |
@@ -139,6 +141,7 @@ Market-wide $25k+ open-market insider purchases, staged for explicit review. Rev
 | VVV | Insider Buy | Denny Jordan M. (Chief Accounting Officer) bought $49,999 of VVV on 2026-08-12 | +2.4% since trade | 2026-08-17 |
 | WULF | Insider Buy | Bucella Michael C. (Dir) bought $99,950 of WULF (2% of position) on 2026-08-14 | -10.8% since trade | 2026-08-18 |
 | XRN | Insider Buy | Roseth Aaron Robert (COO) bought $495,855 of XRN on 2026-08-12 | +1.7% since trade | 2026-08-17 |
+| ZNTL | Insider Buy | Walters Group (10%) bought $15,172,500 of ZNTL (32% of position) on 2026-08-14 | +7.3% since trade | 2026-08-19 |
 
 ## Price Performance — Recent Holdings Filings
 Price move since trade date for P/S filings seen on your holdings (most recent 20, including ones below the alert threshold). 🚩 marks a move that confirms the insider's signal direction (buy -> price rose, sale -> price fell) by 15%+.
