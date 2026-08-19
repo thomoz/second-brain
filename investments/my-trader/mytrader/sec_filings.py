@@ -23,7 +23,7 @@ import re
 import sqlite3
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -116,6 +116,49 @@ def fetch_filing_document(cik: str, accession_number: str, document: str) -> str
         if r.status_code != 200 or len(r.content) > config.SEC_MAX_RAW_DOCUMENT_BYTES:
             return None
         return r.text
+    except Exception:
+        return None
+
+# --- Full-text search (aggregate counting, not per-filing fetch) -----------
+
+
+def edgar_fulltext_search_count(
+    forms: str, *, cik: str | None = None, startdt: date | None = None, enddt: date | None = None
+) -> int | None:
+    """Count of EDGAR full-text-search hits for the given form-type(s) (comma-separated,
+    e.g. "424B2,424B5,FWP"), optionally scoped to one issuer CIK and/or a filing-date
+    range. Confirmed live 2026-08-18 (Phase 3 planning session, real requests against
+    efts.sec.gov/LATEST/search-index):
+
+    - GOTCHA (silent wrong answer, not an error): omit the `q` (search-text) parameter
+      entirely. Passing q="" returns an inflated, wrong total (1661 vs the correct 181
+      for an identical S-1/30-day query) -- confirmed by testing both forms side by side.
+      Do not add a `q` param to this function.
+    - GOTCHA (also silent, also confirmed): `cik` must be the 10-digit zero-padded form
+      (e.g. "0001341439"), not the raw digits sec_filings.get_cik() returns (e.g.
+      "1341439") -- the unpadded form returns hits.total.value == 0 with a 200 status,
+      not an error. This function pads internally so callers can pass get_cik()'s output
+      straight through without remembering to pad it themselves.
+    - Response shape confirmed live: {"hits": {"total": {"value": <int>, "relation":
+      "eq"}, "hits": [...]}}. This function returns only hits.total.value -- callers
+      needing individual filing entries should use fetch_filing_index/latest_filing_entry
+      instead (this is for aggregate counting, e.g. Markers #1/#6 of the Fourteen Crash
+      Signals daily check).
+    """
+    params: dict[str, str] = {"forms": forms}
+    if cik is not None:
+        params["ciks"] = f"{int(cik):010d}"
+    if startdt is not None:
+        params["startdt"] = startdt.isoformat()
+    if enddt is not None:
+        params["enddt"] = enddt.isoformat()
+    try:
+        r = requests.get(
+            "https://efts.sec.gov/LATEST/search-index", params=params, headers=_HEADERS, timeout=20
+        )
+        if r.status_code != 200:
+            return None
+        return r.json()["hits"]["total"]["value"]
     except Exception:
         return None
 

@@ -161,3 +161,45 @@ def test_get_filing_summaries_falls_back_to_stale_cache_on_fetch_failure(db_conn
     monkeypatch.setattr(sec_filings, "get_filing_summaries_for_ticker", _real_get_filing_summaries_for_ticker)
     result = sec_filings.get_filing_summaries_for_ticker("KO", db_conn)
     assert result == {"10-K": "Stale summary."}
+
+
+class _FakeSearchResponse:
+    def __init__(self, status_code: int, payload: dict | None = None):
+        self.status_code = status_code
+        self._payload = payload or {}
+
+    def json(self):
+        return self._payload
+
+
+def test_edgar_fulltext_search_count_returns_total_value(monkeypatch):
+    def _fake_get(url, params=None, headers=None, timeout=None):
+        assert "q" not in params  # GOTCHA regression -- q must never be sent
+        assert params["ciks"] == "0001341439"  # zero-padded from raw "1341439"
+        return _FakeSearchResponse(200, {"hits": {"total": {"value": 42, "relation": "eq"}}})
+
+    monkeypatch.setattr(sec_filings.requests, "get", _fake_get)
+    count = sec_filings.edgar_fulltext_search_count("424B2,424B5,FWP", cik="1341439")
+    assert count == 42
+
+
+def test_edgar_fulltext_search_count_none_on_non_200(monkeypatch):
+    monkeypatch.setattr(sec_filings.requests, "get", lambda *a, **k: _FakeSearchResponse(500))
+    assert sec_filings.edgar_fulltext_search_count("S-1") is None
+
+
+def test_edgar_fulltext_search_count_none_on_exception(monkeypatch):
+    def _raise(*a, **k):
+        raise ConnectionError("boom")
+
+    monkeypatch.setattr(sec_filings.requests, "get", _raise)
+    assert sec_filings.edgar_fulltext_search_count("S-1") is None
+
+
+def test_edgar_fulltext_search_count_no_cik_param_when_omitted(monkeypatch):
+    def _fake_get(url, params=None, headers=None, timeout=None):
+        assert "ciks" not in params  # market-wide query, Marker #6's shape
+        return _FakeSearchResponse(200, {"hits": {"total": {"value": 85, "relation": "eq"}}})
+
+    monkeypatch.setattr(sec_filings.requests, "get", _fake_get)
+    assert sec_filings.edgar_fulltext_search_count("S-1") == 85

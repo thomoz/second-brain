@@ -88,3 +88,64 @@ SIGNALS_BOND_PROSPECTUS_FORM_TYPES = ("424B2", "424B5", "FWP")
 # confirmed with Shaun: keep verdict="ok" + data={"watch": True} rather than a new verdict
 # string, so nothing else that branches on verdict needs to change).
 SIGNALS_CREDIT_SPREAD_WATCH_PCT = 3.2  # within 0.3pp of the 3.5pp flag threshold.
+
+# Marker 1 -- record debt issuance in the hot sector (per-issuer, EDGAR full-text search
+# count of debt-prospectus filings, current vs. this issuer's own historical rate).
+SIGNALS_DEBT_ISSUANCE_LOOKBACK_DAYS = 180  # trailing window being evaluated.
+SIGNALS_DEBT_ISSUANCE_BASELINE_DAYS = 730  # 2 years -- own-history baseline window,
+    # queried live from EDGAR rather than accumulated locally (see this plan's NOTES).
+SIGNALS_DEBT_ISSUANCE_FLAG_RATIO = 2.0  # v1/tunable -- trailing-180d count >=2x this
+    # issuer's own per-180d average rate over the trailing 2 years.
+
+# Marker 3 -- seller finances buyer (vendor/circular financing). No automatable source
+# exists (confirmed by live-testing EDGAR phrase search, too noisy to isolate this deal
+# shape) -- this marker is a permanent verdict="unknown" maintained flag, same shape as
+# Marker #9 before it shipped real date-logic. No config constants needed -- nothing to
+# tune, see seller_financing.py.
+
+# Marker 6 -- record IPO/equity issuance (market-wide, EDGAR full-text search, YoY window
+# comparison -- mirrors mytrader.margin_debt's own YoY shape).
+SIGNALS_IPO_FILING_WINDOW_DAYS = 30  # trailing window compared against the same calendar
+    # window one year prior -- confirmed live 2026-08-18: S-1 filings over an identical
+    # 18-day August window differ meaningfully year over year (85 in 2026 vs 145 in 2025),
+    # confirming this is a real, moving signal.
+SIGNALS_IPO_FILING_FLAG_RATIO = 1.5  # v1/tunable, distinct from Marker #1's 2.0x since
+    # S-1/424B4 filing volume is naturally noisier / less issuer-specific.
+
+# Marker 7 -- retail piles into leverage (CBOE equity put/call ratio proxy -- NOTE: this
+# measures options positioning, a DIFFERENT mechanism than the source video's ETF/fund-flow
+# framing; see this plan's NOTES for the sign-off flag before this ships live).
+SIGNALS_PUTCALL_MIN_HISTORY_DAYS = 30  # bootstrap period -- this package accumulates its
+    # own daily readings (CBOE exposes no historical series), so the first ~30 days can
+    # only report "accumulating baseline", never flag.
+SIGNALS_PUTCALL_FLAG_ZSCORE = -2.0  # v1/tunable -- flag when today's equity put/call ratio
+    # is >=2 standard deviations BELOW its own trailing mean (unusually low put/call =
+    # more speculative call-buying, the retail-leverage proxy per the handoff).
+
+# Marker 11 -- regulators sound the alarm (SEC + Fed press releases + Fed speeches RSS,
+# keyword-scan against titles/descriptions -- v1 scope, does not fetch/scan full linked
+# documents, see this plan's NOTES).
+SIGNALS_REGULATOR_FEED_URLS = (
+    "https://www.sec.gov/news/pressreleases.rss",
+    "https://www.federalreserve.gov/feeds/press_all.xml",
+    "https://www.federalreserve.gov/feeds/speeches.xml",
+)  # all 3 confirmed live 2026-08-18: real, current items, valid RSS 2.0, <guid> present
+   # and stable on every item across all 3 feeds (used as the dedup key).
+SIGNALS_REGULATOR_TRIGGER_PHRASES = (
+    "systemic risk", "financial stability", "leverage", "asset valuations", "bubble",
+    "ai", "shadow bank", "private credit",
+)  # v1/tunable -- case-insensitive substring match against title+description.
+
+# Marker 13 -- funding markets start choking (FRED-backed, zero new DB state -- mirrors
+# credit_spread.py's own "recompute from FRED history every run" pattern exactly).
+SIGNALS_FUNDING_SPREAD_SERIES = ("DCPN3M", "DTB3")  # 3-Month AA Nonfinancial Commercial
+    # Paper Rate minus 3-Month Treasury Bill rate -- a direct, daily-updating
+    # funding-market-stress spread (widens when short-term lenders demand more premium to
+    # fund non-bank borrowers).
+SIGNALS_FUNDING_STRESS_INDEX_SERIES = ("STLFSI4", "NFCI")  # St. Louis Fed Financial Stress
+    # Index + Chicago Fed National Financial Conditions Index -- two independent broad
+    # gauges, secondary corroboration only, not the primary signal.
+SIGNALS_FUNDING_SPREAD_LOOKBACK_DAYS = 365  # trailing year for the z-score baseline.
+SIGNALS_FUNDING_SPREAD_FLAG_ZSCORE = 2.0  # v1/tunable -- spread >=2 std devs above its
+    # own trailing-year mean.
+SIGNALS_FUNDING_STRESS_FLAG_ZSCORE = 2.0  # same threshold shape applied to STLFSI4/NFCI.

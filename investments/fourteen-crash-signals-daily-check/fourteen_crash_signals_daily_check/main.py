@@ -29,11 +29,17 @@ def cmd_daily_check(args) -> None:
         credit_spread,
         credit_spread_issuer,
         db,
+        debt_issuance,
+        funding_stress,
         insider_trend,
+        ipo_issuance,
         lease_commitment,
         margin_debt,
         market_cap_milestone,
+        regulator_alarm,
         report,
+        retail_leverage,
+        seller_financing,
         super_bowl,
         watchlist,
     )
@@ -49,17 +55,33 @@ def cmd_daily_check(args) -> None:
     capex_cashflow_results = capex_cashflow.check_capex_cashflow(hot_watchlist)
     super_bowl_result = super_bowl.check_super_bowl_signal()
     credit_spread_issuer_results = credit_spread_issuer.check_credit_spread_issuer(conn, hot_watchlist)
+    debt_issuance_results = debt_issuance.check_debt_issuance(conn, hot_watchlist)
+    seller_financing_result = seller_financing.check_seller_financing(hot_watchlist)
+    ipo_issuance_result = ipo_issuance.check_ipo_issuance()
+    retail_leverage_result = retail_leverage.check_retail_leverage(conn)
+    regulator_alarm_results = regulator_alarm.check_regulator_alarm(conn)
+    funding_stress_result = funding_stress.check_funding_stress()
 
     report.write_signals_report(
         [dict(r) for r in hot_watchlist], credit_spread_result, margin_debt_result,
         insider_trend_results, market_cap_result,
         lease_commitment_results, capex_cashflow_results, super_bowl_result, credit_spread_issuer_results,
+        debt_issuance_results, seller_financing_result, ipo_issuance_result, retail_leverage_result,
+        regulator_alarm_results, funding_stress_result,
     )
 
     alert_inputs = [
         {"marker_key": "margin_debt_growth", "is_firing": margin_debt_result.verdict == "flag", "detail": margin_debt_result.detail},
         {"marker_key": "market_cap_milestone:" + str(market_cap_result.data.get("rung")), "is_firing": market_cap_result.verdict == "flag", "detail": market_cap_result.detail},
         {"marker_key": "super_bowl_signal", "is_firing": super_bowl_result.verdict == "flag", "detail": super_bowl_result.detail},
+        {"marker_key": "ipo_issuance", "is_firing": ipo_issuance_result.verdict == "flag", "detail": ipo_issuance_result.detail},
+        {"marker_key": "funding_stress", "is_firing": funding_stress_result.verdict == "flag", "detail": funding_stress_result.detail},
+        # retail_leverage: Shaun signed off 2026-08-19 on wiring this into WhatsApp
+        # alerting -- CBOE put/call ratio is a related-but-different mechanism than the
+        # source video's ETF/fund-flow framing (see retail_leverage.py's module
+        # docstring); the report row already stated this plainly, and the sign-off
+        # covers alerting on it too, not just displaying it.
+        {"marker_key": "retail_leverage", "is_firing": retail_leverage_result.verdict == "flag", "detail": retail_leverage_result.detail},
     ]
     for r in insider_trend_results:
         alert_inputs.append({
@@ -81,6 +103,18 @@ def cmd_daily_check(args) -> None:
             "marker_key": f"credit_spread_issuer:{r.data.get('ticker')}",
             "is_firing": r.verdict == "flag", "detail": r.detail,
         })
+    for r in debt_issuance_results:
+        alert_inputs.append({
+            "marker_key": f"debt_issuance:{r.data.get('ticker')}",
+            "is_firing": r.verdict == "flag", "detail": r.detail,
+        })
+    for r in regulator_alarm_results:
+        alert_inputs.append({
+            "marker_key": f"regulator_alarm:{r.data.get('guid')}",
+            "is_firing": True, "detail": r.detail,
+        })
+    # seller_financing_result is deliberately NOT wired into alert_inputs -- permanently
+    # verdict="unknown" (see seller_financing.py), can never transition to firing.
     maybe_notify(conn, alert_inputs)
 
     db.upsert_signal_state(

@@ -22,9 +22,23 @@ def _make_results():
     credit_spread_issuer_results = [
         CheckResult(name="credit_spread_issuer", verdict="ok", detail="ORCL spread ok", data={"ticker": "ORCL"}),
     ]
+    debt_issuance_results = [
+        CheckResult(name="debt_issuance", verdict="ok", detail="ORCL debt issuance ok", data={"ticker": "ORCL"}),
+    ]
+    seller_financing_result = CheckResult(
+        name="seller_financing", verdict="unknown", detail="No automatable source exists -- news-scan NVDA", data={"tickers": ["NVDA"]},
+    )
+    ipo_issuance_result = CheckResult(name="ipo_issuance", verdict="ok", detail="S-1 filings steady", data={})
+    retail_leverage_result = CheckResult(name="retail_leverage", verdict="ok", detail="put/call ratio 0.65", data={})
+    regulator_alarm_results = [
+        CheckResult(name="regulator_alarm", verdict="flag", detail="Fed statement on systemic risk", data={"guid": "g1"}),
+    ]
+    funding_stress_result = CheckResult(name="funding_stress", verdict="ok", detail="CP-Treasury spread normal", data={})
     return (
         credit_spread_result, margin_debt_result, insider_trend_results, market_cap_result,
         lease_commitment_results, capex_cashflow_results, super_bowl_result, credit_spread_issuer_results,
+        debt_issuance_results, seller_financing_result, ipo_issuance_result, retail_leverage_result,
+        regulator_alarm_results, funding_stress_result,
     )
 
 
@@ -33,13 +47,6 @@ def test_render_signals_report_includes_all_14_marker_numbers():
     output = report.render_signals_report([], *results)
     for n in range(1, 15):
         assert f"| {n} |" in output, f"marker {n} missing from report"
-
-
-def test_render_signals_report_placeholder_rows_reference_handoff_doc():
-    results = _make_results()
-    output = report.render_signals_report([], *results)
-    # +1 for the report header's own "Per-marker source" line, beyond one per placeholder row
-    assert output.count("14-signals-crash-warning-handoff.md") == len(report._PLACEHOLDER_MARKERS) + 1
 
 
 def test_render_signals_report_shows_hot_watchlist_table():
@@ -63,7 +70,7 @@ def test_write_signals_report_writes_file():
     assert "14 Crash Signals" in config.SIGNALS_REPORT_PATH.read_text(encoding="utf-8")
 
 
-def test_markers_2_4_9_12_render_real_rows_not_placeholder():
+def test_markers_2_4_9_12_render_real_rows():
     results = _make_results()
     output = report.render_signals_report([], *results)
     assert "ORCL leases ok" in output
@@ -72,18 +79,58 @@ def test_markers_2_4_9_12_render_real_rows_not_placeholder():
     assert "ORCL spread ok" in output
 
 
-def test_markers_still_pending_render_placeholder():
+def test_marker_3_row_renders_seller_financing_directly():
     results = _make_results()
     output = report.render_signals_report([], *results)
-    for n in (1, 3, 6, 7, 11, 13):
-        assert f"| {n} |" in output
-        assert report._NOT_YET_AUTOMATED.split(" -- see")[0] in output
+    assert "No automatable source exists -- news-scan NVDA" in output
+    assert "| 3 |" in output
+
+
+def test_marker_11_renders_one_row_per_item_in_nonempty_list():
+    results = _make_results()
+    output = report.render_signals_report([], *results)
+    assert "Fed statement on systemic risk" in output
+
+
+def test_marker_11_renders_fallback_row_when_list_empty():
+    (
+        credit_spread_result, margin_debt_result, insider_trend_results, market_cap_result,
+        lease_commitment_results, capex_cashflow_results, super_bowl_result, credit_spread_issuer_results,
+        debt_issuance_results, seller_financing_result, ipo_issuance_result, retail_leverage_result,
+        _, funding_stress_result,
+    ) = _make_results()
+    output = report.render_signals_report(
+        [], credit_spread_result, margin_debt_result, insider_trend_results, market_cap_result,
+        lease_commitment_results, capex_cashflow_results, super_bowl_result, credit_spread_issuer_results,
+        debt_issuance_results, seller_financing_result, ipo_issuance_result, retail_leverage_result,
+        [], funding_stress_result,
+    )
+    assert "No new matching regulator statements this run." in output
+
+
+def test_markers_1_and_11_render_fallback_row_when_lists_empty():
+    (
+        credit_spread_result, margin_debt_result, insider_trend_results, market_cap_result,
+        lease_commitment_results, capex_cashflow_results, super_bowl_result, credit_spread_issuer_results,
+        _, seller_financing_result, ipo_issuance_result, retail_leverage_result,
+        _, funding_stress_result,
+    ) = _make_results()
+    output = report.render_signals_report(
+        [], credit_spread_result, margin_debt_result, insider_trend_results, market_cap_result,
+        lease_commitment_results, capex_cashflow_results, super_bowl_result, credit_spread_issuer_results,
+        [], seller_financing_result, ipo_issuance_result, retail_leverage_result,
+        [], funding_stress_result,
+    )
+    assert "No hot-watchlist tickers with a resolvable CIK/filing count this run." in output
+    assert "No new matching regulator statements this run." in output
 
 
 def test_marker_14_watch_suffix_appears_when_watch_true():
     (
         _, margin_debt_result, insider_trend_results, market_cap_result,
         lease_commitment_results, capex_cashflow_results, super_bowl_result, credit_spread_issuer_results,
+        debt_issuance_results, seller_financing_result, ipo_issuance_result, retail_leverage_result,
+        regulator_alarm_results, funding_stress_result,
     ) = _make_results()
     credit_spread_result = CheckResult(
         name="credit_spread_streak", verdict="ok", detail="spread 3.3pp -- WATCH: within 0.2pp of the flag threshold",
@@ -92,6 +139,8 @@ def test_marker_14_watch_suffix_appears_when_watch_true():
     output = report.render_signals_report(
         [], credit_spread_result, margin_debt_result, insider_trend_results, market_cap_result,
         lease_commitment_results, capex_cashflow_results, super_bowl_result, credit_spread_issuer_results,
+        debt_issuance_results, seller_financing_result, ipo_issuance_result, retail_leverage_result,
+        regulator_alarm_results, funding_stress_result,
     )
     assert "(WATCH)" in output
 
@@ -106,10 +155,14 @@ def test_markers_2_4_12_render_empty_list_message_when_no_results():
     (
         credit_spread_result, margin_debt_result, insider_trend_results, market_cap_result,
         _, _, super_bowl_result, _,
+        debt_issuance_results, seller_financing_result, ipo_issuance_result, retail_leverage_result,
+        regulator_alarm_results, funding_stress_result,
     ) = _make_results()
     output = report.render_signals_report(
         [], credit_spread_result, margin_debt_result, insider_trend_results, market_cap_result,
         [], [], super_bowl_result, [],
+        debt_issuance_results, seller_financing_result, ipo_issuance_result, retail_leverage_result,
+        regulator_alarm_results, funding_stress_result,
     )
     assert "No hot-watchlist tickers with a resolvable lease-commitment reading this run." in output
     assert "No hot-watchlist tickers with a resolvable cash-flow statement this run." in output

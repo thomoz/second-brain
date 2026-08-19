@@ -1,6 +1,6 @@
-"""Combined 14-row markdown report -- 8 markers render real data (2, 4, 5, 8, 9, 10, 12,
-14), the other 6 render a fixed "not yet automated" placeholder referencing the source
-handoff. Rows are sorted 1-14 by marker number for readability."""
+"""Combined 14-row markdown report -- all 14 markers render real data (Marker 3 is a
+permanent verdict="unknown" maintained flag by design, not a fetch failure -- see
+seller_financing.py). Rows are sorted 1-14 by marker number for readability."""
 
 from __future__ import annotations
 
@@ -8,21 +8,6 @@ from datetime import date
 from typing import Any
 
 from . import config
-
-_NOT_YET_AUTOMATED = (
-    "Not yet automated in this build -- see "
-    "investments/my-trader/14-signals-crash-warning-handoff.md for the fact-check "
-    "and feasibility notes."
-)
-
-_PLACEHOLDER_MARKERS = [
-    (1, "Record debt issuance, hot sector"),
-    (3, "Seller finances buyer"),
-    (6, "Record IPO/equity issuance"),
-    (7, "Retail piles into leverage"),
-    (11, "Regulators sound the alarm"),
-    (13, "Funding markets start choking"),
-]
 
 
 def render_signals_report(
@@ -35,6 +20,12 @@ def render_signals_report(
     capex_cashflow_results: list[Any],
     super_bowl_result: Any,
     credit_spread_issuer_results: list[Any],
+    debt_issuance_results: list[Any],
+    seller_financing_result: Any,
+    ipo_issuance_result: Any,
+    retail_leverage_result: Any,
+    regulator_alarm_results: list[Any],
+    funding_stress_result: Any,
 ) -> str:
     lines = [
         "# 14 Crash Signals — Daily Check",
@@ -85,8 +76,20 @@ def render_signals_report(
             marker_rows.append((12, f"| 12 | Credit turns in the hot sector while broad market stays calm ({r.data.get('ticker', '?')}) | {r.verdict} | {r.detail} |"))
     else:
         marker_rows.append((12, "| 12 | Credit turns in the hot sector while broad market stays calm | ok | No hot-watchlist tickers with a resolvable bond CUSIP this run. |"))
-    for num, name in _PLACEHOLDER_MARKERS:
-        marker_rows.append((num, f"| {num} | {name} | n/a | {_NOT_YET_AUTOMATED} |"))
+    if debt_issuance_results:
+        for r in debt_issuance_results:
+            marker_rows.append((1, f"| 1 | Record debt issuance, hot sector ({r.data.get('ticker', '?')}) | {r.verdict} | {r.detail} |"))
+    else:
+        marker_rows.append((1, "| 1 | Record debt issuance, hot sector | ok | No hot-watchlist tickers with a resolvable CIK/filing count this run. |"))
+    marker_rows.append((3, f"| 3 | Seller finances buyer | {seller_financing_result.verdict} | {seller_financing_result.detail} |"))
+    marker_rows.append((6, f"| 6 | Record IPO/equity issuance | {ipo_issuance_result.verdict} | {ipo_issuance_result.detail} |"))
+    marker_rows.append((7, f"| 7 | Retail piles into leverage | {retail_leverage_result.verdict} | {retail_leverage_result.detail} |"))
+    if regulator_alarm_results:
+        for r in regulator_alarm_results:
+            marker_rows.append((11, f"| 11 | Regulators sound the alarm | {r.verdict} | {r.detail} |"))
+    else:
+        marker_rows.append((11, "| 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |"))
+    marker_rows.append((13, f"| 13 | Funding markets start choking | {funding_stress_result.verdict} | {funding_stress_result.detail} |"))
     marker_rows.sort(key=lambda r: r[0])
 
     lines += ["", "## Markers", "", "| # | Marker | Status | Detail |", "|---|--------|--------|--------|"]

@@ -5,11 +5,24 @@ pattern as goat.db's goat_* tables)."""
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _today() -> str:
+    """Local calendar date (YYYY-MM-DD), NOT _now()[:10] (UTC) -- every caller of this
+    package's one-row-per-day date keys compares against date.today() (local), e.g.
+    credit_spread_issuer.py's `today = date.today()` and get_issuer_spread_near's
+    target_date. Using a UTC-derived date here silently mismatched the local date for
+    part of the day in Sydney (UTC+10/+11), e.g. record_issuer_spread's row was keyed
+    to "yesterday" (UTC) while get_issuer_spread_near queried with today's local date
+    and 0-day tolerance -- confirmed live 2026-08-19, fixed by keying every daily row to
+    the same local calendar date every other date.today()-based comparison in this
+    package already uses."""
+    return date.today().isoformat()
 
 
 def init_signals_tables(conn: sqlite3.Connection) -> None:
@@ -52,6 +65,16 @@ def init_signals_tables(conn: sqlite3.Connection) -> None:
                 cusip               TEXT,
                 yield_pct           REAL NOT NULL,
                 entered_at          TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS signals_putcall_history (
+                observed_at   TEXT PRIMARY KEY,
+                ratio         REAL NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS signals_regulator_alert_seen (
+                guid          TEXT PRIMARY KEY,
+                source        TEXT NOT NULL,
+                title         TEXT NOT NULL,
+                seen_at       TEXT NOT NULL
             );
         """)
 
@@ -133,7 +156,7 @@ def upsert_bond_cusip(conn: sqlite3.Connection, *, ticker: str, cusip: str, acce
 
 
 def record_issuer_spread(conn: sqlite3.Connection, *, ticker: str, spread_value: float) -> None:
-    today = _now()[:10]  # YYYY-MM-DD, one row per ticker per day
+    today = _today()  # one row per ticker per day, local calendar date -- see _today()'s docstring
     with conn:
         conn.execute(
             """INSERT INTO signals_issuer_spread_history (ticker, spread_value, observed_at)
@@ -163,6 +186,43 @@ def get_issuer_spread_near(
     if best is None or best_diff > tolerance_days:
         return None
     return best
+
+
+def record_putcall_ratio(conn: sqlite3.Connection, *, ratio: float) -> None:
+    today = _today()  # one row per day, local calendar date -- see _today()'s docstring
+    with conn:
+        conn.execute(
+            """INSERT INTO signals_putcall_history (observed_at, ratio) VALUES (?, ?)
+               ON CONFLICT(observed_at) DO UPDATE SET ratio=excluded.ratio""",
+            (today, ratio),
+        )
+
+
+def get_putcall_history(conn: sqlite3.Connection, since_days: int) -> list[sqlite3.Row]:
+    from datetime import date, timedelta
+
+    cutoff = (date.today() - timedelta(days=since_days)).isoformat()
+    return conn.execute(
+        "SELECT * FROM signals_putcall_history WHERE observed_at >= ? ORDER BY observed_at",
+        (cutoff,),
+    ).fetchall()
+
+
+def has_seen_regulator_alert(conn: sqlite3.Connection, guid: str) -> bool:
+    row = conn.execute(
+        "SELECT 1 FROM signals_regulator_alert_seen WHERE guid = ?", (guid,)
+    ).fetchone()
+    return row is not None
+
+
+def mark_regulator_alert_seen(conn: sqlite3.Connection, *, guid: str, source: str, title: str) -> None:
+    with conn:
+        conn.execute(
+            """INSERT INTO signals_regulator_alert_seen (guid, source, title, seen_at)
+               VALUES (?, ?, ?, ?)
+               ON CONFLICT(guid) DO NOTHING""",
+            (guid, source, title, _now()),
+        )
 
 
 def get_manual_bond_yield(conn: sqlite3.Connection, ticker: str) -> sqlite3.Row | None:

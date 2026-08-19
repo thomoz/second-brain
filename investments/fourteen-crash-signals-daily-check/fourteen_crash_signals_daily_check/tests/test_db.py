@@ -170,3 +170,66 @@ def test_set_manual_bond_yield_overwrites_on_conflict(db_conn):
 
 def test_get_manual_bond_yield_none_when_absent(db_conn):
     assert db.get_manual_bond_yield(db_conn, "ORCL") is None
+
+
+def test_record_and_get_putcall_ratio(db_conn):
+    db.record_putcall_ratio(db_conn, ratio=0.65)
+    rows = db.get_putcall_history(db_conn, since_days=30)
+    assert len(rows) == 1
+    assert rows[0]["ratio"] == 0.65
+
+
+def test_record_putcall_ratio_upserts_same_day(db_conn):
+    db.record_putcall_ratio(db_conn, ratio=0.65)
+    db.record_putcall_ratio(db_conn, ratio=0.70)
+    rows = db.get_putcall_history(db_conn, since_days=30)
+    assert len(rows) == 1
+    assert rows[0]["ratio"] == 0.70
+
+
+def test_get_putcall_history_excludes_rows_older_than_since_days(db_conn):
+    db_conn.execute(
+        "INSERT INTO signals_putcall_history (observed_at, ratio) VALUES (?, ?)",
+        ("2020-01-01", 0.5),
+    )
+    db_conn.commit()
+    db.record_putcall_ratio(db_conn, ratio=0.65)
+    rows = db.get_putcall_history(db_conn, since_days=30)
+    assert len(rows) == 1
+    assert rows[0]["ratio"] == 0.65
+
+
+def test_has_seen_regulator_alert_false_before_true_after(db_conn):
+    assert db.has_seen_regulator_alert(db_conn, "guid-1") is False
+    db.mark_regulator_alert_seen(db_conn, guid="guid-1", source="sec", title="Statement")
+    assert db.has_seen_regulator_alert(db_conn, "guid-1") is True
+
+
+def test_mark_regulator_alert_seen_twice_does_not_raise(db_conn):
+    db.mark_regulator_alert_seen(db_conn, guid="guid-1", source="sec", title="Statement")
+    db.mark_regulator_alert_seen(db_conn, guid="guid-1", source="sec", title="Statement")
+    assert db.has_seen_regulator_alert(db_conn, "guid-1") is True
+
+
+def test_record_issuer_spread_keys_by_local_date_not_utc(db_conn, monkeypatch):
+    """Regression for the 2026-08-19 bug: record_issuer_spread previously keyed its
+    daily row to datetime.now(timezone.utc)[:10], which lags local date.today() for
+    part of the day in Sydney (UTC+10/+11) -- a write made in that window was invisible
+    to a same-day, 0-tolerance lookup keyed on the local date. Force UTC and local dates
+    to disagree and confirm the row still lands on today's local date."""
+    from datetime import date, datetime, timedelta, timezone
+
+    class _FakeDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            real_now = datetime.now(tz)
+            if tz is timezone.utc:
+                return real_now - timedelta(days=1)  # simulate UTC lagging local by a day
+            return real_now
+
+    monkeypatch.setattr(db, "datetime", _FakeDateTime)
+    db.record_issuer_spread(db_conn, ticker="ORCL", spread_value=1.25)
+    row = db.get_issuer_spread_near(db_conn, "ORCL", date.today(), tolerance_days=0)
+    assert row is not None
+    assert row["spread_value"] == 1.25
+    assert row["observed_at"] == date.today().isoformat()
