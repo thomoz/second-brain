@@ -1,8 +1,11 @@
 # Handoff: 14-Signal Crash Warning Framework — Fact-Check + Daily Check-In Tool Discussion
 
-## Status: Draft for discussion (2026-08-18). Nothing added to `tool-preplan.md` or
-`investment-strategy.md` yet — per `analyse-transcript.md` convention, this is a
-standalone working file until Shaun says what to keep.
+## Status: COMPLETE — content merged into `tool-preplan.md`/`investment-strategy.md`, tool
+built per `.agent/plans/fourteen-crash-signals-phase1-core-signals.md`
+(`investments/fourteen-crash-signals-daily-check/`). Kept in place (not archived) as the
+per-marker source doc — `signals-report.md` cites this file directly by path in its
+auto-generated output, and `fourteen_crash_signals_daily_check/config.py`/`report.py`
+reference it in code.
 
 **Source**: "The One Chart That Predicted Every Market Crash... It's HERE (14 signals)"
 — https://www.youtube.com/watch?v=WwFdrw1Snaw — transcript at

@@ -1,6 +1,6 @@
 # IBKR Holdings Sync — Session Handoff
 
-## Status: Not started — design discussed 2026-08-11, ready for /plan-feature (Shaun to run in a separate session)
+## Status: COMPLETE — built per `.agent/plans/ibkr-holdings-sync.md` (`investments/my-trader/mytrader/ibkr_sync.py`, `ibkr-setup-guide.md`). Kept in place (not archived) as the source design doc — cited directly by `mytrader/config.py` and `ibkr_sync.py`.
 
 ## What This Is
 

@@ -1,6 +1,6 @@
 # Insider Trading Scanner (OpenInsider) — Session Handoff
 
-## Status: Not started — design discussed 2026-08-17, ready for /plan-feature (Shaun to run in a separate session)
+## Status: COMPLETE — built 2026-08-17/18 per `.agent/plans/insider-trading-scanner.md` (`investments/goat/goat/insider_scan.py`). Kept in place (not archived) as the source design doc — cited directly by `investments/goat/goat/config.py` and `investments/goat/insider-pattern-analysis-handoff.md`.
 
 ## What This Is
 

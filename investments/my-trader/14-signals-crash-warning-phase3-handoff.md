@@ -1,8 +1,9 @@
 # Handoff: 14-Signal Crash Warning Framework — Phase 3 (Markers #1, #3, #6, #7, #11, #13)
 
-## Status: Draft for discussion (2026-08-18). Nothing added to `tool-preplan.md` or
-`investment-strategy.md` yet, per `analyse-transcript.md` convention — standalone
-working file until Shaun says what to keep.
+## Status: COMPLETE — content merged into `tool-preplan.md`/`investment-strategy.md`, tool
+built per `.agent/plans/fourteen-crash-signals-phase3-remaining-six-markers.md`
+(`investments/fourteen-crash-signals-daily-check/`). Kept in place (not archived) as the
+per-marker source doc, cited directly by `.agent/plans/fourteen-crash-signals-phase3-*.md`.
 
 **Scope**: the six markers Phase 1's own scoping deferred because none had a confirmed
 free/structured data source: #1 (record debt issuance), #3 (seller finances buyer),

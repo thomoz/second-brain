@@ -1,8 +1,9 @@
 # Handoff: 14-Signal Crash Warning Framework — Phase 2 (Markers #2, #4, #9, #12)
 
-## Status: Draft for discussion (2026-08-18). Nothing added to `tool-preplan.md` or
-`investment-strategy.md` yet, per `analyse-transcript.md` convention — standalone
-working file until Shaun says what to keep.
+## Status: COMPLETE — content merged into `tool-preplan.md`/`investment-strategy.md`, tool
+built per `.agent/plans/fourteen-crash-signals-phase2-markers-2-4-9-12.md`
+(`investments/fourteen-crash-signals-daily-check/`). Kept in place (not archived) as the
+per-marker source doc, cited directly by `.agent/plans/fourteen-crash-signals-phase2-*.md`.
 
 **Scope**: the four markers the Phase 1 plan
 (`.agent/plans/fourteen-crash-signals-phase1-core-signals.md`, "NOTES — How to create
