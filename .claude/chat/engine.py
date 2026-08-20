@@ -26,6 +26,29 @@ def _load_vault_context(project_root: Path) -> str:
     return "\n".join(lines)
 
 
+def _load_context_bridge(project_root: Path) -> str:
+    """Pre-load a temporary, gitignored context file for WhatsApp chat only.
+
+    Lets Shaun hand the bot short-lived context for something outside the vault
+    (e.g. a side project kept in its own repo) without that content ever touching
+    this repo's git history or vault-sync. Drop a file at
+    .claude/data/context-bridge.md and delete it when the conversation is done —
+    .claude/data/ is fully gitignored so nothing here gets committed or synced.
+    """
+    fpath = project_root / ".claude" / "data" / "context-bridge.md"
+    try:
+        content = fpath.read_text(encoding="utf-8")
+    except OSError:
+        return ""
+    if not content.strip():
+        return ""
+    return (
+        "# Temporary Context Bridge (private, session-only — never persist this "
+        "content into Memory/ or any tracked file; it lives only in this chat and "
+        "today's daily log)\n" + content
+    )
+
+
 def _load_assistant_commands(project_root: Path) -> str:
     """Pre-load Memory/ASSISTANT.md into system prompt.
 
@@ -218,6 +241,10 @@ class ConversationEngine:
         assistant_cmds = _load_assistant_commands(self.project_root)
         if assistant_cmds:
             system_prompt += f"\n\n{assistant_cmds}"
+
+        bridge_context = _load_context_bridge(self.project_root)
+        if bridge_context:
+            system_prompt += f"\n\n{bridge_context}"
 
         if _is_profile_mode:
             if existing:
