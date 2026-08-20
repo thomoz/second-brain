@@ -8,6 +8,7 @@ event doesn't fit that table's open/acknowledge semantics."""
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from datetime import date, datetime, timedelta
 from typing import Any
@@ -244,9 +245,11 @@ def compute_discovery_price_performance(
         move = _price_move_since(row["ticker"], trade_date) if trade_date else None
         if move is None:
             row["price_note"] = "price unavailable"
+            row["pct_change"] = None
             row["newly_flagged"] = False
             continue
         row["price_note"] = _price_note(move["pct_change"], move["days_since"], "P")
+        row["pct_change"] = move["pct_change"]
         flagged = _confirms_signal("P", move["pct_change"], config.GOAT_INSIDER_PRICE_FLAG_PCT)
         row["newly_flagged"] = flagged and not row.get("price_flag_notified")
         if row["newly_flagged"]:
@@ -267,9 +270,11 @@ def compute_holdings_watch_price_performance(
         move = _price_move_since(row["ticker"], trade_date) if trade_date else None
         if move is None:
             row["price_note"] = "price unavailable"
+            row["pct_change"] = None
             row["newly_flagged"] = False
             continue
         row["price_note"] = _price_note(move["pct_change"], move["days_since"], trade_type)
+        row["pct_change"] = move["pct_change"]
         flagged = _confirms_signal(trade_type, move["pct_change"], config.GOAT_INSIDER_PRICE_FLAG_PCT)
         row["newly_flagged"] = flagged and not row.get("price_flag_notified")
         if row["newly_flagged"]:
@@ -301,6 +306,45 @@ def maybe_notify_price_flags(newly_flagged: list[dict[str, Any]]) -> None:
     send_whatsapp_notification("\n".join(lines))
 
 
+_TRADE_VALUE_RE = re.compile(r"\$([\d,]+)")
+
+
+def _parse_trade_value(signal_detail: str) -> float | None:
+    """Pulls the dollar value out of a discovery candidate's signal_detail text
+    (e.g. '...bought $3,425,500 of AAT...') for size-sorting -- goat_pending_candidates
+    doesn't store the raw value as its own column (see insert_goat_pending_candidate),
+    and signal_detail's format is fully controlled by run_discovery_scan's f-string
+    above, not freeform text, so this is safe to regex rather than needing a schema
+    migration + backfill for candidates already staged before this existed."""
+    m = _TRADE_VALUE_RE.search(signal_detail)
+    return float(m.group(1).replace(",", "")) if m else None
+
+
+def _render_discovery_rows(rows: list[dict[str, Any]]) -> list[str]:
+    return [
+        f"| {row['ticker']} | {row['sector_label']} | {row['signal_detail']} "
+        f"| {row.get('price_note', 'n/a')} | {row['flagged_at'][:10]} |"
+        for row in rows
+    ]
+
+
+def _render_holdings_rows(rows: list[dict[str, Any]]) -> list[str]:
+    lines = []
+    for row in rows:
+        action = "Bought" if row.get("trade_type") == "P" else "Sold"
+        lines.append(
+            f"| {row['ticker']} | {action} | ${row['value']:,.0f} | {row['trade_date']} "
+            f"| {row.get('price_note', 'n/a')} |"
+        )
+    return lines
+
+
+_DISCOVERY_HEADER = ["| Ticker | Sector | Signal | Price Since Trade | Flagged |",
+                      "|--------|--------|--------|--------------------|---------|"]
+_HOLDINGS_HEADER = ["| Ticker | Action | Value | Trade Date | Price Since Trade |",
+                     "|--------|--------|-------|------------|--------------------|"]
+
+
 def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: dict[str, Any]) -> str:
     lines = [
         "# Insider Trading Scan — OpenInsider",
@@ -327,16 +371,57 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
         "real watchlist, labeled Goat-approved) or `dismiss-candidate` (discards it). "
         "Edits here are overwritten on the next `scan-insiders` run.",
         "",
-        "| Ticker | Sector | Signal | Price Since Trade | Flagged |",
-        "|--------|--------|--------|--------------------|---------|",
-    ]
-    for row in discovery_result["pending_candidates"]:
-        lines.append(
-            f"| {row['ticker']} | {row['sector_label']} | {row['signal_detail']} "
-            f"| {row.get('price_note', 'n/a')} | {row['flagged_at'][:10]} |"
-        )
+    ] + _DISCOVERY_HEADER
+    candidates = discovery_result["pending_candidates"]
+    lines += _render_discovery_rows(candidates)
 
-    recent_filings = watch_result.get("recent_filings") or []
+    # Same rows as above, re-sorted three ways so Shaun can scan by what matters to
+    # him in the moment instead of only ticker-alphabetical order (Shaun 2026-08-20).
+    for row in candidates:
+        row["trade_value"] = _parse_trade_value(row["signal_detail"])
+    by_size = sorted(
+        (r for r in candidates if r["trade_value"] is not None),
+        key=lambda r: r["trade_value"], reverse=True,
+    )
+    price_up = sorted(
+        (r for r in candidates if r.get("pct_change") is not None and r["pct_change"] > 0),
+        key=lambda r: r["pct_change"], reverse=True,
+    )
+    price_down = sorted(
+        (r for r in candidates if r.get("pct_change") is not None and r["pct_change"] < 0),
+        key=lambda r: r["pct_change"],
+    )
+    lines += [
+        "",
+        "### Discovery Candidates — By Trade Size",
+        "Same candidates, re-sorted by the dollar value of the insider's buy (highest "
+        "first) -- not percent of their own position, which stays visible per-row in "
+        "the Signal column if you'd rather judge by conviction instead.",
+        "",
+    ]
+    lines += _DISCOVERY_HEADER + _render_discovery_rows(by_size) if by_size else [
+        "No candidates with a parseable trade value."
+    ]
+    lines += [
+        "",
+        "### Discovery Candidates — Price Up Since Trade",
+        "Candidates whose price has risen since the insider's buy, biggest gain first.",
+        "",
+    ]
+    lines += _DISCOVERY_HEADER + _render_discovery_rows(price_up) if price_up else [
+        "No candidates have moved up since their trade yet."
+    ]
+    lines += [
+        "",
+        "### Discovery Candidates — Price Down Since Trade",
+        "Candidates whose price has fallen since the insider's buy, biggest drop first.",
+        "",
+    ]
+    lines += _DISCOVERY_HEADER + _render_discovery_rows(price_down) if price_down else [
+        "No candidates have moved down since their trade yet."
+    ]
+
+    recent_filings = (watch_result.get("recent_filings") or [])[:20]
     lines += [
         "",
         "## Stocks You Own That Have Had Price Moves Since Insider Buy/Sell Activity",
@@ -348,16 +433,46 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
         "",
     ]
     if recent_filings:
-        lines += ["| Ticker | Action | Value | Trade Date | Price Since Trade |",
-                   "|--------|--------|-------|------------|--------------------|"]
-        for row in recent_filings[:20]:
-            action = "Bought" if row.get("trade_type") == "P" else "Sold"
-            lines.append(
-                f"| {row['ticker']} | {action} | ${row['value']:,.0f} | {row['trade_date']} "
-                f"| {row.get('price_note', 'n/a')} |"
-            )
+        lines += _HOLDINGS_HEADER + _render_holdings_rows(recent_filings)
     else:
         lines.append("No insider filings recorded yet for current holdings.")
+
+    holdings_by_size = sorted(recent_filings, key=lambda r: r["value"], reverse=True)
+    holdings_up = sorted(
+        (r for r in recent_filings if r.get("pct_change") is not None and r["pct_change"] > 0),
+        key=lambda r: r["pct_change"], reverse=True,
+    )
+    holdings_down = sorted(
+        (r for r in recent_filings if r.get("pct_change") is not None and r["pct_change"] < 0),
+        key=lambda r: r["pct_change"],
+    )
+    lines += [
+        "",
+        "### Holdings Filings — By Trade Size",
+        "Same filings, re-sorted by dollar value (highest first).",
+        "",
+    ]
+    lines += _HOLDINGS_HEADER + _render_holdings_rows(holdings_by_size) if holdings_by_size else [
+        "No insider filings recorded yet for current holdings."
+    ]
+    lines += [
+        "",
+        "### Holdings Filings — Price Up Since Trade",
+        "Filings where the price has risen since the trade, biggest gain first.",
+        "",
+    ]
+    lines += _HOLDINGS_HEADER + _render_holdings_rows(holdings_up) if holdings_up else [
+        "No holdings filings have moved up since their trade yet."
+    ]
+    lines += [
+        "",
+        "### Holdings Filings — Price Down Since Trade",
+        "Filings where the price has fallen since the trade, biggest drop first.",
+        "",
+    ]
+    lines += _HOLDINGS_HEADER + _render_holdings_rows(holdings_down) if holdings_down else [
+        "No holdings filings have moved down since their trade yet."
+    ]
 
     lines += ["", f"Last auto-generated: {date.today().isoformat()}."]
     return "\n".join(lines) + "\n"
