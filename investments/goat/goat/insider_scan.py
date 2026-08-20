@@ -339,7 +339,7 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
     recent_filings = watch_result.get("recent_filings") or []
     lines += [
         "",
-        "## Price Performance — Recent Holdings Filings",
+        "## Stocks You Own That Have Had Price Moves Since Insider Buy/Sell Activity",
         "Price move since trade date for P/S filings seen on your holdings "
         "(most recent 20, including ones below the alert threshold). "
         "\U0001F6A9 marks a move that confirms the insider's signal direction "

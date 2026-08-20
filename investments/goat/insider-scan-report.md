@@ -143,7 +143,7 @@ Market-wide $25k+ open-market insider purchases, staged for explicit review. Rev
 | XRN | Insider Buy | Roseth Aaron Robert (COO) bought $495,855 of XRN on 2026-08-12 | +1.7% since trade | 2026-08-17 |
 | ZNTL | Insider Buy | Walters Group (10%) bought $15,172,500 of ZNTL (32% of position) on 2026-08-14 | +7.3% since trade | 2026-08-19 |
 
-## Price Performance — Recent Holdings Filings
+## Stocks You Own That Have Had Price Moves Since Insider Buy/Sell Activity
 Price move since trade date for P/S filings seen on your holdings (most recent 20, including ones below the alert threshold). 🚩 marks a move that confirms the insider's signal direction (buy -> price rose, sale -> price fell) by 15%+.
 
 | Ticker | Action | Value | Trade Date | Price Since Trade |

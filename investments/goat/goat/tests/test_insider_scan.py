@@ -453,5 +453,5 @@ def test_render_insider_scan_report_includes_price_note_and_recent_filings_secti
     report = insider_scan.render_insider_scan_report(watch_result, discovery_result)
     assert "+18.0% since trade" in report
     assert "-22.0% since trade" in report
-    assert "Price Performance — Recent Holdings Filings" in report
+    assert "Stocks You Own That Have Had Price Moves Since Insider Buy/Sell Activity" in report
     assert "Sold" in report and "2,000,000" in report
