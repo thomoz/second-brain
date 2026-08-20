@@ -391,6 +391,19 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
         (r for r in candidates if r.get("pct_change") is not None and r["pct_change"] < 0),
         key=lambda r: r["pct_change"],
     )
+    by_date = sorted(
+        (r for r in candidates if r.get("trade_date")),
+        key=lambda r: r["trade_date"], reverse=True,
+    )
+    lines += [
+        "",
+        "### Discovery Candidates — By Trade Date",
+        "Same candidates, re-sorted by the insider's trade date, most recent first.",
+        "",
+    ]
+    lines += _DISCOVERY_HEADER + _render_discovery_rows(by_date) if by_date else [
+        "No candidates with a recorded trade date."
+    ]
     lines += [
         "",
         "### Discovery Candidates — By Trade Size",
@@ -446,6 +459,19 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
         (r for r in recent_filings if r.get("pct_change") is not None and r["pct_change"] < 0),
         key=lambda r: r["pct_change"],
     )
+    holdings_by_date = sorted(
+        (r for r in recent_filings if r.get("trade_date")),
+        key=lambda r: r["trade_date"], reverse=True,
+    )
+    lines += [
+        "",
+        "### Holdings Filings — By Trade Date",
+        "Same filings, re-sorted by trade date, most recent first.",
+        "",
+    ]
+    lines += _HOLDINGS_HEADER + _render_holdings_rows(holdings_by_date) if holdings_by_date else [
+        "No insider filings recorded yet for current holdings."
+    ]
     lines += [
         "",
         "### Holdings Filings — By Trade Size",
