@@ -56,6 +56,17 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
                 value       TEXT NOT NULL,
                 updated_at  TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS goat_insider_price_outcomes (
+                dedup_key             TEXT NOT NULL,
+                ticker                TEXT NOT NULL,
+                trade_type            TEXT NOT NULL,
+                horizon_days          INTEGER NOT NULL,
+                pct_change            REAL,
+                benchmark_pct_change  REAL,
+                excess_pct_change     REAL,
+                snapshot_date         TEXT NOT NULL,
+                PRIMARY KEY (dedup_key, horizon_days)
+            );
         """)
     # Migration for DBs created before pct_owned_change existed (added
     # 2026-08-17 for the repeated-small-sales pattern -- see
@@ -91,6 +102,15 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
             conn.execute(
                 "ALTER TABLE goat_insider_filings_seen ADD COLUMN price_flag_notified INTEGER NOT NULL DEFAULT 0"
             )
+        except sqlite3.OperationalError:
+            pass
+    # Migration for DBs created before title existed (added 2026-08-20 for
+    # insider_pattern_analysis's title/role slice -- OpenInsider's row dict
+    # already carried this, it just never flowed through to the insert).
+    # Informational-only, same nullability posture as pct_owned_change.
+    with conn:
+        try:
+            conn.execute("ALTER TABLE goat_insider_filings_seen ADD COLUMN title TEXT")
         except sqlite3.OperationalError:
             pass
 
@@ -204,7 +224,7 @@ def get_sp500_constituents(conn: sqlite3.Connection) -> list[sqlite3.Row]:
 def insert_goat_insider_filing_seen(
     conn: sqlite3.Connection, *, dedup_key: str, ticker: str, filing_date: str,
     trade_date: str, insider_name: str, trade_type: str, value: float, kind: str,
-    pct_owned_change: float | None = None,
+    pct_owned_change: float | None = None, title: str = "",
 ) -> bool:
     """Returns True if this filing was newly seen (inserted), False if it's a
     duplicate of a filing already alerted/staged in a prior run. Every sale
@@ -214,9 +234,9 @@ def insert_goat_insider_filing_seen(
     with conn:
         cur = conn.execute(
             """INSERT OR IGNORE INTO goat_insider_filings_seen
-               (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, seen_at, pct_owned_change)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, _now(), pct_owned_change),
+               (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, seen_at, pct_owned_change, title)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, _now(), pct_owned_change, title),
         )
         return cur.rowcount == 1
 
@@ -275,3 +295,40 @@ def set_macro_state(conn: sqlite3.Connection, key: str, value: str) -> None:
                ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at""",
             (key, value, _now()),
         )
+
+
+def get_captured_horizons(conn: sqlite3.Connection, dedup_key: str) -> set[int]:
+    rows = conn.execute(
+        "SELECT horizon_days FROM goat_insider_price_outcomes WHERE dedup_key = ?", (dedup_key,)
+    ).fetchall()
+    return {r["horizon_days"] for r in rows}
+
+
+def insert_price_outcome(
+    conn: sqlite3.Connection, *, dedup_key: str, ticker: str, trade_type: str,
+    horizon_days: int, pct_change: float | None, benchmark_pct_change: float | None,
+    excess_pct_change: float | None, snapshot_date: str,
+) -> None:
+    """A horizon is immutable once matured -- INSERT OR IGNORE, no update path,
+    mirrors insert_goat_insider_filing_seen's own dedup philosophy."""
+    with conn:
+        conn.execute(
+            """INSERT OR IGNORE INTO goat_insider_price_outcomes
+               (dedup_key, ticker, trade_type, horizon_days, pct_change,
+                benchmark_pct_change, excess_pct_change, snapshot_date)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (dedup_key, ticker, trade_type, horizon_days, pct_change,
+             benchmark_pct_change, excess_pct_change, snapshot_date),
+        )
+
+
+def get_price_outcomes_for_pattern_analysis(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    """Market-wide only (discovery + discovery_sell) -- excludes holdings_watch,
+    per the handoff's explicit scoping (not Shaun's existing holdings)."""
+    return conn.execute(
+        """SELECT o.*, f.value, f.pct_owned_change, f.title, f.trade_date,
+                  f.insider_name, f.kind
+           FROM goat_insider_price_outcomes o
+           JOIN goat_insider_filings_seen f ON o.dedup_key = f.dedup_key
+           WHERE f.kind IN ('discovery', 'discovery_sell')"""
+    ).fetchall()

@@ -101,11 +101,14 @@ def cmd_scan_heartbeat(args) -> None:
 
 
 def cmd_scan_insiders(args) -> None:
+    from .insider_pattern_analysis import compute_pattern_analysis, write_pattern_analysis_report
     from .insider_scan import (
         compute_discovery_price_performance,
         compute_holdings_watch_price_performance,
+        mature_price_outcome_snapshots,
         maybe_notify_price_flags,
         run_discovery_scan,
+        run_discovery_sell_tracking,
         run_holdings_watch,
         write_insider_scan_report,
     )
@@ -114,6 +117,7 @@ def cmd_scan_insiders(args) -> None:
     conn = _open_conn()
     watch_result = run_holdings_watch(conn)
     discovery_result = run_discovery_scan(conn)
+    sell_tracking_result = run_discovery_sell_tracking(conn)
     # Price-since-trade is recalculated fresh every run (Shaun 2026-08-18) --
     # network calls, so deliberately kept outside run_discovery_scan/
     # run_holdings_watch (DB-only, cheap, easy to test without mocking yfinance).
@@ -125,8 +129,11 @@ def cmd_scan_insiders(args) -> None:
     watch_result["recent_filings"] = compute_holdings_watch_price_performance(
         conn, watch_result.get("recent_filings") or []
     )
+    maturation_result = mature_price_outcome_snapshots(conn)
+    pattern_analysis = compute_pattern_analysis(conn)
     conn.close()
     write_insider_scan_report(watch_result, discovery_result)
+    write_pattern_analysis_report(pattern_analysis)
     maybe_notify(
         {"new_alerts": watch_result["new_alerts"]},
         new_candidates=discovery_result["new_candidates"],
@@ -141,8 +148,11 @@ def cmd_scan_insiders(args) -> None:
     print(
         f"Insider scan complete: {len(watch_result['new_alerts'])} holdings-watch alert(s), "
         f"{len(discovery_result['new_candidates'])} new discovery candidate(s), "
-        f"{len(newly_flagged)} price move(s) newly confirmed the signal. "
-        f"See investments/goat/insider-scan-report.md"
+        f"{len(newly_flagged)} price move(s) newly confirmed the signal, "
+        f"{sell_tracking_result['tracked']} market-wide sell(s) tracked, "
+        f"{maturation_result['matured']} price-outcome snapshot(s) matured. "
+        f"See investments/goat/insider-scan-report.md and "
+        f"investments/goat/insider-pattern-analysis.md"
     )
 
 

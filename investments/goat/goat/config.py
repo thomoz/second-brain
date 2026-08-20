@@ -237,10 +237,47 @@ GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS = 5  # same reasoning as above -- a safety 
     # top of OpenInsider's own latest-first page ordering.
 GOAT_INSIDER_SCAN_REPORT_PATH = GOAT_DIR / "insider-scan-report.md"
 
-GOAT_INSIDER_PRICE_FLAG_PCT = 15.0  # Shaun 2026-08-18: flag price-since-trade moves
-    # at +/-15% in the direction that CONFIRMS the insider signal only (buy -> price
-    # rose, sale -> price fell) -- the contrarian direction (e.g. a big rise after a
-    # sale) is deliberately not flagged, that's a separate judgment call for Shaun.
+GOAT_INSIDER_PRICE_FLAG_TIERS: list[tuple[int, float]] = [
+    (7, 2.5), (14, 5.0), (21, 7.5), (28, 10.0),
+]  # (max_days_since_trade, threshold_pct), ascending. Shaun's own numbers,
+    # 2026-08-20 -- supersedes the old flat GOAT_INSIDER_PRICE_FLAG_PCT (15.0)
+    # immediately, applied to BOTH the live insider-scan report's confirms-signal
+    # flag AND the price-outcomes dataset's "confirmed" labeling, so the two never
+    # drift apart. A fast, small move is treated as more meaningful than a slow,
+    # large one (price moves grow with elapsed time under normal random-walk
+    # drift, so a flat threshold was implicitly biased the wrong way).
+GOAT_INSIDER_PRICE_FLAG_PCT_TAIL = 12.5  # threshold once days_since_trade exceeds
+    # the last tier's max_days (28) -- Shaun's number, 2026-08-20.
+
+GOAT_INSIDER_OUTCOME_HORIZONS_DAYS: list[int] = [1, 3, 7, 14, 30, 90, 180]  # snapshot
+    # schedule for goat_insider_price_outcomes. Includes 180 to match the max
+    # tracking window below (Shaun 2026-08-20: raised from 90 -> 180 days) --
+    # without a matching 180d horizon the extended window would collect no new
+    # snapshot past day 90, defeating the point of the extension.
+GOAT_INSIDER_OUTCOME_MAX_TRACKING_DAYS = 180  # Shaun 2026-08-20: raised from the
+    # handoff doc's original 90-day proposal to better match how insider-trading
+    # literature typically studies outcomes (6-12 months) -- filings older than
+    # this stop maturing new snapshot horizons. Distinct from
+    # GOAT_INSIDER_PRICE_STALE_DAYS (90, unchanged) -- that constant is about the
+    # existing report's "may be stale" annotation for repeated-sale-pattern
+    # detection, a different concern.
+GOAT_INSIDER_OUTCOME_BENCHMARK_TICKER = "SPY"  # excess-return benchmark for every
+    # slice -- SPY-only, not per-sector (most discovery candidates are smaller-cap
+    # names outside goat_sp500_constituents coverage anyway). "Buys rose 60% of
+    # the time" during a market rally isn't an insider-specific signal without
+    # this -- excess return isolates the trade-attributable part.
+GOAT_INSIDER_PATTERN_MIN_SAMPLE = 20  # minimum filings in a slice before the
+    # pattern report states a conclusion instead of "not enough data yet". Trade
+    # dates only go back to 2026-08-12 as of this build -- most slices are
+    # expected to say "not enough data yet" for the first several weeks, that's
+    # expected, not a bug.
+GOAT_INSIDER_CLUSTER_WINDOW_DAYS = 7  # multiple distinct insiders on the same
+    # ticker/trade_type within this many days counts as cluster buying/selling --
+    # v1/tunable, rounded up slightly from the GOAT_INSIDER_HOLDINGS_WATCH_
+    # LOOKBACK_DAYS/GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS precedent (5 days).
+
+GOAT_INSIDER_PATTERN_ANALYSIS_PATH = GOAT_DIR / "insider-pattern-analysis.md"
+
 GOAT_INSIDER_PRICE_STALE_DAYS = 90  # matches GOAT_INSIDER_SALE_LOOKBACK_DAYS's window --
     # past this many days since the trade, a price move is more likely broad market
     # drift than a reaction to the insider signal, so it's annotated, not hidden

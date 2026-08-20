@@ -185,6 +185,13 @@ def fetch_discovery_purchases() -> list[dict] | None:
     return [r for r in rows if r["trade_type_code"] == "P"]
 
 
+def fetch_discovery_sales() -> list[dict] | None:
+    rows = _fetch(f"{config.OPENINSIDER_BASE_URL}/latest-insider-sales-100k")
+    if rows is None:
+        return None
+    return [r for r in rows if r["trade_type_code"] == "S"]
+
+
 def build_dedup_key(row: dict) -> str:
     return "|".join([
         row["ticker"],

@@ -3,7 +3,25 @@ Paste shortcuts:
 claude --dangerously-skip-permissions
 
 
-CVX 19 Sep $205.74
+
+Youtube channel next session prompt:
+
+Resume the Kestrel project — read O:\AI\Dynamous\Projects\kestrel\CLAUDE.md
+and design.md for full context (private, standalone repo, not part of
+this vault — codename deliberately unrelated to actual content).
+
+Check the end of design.md's Log for a pending item: a question I sent
+myself via WhatsApp about what Phase 1 should actually be testing for
+(sustain-interesting-dialogue vs. surface-what-unmoderated-drift-
+looks-like). If I've got an answer, log it and move on to scoping the
+actual Phase 1 test setup — two bare agents via local Ollama, no
+persona/memory/moderation, just testing whether the raw dialogue
+mechanic holds up. If I haven't answered yet, ask me before proceeding.
+
+
+
+
+
 
 
 

@@ -434,6 +434,227 @@ def test_maybe_notify_price_flags_sends_whatsapp_with_ticker_and_note(monkeypatc
     assert "+25.0% since trade" in message
 
 
+def test_threshold_for_days_boundaries():
+    cases = [
+        (7, 2.5), (8, 5.0), (14, 5.0), (15, 7.5), (21, 7.5),
+        (22, 10.0), (28, 10.0), (29, 12.5), (100, 12.5),
+    ]
+    for days, expected in cases:
+        assert insider_scan._threshold_for_days(days) == expected
+
+
+def test_run_holdings_watch_persists_title(db_conn, monkeypatch):
+    _seed_holding(db_conn, ticker="VRTX")
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_screener_filings",
+        lambda tickers_list, trade_type, min_value: [_sale_row()] if trade_type == "S" else [],
+    )
+    insider_scan.run_holdings_watch(db_conn)
+    rows = goat_db.get_recent_insider_filings_seen(db_conn, kind="holdings_watch")
+    assert rows[0]["title"] == "CFO"
+
+
+def test_run_discovery_scan_persists_title(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [_purchase_row(ticker="ACME")],
+    )
+    insider_scan.run_discovery_scan(db_conn)
+    rows = goat_db.get_recent_insider_filings_seen(db_conn, kind="discovery")
+    assert rows[0]["title"] == "Director"
+
+
+def _sell_row(ticker="ZETA", trade_date=None, value=200_000.0, pct_owned_change=-15.0):
+    return {
+        "ticker": ticker,
+        "filing_date": (trade_date or date.today()).isoformat(),
+        "trade_date": (trade_date or date.today()).isoformat(),
+        "insider_name": "Sam Sell",
+        "title": "CEO",
+        "trade_type_code": "S",
+        "value": value,
+        "pct_owned_change": pct_owned_change,
+    }
+
+
+def test_run_discovery_sell_tracking_tracks_new_sale(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_sales",
+        lambda: [_sell_row()],
+    )
+    result = insider_scan.run_discovery_sell_tracking(db_conn)
+    assert result["tracked"] == 1
+    rows = goat_db.get_recent_insider_filings_seen(db_conn, kind="discovery_sell")
+    assert len(rows) == 1
+    assert rows[0]["ticker"] == "ZETA"
+    assert rows[0]["title"] == "CEO"
+
+
+def test_run_discovery_sell_tracking_creates_no_pending_candidate(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_sales",
+        lambda: [_sell_row(ticker="ZETA")],
+    )
+    insider_scan.run_discovery_sell_tracking(db_conn)
+    assert goat_db.get_goat_pending_candidate(db_conn, "ZETA") is None
+
+
+def test_run_discovery_sell_tracking_skips_held_ticker(db_conn, monkeypatch):
+    _seed_holding(db_conn, ticker="ZETA")
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_sales",
+        lambda: [_sell_row(ticker="ZETA")],
+    )
+    result = insider_scan.run_discovery_sell_tracking(db_conn)
+    assert result["tracked"] == 0
+    assert goat_db.get_recent_insider_filings_seen(db_conn, kind="discovery_sell") == []
+
+
+def test_run_discovery_sell_tracking_respects_lookback_window(db_conn, monkeypatch):
+    stale_date = date.today() - timedelta(days=config_lookback_plus_one())
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_sales",
+        lambda: [_sell_row(trade_date=stale_date)],
+    )
+    result = insider_scan.run_discovery_sell_tracking(db_conn)
+    assert result["tracked"] == 0
+
+
+def test_run_discovery_sell_tracking_handles_fetch_failure_gracefully(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_sales",
+        lambda: None,
+    )
+    result = insider_scan.run_discovery_sell_tracking(db_conn)  # must not raise
+    assert result["tracked"] == 0
+
+
+def test_run_discovery_sell_tracking_is_a_no_op_on_repeat_run(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_sales",
+        lambda: [_sell_row()],
+    )
+    insider_scan.run_discovery_sell_tracking(db_conn)
+    result = insider_scan.run_discovery_sell_tracking(db_conn)
+    assert result["tracked"] == 0
+
+
+def test_price_at_horizon_matures_at_exact_horizon(db_conn, monkeypatch):
+    trade_date, series = _price_series(days_ago=30, start_price=100.0, end_price=125.0)
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    result = insider_scan._price_at_horizon("ACME", trade_date, 7)
+    assert result is not None
+    assert result["pct_change"] == 25.0  # series is flat at end_price from day 1 onward
+
+
+def test_price_at_horizon_returns_none_when_horizon_not_reached(db_conn):
+    trade_date = date.today().isoformat()  # 0 days elapsed
+    result = insider_scan._price_at_horizon("ACME", trade_date, 7)
+    assert result is None
+
+
+def test_price_at_horizon_returns_none_on_price_fetch_miss(db_conn, monkeypatch):
+    trade_date = (date.today() - timedelta(days=30)).isoformat()
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: None)
+    result = insider_scan._price_at_horizon("ACME", trade_date, 7)
+    assert result is None
+
+
+def test_mature_price_outcome_snapshots_matures_reachable_horizons_only(db_conn, monkeypatch):
+    trade_date, series = _price_series(days_ago=35, start_price=100.0, end_price=110.0)
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=trade_date, trade_date=trade_date,
+        insider_name="Jane Doe", trade_type="P", value=50000.0, kind="discovery",
+    )
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    result = insider_scan.mature_price_outcome_snapshots(db_conn)
+    # 35 days old -- horizons 1/3/7/14/30 reachable, 90/180 not yet.
+    assert result["matured"] == 5
+    captured = goat_db.get_captured_horizons(db_conn, "k1")
+    assert captured == {1, 3, 7, 14, 30}
+
+
+def test_mature_price_outcome_snapshots_skips_already_captured_horizons(db_conn, monkeypatch):
+    trade_date, series = _price_series(days_ago=35, start_price=100.0, end_price=110.0)
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=trade_date, trade_date=trade_date,
+        insider_name="Jane Doe", trade_type="P", value=50000.0, kind="discovery",
+    )
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    insider_scan.mature_price_outcome_snapshots(db_conn)
+    result = insider_scan.mature_price_outcome_snapshots(db_conn)
+    assert result["matured"] == 0
+
+
+def test_mature_price_outcome_snapshots_skips_filings_past_max_tracking_window(db_conn, monkeypatch):
+    trade_date, series = _price_series(days_ago=181, start_price=100.0, end_price=110.0)
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=trade_date, trade_date=trade_date,
+        insider_name="Jane Doe", trade_type="P", value=50000.0, kind="discovery",
+    )
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    result = insider_scan.mature_price_outcome_snapshots(db_conn)
+    assert result["matured"] == 0
+
+
+def test_mature_price_outcome_snapshots_boundary_at_180_days_still_matures(db_conn, monkeypatch):
+    trade_date, series = _price_series(days_ago=180, start_price=100.0, end_price=110.0)
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=trade_date, trade_date=trade_date,
+        insider_name="Jane Doe", trade_type="P", value=50000.0, kind="discovery",
+    )
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    result = insider_scan.mature_price_outcome_snapshots(db_conn)
+    assert result["matured"] > 0
+
+
+def test_mature_price_outcome_snapshots_computes_excess_pct_change_against_benchmark(db_conn, monkeypatch):
+    trade_date, ticker_series = _price_series(days_ago=10, start_price=100.0, end_price=120.0)
+    _, spy_series = _price_series(days_ago=10, start_price=400.0, end_price=408.0)  # SPY +2%
+
+    def _fake_fetch(ticker, lookback_days):
+        return spy_series if ticker == "SPY" else ticker_series
+
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=trade_date, trade_date=trade_date,
+        insider_name="Jane Doe", trade_type="P", value=50000.0, kind="discovery",
+    )
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", _fake_fetch)
+    insider_scan.mature_price_outcome_snapshots(db_conn)
+    row = db_conn.execute(
+        "SELECT * FROM goat_insider_price_outcomes WHERE dedup_key = ? AND horizon_days = ?", ("k1", 7)
+    ).fetchone()
+    assert row["pct_change"] == 20.0
+    assert row["benchmark_pct_change"] == 2.0
+    assert row["excess_pct_change"] == 18.0
+
+
+def test_mature_price_outcome_snapshots_caches_benchmark_fetch_within_a_run(db_conn, monkeypatch):
+    trade_date, series = _price_series(days_ago=10, start_price=100.0, end_price=110.0)
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=trade_date, trade_date=trade_date,
+        insider_name="Jane Doe", trade_type="P", value=50000.0, kind="discovery",
+    )
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k2", ticker="ZETA", filing_date=trade_date, trade_date=trade_date,
+        insider_name="John Smith", trade_type="P", value=50000.0, kind="discovery",
+    )
+    calls = []
+
+    def _fake_fetch(ticker, lookback_days):
+        calls.append(ticker)
+        return series
+
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", _fake_fetch)
+    insider_scan.mature_price_outcome_snapshots(db_conn)
+    spy_calls = [c for c in calls if c == "SPY"]
+    # days_ago=10 -> only horizons 1/3/7 are reachable. Same trade_date -> each
+    # horizon's SPY fetch is cached across both filings, so SPY is fetched once
+    # per reachable horizon (3), not once per filing*horizon (would be 6).
+    reachable_horizons = [h for h in goat_config.GOAT_INSIDER_OUTCOME_HORIZONS_DAYS if h <= 10]
+    assert len(spy_calls) == len(reachable_horizons)
+
+
 def test_render_insider_scan_report_includes_price_note_and_recent_filings_section():
     watch_result = {
         "checked_holdings": 1,

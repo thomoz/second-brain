@@ -80,6 +80,7 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
             filing_date=row.get("filing_date", ""), trade_date=row.get("trade_date", ""),
             insider_name=row.get("insider_name", ""), trade_type=row["trade_type_code"],
             value=row["value"], kind="holdings_watch", pct_owned_change=row.get("pct_owned_change"),
+            title=row.get("title", ""),
         )
         if not newly_seen:
             continue
@@ -150,7 +151,7 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
             conn, dedup_key=dedup_key, ticker=ticker,
             filing_date=row.get("filing_date", ""), trade_date=row.get("trade_date", ""),
             insider_name=row.get("insider_name", ""), trade_type=row["trade_type_code"],
-            value=row["value"], kind="discovery",
+            value=row["value"], kind="discovery", title=row.get("title", ""),
         )
         if not newly_seen:
             continue
@@ -173,6 +174,37 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
             dict(r) for r in db.get_all_goat_pending_candidates(conn) if r["source"] == "goat_insider_discovery"
         ],
     }
+
+
+def run_discovery_sell_tracking(conn: sqlite3.Connection) -> dict[str, Any]:
+    """Market-wide sell tracking, data-only -- explicitly no
+    goat_pending_candidates row and no WhatsApp notify (Shaun 2026-08-20: there's
+    no 'should I act on this' question for a sell on a stock he doesn't hold,
+    it's purely a data point for insider_pattern_analysis). Held tickers are
+    skipped -- those sells are already covered by run_holdings_watch."""
+    held_tickers = {row["ticker"] for row in mt_db.get_all_holdings(conn)}
+    rows = openinsider.fetch_discovery_sales()
+    if rows is None:
+        print("[goat-insider-scan] OpenInsider sell-discovery fetch failed")
+        return {"tracked": 0}
+
+    tracked = 0
+    for row in rows:
+        if not _within_lookback(row.get("trade_date", ""), config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS):
+            continue
+        if row["ticker"] in held_tickers:
+            continue
+        dedup_key = openinsider.build_dedup_key(row)
+        newly_seen = db.insert_goat_insider_filing_seen(
+            conn, dedup_key=dedup_key, ticker=row["ticker"],
+            filing_date=row.get("filing_date", ""), trade_date=row.get("trade_date", ""),
+            insider_name=row.get("insider_name", ""), trade_type=row["trade_type_code"],
+            value=row["value"], kind="discovery_sell",
+            pct_owned_change=row.get("pct_owned_change"), title=row.get("title", ""),
+        )
+        if newly_seen:
+            tracked += 1
+    return {"tracked": tracked}
 
 
 def _price_move_since(ticker: str, trade_date_str: str) -> dict[str, Any] | None:
@@ -206,11 +238,95 @@ def _price_move_since(ticker: str, trade_date_str: str) -> dict[str, Any] | None
     }
 
 
-def _confirms_signal(trade_type_code: str, pct_change: float, threshold: float) -> bool:
+def _threshold_for_days(days_since: int) -> float:
+    for max_days, pct in config.GOAT_INSIDER_PRICE_FLAG_TIERS:
+        if days_since <= max_days:
+            return pct
+    return config.GOAT_INSIDER_PRICE_FLAG_PCT_TAIL
+
+
+def _tiered_threshold_description() -> str:
+    """English description of the tier table for the report footer, derived
+    programmatically from config so it can never drift out of sync."""
+    parts = [f"{pct:.1f}% within {max_days}d" for max_days, pct in config.GOAT_INSIDER_PRICE_FLAG_TIERS]
+    parts.append(f"{config.GOAT_INSIDER_PRICE_FLAG_PCT_TAIL:.1f}% after that")
+    return ", ".join(parts)
+
+
+def _price_at_horizon(ticker: str, trade_date_str: str, horizon_days: int) -> dict[str, Any] | None:
+    """pct_change from the close on/after trade_date_str to the close on/after
+    trade_date_str + horizon_days -- distinct from _price_move_since, which
+    measures to *today's* latest close. Returns None on unparsable date or a
+    price-fetch/window miss; callers must treat that as 'not yet maturable',
+    not zero."""
+    try:
+        trade_date_obj = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+    target_date = trade_date_obj + timedelta(days=horizon_days)
+    days_since_trade = (date.today() - trade_date_obj).days
+    if days_since_trade < horizon_days:
+        return None  # horizon not reached yet
+
+    close = price_history.fetch_close_history(ticker, days_since_trade + 10)
+    if close is None or close.empty:
+        return None
+    start_slice = close[close.index >= pd.Timestamp(trade_date_obj)]
+    end_slice = close[close.index >= pd.Timestamp(target_date)]
+    if start_slice.empty or end_slice.empty:
+        return None
+    start_price = float(start_slice.iloc[0])
+    end_price = float(end_slice.iloc[0])
+    if start_price == 0:
+        return None
+    return {"pct_change": (end_price - start_price) / start_price * 100}
+
+
+def mature_price_outcome_snapshots(conn: sqlite3.Connection) -> dict[str, Any]:
+    """Nightly job: for every filing within GOAT_INSIDER_OUTCOME_MAX_TRACKING_DAYS
+    of its trade date, insert any not-yet-captured horizon that's been reached.
+    Independent of goat_pending_candidates' lifecycle -- dismissing/promoting a
+    candidate no longer destroys its outcome history."""
+    matured = 0
+    benchmark_cache: dict[tuple[str, int], float | None] = {}
+    filings = db.get_recent_insider_filings_seen(conn, limit=100000)
+    for filing in filings:
+        if not _within_lookback(filing["trade_date"], config.GOAT_INSIDER_OUTCOME_MAX_TRACKING_DAYS):
+            continue
+        captured = db.get_captured_horizons(conn, filing["dedup_key"])
+        for horizon in config.GOAT_INSIDER_OUTCOME_HORIZONS_DAYS:
+            if horizon in captured:
+                continue
+            outcome = _price_at_horizon(filing["ticker"], filing["trade_date"], horizon)
+            if outcome is None:
+                continue
+            cache_key = (filing["trade_date"], horizon)
+            if cache_key not in benchmark_cache:
+                bm = _price_at_horizon(
+                    config.GOAT_INSIDER_OUTCOME_BENCHMARK_TICKER, filing["trade_date"], horizon
+                )
+                benchmark_cache[cache_key] = bm["pct_change"] if bm else None
+            benchmark_pct = benchmark_cache[cache_key]
+            excess_pct = (
+                outcome["pct_change"] - benchmark_pct if benchmark_pct is not None else None
+            )
+            db.insert_price_outcome(
+                conn, dedup_key=filing["dedup_key"], ticker=filing["ticker"],
+                trade_type=filing["trade_type"], horizon_days=horizon,
+                pct_change=outcome["pct_change"], benchmark_pct_change=benchmark_pct,
+                excess_pct_change=excess_pct, snapshot_date=date.today().isoformat(),
+            )
+            matured += 1
+    return {"matured": matured}
+
+
+def _confirms_signal(trade_type_code: str, pct_change: float, days_since: int) -> bool:
     """Direction-aware only -- a buy is flagged on a rise, a sale on a fall.
     The contrarian direction is deliberately never flagged here (Shaun
     2026-08-18): that's a distinct read ("insider was early/wrong") he wants
-    to judge himself, not have the tool call out as noteworthy."""
+    to judge himself, not have the tool call out as noteworthy. Threshold is
+    time-aware (Shaun 2026-08-20) -- see _threshold_for_days."""
+    threshold = _threshold_for_days(days_since)
     if trade_type_code == "P":
         return pct_change >= threshold
     if trade_type_code == "S":
@@ -220,7 +336,7 @@ def _confirms_signal(trade_type_code: str, pct_change: float, threshold: float) 
 
 def _price_note(pct_change: float, days_since: int, trade_type_code: str) -> str:
     flag = " \U0001F6A9 confirms signal" if _confirms_signal(
-        trade_type_code, pct_change, config.GOAT_INSIDER_PRICE_FLAG_PCT
+        trade_type_code, pct_change, days_since
     ) else ""
     stale = (
         f"; {days_since}d -- may not reflect the insider signal anymore"
@@ -250,7 +366,7 @@ def compute_discovery_price_performance(
             continue
         row["price_note"] = _price_note(move["pct_change"], move["days_since"], "P")
         row["pct_change"] = move["pct_change"]
-        flagged = _confirms_signal("P", move["pct_change"], config.GOAT_INSIDER_PRICE_FLAG_PCT)
+        flagged = _confirms_signal("P", move["pct_change"], move["days_since"])
         row["newly_flagged"] = flagged and not row.get("price_flag_notified")
         if row["newly_flagged"]:
             db.mark_pending_candidate_price_flag_notified(conn, row["ticker"])
@@ -275,7 +391,7 @@ def compute_holdings_watch_price_performance(
             continue
         row["price_note"] = _price_note(move["pct_change"], move["days_since"], trade_type)
         row["pct_change"] = move["pct_change"]
-        flagged = _confirms_signal(trade_type, move["pct_change"], config.GOAT_INSIDER_PRICE_FLAG_PCT)
+        flagged = _confirms_signal(trade_type, move["pct_change"], move["days_since"])
         row["newly_flagged"] = flagged and not row.get("price_flag_notified")
         if row["newly_flagged"]:
             db.mark_insider_filing_price_flag_notified(conn, row["dedup_key"])
@@ -441,8 +557,8 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
         "Price move since trade date for P/S filings seen on your holdings "
         "(most recent 20, including ones below the alert threshold). "
         "\U0001F6A9 marks a move that confirms the insider's signal direction "
-        "(buy -> price rose, sale -> price fell) by "
-        f"{config.GOAT_INSIDER_PRICE_FLAG_PCT:.0f}%+.",
+        "(buy -> price rose, sale -> price fell) past a time-aware threshold "
+        f"({_tiered_threshold_description()}).",
         "",
     ]
     if recent_filings:

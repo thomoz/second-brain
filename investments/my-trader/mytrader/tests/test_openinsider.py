@@ -40,6 +40,34 @@ def test_fetch_discovery_purchases_parses_table_and_filters_purchase_code(monkey
     assert rows[0]["pct_owned_change"] == 10.0
 
 
+def test_fetch_discovery_sales_parses_table_and_filters_sale_code(monkeypatch):
+    monkeypatch.setattr("requests.get", lambda *a, **k: _FakeResponse(_FAKE_HTML))
+    rows = openinsider.fetch_discovery_sales()
+    assert rows is not None
+    assert len(rows) == 1
+    assert rows[0]["ticker"] == "BRK-B"
+    assert rows[0]["trade_type_code"] == "S"
+    assert rows[0]["value"] == 2_000_000.0
+
+
+def test_fetch_discovery_sales_returns_none_on_missing_table(monkeypatch):
+    monkeypatch.setattr("requests.get", lambda *a, **k: _FakeResponse("<html>no table</html>"))
+    assert openinsider.fetch_discovery_sales() is None
+
+
+def test_fetch_discovery_sales_returns_none_on_bad_status(monkeypatch):
+    monkeypatch.setattr("requests.get", lambda *a, **k: _FakeResponse(_FAKE_HTML, status_code=500))
+    assert openinsider.fetch_discovery_sales() is None
+
+
+def test_fetch_discovery_sales_returns_none_on_network_error(monkeypatch):
+    def _raise(*a, **k):
+        raise Exception("network down")
+
+    monkeypatch.setattr("requests.get", _raise)
+    assert openinsider.fetch_discovery_sales() is None
+
+
 def test_parse_table_reads_pct_owned_change_for_sale_row(monkeypatch):
     monkeypatch.setattr("requests.get", lambda *a, **k: _FakeResponse(_FAKE_HTML))
     rows = openinsider.fetch_screener_filings(["BRK-B"], "S", 100_000)

@@ -198,3 +198,81 @@ def test_init_goat_tables_migration_is_idempotent(db_conn):
 
     init_goat_tables(db_conn)  # second call must not raise (column already exists)
     init_goat_tables(db_conn)
+
+
+def test_insert_goat_insider_filing_seen_stores_title(db_conn):
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="AAPL", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="Jane Doe", trade_type="S", value=150000.0, kind="holdings_watch",
+        title="CFO",
+    )
+    rows = db.get_recent_insider_filings_seen(db_conn)
+    assert rows[0]["title"] == "CFO"
+
+
+def test_insert_goat_insider_filing_seen_defaults_title_to_empty_string(db_conn):
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="AAPL", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="Jane Doe", trade_type="P", value=150000.0, kind="holdings_watch",
+    )
+    rows = db.get_recent_insider_filings_seen(db_conn)
+    assert rows[0]["title"] == ""
+
+
+def test_get_captured_horizons_returns_empty_set_when_none(db_conn):
+    assert db.get_captured_horizons(db_conn, "k1") == set()
+
+
+def test_get_captured_horizons_returns_horizons_after_insert(db_conn):
+    db.insert_price_outcome(
+        db_conn, dedup_key="k1", ticker="AAPL", trade_type="P", horizon_days=7,
+        pct_change=5.0, benchmark_pct_change=2.0, excess_pct_change=3.0,
+        snapshot_date="2026-08-20",
+    )
+    assert db.get_captured_horizons(db_conn, "k1") == {7}
+
+
+def test_insert_price_outcome_twice_is_a_no_op(db_conn):
+    kwargs = dict(
+        dedup_key="k1", ticker="AAPL", trade_type="P", horizon_days=7,
+        pct_change=5.0, benchmark_pct_change=2.0, excess_pct_change=3.0,
+        snapshot_date="2026-08-20",
+    )
+    db.insert_price_outcome(db_conn, **kwargs)
+    db.insert_price_outcome(db_conn, **dict(kwargs, pct_change=99.0))
+    row = db_conn.execute(
+        "SELECT pct_change FROM goat_insider_price_outcomes WHERE dedup_key = ? AND horizon_days = ?",
+        ("k1", 7),
+    ).fetchone()
+    assert row["pct_change"] == 5.0
+
+
+def test_get_price_outcomes_for_pattern_analysis_returns_joined_rows(db_conn):
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="AAPL", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="Jane Doe", trade_type="P", value=150000.0, kind="discovery", title="CFO",
+    )
+    db.insert_price_outcome(
+        db_conn, dedup_key="k1", ticker="AAPL", trade_type="P", horizon_days=7,
+        pct_change=5.0, benchmark_pct_change=2.0, excess_pct_change=3.0,
+        snapshot_date="2026-08-20",
+    )
+    rows = db.get_price_outcomes_for_pattern_analysis(db_conn)
+    assert len(rows) == 1
+    assert rows[0]["value"] == 150000.0
+    assert rows[0]["title"] == "CFO"
+    assert rows[0]["kind"] == "discovery"
+
+
+def test_get_price_outcomes_for_pattern_analysis_excludes_holdings_watch(db_conn):
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="AAPL", filing_date="2026-08-15", trade_date="2026-08-14",
+        insider_name="Jane Doe", trade_type="P", value=150000.0, kind="holdings_watch",
+    )
+    db.insert_price_outcome(
+        db_conn, dedup_key="k1", ticker="AAPL", trade_type="P", horizon_days=7,
+        pct_change=5.0, benchmark_pct_change=2.0, excess_pct_change=3.0,
+        snapshot_date="2026-08-20",
+    )
+    rows = db.get_price_outcomes_for_pattern_analysis(db_conn)
+    assert rows == []

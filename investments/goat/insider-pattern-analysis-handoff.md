@@ -1,6 +1,6 @@
 # Insider Trade Outcome Pattern Analysis — Session Handoff
 
-## Status: Not started — design discussed 2026-08-20, ready for /plan-feature (Shaun to run in a separate session)
+## Status: Implemented 2026-08-20 — see .agent/plans/insider-pattern-analysis.md; full test suite passing (198 goat + 494 my-trader), manual scan-insiders run validated twice with no duplicate work
 
 ## What This Is
 
