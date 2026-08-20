@@ -26,16 +26,18 @@ def _load_vault_context(project_root: Path) -> str:
     return "\n".join(lines)
 
 
-def _load_context_bridge(project_root: Path) -> str:
-    """Pre-load a temporary, gitignored context file for WhatsApp chat only.
+def _load_context_bridge() -> str:
+    """Pre-load a temporary context file for WhatsApp chat only, kept outside this repo.
 
     Lets Shaun hand the bot short-lived context for something outside the vault
     (e.g. a side project kept in its own repo) without that content ever touching
-    this repo's git history or vault-sync. Drop a file at
-    .claude/data/context-bridge.md and delete it when the conversation is done —
-    .claude/data/ is fully gitignored so nothing here gets committed or synced.
+    this repo's working tree, git history, or vault-sync — deliberately stored
+    under the home directory rather than under project_root, so it's never even
+    adjacent to a gitignore rule. Drop a file at
+    ~/second-brain-bridge/context-bridge.md and delete it when the conversation
+    is done.
     """
-    fpath = project_root / ".claude" / "data" / "context-bridge.md"
+    fpath = Path.home() / "second-brain-bridge" / "context-bridge.md"
     try:
         content = fpath.read_text(encoding="utf-8")
     except OSError:
@@ -242,7 +244,7 @@ class ConversationEngine:
         if assistant_cmds:
             system_prompt += f"\n\n{assistant_cmds}"
 
-        bridge_context = _load_context_bridge(self.project_root)
+        bridge_context = _load_context_bridge()
         if bridge_context:
             system_prompt += f"\n\n{bridge_context}"
 
