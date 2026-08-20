@@ -7,4 +7,4 @@ Scanned 448 ticker(s) across 9 rising sector(s): Consumer Discretionary, Consume
 | Ticker | Sector | Signal | Flagged |
 |--------|--------|--------|---------|
 
-Last auto-generated: 2026-08-19.
+Last auto-generated: 2026-08-20.

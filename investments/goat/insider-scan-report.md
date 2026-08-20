@@ -150,4 +150,4 @@ Price move since trade date for P/S filings seen on your holdings (most recent 2
 |--------|--------|-------|------------|--------------------|
 | LLY | Sold | $1,175 | 2026-08-17 | +8.2% since trade |
 
-Last auto-generated: 2026-08-19.
+Last auto-generated: 2026-08-20.
