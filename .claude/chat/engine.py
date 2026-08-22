@@ -105,6 +105,21 @@ def _load_profile_context(project_root: Path) -> str:
     return "\n".join(lines)
 
 
+def _is_new_sydney_day(session_created_at: datetime) -> bool:
+    """True if session_created_at falls on an earlier Sydney calendar day than now.
+
+    Old rows written before this check existed may be naive (VPS system clock,
+    effectively UTC) - treat those as stale too rather than risk an aware/naive
+    comparison error, since a broken pre-existing session should reset anyway.
+    """
+    from config import now_local
+
+    now = now_local()
+    if session_created_at.tzinfo is None:
+        return True
+    return session_created_at.astimezone(now.tzinfo).date() != now.date()
+
+
 def _profile_session_state_path(project_root: Path) -> Path:
     return project_root / ".claude" / "data" / "state" / "profile-session.json"
 
@@ -194,6 +209,21 @@ class ConversationEngine:
 
         existing = self.session_store.get(platform_str, channel_id, thread_id)
 
+        # force_new_thread: start a fresh Codex agent thread this turn but keep
+        # `existing` (the DB row, keyed on platform:channel:thread) so the row
+        # gets updated with the new thread id afterwards instead of a duplicate
+        # INSERT on the same (unique) session_id.
+        force_new_thread = False
+
+        # Daily session reset: a WhatsApp thread resumed across many messages
+        # eventually grows past Codex's auto-compaction threshold, which is
+        # currently broken upstream (openai/codex#38513 - remote compact 404s).
+        # Starting a fresh agent thread each Sydney calendar day keeps sessions
+        # short enough that compaction rarely triggers, independent of that bug.
+        if existing is not None and _is_new_sydney_day(existing.created_at):
+            reset_session(existing.agent_session_id)
+            force_new_thread = True
+
         # Injection detection on incoming message (log only â€” never block Shaun)
         injection_flags = check_injection_patterns(message.text)
         if injection_flags:
@@ -203,7 +233,7 @@ class ConversationEngine:
         # Conversation thread reset
         _reset_phrases = ["new conversation thread", "start new conversation"]
         if any(phrase in message.text.lower() for phrase in _reset_phrases):
-            if existing:
+            if existing and not force_new_thread:
                 reset_session(existing.agent_session_id)
             yield OutgoingMessage(
                 text="Conversation thread reset. Starting fresh â€” your vault memory is intact.",
@@ -218,8 +248,9 @@ class ConversationEngine:
 
         # Check for 10-min timeout on active profile session (BEFORE LLM call)
         if not _is_profile_mode and _check_and_clear_profile_timeout(self.project_root, channel_id):
-            if existing:
+            if existing and not force_new_thread:
                 reset_session(existing.agent_session_id)
+            force_new_thread = True
             # Silent reset — no WhatsApp notification to avoid cluttering CarPlay unread queue
 
         # Build system prompt from SOUL.md + WhatsApp rules
@@ -249,8 +280,9 @@ class ConversationEngine:
             system_prompt += f"\n\n{bridge_context}"
 
         if _is_profile_mode:
-            if existing:
+            if existing and not force_new_thread:
                 reset_session(existing.agent_session_id)
+            force_new_thread = True
             skill_path = self.project_root / ".claude" / "skills" / "ask-me-questions" / "SKILL.md"
             try:
                 skill_text = skill_path.read_text(encoding="utf-8")
@@ -269,7 +301,7 @@ class ConversationEngine:
             "permission_mode": "dontAsk",
             "max_turns": self.max_turns,
         }
-        if existing:
+        if existing and not force_new_thread:
             options_kwargs["resume"] = existing.agent_session_id
             print(f"[{datetime.now()}] Resuming session {existing.session_id}")
         else:
@@ -281,8 +313,9 @@ class ConversationEngine:
         session_id_from_sdk: str | None = None
         cost_usd: float = 0.0
 
-        try:
-            async for sdk_msg in query(prompt=message.text, options=options):
+        async def _run(opts: ClaudeAgentOptions) -> None:
+            nonlocal response_text, session_id_from_sdk, cost_usd
+            async for sdk_msg in query(prompt=message.text, options=opts):
                 if isinstance(sdk_msg, AssistantMessage):
                     response_text = ""
                     for block in sdk_msg.content:
@@ -296,14 +329,38 @@ class ConversationEngine:
                         f"[{datetime.now()}] Agent done: "
                         f"session={session_id_from_sdk}, cost={cost_str}"
                     )
+
+        try:
+            await _run(options)
         except Exception as e:
-            print(f"[{datetime.now()}] Agent error: {e}")
-            yield OutgoingMessage(
-                text=f"Sorry, I hit an error: {e}",
-                channel=message.channel,
-                thread=message.thread,
-            )
-            return
+            # Codex's remote auto-compaction is currently 404ing upstream
+            # (openai/codex#38513) once a resumed thread's context grows large
+            # enough to trigger it. That leaves the saved thread id permanently
+            # broken - every future message would resume the same dead thread
+            # and hit the same error forever. Reset it and, for this specific
+            # failure, retry once on a fresh thread so Shaun doesn't see the
+            # hiccup on WhatsApp at all.
+            is_compact_failure = "compact" in str(e).lower()
+            if existing:
+                reset_session(existing.agent_session_id)
+            if is_compact_failure and existing:
+                print(f"[{datetime.now()}] Compact error, retrying on fresh session: {e}")
+                options_kwargs.pop("resume", None)
+                force_new_thread = True
+                try:
+                    await _run(ClaudeAgentOptions(**options_kwargs))
+                except Exception as retry_e:
+                    e = retry_e
+                else:
+                    e = None
+            if e is not None:
+                print(f"[{datetime.now()}] Agent error: {e}")
+                yield OutgoingMessage(
+                    text=f"Sorry, I hit an error: {e}",
+                    channel=message.channel,
+                    thread=message.thread,
+                )
+                return
 
         if response_text.strip():
             yield OutgoingMessage(
@@ -320,7 +377,8 @@ class ConversationEngine:
 
         # Persist session
         if session_id_from_sdk:
-            now = datetime.now()
+            from config import now_local
+            now = now_local()
             if existing:
                 existing.agent_session_id = session_id_from_sdk
                 existing.message_count += 1
