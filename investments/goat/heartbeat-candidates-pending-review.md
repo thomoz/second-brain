@@ -7,4 +7,4 @@ Scanned 401 ticker(s) across 8 rising sector(s): Consumer Staples, Energy, Finan
 | Ticker | Sector | Signal | Flagged |
 |--------|--------|--------|---------|
 
-Last auto-generated: 2026-08-21.
+Last auto-generated: 2026-08-22.
