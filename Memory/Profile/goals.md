@@ -170,3 +170,6 @@ _(not yet populated)_
 
 ## 2026-06-27 Update
 - (Jun 27) Long-term goal is to narrow focus to one or two business areas
+
+## 2026-08-22 Update
+- (Aug 22) Wants AI relationship project to create ongoing character change people revisit
