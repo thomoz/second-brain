@@ -89,3 +89,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 ## 2026-08-19 Reflection
 - (Aug 19) Fourteen Crash Signals Phase 3 is live on VPS; all 14 markers are now real
 - (Aug 19) Goat Monitor now runs insider-selling checks on the broader watchlist
+
+## 2026-08-20 Reflection
+- (Aug 20) Recover broken Claude Code on Windows with PowerShell install script, then `claude --version`
