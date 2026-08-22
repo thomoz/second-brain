@@ -260,8 +260,9 @@ def render_pattern_analysis_report(analysis: dict[str, Any]) -> str:
             else f"n={velocity['n']}: {velocity['pct_direction_confirmed']:.0f}% still confirmed direction at 30/90d"
         )
 
-    from datetime import date
-    lines += ["", f"Last auto-generated: {date.today().isoformat()}."]
+    from .insider_scan import _now_sydney_str
+
+    lines += ["", f"Last auto-generated: {_now_sydney_str()}."]
     return "\n".join(lines) + "\n"
 
 

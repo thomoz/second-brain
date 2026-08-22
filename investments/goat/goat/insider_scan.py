@@ -20,6 +20,15 @@ from mytrader import openinsider
 from . import config, db, price_history
 
 
+def _now_sydney_str() -> str:
+    """Sydney local date+time for report footers -- Shaun 2026-08-20 wanted the
+    write time visible, not just the date, to tell a stale report from a fresh
+    one at a glance."""
+    from zoneinfo import ZoneInfo
+
+    return datetime.now(ZoneInfo(config.GOAT_ASX_TZ)).strftime("%Y-%m-%d %H:%M %Z")
+
+
 def _within_lookback(trade_date_str: str, lookback_days: int) -> bool:
     try:
         trade_date = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
@@ -616,7 +625,7 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
         "No holdings filings have moved down since their trade yet."
     ]
 
-    lines += ["", f"Last auto-generated: {date.today().isoformat()}."]
+    lines += ["", f"Last auto-generated: {_now_sydney_str()}."]
     return "\n".join(lines) + "\n"
 
 
