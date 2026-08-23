@@ -37,6 +37,8 @@ def render_signals_report(
         "action is ever suggested here (see SOUL.md). Per-marker source: "
         "investments/my-trader/14-signals-crash-warning-handoff.md.",
         "",
+        f"## Run: {date.today().isoformat()}",
+        "",
         "## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)",
         "Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 "
         "mega-cap constituents -- never hardcoded to a fixed ticker list.",
@@ -98,7 +100,6 @@ def render_signals_report(
     lines += ["", "## Markers", "", "| # | Marker | Status | Detail |", "|---|--------|--------|--------|"]
     lines += [row for _, row in marker_rows]
 
-    lines += ["", f"Last auto-generated: {date.today().isoformat()}."]
     return "\n".join(lines) + "\n"
 
 
