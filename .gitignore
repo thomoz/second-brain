@@ -16,6 +16,7 @@ mcp-config.json
 .claude/scripts/reflection_runs.log
 .claude/scripts/vault_sync_runs.log
 investments/my-trader/monitor_runs.log
+investments/briefs-finance/data/investments.db
 .claude/scripts/integrations/google_credentials.json
 .claude/scripts/integrations/google_token.json
 .claude/scripts/integrations/token_gmail_*.json
