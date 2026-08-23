@@ -9,6 +9,10 @@ _Active items and pointers to structured memory pages. Always loaded into sessio
 _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here; archive to decisions/ when done._
 
 
+- (Aug 23) Check whether Goat monitor is still running on schedule after the stale report
+- (Aug 23) Preserve 21 divergent local investment rows before untracking the local DB
+- (Aug 23) Update investment docs/skills for the SSH-wrapper single-VPS `investments.db` flow
+- (Aug 23) Run `/plan-feature` for Goat rotation trend tracking from the saved handoff
 ## Entity Pages
 
 - [[songbookdb/index]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app, PHP upgrade in progress
@@ -47,6 +51,8 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - Hand off blocked commands as one pasteable `&&` block unless shell context changes
 - For investment reports, use `Debt/Equity` instead of `d/e`
 - In investment reports, add plain-English metric notes like `Lower is generally safer`
+- Notify Shaun only for long/background task completion, not quick routine tasks
+- Use WhatsApp for task completion notifications, not `PushNotification`
 ---
 
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_

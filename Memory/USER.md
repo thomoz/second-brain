@@ -92,3 +92,7 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-08-20 Reflection
 - (Aug 20) Recover broken Claude Code on Windows with PowerShell install script, then `claude --version`
+
+## 2026-08-23 Reflection
+- Local GREEN-API WhatsApp notifications work; no VPS relay needed
+- Access VPS `investments.db` locally via `scripts/invoke_investments.ps1`
