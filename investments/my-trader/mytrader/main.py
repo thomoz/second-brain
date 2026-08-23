@@ -228,9 +228,8 @@ def cmd_dismiss_candidate(args) -> None:
 
 
 def cmd_sync_ibkr(args) -> None:
-    from .db import get_all_holdings, get_holding_row, insert_ibkr_pending_position, upsert_holding
-    from .ibkr_sync import compute_diff, fetch_account_summary, fetch_positions
-    from .snapshot import regenerate_all
+    from .ibkr_remote_write import push_positions_remote
+    from .ibkr_sync import fetch_account_summary, fetch_positions
 
     try:
         positions = fetch_positions()
@@ -243,74 +242,10 @@ def cmd_sync_ibkr(args) -> None:
         return
 
     summary = fetch_account_summary()
-    if summary is not None:
-        cash_part = (
-            f", TotalCashValue {summary['total_cash']} {summary['currency']}"
-            if summary["total_cash"] is not None else ""
-        )
-        print(f"Account summary: NetLiquidation {summary['net_liquidation']} {summary['currency']}{cash_part}")
-    else:
-        print("Account summary: unavailable.")
-
-    print(f"\nFound {len(positions)} IBKR position(s).")
-
-    conn = _open_conn()
-    holdings = get_all_holdings(conn)
-    diff = compute_diff(positions, holdings)
-
-    print(f"\nMatched, no change ({len(diff['matched_no_change'])}):")
-    for row in diff["matched_no_change"]:
-        print(f"  {row['ticker']}: qty {row['holdings_qty']}, avg_price {row['holdings_avg_price']}")
-
-    print(f"\nMatched, mismatch ({len(diff['matched_with_mismatch'])}):")
-    for row in diff["matched_with_mismatch"]:
-        print(
-            f"  {row['ticker']} (bucket {row['bucket']}): tracked qty={row['holdings_qty']} "
-            f"avg_price={row['holdings_avg_price']} -> IBKR qty={row['ibkr_qty']} "
-            f"avg_price={row['ibkr_avg_price']}"
-        )
-
-    print(f"\nNew to IBKR, not tracked ({len(diff['new_to_ibkr'])}):")
-    for row in diff["new_to_ibkr"]:
-        print(f"  {row['ticker']}: qty {row['qty']}, avg_price {row['avg_price']}")
-
-    print(f"\nTracked but missing from IBKR ({len(diff['missing_from_ibkr'])}):")
-    for row in diff["missing_from_ibkr"]:
-        print(
-            f"  {row['ticker']} (bucket {row['bucket']}): qty {row['qty']} — sold outside "
-            "this tool, or run holding-sell if confirmed"
-        )
-
-    if not args.apply:
-        conn.close()
-        print("\nDry run only — no writes made. Re-run with --apply to commit corrections and stage new positions.")
-        return
-
-    corrected = 0
-    for row in diff["matched_with_mismatch"]:
-        existing = get_holding_row(conn, row["ticker"], row["bucket"])
-        upsert_holding(
-            conn, ticker=row["ticker"], name=existing["name"], asset_type=existing["asset_type"],
-            bucket=row["bucket"], qty=row["ibkr_qty"], avg_price=row["ibkr_avg_price"],
-            currency=existing["currency"], last_expense_ratio=existing["last_expense_ratio"],
-        )
-        corrected += 1
-
-    staged = 0
-    for row in diff["new_to_ibkr"]:
-        insert_ibkr_pending_position(
-            conn, ticker=row["ticker"], name=row["name"], qty=row["qty"], avg_price=row["avg_price"],
-            currency=row["currency"], asset_type=row["asset_type"], exchange_raw=row["exchange_raw"],
-        )
-        staged += 1
-
-    if corrected:
-        regenerate_all(conn)
-    conn.close()
-    print(
-        f"\nApplied: {corrected} correction(s), {staged} new position(s) staged, "
-        f"{len(diff['missing_from_ibkr'])} missing (reported only)."
-    )
+    # positions/summary are fetched locally (IB Gateway only runs here); the diff
+    # against tracked holdings and any resulting write happen on the VPS, the single
+    # source of truth for investments.db (see .agent/plans/investments-db-ssh-single-source.md).
+    push_positions_remote(positions, summary, apply=args.apply)
 
 
 def cmd_ibkr_assign_bucket(args) -> None:

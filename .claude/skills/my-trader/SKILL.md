@@ -21,47 +21,65 @@ SOUL.md).
 
 ## Quick Reference
 
+`investments.db` lives only on the VPS now (no more local copy — see "Where This Runs"
+below). Every command runs via the SSH wrapper:
+
 ```powershell
 # Ephemeral lookup — "what do you think of TICKER" (writes nothing)
-uv run --directory investments/my-trader python -m mytrader.main find --ticker VRTX
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "find --ticker VRTX"
 
 # Explicit "add to watchlist" — persists a DB row + regenerates snapshots
-uv run --directory investments/my-trader python -m mytrader.main watchlist-add --ticker VRTX --name "Vertex Pharmaceuticals" --asset-type stock --bucket 1 --notes "..."
+.\scripts\invoke_investments.ps1 -Package my-trader -Command 'watchlist-add --ticker VRTX --name "Vertex Pharmaceuticals" --asset-type stock --bucket 1 --notes "..."'
 
 # Record a buy/sell against a holding
-uv run --directory investments/my-trader python -m mytrader.main holding-buy --ticker V --bucket 1 --qty 0.1 --price 340
-uv run --directory investments/my-trader python -m mytrader.main holding-sell --ticker V --bucket 1 --qty 0.05 --price 350
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "holding-buy --ticker V --bucket 1 --qty 0.1 --price 340"
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "holding-sell --ticker V --bucket 1 --qty 0.05 --price 350"
 
 # Regenerate holdings.md / watchlist.md from the DB
-uv run --directory investments/my-trader python -m mytrader.main snapshot
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "snapshot"
 
 # One-time migration of the already-confirmed rows (VRTX, PMGOLD core+tactical, BRK-B,
 # HDV, SCHD, ASML, LLY, LYV, V) into the shared DB — idempotent, safe to re-run
-uv run --directory investments/my-trader python -m mytrader.main seed
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "seed"
 
 # Scheduled re-check of all holdings + vetted watchlist (also runs automatically —
 # see scripts/setup_scheduler_windows.ps1 / scripts/systemd/second-brain-mytrader-monitor.timer)
-uv run --directory investments/my-trader python -m mytrader.main monitor
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "monitor"
 
 # Pull new Briefs Finance recommendations into synced-candidates-pending-review.md
 # right now (also runs automatically once a day as part of `monitor`)
-uv run --directory investments/my-trader python -m mytrader.main sync-candidates
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "sync-candidates"
 
 # Force a fresh gold backtest right now (slow, on-demand — also refreshes
 # automatically, roughly once a day, as part of `monitor` — see "Gold Outlook" below)
-uv run --directory investments/my-trader python -m mytrader.main gold-backtest
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "gold-backtest"
 
 # Review synced-candidates-pending-review.md, then promote or dismiss each one
-uv run --directory investments/my-trader python -m mytrader.main promote-candidate --ticker VRTX --bucket 1 --status raw
-uv run --directory investments/my-trader python -m mytrader.main dismiss-candidate --ticker XYZ
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "promote-candidate --ticker VRTX --bucket 1 --status raw"
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "dismiss-candidate --ticker XYZ"
 
 # Remove a ticker from the watchlist, or move it to a different bucket
-uv run --directory investments/my-trader python -m mytrader.main watchlist-remove --ticker XYZ
-uv run --directory investments/my-trader python -m mytrader.main watchlist-move-bucket --ticker XYZ --to-bucket 2
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "watchlist-remove --ticker XYZ"
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "watchlist-move-bucket --ticker XYZ --to-bucket 2"
 ```
 
-Note: use `uv run --directory <path> ...` rather than `cd`-ing into the directory first —
-`cd` in this repo's shell breaks the PreToolUse hooks (see project memory).
+Quoting note: `-Command`'s value is reconstructed and re-parsed by the remote bash, so
+a literal `$` inside a double-quoted argument (e.g. `--notes "worth $340"`) gets bash-
+expanded to empty rather than preserved literally — avoid `$`, backticks, and
+backslashes inside quoted argument values. See `scripts/invoke_investments.ps1`'s
+header comment for detail.
+
+## Where This Runs
+
+`investments.db` (`investments/briefs-finance/data/investments.db`) exists in exactly
+one place: the VPS. It is gitignored and never opened by a process on Shaun's Windows
+machine — two independently-writable local/VPS copies kept jamming git on unmergeable
+binary diffs (recurring incident, fixed 2026-08-23, see
+`.agent/plans/investments-db-ssh-single-source.md`). All commands above run *on* the
+VPS via `scripts/invoke_investments.ps1`, which streams output back live and propagates
+the remote exit code — the workflow is identical to running locally, just routed over
+SSH. The one exception is IBKR holdings sync (see below) — it must run locally against
+IB Gateway, but its DB write still lands only on the VPS.
 
 ## Key Paths
 

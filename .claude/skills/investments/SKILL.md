@@ -16,35 +16,61 @@ Briefs Finance investment analysis tool. All output is for Shaun's review only �
 
 ## Quick Reference
 
-```powershell
-# Always run from the briefs-finance directory
-cd investments/briefs-finance
+`investments.db` lives only on the VPS now (no more local copy — see "Where This Runs"
+below). Every command runs via the SSH wrapper:
 
-# Ingest PDFs
-uv run python -m scripts.main ingest                              # all PDFs
-uv run python -m scripts.main ingest --path "reports/pro-2026/1781550652-Golds_Comeback_May_30.pdf"
-uv run python -m scripts.main ingest --folder pro-2025           # specific subfolder
-uv run python -m scripts.main ingest --dry-run                   # preview only
+```powershell
+# Ingest PDFs already present on the VPS
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "ingest"                              # all PDFs
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "ingest --path reports/pro-2026/1781550652-Golds_Comeback_May_30.pdf"
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "ingest --folder pro-2025"           # specific subfolder
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "ingest --dry-run"                   # preview only
+
+# Ingesting a PDF that only exists locally: scp it up first (see "Ingesting a New PDF" below),
+# then run --path against the path it landed at on the VPS
 
 # Backtest historical picks
-uv run python -m scripts.main backtest                            # all missing outcomes
-uv run python -m scripts.main backtest --ticker KGC              # single ticker
-uv run python -m scripts.main backtest --stats                   # track record summary
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "backtest"                            # all missing outcomes
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "backtest --ticker KGC"              # single ticker
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "backtest --stats"                   # track record summary
 
 # Score recommendations
-uv run python -m scripts.main score --ticker KGC
-uv run python -m scripts.main score --all
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "score --ticker KGC"
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "score --all"
 
 # Full assessment (primary command)
-uv run python -m scripts.main assess --ticker KGC                # terminal (default)
-uv run python -m scripts.main assess --ticker KGC --output markdown   # vault .md
-uv run python -m scripts.main assess --ticker KGC --output html       # Chart.js HTML
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "assess --ticker KGC"                # terminal (default)
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "assess --ticker KGC --output markdown"   # vault .md
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "assess --ticker KGC --output html"       # Chart.js HTML
 
 # Other commands
-uv run python -m scripts.main context --ticker KGC               # sector + macro context
-uv run python -m scripts.main stats                              # full track record
-uv run python -m scripts.main excluded                           # list defense-filtered stocks
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "context --ticker KGC"               # sector + macro context
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "stats"                              # full track record
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "excluded"                           # list defense-filtered stocks
 ```
+
+## Ingesting a New PDF
+
+The source PDF is the one input in this skill that starts out local. Copy it to the
+VPS's matching subfolder first, then ingest it by its VPS-side path:
+
+```powershell
+scp "<local path to PDF>" secondbrain@137.184.102.104:/home/secondbrain/second-brain/investments/briefs-finance/reports/<subfolder>/
+.\scripts\invoke_investments.ps1 -Package briefs-finance -Command "ingest --path reports/<subfolder>/<filename>.pdf"
+```
+
+`<subfolder>` (`pro-2025`, `pro-2026`, `holdings`, `plus`) is a conscious placement
+choice, same as it always was — pick the same one you would have used locally.
+
+## Where This Runs
+
+`investments.db` (`investments/briefs-finance/data/investments.db`) exists in exactly
+one place: the VPS. It is gitignored and never opened by a process on Shaun's Windows
+machine — two independently-writable local/VPS copies kept jamming git on unmergeable
+binary diffs (recurring incident, fixed 2026-08-23, see
+`.agent/plans/investments-db-ssh-single-source.md`). All commands above run *on* the
+VPS via `scripts/invoke_investments.ps1`, which streams output back live and propagates
+the remote exit code.
 
 ## Key Paths
 
