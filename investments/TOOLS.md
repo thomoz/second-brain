@@ -15,6 +15,7 @@ Freshest reports worth actually opening most days:
 |------|------|---|
 | [investments/my-trader/my-trader-report.md](my-trader/my-trader-report.md) | my-trader Monitor (7:30am Sydney) | [→](#mytrader-monitor) |
 | [investments/goat/goat-report.md](goat/goat-report.md) | Goat Monitor (~7:35am Sydney) | [→](#goat-monitor) |
+| [investments/goat/industry-ranking.md](goat/industry-ranking.md) | Part of Goat Monitor, industry rotation section (~7:35am Sydney) | [→](#goat-monitor) |
 | [investments/goat/insider-scan-report.md](goat/insider-scan-report.md) | Goat Insider Scan (~7:50am Sydney) | [→](#goat-insider-scan) |
 | [investments/fourteen-crash-signals-daily-check/crash-signals-report.md](fourteen-crash-signals-daily-check/crash-signals-report.md) | Fourteen Crash Signals (daily) | [→](#fourteen-crash-signals) |
 | [investments/my-trader/gold-outlook.md](my-trader/gold-outlook.md) | Part of my-trader Monitor, gold section | [→](#mytrader-monitor) |
