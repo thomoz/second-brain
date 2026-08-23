@@ -423,3 +423,76 @@ def test_dismiss_workflow_removes_pending_only_no_watchlist_write(db_conn):
     assert count == 1
     assert goat_db.get_goat_pending_candidate(db_conn, "XLK") is None
     assert mt_db.get_watchlist_row(db_conn, "XLK") is None
+
+
+# --- Industry rotation ranking -------------------------------------------------
+
+_FAKE_INDUSTRY_ETFS = {"ITA": "Aerospace & Defense", "JETS": "Airlines"}
+_FAKE_FINVIZ_INDUSTRIES = ["Aerospace & Defense", "Airlines", "Coking Coal", "Gold"]
+
+
+def _industry_series(n: int = 200, price: float = 100.0) -> pd.Series:
+    return pd.Series([price] * n, index=_dates(n))
+
+
+def _patch_industry_universe(monkeypatch):
+    monkeypatch.setattr(goat_config, "GOAT_INDUSTRY_ETFS", _FAKE_INDUSTRY_ETFS)
+    monkeypatch.setattr(goat_config, "GOAT_FINVIZ_INDUSTRIES", _FAKE_FINVIZ_INDUSTRIES)
+
+
+def test_run_industry_scan_ranks_and_lists_not_covered(monkeypatch):
+    _patch_industry_universe(monkeypatch)
+    window = goat_config.GOAT_INDUSTRY_RANK_WINDOW_TRADING_DAYS
+
+    def _fake_fetch(ticker, lookback_days):
+        tail = 110.0 if ticker == "ITA" else 90.0
+        prices = [100.0] * window + [tail]
+        return pd.Series(prices, index=_dates(len(prices)))
+
+    monkeypatch.setattr("goat.industry_rotation.price_history.fetch_close_history", _fake_fetch)
+
+    result = monitor.run_industry_scan()
+    assert [r["ticker"] for r in result["ranking"]] == ["ITA", "JETS"]
+    assert result["not_covered"] == ["Coking Coal", "Gold"]
+
+
+def test_run_industry_scan_all_tickers_missing_data_still_renders(monkeypatch):
+    _patch_industry_universe(monkeypatch)
+    monkeypatch.setattr(
+        "goat.industry_rotation.price_history.fetch_close_history",
+        lambda ticker, lookback_days: None,
+    )
+
+    result = monitor.run_industry_scan()
+    assert all(r["return_pct"] is None for r in result["ranking"])
+    report = monitor.render_industry_ranking_report(result)
+    assert "ITA" in report
+    assert "Coking Coal" in report
+
+
+def test_render_industry_ranking_report_has_all_sections():
+    result = {
+        "ranking": [
+            {"rank": 1, "ticker": "ITA", "industry_label": "Aerospace & Defense", "return_pct": 12.3, "rising": True},
+            {"rank": 2, "ticker": "JETS", "industry_label": "Airlines", "return_pct": None, "rising": None},
+        ],
+        "not_covered": ["Coking Coal", "Gold"],
+    }
+    report = monitor.render_industry_ranking_report(result)
+    assert "## Top 5 Rising" in report
+    assert "## Bottom 5 Falling" in report
+    assert "## Full Ranking" in report
+    assert "## Not Covered (2)" in report
+    assert "ITA" in report
+    assert "+12.3%" in report
+    assert "Coking Coal" in report
+    assert "Gold" in report
+
+
+def test_write_industry_ranking_report_writes_to_configured_path(tmp_path, monkeypatch):
+    report_path = tmp_path / "industry-ranking.md"
+    monkeypatch.setattr("goat.monitor.config.GOAT_INDUSTRY_RANKING_MD_PATH", report_path)
+    result = {"ranking": [], "not_covered": []}
+    monitor.write_industry_ranking_report(result)
+    assert report_path.exists()
+    assert report_path.read_text(encoding="utf-8") == monitor.render_industry_ranking_report(result)

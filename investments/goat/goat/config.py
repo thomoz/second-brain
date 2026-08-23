@@ -90,6 +90,109 @@ GOAT_SECTOR_CROSS_RECENCY_DAYS = 10  # a cross older than this no longer counts 
 GOAT_SECTOR_RANKING_MD_PATH = GOAT_DIR / "sector-ranking.md"
 GOAT_SECTOR_CANDIDATES_MD_PATH = GOAT_DIR / "sector-candidates-pending-review.md"
 
+# Industry rotation ranking, per .agent/plans/goat-industry-rotation-ranking.md --
+# extends sector rotation (above) down to Finviz's ~143 finer-grained industry
+# groups, prompted by Shaun sharing Finviz "Money Flowing IN/OUT" screenshots
+# 2026-08-23. Full taxonomy sourced from finviz.com/groups?g=industry, fetched
+# 2026-08-23 -- embedded verbatim as the canonical reference list.
+GOAT_FINVIZ_INDUSTRIES: list[str] = [
+    "Advertising Agencies", "Aerospace & Defense", "Agricultural Inputs", "Airlines",
+    "Airports & Air Services", "Aluminum", "Apparel Manufacturing", "Apparel Retail",
+    "Asset Management", "Auto & Truck Dealerships", "Auto Manufacturers", "Auto Parts",
+    "Banks - Diversified", "Banks - Regional", "Beverages - Brewers",
+    "Beverages - Non-Alcoholic", "Beverages - Wineries & Distilleries", "Biotechnology",
+    "Broadcasting", "Building Materials", "Building Products & Equipment",
+    "Business Equipment & Supplies", "Capital Markets", "Chemicals", "Coking Coal",
+    "Communication Equipment", "Computer Hardware", "Confectioners", "Conglomerates",
+    "Consulting Services", "Consumer Electronics", "Copper", "Credit Services",
+    "Department Stores", "Diagnostics & Research", "Discount Stores",
+    "Drug Manufacturers - General", "Drug Manufacturers - Specialty & Generic",
+    "Education & Training Services", "Electrical Equipment & Parts",
+    "Electronic Components", "Electronic Gaming & Multimedia",
+    "Electronics & Computer Distribution", "Engineering & Construction",
+    "Entertainment", "Farm & Heavy Construction Machinery", "Farm Products",
+    "Financial Conglomerates", "Financial Data & Stock Exchanges", "Food Distribution",
+    "Footwear & Accessories", "Furnishings, Fixtures & Appliances", "Gambling", "Gold",
+    "Grocery Stores", "Health Information Services", "Healthcare Plans",
+    "Home Improvement Retail", "Household & Personal Products",
+    "Industrial Distribution", "Information Technology Services",
+    "Insurance - Diversified", "Insurance - Life", "Insurance - Property & Casualty",
+    "Insurance - Reinsurance", "Insurance - Specialty", "Insurance Brokers",
+    "Integrated Freight & Logistics", "Internet Content & Information",
+    "Internet Retail", "Leisure", "Lodging", "Lumber & Wood Production",
+    "Luxury Goods", "Marine Shipping", "Medical Care Facilities", "Medical Devices",
+    "Medical Distribution", "Medical Instruments & Supplies", "Metal Fabrication",
+    "Mortgage Finance", "Oil & Gas Drilling", "Oil & Gas E&P",
+    "Oil & Gas Equipment & Services", "Oil & Gas Integrated", "Oil & Gas Midstream",
+    "Oil & Gas Refining & Marketing", "Other Industrial Metals & Mining",
+    "Other Precious Metals & Mining", "Packaged Foods", "Packaging & Containers",
+    "Paper & Paper Products", "Personal Services", "Pharmaceutical Retailers",
+    "Pollution & Treatment Controls", "Publishing", "Railroads",
+    "Real Estate - Development", "Real Estate Services", "Recreational Vehicles",
+    "REIT - Diversified", "REIT - Healthcare Facilities", "REIT - Hotel & Motel",
+    "REIT - Industrial", "REIT - Mortgage", "REIT - Office", "REIT - Residential",
+    "REIT - Retail", "REIT - Specialty", "Rental & Leasing Services",
+    "Residential Construction", "Resorts & Casinos", "Restaurants",
+    "Scientific & Technical Instruments", "Security & Protection Services",
+    "Semiconductor Equipment & Materials", "Semiconductors", "Shell Companies",
+    "Silver", "Software - Application", "Software - Infrastructure", "Solar",
+    "Specialty Business Services", "Specialty Chemicals",
+    "Specialty Industrial Machinery", "Specialty Retail",
+    "Staffing & Employment Services", "Steel", "Telecom Services",
+    "Textile Manufacturing", "Thermal Coal", "Tobacco", "Tools & Accessories",
+    "Travel Services", "Trucking", "Uranium", "Utilities - Diversified",
+    "Utilities - Independent Power Producers", "Utilities - Regulated Electric",
+    "Utilities - Regulated Gas", "Utilities - Regulated Water",
+    "Utilities - Renewable", "Waste Management",
+]  # 143 industries -- must match Finviz's own count exactly; a mismatch here would
+   # silently skew the "Not Covered" gap list in industry-ranking.md.
+
+GOAT_INDUSTRY_ETFS: dict[str, str] = {
+    "ITA": "Aerospace & Defense", "JETS": "Airlines", "CARZ": "Auto Manufacturers",
+    "KBWB": "Banks - Diversified", "KRE": "Banks - Regional", "XBI": "Biotechnology",
+    "XHB": "Building Products & Equipment", "IAI": "Capital Markets",
+    "COPX": "Copper", "ESPO": "Electronic Gaming & Multimedia",
+    "PAVE": "Engineering & Construction", "BJK": "Gambling", "GDX": "Gold",
+    "IHF": "Healthcare Plans", "KIE": "Insurance - Diversified",
+    "FDN": "Internet Content & Information", "IBUY": "Internet Retail",
+    "WOOD": "Lumber & Wood Production", "BOAT": "Marine Shipping",
+    "IHI": "Medical Devices", "XOP": "Oil & Gas E&P",
+    "XES": "Oil & Gas Equipment & Services", "CRAK": "Oil & Gas Refining & Marketing",
+    "PICK": "Other Industrial Metals & Mining", "INDS": "REIT - Industrial",
+    "REM": "REIT - Mortgage", "ITB": "Residential Construction",
+    "EATZ": "Restaurants", "SMH": "Semiconductors", "SIL": "Silver",
+    "IGV": "Software - Application", "TAN": "Solar", "SLX": "Steel",
+    "IYZ": "Telecom Services", "URA": "Uranium",
+    "PHO": "Utilities - Regulated Water", "ICLN": "Utilities - Renewable",
+    "MOO": "Agricultural Inputs", "EVX": "Waste Management",
+}  # 39 of 143 Finviz industries with a real, dedicated, currently-trading ETF --
+   # researched 2026-08-23 (Finviz taxonomy cross-referenced against SPDR/iShares/
+   # VanEck/Invesco/Global X/First Trust/Pacer/AdvisorShares). dict[ticker, label]
+   # shape mirrors GOAT_SECTOR_ETFS -- one ticker per industry only; where an ETF
+   # plausibly fits two industries (e.g. IGV, BJK, IHI) only one label is kept here,
+   # the other stays a gap -- see the plan's "Gotcha" note before adding a ticker
+   # under two entries (silent overwrite, no error). The remaining 104 industries
+   # have no dedicated ETF and are surfaced as a "Not Covered" list in
+   # industry-ranking.md, never silently proxied -- Shaun's confirmed decision,
+   # 2026-08-23. INDS and EVX are lower-liquidity, medium-confidence picks (not
+   # individually web-verified this session) -- if either fails to resolve against
+   # real yfinance data, drop that one row to the gap list rather than guessing a
+   # replacement.
+
+GOAT_INDUSTRY_HISTORY_LOOKBACK_DAYS = 400  # calendar days -- same margin philosophy
+                                              # as GOAT_SECTOR_HISTORY_LOOKBACK_DAYS,
+                                              # comfortably exceeds the 126-trading-
+                                              # day rank window below.
+GOAT_INDUSTRY_RANK_WINDOW_TRADING_DAYS = 126  # ~6 calendar months of trading days --
+                                                 # matches the Finviz screenshots that
+                                                 # prompted this feature. Deliberately
+                                                 # a SEPARATE constant from
+                                                 # GOAT_SECTOR_RANK_WINDOW_TRADING_DAYS
+                                                 # (63/3-month) -- Shaun confirmed
+                                                 # 2026-08-23 these do not need to
+                                                 # match.
+GOAT_INDUSTRY_RANKING_MD_PATH = GOAT_DIR / "industry-ranking.md"
+
 # Intraday 150DMA live-check polling, per investments/goat/HANDOFF.md's
 # "Intraday 150DMA Alerting" section (raised 2026-08-16) -- Shaun wants a
 # WhatsApp alert as soon as a holding's LIVE price crosses below its 150DMA

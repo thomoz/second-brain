@@ -22,8 +22,10 @@ def _open_conn():
 def cmd_monitor(args) -> None:
     from .monitor import (
         maybe_notify,
+        run_industry_scan,
         run_monitor,
         run_sector_scan,
+        write_industry_ranking_report,
         write_report,
         write_sector_candidates_report,
         write_sector_ranking_report,
@@ -33,10 +35,12 @@ def cmd_monitor(args) -> None:
     result = run_monitor(conn)
     sector_result = run_sector_scan(conn)
     conn.close()
+    industry_result = run_industry_scan()  # no conn needed -- pure compute-and-render
     result["new_sector_candidates"] = sector_result["new_candidates"]
     write_report(result)
     write_sector_ranking_report(sector_result)
     write_sector_candidates_report(sector_result)
+    write_industry_ranking_report(industry_result)
     maybe_notify(result, new_candidates=sector_result["new_candidates"])
     print(
         f"Goat Monitor complete: {len(result['new_alerts'])} new exit alert(s), "
@@ -77,6 +81,19 @@ def cmd_scan_sectors(args) -> None:
         f"Sector scan complete: {len(result['new_candidates'])} new candidate(s), "
         f"{len(result['pending_candidates'])} pending. "
         f"See investments/goat/sector-ranking.md and sector-candidates-pending-review.md"
+    )
+
+
+def cmd_scan_industries(args) -> None:
+    from .monitor import run_industry_scan, write_industry_ranking_report
+
+    result = run_industry_scan()  # no DB connection needed -- pure compute-and-render
+    write_industry_ranking_report(result)
+    covered = len(result["ranking"])
+    print(
+        f"Industry scan complete: ranked {covered} covered industry ETF(s), "
+        f"{len(result['not_covered'])} industries not covered. "
+        f"See investments/goat/industry-ranking.md"
     )
 
 
@@ -224,6 +241,10 @@ def main() -> None:
         help="On-demand sector rotation ranking + breakout scan (also runs daily as part of monitor)",
     )
     subparsers.add_parser(
+        "scan-industries",
+        help="On-demand industry rotation ranking (also runs daily as part of monitor)",
+    )
+    subparsers.add_parser(
         "check-live",
         help="Intraday 150DMA live-price check against currently-open-market holdings",
     )
@@ -257,6 +278,7 @@ def main() -> None:
     dispatch = {
         "monitor": cmd_monitor,
         "scan-sectors": cmd_scan_sectors,
+        "scan-industries": cmd_scan_industries,
         "check-live": cmd_check_live,
         "scan-heartbeat": cmd_scan_heartbeat,
         "scan-insiders": cmd_scan_insiders,
