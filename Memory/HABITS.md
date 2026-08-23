@@ -454,3 +454,27 @@
 - [ ] **Wealth** — Reviewed investments, researched opportunity, or updated portfolio notes
 - [ ] **Health** — Exercise, sleep hygiene, or deliberate health action
 - [ ] **Learning** — Read, watched, or practiced something new
+
+## History — 2026-08-20
+## Today's Pillars
+- [ ] **SongbookDB** — Made progress on a feature, bug fix, or support ticket
+- [ ] **Shows** — Prepared or hosted a show (karaoke/bingo/trivia)
+- [ ] **Wealth** — Reviewed investments, researched opportunity, or updated portfolio notes
+- [ ] **Health** — Exercise, sleep hygiene, or deliberate health action
+- [ ] **Learning** — Read, watched, or practiced something new
+
+## History — 2026-08-21
+## Today's Pillars
+- [ ] **SongbookDB** — Made progress on a feature, bug fix, or support ticket
+- [ ] **Shows** — Prepared or hosted a show (karaoke/bingo/trivia)
+- [ ] **Wealth** — Reviewed investments, researched opportunity, or updated portfolio notes
+- [ ] **Health** — Exercise, sleep hygiene, or deliberate health action
+- [ ] **Learning** — Read, watched, or practiced something new
+
+## History — 2026-08-22
+## Today's Pillars
+- [ ] **SongbookDB** — Made progress on a feature, bug fix, or support ticket
+- [ ] **Shows** — Prepared or hosted a show (karaoke/bingo/trivia)
+- [ ] **Wealth** — Reviewed investments, researched opportunity, or updated portfolio notes
+- [ ] **Health** — Exercise, sleep hygiene, or deliberate health action
+- [ ] **Learning** — Read, watched, or practiced something new
