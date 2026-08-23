@@ -5,6 +5,13 @@
 # Usage:
 #   .\scripts\invoke_investments.ps1 -Package my-trader -Command "find --ticker VRTX"
 #   .\scripts\invoke_investments.ps1 -Package briefs-finance -Command "assess --ticker KGC --output markdown"
+#   .\scripts\invoke_investments.ps1 -Package goat -Command "scan-sectors"
+#   .\scripts\invoke_investments.ps1 -Package fourteen-signals -Command "daily-check"
+#
+# goat/fourteen-signals share the same VPS-only investments.db as my-trader/briefs-
+# finance -- never run them via a local `uv run --directory investments/goat ...`;
+# that would silently create a fresh, empty local investments.db (init_db() creates
+# on first open) and reintroduce the split this wrapper exists to avoid.
 #
 # Known limitation: -Command is reconstructed and re-parsed by the remote bash, so
 # double-quoted segments follow bash quoting rules -- a literal "$" inside one (e.g.
@@ -13,7 +20,7 @@
 
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("my-trader", "briefs-finance")]
+    [ValidateSet("my-trader", "briefs-finance", "goat", "fourteen-signals")]
     [string]$Package,
 
     [Parameter(Mandatory=$true)]
@@ -24,8 +31,10 @@ $VPS = "secondbrain@137.184.102.104"
 $REMOTE_DIR = "/home/secondbrain/second-brain"
 
 $PACKAGES = @{
-    "my-trader"      = @{ Dir = "my-trader"; Module = "mytrader.main" }
-    "briefs-finance" = @{ Dir = "briefs-finance"; Module = "scripts.main" }
+    "my-trader"        = @{ Dir = "my-trader"; Module = "mytrader.main" }
+    "briefs-finance"   = @{ Dir = "briefs-finance"; Module = "scripts.main" }
+    "goat"             = @{ Dir = "goat"; Module = "goat.main" }
+    "fourteen-signals" = @{ Dir = "fourteen-crash-signals-daily-check"; Module = "fourteen_crash_signals_daily_check.main" }
 }
 
 $pkg = $PACKAGES[$Package]
