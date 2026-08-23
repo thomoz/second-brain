@@ -13,11 +13,11 @@ Freshest reports worth actually opening most days:
 
 | File | From | |
 |------|------|---|
-| `investments/my-trader/monitor-report.md` | my-trader Monitor (7:30am Sydney) | [→](#mytrader-monitor) |
-| `investments/goat/monitor-report.md` | Goat Monitor (~7:35am Sydney) | [→](#goat-monitor) |
-| `investments/goat/insider-scan-report.md` | Goat Insider Scan (~7:50am Sydney) | [→](#goat-insider-scan) |
-| `investments/fourteen-crash-signals-daily-check/signals-report.md` | Fourteen Crash Signals (daily) | [→](#fourteen-crash-signals) |
-| `investments/my-trader/gold-outlook.md` | Part of my-trader Monitor, gold section | [→](#mytrader-monitor) |
+| [investments/my-trader/monitor-report.md](my-trader/monitor-report.md) | my-trader Monitor (7:30am Sydney) | [→](#mytrader-monitor) |
+| [investments/goat/monitor-report.md](goat/monitor-report.md) | Goat Monitor (~7:35am Sydney) | [→](#goat-monitor) |
+| [investments/goat/insider-scan-report.md](goat/insider-scan-report.md) | Goat Insider Scan (~7:50am Sydney) | [→](#goat-insider-scan) |
+| [investments/fourteen-crash-signals-daily-check/signals-report.md](fourteen-crash-signals-daily-check/signals-report.md) | Fourteen Crash Signals (daily) | [→](#fourteen-crash-signals) |
+| [investments/my-trader/gold-outlook.md](my-trader/gold-outlook.md) | Part of my-trader Monitor, gold section | [→](#mytrader-monitor) |
 
 Staging files (only worth checking when you want to review pending candidates, not a
 daily habit): `investments/my-trader/synced-candidates-pending-review.md`,
