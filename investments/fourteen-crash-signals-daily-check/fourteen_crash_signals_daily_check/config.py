@@ -11,7 +11,7 @@ from pathlib import Path
 from scripts.config import DB_PATH  # noqa: F401  (re-exported for this package's callers)
 
 SIGNALS_DIR = Path(__file__).resolve().parent.parent  # package -> investments/fourteen-crash-signals-daily-check
-SIGNALS_REPORT_PATH = SIGNALS_DIR / "signals-report.md"
+SIGNALS_REPORT_PATH = SIGNALS_DIR / "crash-signals-report.md"
 
 # Hot-company watchlist -- see the Phase 1 plan's Design Decision #1 for full
 # rationale. v1/tunable, same status as GOAT_SECTOR_RANK_WINDOW_TRADING_DAYS.

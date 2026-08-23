@@ -126,7 +126,7 @@ def cmd_daily_check(args) -> None:
     conn.close()
     print(
         f"14 Crash Signals daily check complete: {len(hot_watchlist)} hot-watchlist "
-        f"ticker(s), see investments/fourteen-crash-signals-daily-check/signals-report.md"
+        f"ticker(s), see investments/fourteen-crash-signals-daily-check/crash-signals-report.md"
     )
 
 

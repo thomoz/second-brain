@@ -41,7 +41,7 @@ def cmd_monitor(args) -> None:
     print(
         f"Goat Monitor complete: {len(result['new_alerts'])} new exit alert(s), "
         f"{len(sector_result['new_candidates'])} new sector candidate(s). "
-        f"See investments/goat/monitor-report.md"
+        f"See investments/goat/goat-report.md"
     )
 
 

@@ -13,10 +13,10 @@ Freshest reports worth actually opening most days:
 
 | File | From | |
 |------|------|---|
-| [investments/my-trader/monitor-report.md](my-trader/monitor-report.md) | my-trader Monitor (7:30am Sydney) | [→](#mytrader-monitor) |
-| [investments/goat/monitor-report.md](goat/monitor-report.md) | Goat Monitor (~7:35am Sydney) | [→](#goat-monitor) |
+| [investments/my-trader/my-trader-report.md](my-trader/my-trader-report.md) | my-trader Monitor (7:30am Sydney) | [→](#mytrader-monitor) |
+| [investments/goat/goat-report.md](goat/goat-report.md) | Goat Monitor (~7:35am Sydney) | [→](#goat-monitor) |
 | [investments/goat/insider-scan-report.md](goat/insider-scan-report.md) | Goat Insider Scan (~7:50am Sydney) | [→](#goat-insider-scan) |
-| [investments/fourteen-crash-signals-daily-check/signals-report.md](fourteen-crash-signals-daily-check/signals-report.md) | Fourteen Crash Signals (daily) | [→](#fourteen-crash-signals) |
+| [investments/fourteen-crash-signals-daily-check/crash-signals-report.md](fourteen-crash-signals-daily-check/crash-signals-report.md) | Fourteen Crash Signals (daily) | [→](#fourteen-crash-signals) |
 | [investments/my-trader/gold-outlook.md](my-trader/gold-outlook.md) | Part of my-trader Monitor, gold section | [→](#mytrader-monitor) |
 
 Staging files (only worth checking when you want to review pending candidates, not a
@@ -29,12 +29,12 @@ alerts/discoveries as they fire — these files are for batch review, not discov
 
 | Tool | What it does | Where it runs | Schedule | Output |
 |------|--------------|----------------|----------|--------|
-| <a id="mytrader-monitor"></a>[↑](#daily-read) **my-trader Monitor** | Re-checks all holdings + vetted watchlist rows | Windows Task Scheduler (`SecondBrain-MyTraderMonitor`), this dev machine | Daily, 7:30am Sydney local | `investments/my-trader/monitor-report.md`, refreshes `gold-outlook.md` |
-| <a id="goat-monitor"></a>[↑](#daily-read) **Goat Monitor** (150DMA exit check + sector rotation scan) | Flags holdings AND every watchlist ticker closing below their 150-day MA; ranks the 11 SPDR sector ETFs and stages fresh breakout candidates | VPS systemd (`second-brain-goat-monitor.timer`) | Daily, 21:35 UTC (07:35 AEST / 08:35 AEDT) | `investments/goat/monitor-report.md`, `sector-ranking.md`, `sector-candidates-pending-review.md` |
+| <a id="mytrader-monitor"></a>[↑](#daily-read) **my-trader Monitor** | Re-checks all holdings + vetted watchlist rows | Windows Task Scheduler (`SecondBrain-MyTraderMonitor`), this dev machine | Daily, 7:30am Sydney local | `investments/my-trader/my-trader-report.md`, refreshes `gold-outlook.md` |
+| <a id="goat-monitor"></a>[↑](#daily-read) **Goat Monitor** (150DMA exit check + sector rotation scan) | Flags holdings AND every watchlist ticker closing below their 150-day MA; ranks the 11 SPDR sector ETFs and stages fresh breakout candidates | VPS systemd (`second-brain-goat-monitor.timer`) | Daily, 21:35 UTC (07:35 AEST / 08:35 AEDT) | `investments/goat/goat-report.md`, `sector-ranking.md`, `sector-candidates-pending-review.md` |
 | **Goat Intraday Live-Check** | Live-price 150DMA check against currently-open-market holdings | VPS systemd (`second-brain-goat-live-check.timer`) | Every 10 min around the clock (no-ops outside ASX/US session hours) | WhatsApp alert only if breached — no standalone report file |
 | **Goat Heartbeat Scan** (S&P 500) | Screens S&P 500 constituents in currently-rising sectors for the low-volatility-consolidation-then-breakout pattern, with fundamentals survival context | VPS systemd (`second-brain-goat-heartbeat-scan.timer`) | Weekly, Saturday 8:00am Sydney local | `investments/goat/heartbeat-candidates-pending-review.md` |
 | <a id="goat-insider-scan"></a>[↑](#daily-read) **Goat Insider Scan** (OpenInsider) | Checks Form 4 filings on holdings, stages market-wide $25k+ buys as candidates, tracks $100k+ sells; price-since-trade tracking; feeds pattern analysis | VPS systemd (`second-brain-goat-insider-scan.timer`) | Daily, 21:50 UTC (~15min after Goat Monitor) | `investments/goat/insider-scan-report.md`; nightly pattern slice in `insider-pattern-analysis.md` |
-| <a id="fourteen-crash-signals"></a>[↑](#daily-read) **Fourteen Crash Signals Daily Check** | Tracks all 14 crash-warning markers against a dynamically-recomputed hot-company watchlist | VPS systemd (`second-brain-fourteen-signals.timer`) | Daily, 22:05 UTC | `investments/fourteen-crash-signals-daily-check/signals-report.md` |
+| <a id="fourteen-crash-signals"></a>[↑](#daily-read) **Fourteen Crash Signals Daily Check** | Tracks all 14 crash-warning markers against a dynamically-recomputed hot-company watchlist | VPS systemd (`second-brain-fourteen-signals.timer`) | Daily, 22:05 UTC | `investments/fourteen-crash-signals-daily-check/crash-signals-report.md` |
 
 ## Manual / on-demand only
 
@@ -62,7 +62,7 @@ undoing the 2026-08-23 fix.
 | **Briefs Finance backtest** | Backtest historical recommendations | `-Package briefs-finance -Command "backtest"` | DB only |
 | **Briefs Finance score** | Compute 0–100% likelihood scores | `-Package briefs-finance -Command "score"` | DB only |
 | **Briefs Finance assess / context / stats / excluded** | Full assessment / sector+macro context / track record / exclusion list | `-Package briefs-finance -Command "assess --ticker TICKER [--output markdown]"` / `"context"` / `"stats"` / `"excluded"` | Terminal by default; `--output markdown` writes to `investments/briefs-finance/assessments/` |
-| **Fourteen Crash Signals (on-demand)** | Same daily check, right now | `-Package fourteen-signals -Command "daily-check"` | `investments/fourteen-crash-signals-daily-check/signals-report.md` |
+| **Fourteen Crash Signals (on-demand)** | Same daily check, right now | `-Package fourteen-signals -Command "daily-check"` | `investments/fourteen-crash-signals-daily-check/crash-signals-report.md` |
 | **Fourteen Crash Signals: record bond yield** | Manually record a bond yield for Marker #12 (no live source exists) | `-Package fourteen-signals -Command "record-bond-yield TICKER YIELD_PCT [--cusip CUSIP]"` | DB only |
 
 Full invocation is `.\scripts\invoke_investments.ps1` from the repo root — table rows

@@ -303,7 +303,7 @@ def cmd_monitor(args) -> None:
     maybe_notify(result)
     print(
         f"Monitor complete: {len(result['new_alerts'])} new alert(s), "
-        f"{len(result['open_alerts'])} open. See investments/my-trader/monitor-report.md"
+        f"{len(result['open_alerts'])} open. See investments/my-trader/my-trader-report.md"
     )
 
 

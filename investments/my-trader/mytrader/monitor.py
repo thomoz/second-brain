@@ -360,5 +360,5 @@ def maybe_notify(result: dict[str, Any]) -> None:
     n = len(result["new_alerts"])
     send_toast_notification(
         "my-trader Monitor",
-        f"{n} item(s) flagged — check investments/my-trader/monitor-report.md",
+        f"{n} item(s) flagged — check investments/my-trader/my-trader-report.md",
     )

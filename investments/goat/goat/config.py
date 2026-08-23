@@ -7,7 +7,7 @@ from pathlib import Path
 from scripts.config import DB_PATH  # noqa: F401  (re-exported for goat callers)
 
 GOAT_DIR = Path(__file__).resolve().parent.parent  # goat -> investments/goat
-GOAT_MONITOR_REPORT_PATH = GOAT_DIR / "monitor-report.md"
+GOAT_MONITOR_REPORT_PATH = GOAT_DIR / "goat-report.md"
 
 # 150-day-MA exit check, per investments/goat/HANDOFF.md Phase 1 -- the source
 # webinar notes only say "reasonably below" with no number. The original v1

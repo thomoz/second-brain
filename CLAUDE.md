@@ -29,7 +29,7 @@ all action requires Shaun's explicit review.
 - Phase plans: .agent/plans/
 - Project PRD: .agent/plans/second-brain-prd.md
 - Investments tool: investments/ (my-trader + briefs-finance, uv workspace; skills: .claude/skills/my-trader/, .claude/skills/investments/)
-- Investments DB: investments/briefs-finance/data/investments.db (shared SQLite — generates investments/my-trader/holdings.md, watchlist.md, monitor-report.md). Lives only on the VPS as of 2026-08-23 — gitignored, never opened locally. Interactive my-trader/briefs-finance commands run on the VPS via `scripts/invoke_investments.ps1` (see both skills' SKILL.md); IBKR sync is the one workflow that still fetches locally (against IB Gateway) but writes remotely.
+- Investments DB: investments/briefs-finance/data/investments.db (shared SQLite — generates investments/my-trader/holdings.md, watchlist.md, my-trader-report.md). Lives only on the VPS as of 2026-08-23 — gitignored, never opened locally. Interactive my-trader/briefs-finance commands run on the VPS via `scripts/invoke_investments.ps1` (see both skills' SKILL.md); IBKR sync is the one workflow that still fetches locally (against IB Gateway) but writes remotely.
 
 ## Project Conventions
 - Timezone: Australia/Sydney (AEST UTC+10 / AEDT UTC+11)

@@ -275,7 +275,7 @@ non-flag auto-acknowledges its open alert, so a future re-flag raises a fresh on
 `opportunity` check's `"interesting"` verdict is explicitly exempt from this dedup —
 see "Opportunity Signal" above.
 
-Output is a standalone file, `investments/my-trader/monitor-report.md` (full overwrite
+Output is a standalone file, `investments/my-trader/my-trader-report.md` (full overwrite
 every run — upcoming economic releases + a full per-holding report + new alerts this
 run + all currently-open alerts + watchlist opportunities this run, in that order). A
 bare Windows toast notification fires only when there's at least one new alert (reuses
@@ -372,7 +372,7 @@ target). Japan CPI deliberately parked — e-Stat's API requires its own free
 registered `appId` (same pattern as FRED's key) that hasn't been obtained yet.
 These reuse the same high-bar alert-dedup
 mechanism as the per-ticker checks, via a `"MACRO"`/`"macro"` sentinel ticker/
-source_table pair in `alert_history`. Shown in `monitor-report.md`'s "Macro
+source_table pair in `alert_history`. Shown in `my-trader-report.md`'s "Macro
 Indicators" section every run regardless of flag status (unlike per-ticker checks,
 which are only shown when flagged/open). FRED-backed checks (housing, sentiment,
 recession, inflation expectations, credit spreads, US CPI) degrade to `"unknown"` if
@@ -402,7 +402,7 @@ as the per-ticker `price_action` check), the gold/silver ratio (GC=F/SI=F, flagg
 at the commonly-cited historical-extreme bands of 80 high / 50 low), and VIX
 (equity-market volatility, complementing the existing MOVE bond-volatility check,
 flagged above the widely-cited crisis-adjacent level of 30). All five thresholds are
-best-guess defaults pending Shaun's sign-off against real `monitor-report.md`
+best-guess defaults pending Shaun's sign-off against real `my-trader-report.md`
 readings, not sourced from a stated criterion the way `OPPORTUNITY_*` thresholds
 are. These 5 signals' historical track record, plus 6 live technical indicators, now
 feed a daily backtest-grounded directional read — see "Gold Outlook" below.
@@ -515,7 +515,7 @@ swing vote yet in the windows tested.
 - seasonality: this calendar month has historically averaged 2.27% (median 2.9%, win-rate 73.1%, N=26 years)
 ```
 
-Monitor writes the full file every run; `monitor-report.md` gets a one-line pointer
+Monitor writes the full file every run; `my-trader-report.md` gets a one-line pointer
 under "### Gold Outlook". `investments/my-trader/mytrader/main.py`'s `gold-backtest`
 subcommand forces an immediate full recompute on demand (bypassing the ~1-day cache)
 — useful right after changing a `GOLD_TA_*`/`GOLD_BACKTEST_*` threshold in
@@ -643,7 +643,7 @@ New, non-excluded `briefs-finance` `recommendations` rows land in a separate
 `pending_candidates` table, rendered as `investments/my-trader/synced-candidates-pending-review.md`
 — never written directly into the watchlist/`watchlist.md`, which stays
 exactly what Shaun has explicitly curated. Watermarked (`sync_state` table) so re-runs
-don't reprocess the same recommendations. `monitor-report.md` shows a "New Candidates
+don't reprocess the same recommendations. `my-trader-report.md` shows a "New Candidates
 Synced (Pending Review)" section every run.
 
 Review the pending file and either:
