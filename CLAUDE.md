@@ -39,6 +39,7 @@ all action requires Shaun's explicit review.
 - Draft files: YAML frontmatter required (type, source_id, recipient, subject, created, status)
 - Checkbox syntax: - [ ] incomplete / - [x] complete
 - All email/message drafts go to Memory/drafts/active/ — never sent automatically
+- Claude Code responses to Shaun: terse. No verbose option-laying-out. If action is needed from Shaun, lead with exactly what to do; skip the rationale unless asked.
 
 ## Architecture Rule: Model-Agnostic Runtime
 - The Second Brain must not be built as a Claude-only system.
