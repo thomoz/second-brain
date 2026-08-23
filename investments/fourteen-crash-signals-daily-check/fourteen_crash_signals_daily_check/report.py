@@ -30,6 +30,9 @@ def render_signals_report(
     lines = [
         "# 14 Crash Signals — Daily Check",
         "",
+        "What this is: 14 historical market-crash warning markers, checked daily "
+        "so an early warning doesn't slip by unnoticed.",
+        "",
         "Auto-generated daily -- overwritten every run. Advisor notes only; no trade "
         "action is ever suggested here (see SOUL.md). Per-marker source: "
         "investments/my-trader/14-signals-crash-warning-handoff.md.",
