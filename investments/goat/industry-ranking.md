@@ -173,4 +173,4 @@ No dedicated, currently-trading ETF found for these Finviz industries -- never s
 - Utilities - Regulated Electric
 - Utilities - Regulated Gas
 
-Last auto-generated: 2026-08-23.
+Last auto-generated: 2026-08-24.
