@@ -12,7 +12,6 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - (Aug 23) Check whether Goat monitor is still running on schedule after the stale report
 - (Aug 23) Preserve 21 divergent local investment rows before untracking the local DB
 - (Aug 23) Update investment docs/skills for the SSH-wrapper single-VPS `investments.db` flow
-- (Aug 23) Run `/plan-feature` for Goat rotation trend tracking from the saved handoff
 ## Entity Pages
 
 - [[songbookdb/index]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app, PHP upgrade in progress
