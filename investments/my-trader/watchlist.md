@@ -34,6 +34,7 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 | PMGOLD | Perth Mint Gold Structured Product | etf | 3b | 0.00% | +224% | Confirmed — same vehicle as core sleeve, tracked separately; conditions-dependent, hold/sell rule = no formal rule (periodic check-in) to start |
 | SCHD | Schwab US Dividend Equity ETF | etf | 1 | 3.30% | +223% | Candidate — dividend aristocrats-style ETF; not yet deeply discussed (no mechanics/overlap review done) |
 | SPY | SPDR S&P 500 ETF Trust | etf | 1 | — | — | Core S&P 500 index ETF. Expense ratio 0.0945% (vs IVV's 0.03% -- IVV is cheaper for the same S&P 500 exposure, matches VOO/VTI already in bucket 1). PE 26.9, no valuation/balance-sheet flags. Crash resilience roughly tracks the broad market by construction (2008 -55.2%, 2022 -24.5%) since it IS the broad market. Principles fit avg 34/100 -- expected and not meaningful for a diversified index fund (Buffett/Graham/Lynch/Fisher frameworks are built to grade single operating businesses, not baskets). |
+| TBIL | US Treasury 3 Month Bill ETF | etf | unassigned | — | — | Crash hedge - buy once price is lower. Ultra-short-duration T-bill ETF, added for capital preservation during a drawdown, not a growth position. |
 | TLT | iShares 20+ Year Treasury Bond ETF | etf | 2 | 2.56% | -19% | Not yet discussed. Situational — only helps in deflationary/rate-cutting crashes, not inflationary ones (e.g. 2022) |
 | VAS | Vanguard ASX300 ETF (ASX, AU-domiciled) | etf | 1 | — | +135% | Not yet discussed. Broad index option — pick one (paired with VGS), depends on broker/domicile |
 | VDC | Vanguard Consumer Staples ETF | etf | 1 | 2.13% | +107% | Not yet discussed. Fee 0.09% |
@@ -99,4 +100,4 @@ Major AI-boom names with real moats (chip/foundry monopoly, hyperscaler platform
 | SNDK | SanDisk | stock | ai_postcrash | — | +3663% | Major U.S.-listed NAND flash provider for AI long-term memory with sold-out enterprise inventory, rising margins, strong data center revenue growth, and a hard-to-replicate Kioxia manufacturing partnership. |
 | TSM | Taiwan Semiconductor Manufacturing Company Limited | stock | ai_postcrash | 2.93% | +1713% | Named as one of the companies powering AI that has been crushing it, fitting the report's AI chip supply-chain thesis. |
 
-Last auto-generated: 2026-08-24.
+Last auto-generated: 2026-08-25.
