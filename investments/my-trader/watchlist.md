@@ -4,6 +4,16 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 
 ## Watchlist
 
+### 👁 Keep an eye on
+
+Flagged via `watchlist-watch` — these still appear in their normal bucket table below; this is just a shortcut to what's live right now.
+
+| Ticker | Bucket(s) | Why |
+|--------|-----------|-----|
+| BXB.AX | 4 | FY26 full results due 27 Aug 2026 (US repair-capacity bottleneck was the May guidance cut) |
+| MLM | 4 | Lhoist 13.5B acquisition expected to close Q3 2026 |
+| WES.AX | 4 | FY26 full results due 27 Aug 2026 |
+
 | Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |
 |--------|------|------|--------|----------|------------|--------|
 | 1211.HK | BYD Company Limited | stock | unassigned | — | — | Added at Shaun's request 2026-08-19 |
