@@ -55,6 +55,32 @@ def test_fetch_discovery_sales_returns_none_on_missing_table(monkeypatch):
     assert openinsider.fetch_discovery_sales() is None
 
 
+_ZERO_RESULTS_HTML = """
+<html><body>
+<h1>NVDA - Nvidia Corp - SEC Form 4 Insider Trading Screener</h1>
+<form action="/screener" method="GET">
+<table><tr><td>no results table, just the search form</td></tr></table>
+</form>
+<div id="footer">Data provided by sec.gov 6:00-22:00 ET Mon-Fri except federal holidays.</div>
+</body></html>
+"""
+
+
+def test_fetch_screener_filings_returns_empty_list_on_zero_results_page(monkeypatch):
+    # A query with no matching filings renders no results table at all (no
+    # "Ticker" <th> anywhere) -- confirmed live 2026-08-26 for NVDA. This must
+    # be reported as "no filings" ([]), not confused with a genuine fetch
+    # failure (None), which is what happened before this fix.
+    monkeypatch.setattr("requests.get", lambda *a, **k: _FakeResponse(_ZERO_RESULTS_HTML))
+    rows = openinsider.fetch_screener_filings(["NVDA"], "S", 1_000)
+    assert rows == []
+
+
+def test_fetch_discovery_sales_returns_empty_list_on_zero_results_page(monkeypatch):
+    monkeypatch.setattr("requests.get", lambda *a, **k: _FakeResponse(_ZERO_RESULTS_HTML))
+    assert openinsider.fetch_discovery_sales() == []
+
+
 def test_fetch_discovery_sales_returns_none_on_bad_status(monkeypatch):
     monkeypatch.setattr("requests.get", lambda *a, **k: _FakeResponse(_FAKE_HTML, status_code=500))
     assert openinsider.fetch_discovery_sales() is None

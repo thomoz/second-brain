@@ -97,6 +97,19 @@ def _parse_pct_owned_change(text: str) -> float | None:
         return None
 
 
+
+# Static footer text present on every real OpenInsider /screener response --
+# confirmed live 2026-08-26: a query with zero matching filings (e.g. NVDA,
+# no insider sales in the trailing 30 days) renders no results table at all
+# (no "Ticker" <th> anywhere on the page), which is indistinguishable from a
+# genuinely broken/malformed response by header-search alone. This footer
+# string is part of the static page template and renders regardless of
+# result count, so its presence is what separates "OpenInsider answered with
+# zero rows" (return []) from "the response isn't a real screener page at
+# all" (return None, unknown/failed).
+_ZERO_RESULTS_MARKER = "Data provided by sec.gov"
+
+
 def _parse_table(html: str) -> list[dict] | None:
     from bs4 import BeautifulSoup
 
@@ -108,6 +121,8 @@ def _parse_table(html: str) -> list[dict] | None:
             table = candidate
             break
     if table is None:
+        if _ZERO_RESULTS_MARKER in html:
+            return []
         return None
 
     header_cells = table.find_all("th")
@@ -146,7 +161,7 @@ def _parse_table(html: str) -> list[dict] | None:
 
         rows.append(row)
 
-    return rows or None
+    return rows
 
 
 def _fetch(url: str, params: dict | None = None) -> list[dict] | None:
