@@ -108,6 +108,23 @@ def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
         "## Watchlist",
         "",
     ]
+
+    watched = db.get_watched(conn)
+    if watched:
+        lines += [
+            "### 👁 Keep an eye on",
+            "",
+            "Flagged via `watchlist-watch` — these still appear in their normal "
+            "bucket table below; this is just a shortcut to what's live right now.",
+            "",
+            "| Ticker | Bucket(s) | Why |",
+            "|--------|-----------|-----|",
+        ]
+        for w in watched:
+            note = (w["watch_note"] or "").replace("|", "/").replace("\n", " ")
+            lines.append(f"| {w['ticker']} | {w['buckets']} | {note} |")
+        lines.append("")
+
     lines += _watchlist_table(main_rows)
     lines += [
         "",

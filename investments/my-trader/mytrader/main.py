@@ -87,7 +87,7 @@ def cmd_watchlist_remove(args) -> None:
 
 def cmd_watchlist_move_bucket(args) -> None:
     from .db import (
-        delete_watchlist_row, get_all_watchlist, get_watchlist_row,
+        delete_watchlist_row, get_all_watchlist, get_watchlist_row, set_watch_note,
         update_watchlist_return_data, upsert_watchlist_row,
     )
     from .snapshot import regenerate_all
@@ -122,6 +122,8 @@ def cmd_watchlist_move_bucket(args) -> None:
         update_watchlist_return_data(
             conn, ticker, args.to_bucket, row["dividend_yield_pct"], row["ten_year_return_pct"],
         )
+    if row["watch_note"]:  # carry the keep-an-eye-on flag across the move
+        set_watch_note(conn, ticker, row["watch_note"])
     regenerate_all(conn)
     conn.close()
     print(f"Moved {ticker} from bucket {row['bucket']} to {args.to_bucket}.")
@@ -136,6 +138,37 @@ def cmd_refresh_watchlist_data(args) -> None:
     regenerate_all(conn)
     conn.close()
     print(f"Refreshed dividend/10Y return data for {updated} watchlist row(s) with data found.")
+
+
+def cmd_watchlist_watch(args) -> None:
+    from .db import set_watch_note
+    from .snapshot import regenerate_all
+    from .tickers import normalize
+
+    conn = _open_conn()
+    ticker = normalize(args.ticker)
+    count = set_watch_note(conn, ticker, args.note)
+    if count:
+        regenerate_all(conn)
+    conn.close()
+    if count:
+        print(f"Flagged {ticker} ({count} row(s)) — shows in the 'Keep an eye on' block at the top of watchlist.md.")
+    else:
+        print(f"No watchlist row found for {ticker}. Add it first with watchlist-add.")
+
+
+def cmd_watchlist_unwatch(args) -> None:
+    from .db import set_watch_note
+    from .snapshot import regenerate_all
+    from .tickers import normalize
+
+    conn = _open_conn()
+    ticker = normalize(args.ticker)
+    count = set_watch_note(conn, ticker, None)
+    if count:
+        regenerate_all(conn)
+    conn.close()
+    print(f"Cleared the keep-an-eye-on flag for {ticker} ({count} row(s)).")
 
 
 def cmd_holding_buy(args) -> None:
@@ -363,6 +396,18 @@ def main() -> None:
         help="Omit if the ticker exists in exactly one bucket",
     )
 
+    p_watch_flag = subparsers.add_parser(
+        "watchlist-watch",
+        help="Flag a watchlist ticker for the 'Keep an eye on' block at the top of watchlist.md",
+    )
+    p_watch_flag.add_argument("--ticker", required=True)
+    p_watch_flag.add_argument("--note", required=True, help="Short reason, shown in the block")
+
+    p_watch_unflag = subparsers.add_parser(
+        "watchlist-unwatch", help="Clear the keep-an-eye-on flag from a watchlist ticker",
+    )
+    p_watch_unflag.add_argument("--ticker", required=True)
+
     subparsers.add_parser(
         "refresh-watchlist-data",
         help="Fetch dividend yield + 10Y return for every watchlist row via yfinance",
@@ -440,6 +485,8 @@ def main() -> None:
         "watchlist-add": cmd_watchlist_add,
         "watchlist-remove": cmd_watchlist_remove,
         "watchlist-move-bucket": cmd_watchlist_move_bucket,
+        "watchlist-watch": cmd_watchlist_watch,
+        "watchlist-unwatch": cmd_watchlist_unwatch,
         "holding-buy": cmd_holding_buy,
         "holding-sell": cmd_holding_sell,
         "snapshot": cmd_snapshot,

@@ -11,9 +11,9 @@ def _now() -> str:
 
 
 def _ensure_watchlist_return_columns(conn: sqlite3.Connection) -> None:
-    """Additive migration for the dividend-yield/10Y-return enrichment columns —
-    ALTER TABLE ADD COLUMN rather than a CREATE TABLE change, so it's safe to run
-    against a watchlist table that already has real rows."""
+    """Additive migration for the dividend-yield/10Y-return enrichment columns and
+    the watch_note flag — ALTER TABLE ADD COLUMN rather than a CREATE TABLE change,
+    so it's safe to run against a watchlist table that already has real rows."""
     cols = {row["name"] for row in conn.execute("PRAGMA table_info(watchlist)")}
     with conn:
         if "dividend_yield_pct" not in cols:
@@ -22,6 +22,10 @@ def _ensure_watchlist_return_columns(conn: sqlite3.Connection) -> None:
             conn.execute("ALTER TABLE watchlist ADD COLUMN ten_year_return_pct REAL")
         if "return_data_updated_at" not in cols:
             conn.execute("ALTER TABLE watchlist ADD COLUMN return_data_updated_at TEXT")
+        if "watch_note" not in cols:
+            # NULL = not flagged; a non-empty string = "keep an eye on this", and the
+            # string is the reason, surfaced at the top of watchlist.md.
+            conn.execute("ALTER TABLE watchlist ADD COLUMN watch_note TEXT")
 
 
 def init_mytrader_tables(conn: sqlite3.Connection) -> None:
@@ -343,6 +347,29 @@ def update_watchlist_return_data(
                return_data_updated_at = ? WHERE ticker = ? AND bucket = ?""",
             (dividend_yield_pct, ten_year_return_pct, _now(), ticker, bucket),
         )
+
+
+def set_watch_note(conn: sqlite3.Connection, ticker: str, note: str | None) -> int:
+    """Flag (note set) or unflag (note=None) a ticker for the "keep an eye on"
+    section at the top of watchlist.md. Applies to every bucket the ticker sits in
+    -- the flag is conceptually per-company, not per-bucket. Returns rows touched."""
+    with conn:
+        cur = conn.execute(
+            "UPDATE watchlist SET watch_note = ?, updated_at = ? WHERE ticker = ?",
+            (note or None, _now(), ticker),
+        )
+        return cur.rowcount
+
+
+def get_watched(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    """One row per flagged ticker (buckets joined if it's in several), for the
+    top-of-watchlist summary block."""
+    return conn.execute(
+        """SELECT ticker, GROUP_CONCAT(bucket, ', ') AS buckets, watch_note
+           FROM watchlist
+           WHERE watch_note IS NOT NULL AND watch_note != ''
+           GROUP BY ticker, watch_note ORDER BY ticker"""
+    ).fetchall()
 
 
 def get_open_alert(

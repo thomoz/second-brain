@@ -49,7 +49,7 @@ undoing the 2026-08-23 fix.
 | Tool | What it does | Command | Output |
 |------|--------------|---------|--------|
 | **my-trader Find** | Conversational ticker assessment (7 checks + Briefs Finance score) | `invoke_investments.ps1 -Package my-trader -Command "find --ticker TICKER"` | Terminal only (ephemeral) |
-| **my-trader watchlist ops** | Add/remove/move a watchlist ticker | `-Package my-trader -Command "watchlist-add / watchlist-remove / watchlist-move-bucket ..."` | DB row + regenerates `holdings.md`/`watchlist.md` |
+| **my-trader watchlist ops** | Add/remove/move a watchlist ticker, or flag one for the "Keep an eye on" block at the top of `watchlist.md` | `-Package my-trader -Command "watchlist-add / watchlist-remove / watchlist-move-bucket / watchlist-watch --ticker X --note '...' / watchlist-unwatch --ticker X ..."` | DB row + regenerates `holdings.md`/`watchlist.md` |
 | **my-trader holding ops** | Record a buy/sell | `-Package my-trader -Command "holding-buy / holding-sell ..."` | DB row + regenerates `holdings.md`/`watchlist.md` |
 | **my-trader snapshot** | Regenerate markdown from the DB | `-Package my-trader -Command "snapshot"` | `investments/my-trader/holdings.md`, `watchlist.md` |
 | **my-trader sync-candidates** | Pull new Briefs Finance recs into staging | `-Package my-trader -Command "sync-candidates"` | `investments/my-trader/synced-candidates-pending-review.md` |

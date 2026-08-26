@@ -9,7 +9,8 @@ description: >
   (briefs-finance) — Find uses briefs-finance's score as one input among several, it
   doesn't replace that skill. Also handles holdings updates (buy/sell) conversationally.
   Triggers on: "check TICKER", "what do you think of TICKER", "add TICKER to watchlist",
-  "I bought/sold N shares of TICKER", "show my holdings", "my-trader".
+  "keep an eye on TICKER" / "watch TICKER closely", "I bought/sold N shares of TICKER",
+  "show my holdings", "my-trader".
 ---
 
 # my-trader Skill
@@ -61,6 +62,11 @@ below). Every command runs via the SSH wrapper:
 # Remove a ticker from the watchlist, or move it to a different bucket
 .\scripts\invoke_investments.ps1 -Package my-trader -Command "watchlist-remove --ticker XYZ"
 .\scripts\invoke_investments.ps1 -Package my-trader -Command "watchlist-move-bucket --ticker XYZ --to-bucket 2"
+
+# "Keep an eye on X" — flags a watchlist ticker into a highlighted block at the top
+# of watchlist.md (still shown in its normal bucket row too). Note is the reason.
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "watchlist-watch --ticker WES.AX --note 'FY26 results 27 Aug'"
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "watchlist-unwatch --ticker WES.AX"
 ```
 
 Quoting note: `-Command`'s value is reconstructed and re-parsed by the remote bash, so

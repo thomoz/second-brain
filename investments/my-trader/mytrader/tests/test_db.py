@@ -71,6 +71,44 @@ def test_upsert_watchlist_row_defaults_to_raw_status(db_conn):
     assert row["source"] == "manual"
 
 
+def test_set_watch_note_flags_and_get_watched_returns_it(db_conn):
+    db.upsert_watchlist_row(db_conn, ticker="WES", name="Wesfarmers", asset_type="stock", bucket="4")
+    n = db.set_watch_note(db_conn, "WES", "FY26 results 27 Aug")
+    assert n == 1
+    watched = db.get_watched(db_conn)
+    assert len(watched) == 1
+    assert watched[0]["ticker"] == "WES"
+    assert watched[0]["watch_note"] == "FY26 results 27 Aug"
+    assert watched[0]["buckets"] == "4"
+
+
+def test_set_watch_note_applies_to_every_bucket_and_get_watched_joins_them(db_conn):
+    db.upsert_watchlist_row(db_conn, ticker="PMGOLD", name="Perth Mint Gold", asset_type="etf", bucket="3a")
+    db.upsert_watchlist_row(db_conn, ticker="PMGOLD", name="Perth Mint Gold", asset_type="etf", bucket="3b")
+    assert db.set_watch_note(db_conn, "PMGOLD", "periodic check-in") == 2
+    watched = db.get_watched(db_conn)
+    assert len(watched) == 1  # one row per ticker
+    assert set(watched[0]["buckets"].split(", ")) == {"3a", "3b"}
+
+
+def test_set_watch_note_none_clears_the_flag(db_conn):
+    db.upsert_watchlist_row(db_conn, ticker="INTC", name="Intel", asset_type="stock", bucket="4")
+    db.set_watch_note(db_conn, "INTC", "turnaround watch")
+    assert db.get_watched(db_conn)
+    db.set_watch_note(db_conn, "INTC", None)
+    assert db.get_watched(db_conn) == []
+
+
+def test_set_watch_note_empty_string_is_not_flagged(db_conn):
+    db.upsert_watchlist_row(db_conn, ticker="INTC", name="Intel", asset_type="stock", bucket="4")
+    db.set_watch_note(db_conn, "INTC", "")
+    assert db.get_watched(db_conn) == []
+
+
+def test_set_watch_note_returns_zero_when_ticker_not_on_watchlist(db_conn):
+    assert db.set_watch_note(db_conn, "NOPE", "x") == 0
+
+
 def test_upsert_watchlist_row_upserts_by_natural_key(db_conn):
     db.upsert_watchlist_row(
         db_conn, ticker="VRTX", name="Vertex Pharmaceuticals", asset_type="stock", bucket="1",

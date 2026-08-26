@@ -93,6 +93,31 @@ def test_regenerate_watchlist_md_raw_status_placeholder(db_conn, monkeypatch, tm
     assert "| DG | Dollar General | stock | 1 | — | — | Not yet discussed |" in content
 
 
+def test_regenerate_watchlist_md_no_keep_an_eye_block_when_nothing_flagged(db_conn, monkeypatch, tmp_path):
+    _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
+    db.upsert_watchlist_row(db_conn, ticker="DG", name="Dollar General", asset_type="stock", bucket="1")
+    snapshot.regenerate_watchlist_md(db_conn)
+    assert "Keep an eye on" not in watchlist_path.read_text(encoding="utf-8")
+
+
+def test_regenerate_watchlist_md_renders_keep_an_eye_block_at_top(db_conn, monkeypatch, tmp_path):
+    _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
+    db.upsert_watchlist_row(db_conn, ticker="WES", name="Wesfarmers", asset_type="stock", bucket="4",
+                            status="discussed", notes="Crash-discount candidate")
+    db.upsert_watchlist_row(db_conn, ticker="DG", name="Dollar General", asset_type="stock", bucket="1")
+    db.set_watch_note(db_conn, "WES", "FY26 results 27 Aug 2026")
+    snapshot.regenerate_watchlist_md(db_conn)
+
+    content = watchlist_path.read_text(encoding="utf-8")
+    eye, rest = content.split("### 👁 Keep an eye on")
+    assert "## Watchlist" in eye  # block sits under the Watchlist heading...
+    assert "| WES | 4 | FY26 results 27 Aug 2026 |" in rest
+    # ...and above the main table (WES still appears there too)
+    main_table_start = rest.index("| Ticker | Name |")
+    assert rest.index("| WES | 4 | FY26 results 27 Aug 2026 |") < main_table_start
+    assert "| WES | Wesfarmers | stock | 4 |" in rest  # normal row still present
+
+
 def test_regenerate_watchlist_md_splits_post_crash_ai_section(db_conn, monkeypatch, tmp_path):
     _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
 
