@@ -46,7 +46,7 @@ All 39 covered industries.
 | 19 | JETS | Airlines | +4.4% | Yes |
 | 20 | COPX | Copper | +3.5% | Yes |
 | 21 | XES | Oil & Gas Equipment & Services | +3.0% | Yes |
-| 22 | INDS | REIT - Industrial | +2.0% | Yes |
+| 22 | INDS | REIT - Industrial | +2.4% | Yes |
 | 23 | REM | REIT - Mortgage | +0.8% | Yes |
 | 24 | PAVE | Engineering & Construction | +0.1% | Yes |
 | 25 | MOO | Agricultural Inputs | -0.7% | No |
@@ -173,4 +173,4 @@ No dedicated, currently-trading ETF found for these Finviz industries -- never s
 - Utilities - Regulated Electric
 - Utilities - Regulated Gas
 
-Last auto-generated: 2026-08-25.
+Last auto-generated: 2026-08-26.
