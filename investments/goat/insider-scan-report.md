@@ -900,4 +900,4 @@ Filings where the price has fallen since the trade, biggest drop first.
 
 No holdings filings have moved down since their trade yet.
 
-Last auto-generated: 2026-08-26 12:22 AEST.
+Last auto-generated: 2026-08-26 12:36 AEST.
