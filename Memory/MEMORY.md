@@ -9,10 +9,8 @@ _Active items and pointers to structured memory pages. Always loaded into sessio
 _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here; archive to decisions/ when done._
 
 
-- (Aug 23) Check whether Goat monitor is still running on schedule after the stale report
 - (Aug 23) Preserve 21 divergent local investment rows before untracking the local DB
 - (Aug 23) Update investment docs/skills for the SSH-wrapper single-VPS `investments.db` flow
-- (Aug 24) Repoint or disable `SecondBrain-MyTraderMonitor` on Windows after local DB corruption
 ## Entity Pages
 
 - [[songbookdb/index]] — karaoke song list software, ~170 subscribers, code-signing blocker on desktop app, PHP upgrade in progress
@@ -53,6 +51,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - In investment reports, add plain-English metric notes like `Lower is generally safer`
 - Notify Shaun only for long/background task completion, not quick routine tasks
 - Use WhatsApp for task completion notifications, not `PushNotification`
+- Phrase unclear questions simply
 ---
 
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_

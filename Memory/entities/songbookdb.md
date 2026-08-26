@@ -12,3 +12,4 @@
 - (Jul 05) PHP upgrade path is 7.4 to 8.5, one major version at a time
 - (Jul 07) Facebook developer notification: user data deletion request needs review/action
 - (Jul 09) PHP upgrade path is 7.4 -> 8.0 first, then one major version at a time
+- (Aug 26) Apple Developer asked to confirm organisation address change request

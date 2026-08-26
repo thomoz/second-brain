@@ -96,3 +96,7 @@ Skip drafts for: Newsletters, automated notifications, spam
 ## 2026-08-23 Reflection
 - Local GREEN-API WhatsApp notifications work; no VPS relay needed
 - Access VPS `investments.db` locally via `scripts/invoke_investments.ps1`
+
+## 2026-08-26 Reflection
+- (Aug 26) Wrapper strips literal `$` from command args; use `USD 6.19` style prices
+- (Aug 26) `SecondBrain-MyTraderMonitor` 7:30am run should use VPS over SSH, not local DB
