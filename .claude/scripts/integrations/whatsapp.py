@@ -61,24 +61,44 @@ def send_message(
     text: str,
     instance_id: str = "",
     api_token: str = "",
+    retries: int = 2,
 ) -> bool:
-    """Send a WhatsApp message via GREEN-API. Returns True on success."""
+    """Send a WhatsApp message via GREEN-API. Returns True on success.
+
+    Retries transient failures (timeouts, non-200s) up to `retries` attempts
+    before giving up -- 2026-08-26: a Goat Monitor alert silently failed to
+    send during a brief GREEN-API read-timeout window, with no trace anywhere
+    (send_message returned False, nothing logged). Printing here lands in
+    whichever log the calling process's stdout is captured to (e.g.
+    monitor_runs.log for goat), same pattern as the poll-error logging in
+    .claude/chat/adapters/whatsapp.py."""
+    import time
+
     from config import WHATSAPP_API_TOKEN, WHATSAPP_INSTANCE_ID
 
     iid = instance_id or WHATSAPP_INSTANCE_ID
     tok = api_token or WHATSAPP_API_TOKEN
     if not iid or not tok:
         return False
-    try:
-        resp = requests.post(
-            f"{get_greenapi_base(iid)}/sendMessage/{tok}",
-            json={"chatId": chat_id, "message": text},
-            timeout=10,
-        )
-        return resp.status_code == 200
-    except Exception as e:
-        print(f"[whatsapp] send_message error: {e}")
-        return False
+
+    last_error = ""
+    for attempt in range(1, retries + 1):
+        try:
+            resp = requests.post(
+                f"{get_greenapi_base(iid)}/sendMessage/{tok}",
+                json={"chatId": chat_id, "message": text},
+                timeout=10,
+            )
+            if resp.status_code == 200:
+                return True
+            last_error = f"HTTP {resp.status_code}: {resp.text[:200]}"
+        except Exception as e:
+            last_error = str(e)
+        if attempt < retries:
+            time.sleep(3)
+
+    print(f"[{datetime.now()}] WhatsApp send error (to {chat_id}, {retries} attempt(s)): {last_error}")
+    return False
 
 
 def get_unread_messages(limit: int = 10) -> list[WhatsAppMessage]:
