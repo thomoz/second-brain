@@ -11,7 +11,6 @@ Checked 10 holding(s) and 77 watchlist ticker(s) (incl. not-yet-discussed candid
 No new material changes.
 
 ### All Open Alerts
-- **PMGOLD.AX** (holdings) -- PMGOLD.AX: LIVE price now 72.2% below its 150-day MA (intraday -- not yet a confirmed close); has stayed >=0% below for 1+ trading day(s) including today -- 150DMA exit-rule threshold triggered (first flagged 2026-08-26)
 - **GOLD.AX** (holdings) -- GOLD.AX: LIVE price now 0.0% below its 150-day MA (intraday -- not yet a confirmed close); has stayed >=0% below for 1+ trading day(s) including today -- 150DMA exit-rule threshold triggered (first flagged 2026-08-26)
 - **IXI.AX** (watchlist) -- IXI.AX: now 0.1% below its 150-day MA as of today's close; has stayed >=0% below for 1+ consecutive trading day(s) -- 150DMA exit-rule threshold triggered (first flagged 2026-08-26)
 - **DG** (watchlist) -- DG: now 1.4% below its 150-day MA as of today's close; has stayed >=0% below for 1+ consecutive trading day(s) -- 150DMA exit-rule threshold triggered (first flagged 2026-08-25)
