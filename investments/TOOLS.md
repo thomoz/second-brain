@@ -32,7 +32,7 @@ alerts/discoveries as they fire — these files are for batch review, not discov
 | Tool | What it does | Where it runs | Schedule | Output |
 |------|--------------|----------------|----------|--------|
 | <a id="mytrader-monitor"></a>[↑](#daily-read) **my-trader Monitor** | Re-checks all holdings + vetted watchlist rows | Windows Task Scheduler (`SecondBrain-MyTraderMonitor`), this dev machine | Daily, 7:30am Sydney local | `investments/my-trader/my-trader-report.md`, refreshes `gold-outlook.md` |
-| <a id="cashvalue-scan"></a>[↑](#daily-read) **Cash-Value Scan** | Screens US (Finviz) + ASX 200 (Wikipedia) for net cash ≥ 50% of market cap + positive operating cash flow (threshold `CASH_VALUE_RATIO_THRESHOLD` in `mytrader/config.py`); ranked advisor-notes list, no staging/alerts | VPS systemd (`second-brain-mytrader-cashvalue-scan.timer`) | Daily, 22:30 UTC | `investments/my-trader/cash-value-report.md` |
+| [↑](#daily-read) **Cash-Value Scan** ([details + tuning ↓](#cashvalue-scan)) | Screens US (Finviz) + ASX 200 (Wikipedia) for net cash ≥ 50% of market cap + positive operating cash flow; ranked advisor-notes list, no staging/alerts | VPS systemd (`second-brain-mytrader-cashvalue-scan.timer`) | Daily, 22:30 UTC | `investments/my-trader/cash-value-report.md` |
 | <a id="goat-monitor"></a>[↑](#daily-read) **Goat Monitor** (150DMA exit check + sector rotation scan) | Flags holdings AND every watchlist ticker closing below their 150-day MA; ranks the 11 SPDR sector ETFs and stages fresh breakout candidates; also refreshes the industry rotation ranking | VPS systemd (`second-brain-goat-monitor.timer`) | Daily, 21:35 UTC (07:35 AEST / 08:35 AEDT) | `investments/goat/goat-report.md`, `sector-ranking.md`, `sector-candidates-pending-review.md`, `industry-ranking.md` |
 | **Goat Intraday Live-Check** | Live-price 150DMA check against currently-open-market holdings | VPS systemd (`second-brain-goat-live-check.timer`) | Every 10 min around the clock (no-ops outside ASX/US session hours) | WhatsApp alert only if breached — no standalone report file |
 | <a id="goat-heartbeat"></a>[↑](#daily-read) **Goat Heartbeat Scan** (S&P 500) | Screens S&P 500 constituents in currently-rising sectors for a tight sideways base sitting at/above a flat-to-rising 150-day MA (price mostly below its 50-day MA through the base), then a fresh 50-day-MA breakout, with fundamentals survival context. Stages fresh finds into `goat_pending_candidates` (`source="goat_heartbeat_scan"`) and pushes new ones to WhatsApp; zero-candidate days are silent. | VPS systemd (`second-brain-goat-heartbeat-scan.timer`) | Daily, 22:45 UTC (~08:45 AEST / 09:45 AEDT) | `investments/goat/heartbeat-candidates-pending-review.md` |
@@ -72,6 +72,59 @@ undoing the 2026-08-23 fix.
 
 Full invocation is `.\scripts\invoke_investments.ps1` from the repo root — table rows
 above show only the `-Package`/`-Command` args for brevity.
+
+## <a id="cashvalue-scan"></a>Cash-Value Scan — how it works + tuning [↑](#daily-read)
+
+**The idea.** A deep-value / Graham-style screen: find companies where the cash pile
+(after subtracting *all* debt) is large relative to what the whole company costs, so
+you're effectively buying the operating business at a steep discount and getting the
+balance-sheet cash on top. Built 2026-08-26 (`.agent/plans/cash-value-scanner.md`);
+tuned the same day after the first run at the original 0.80 threshold found nothing.
+
+**Two universes, both re-tested precisely via yfinance every run:**
+- **US** — scraped from the Finviz screener with a coarse Price/Cash prefilter
+  (`FINVIZ_SCREENER_FILTERS`, ~500 names/day). Finviz watermarks tickers for
+  unauthenticated scrapers by doubling the first character (`AAPL`→`AAAPL`);
+  `finviz_screener._descramble_ticker` undoes it.
+- **ASX** — the S&P/ASX 200 constituent list from Wikipedia (all 200, `.AX`).
+  Deliberately not wider — ASX large-caps rarely trade at cash value, and a full
+  board scrape would be too many nightly yfinance calls.
+
+**The precise test (per ticker, in `mytrader/cash_value_scan.py`):**
+- `net_cash = totalCash − totalDebt` (yfinance bundles IFRS 16 leases into
+  `totalDebt` — kept, it's the conservative number).
+- Qualifies if `net_cash / marketCap ≥ CASH_VALUE_RATIO_THRESHOLD` **and**
+  `operatingCashflow > 0` (annual-statement fallback when `.info` lacks the field).
+  Free cash flow is shown and gets a `negative FCF` tag but is **not** a filter —
+  positive OCF with negative FCF is usually growth capex, not cash burn.
+- The ratio is currency-consistent per company (both figures in the listing
+  currency), so no FX math; dollar columns are labelled with each row's currency.
+- Excludes Financials + Real Estate (net cash is meaningless for a bank/REIT) and
+  runs the shared ethical filter (defense contractors dropped, `BA`/`PLTR` tagged
+  `REVIEW:`).
+
+**Output.** One ranked Markdown table (by cash ratio, desc) at
+`investments/my-trader/cash-value-report.md` — overwritten every run, advisor notes
+only, no staging / watchlist-add / alerts. Row tags: `held` / `watchlist` (matched
+against the real DB, read-only), `micro` (small market cap), `shrinking revenue`,
+`negative FCF`, `REVIEW:`. If the Finviz scrape fails the previous report is kept
+with a `STALE` banner; if only the ASX scrape fails the US report still writes with
+a note.
+
+**Tweakable config** — all in `investments/my-trader/mytrader/config.py`:
+
+| Constant | Now | What it does |
+|----------|-----|--------------|
+| `CASH_VALUE_RATIO_THRESHOLD` | `0.50` | **The headline knob.** Min `net_cash / marketCap` to qualify. 0.50 = "market prices the whole business at ~50c on the dollar." Raise toward 0.80–1.0 for near-net-net only (found 0 names); lower toward 0.33 for a looser, noisier list. |
+| `CASH_VALUE_MICRO_CAP_TAG_USD` / `_AUD` | `50M` / `75M` | Market cap below which a row gets the `⚠ micro` tag (never dropped, just flagged as thinner/riskier). |
+| `CASH_VALUE_EXCLUDED_SECTORS` | Financial(s) / Financial Services / Real Estate | Sectors dropped before the test. Matches Finviz, GICS/Wikipedia, and yfinance wording. |
+| `CASH_VALUE_REPORT_MAX_ROWS` | `60` | If more than this qualify, show the top N by ratio and note the overflow count. |
+| `FINVIZ_SCREENER_FILTERS` | `fa_pc_u3,geo_usa,sh_avgvol_o100,sh_price_o1` | The coarse US prefilter (Price/Cash < 3, US-listed, avg vol > 100K, price > $1). P/C < 3 safely contains any true net-cash positive. |
+| `FINVIZ_MAX_PAGES` / `FINVIZ_REQUEST_DELAY_SECONDS` | `40` / `0.5` | Scrape safety cap + courtesy delay between the ~25 sequential page fetches. |
+
+The cash-flow gate (`operatingCashflow > 0`, FCF as a tag not a filter) is a one-line
+rule in `compute_cash_value_metrics`, not a config constant — change it there if you
+want OCF+FCF back or an OCF margin floor.
 
 ## Notes on the schedule mismatch
 
