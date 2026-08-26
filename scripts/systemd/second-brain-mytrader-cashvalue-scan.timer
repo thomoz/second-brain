@@ -4,7 +4,9 @@ Requires=second-brain-mytrader-cashvalue-scan.service
 
 [Timer]
 OnCalendar=*-*-* 22:30:00 UTC
-Persistent=true
+# No Persistent= : a daily deep-value screener missing one day (VPS down, or a
+# fresh `enable --now`) does not matter, and a surprise catch-up run right after a
+# manual run gets Yahoo-rate-limited (2026-08-26).
 
 [Install]
 WantedBy=timers.target

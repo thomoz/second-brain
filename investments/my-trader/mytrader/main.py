@@ -307,6 +307,14 @@ def cmd_cash_value_scan(args) -> None:
             "cash-value-report.md with a STALE banner."
         )
         return
+    if result.get("degraded"):
+        print(
+            f"Cash-value scan: Yahoo Finance RATE-LIMITED this run "
+            f"({result['asx_usable']}/{result['asx_scanned']} ASX names returned data) "
+            f"— kept the previous cash-value-report.md with a DEGRADED banner. "
+            f"Re-run in an hour or so."
+        )
+        return
     asx_note = " (ASX universe unavailable)" if result.get("asx_unavailable") else ""
     print(
         f"Cash-value scan complete: {result['qualifying_count']} name(s) at "

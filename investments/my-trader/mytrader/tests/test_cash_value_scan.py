@@ -121,6 +121,7 @@ def _patch_universes(monkeypatch, *, us, asx, ticker_map):
         "mytrader.market_data.fetch_ticker_data",
         lambda t: ticker_map.get(t),
     )
+    monkeypatch.setattr(cash_value_scan.time, "sleep", lambda *_: None)
 
 
 def test_run_scan_filters_ranks_and_tags(db_conn, monkeypatch):
@@ -175,6 +176,26 @@ def test_run_scan_returns_stale_when_finviz_fails(db_conn, monkeypatch):
     assert result["stale"] is True
 
 
+def test_run_scan_degraded_when_yahoo_rate_limits_the_asx_reference_set(db_conn, monkeypatch):
+    us = [{"ticker": "GEM", "company": "Gem Co", "sector": "Technology"}]
+    asx = [{"ticker": f"A{i}", "company": f"Co {i}", "sector": "Materials"} for i in range(10)]
+
+    def _fake_fetch(t):
+        if t == "GEM":
+            return _td("GEM", **_QUALIFIER)
+        return _td(t, regularMarketPrice=1.0)  # resolves, but no balance-sheet fields
+
+    monkeypatch.setattr("mytrader.finviz_screener.fetch_screener_universe", lambda: us)
+    monkeypatch.setattr("mytrader.asx200_universe.fetch_asx200_constituents", lambda: asx)
+    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", _fake_fetch)
+    monkeypatch.setattr(cash_value_scan.time, "sleep", lambda *_: None)
+
+    result = cash_value_scan.run_scan(db_conn)
+    assert result["degraded"] is True
+    assert result["asx_usable"] == 0
+    assert "rows" not in result
+
+
 def test_run_scan_notes_asx_unavailable_when_wiki_fails(db_conn, monkeypatch):
     us = [{"ticker": "GEM", "company": "Gem Co", "sector": "Technology"}]
     _patch_universes(monkeypatch, us=us, asx=None, ticker_map={"GEM": _td("GEM", **_QUALIFIER)})
@@ -220,7 +241,9 @@ def _rendered_row(ticker="GEM", **over):
 def test_render_includes_run_date_and_advisor_disclaimer():
     out = cash_value_scan.render_report(_result([_rendered_row()]))
     assert "# Cash-Value Scan" in out
-    assert "## Run:" in out
+    lines = out.splitlines()
+    assert lines[0] == "# Cash-Value Scan"
+    assert lines[2].startswith("**Last run:")  # run date at the very top
     assert "Advisor notes only" in out
     assert "GEM" in out
 
@@ -259,18 +282,31 @@ def test_write_stale_banner_prepends_to_existing_report():
     path.write_text("# Cash-Value Scan\n\noriginal body\n", encoding="utf-8")
     cash_value_scan.write_report({"stale": True})
     out = path.read_text(encoding="utf-8")
-    assert out.startswith("> STALE - Finviz fetch failed")
+    assert out.startswith("> STALE - Finviz screener fetch failed")
     assert "original body" in out
 
 
-def test_write_stale_banner_does_not_stack():
+def test_write_banner_does_not_stack_across_bad_runs():
     path = config.CASH_VALUE_REPORT_PATH
     path.write_text("# Cash-Value Scan\n\nbody\n", encoding="utf-8")
     cash_value_scan.write_report({"stale": True})
-    cash_value_scan.write_report({"stale": True})
+    cash_value_scan.write_report(
+        {"degraded": True, "asx_usable": 2, "asx_scanned": 200}
+    )
     out = path.read_text(encoding="utf-8")
-    assert out.count("STALE - Finviz fetch failed") == 1
+    assert out.count("showing the last good run below.") == 1  # one banner, not two
+    assert out.startswith("> DEGRADED - Yahoo Finance rate-limited")
     assert "body" in out
+
+
+def test_write_degraded_banner_prepends_to_existing_report():
+    path = config.CASH_VALUE_REPORT_PATH
+    path.write_text("# Cash-Value Scan\n\ngood run body\n", encoding="utf-8")
+    cash_value_scan.write_report({"degraded": True, "asx_usable": 3, "asx_scanned": 200})
+    out = path.read_text(encoding="utf-8")
+    assert out.startswith("> DEGRADED - Yahoo Finance rate-limited")
+    assert "3/200 ASX names returned data" in out
+    assert "good run body" in out
 
 
 def test_write_stale_banner_with_no_prior_report():

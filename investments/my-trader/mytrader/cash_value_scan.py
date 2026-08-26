@@ -23,6 +23,7 @@ Nothing in this module writes to investments.db.
 from __future__ import annotations
 
 import sqlite3
+import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -145,12 +146,16 @@ def _plain_english_read(row: dict) -> str:
 
 def _enrich_universe(
     coarse_rows: list[dict], *, market: str, held: set[str], watched: set[str]
-) -> list[dict]:
+) -> tuple[list[dict], int]:
+    """Returns (qualifying rows, usable_count). usable_count = how many coarse names
+    yfinance returned balance-sheet data for (marketCap + totalCash + totalDebt all
+    present) -- run_scan uses the ASX slice of this as a rate-limit tripwire."""
     micro_floor = (
         config.CASH_VALUE_MICRO_CAP_TAG_USD if market == "US"
         else config.CASH_VALUE_MICRO_CAP_TAG_AUD
     )
     results: list[dict] = []
+    usable = 0
     for row in coarse_rows:
         bare = row["ticker"]
         yf_ticker = bare if market == "US" else tickers.asx_variant(bare)
@@ -165,9 +170,12 @@ def _enrich_universe(
                 continue  # defense contractor -- dropped entirely, never shown
 
             data = market_data.fetch_ticker_data(yf_ticker)
+            time.sleep(config.CASH_VALUE_FETCH_DELAY_SECONDS)  # ease off Yahoo's rate limit
             if data is None:
                 continue
             metrics = compute_cash_value_metrics(data)
+            if metrics is not None:
+                usable += 1
             if not _passes(metrics):
                 continue
 
@@ -201,7 +209,7 @@ def _enrich_universe(
             results.append(result)
         except Exception as e:  # one bad ticker must not sink the run
             print(f"[cash-value-scan] error on {yf_ticker}: {e}")
-    return results
+    return results, usable
 
 
 # --- orchestration -------------------------------------------------------
@@ -218,11 +226,17 @@ def run_scan(conn: sqlite3.Connection) -> dict:
     asx_coarse = asx200_universe.fetch_asx200_constituents()
 
     with market_data.cached_session():
-        us_rows = _enrich_universe(us_coarse, market="US", held=held, watched=watched)
-        asx_rows = (
+        us_rows, us_usable = _enrich_universe(us_coarse, market="US", held=held, watched=watched)
+        asx_rows, asx_usable = (
             _enrich_universe(asx_coarse, market="ASX", held=held, watched=watched)
-            if asx_coarse is not None else []
+            if asx_coarse is not None else ([], 0)
         )
+
+    # Rate-limit tripwire: the ASX 200 is large-caps with near-complete yfinance
+    # coverage, so a collapse in its usable-data count means Yahoo is throttling this
+    # whole run -- don't overwrite a good report with a throttled-empty one.
+    if asx_coarse is not None and asx_usable < len(asx_coarse) * config.CASH_VALUE_DEGRADED_ASX_MIN_FRACTION:
+        return {"degraded": True, "asx_usable": asx_usable, "asx_scanned": len(asx_coarse)}
 
     combined = sorted(us_rows + asx_rows, key=lambda r: r["cash_ratio"], reverse=True)
     max_rows = config.CASH_VALUE_REPORT_MAX_ROWS
@@ -233,6 +247,7 @@ def run_scan(conn: sqlite3.Connection) -> dict:
         "rows": shown,
         "overflow": overflow,
         "qualifying_count": len(combined),
+        "usable_count": us_usable + asx_usable,
         "asx_unavailable": asx_coarse is None,
         "us_scanned": len(us_coarse),
         "asx_scanned": len(asx_coarse or []),
@@ -248,10 +263,17 @@ _DISCLAIMER = (
 )
 
 _TABLE_HEADER = (
-    "| Ticker | Company | Mkt | Cash ratio | EV % of mcap | Market cap | "
-    "OCF (TTM) | FCF | FCF yld on EV | Net cash | Rev growth YoY | Sector | Tags | Read |"
+    "| Ticker | Company | Mkt | Net cash / mcap | Biz / mcap | Market cap | "
+    "OCF (TTM) | FCF | FCF yld on biz | Net cash | Rev growth YoY | Sector | Tags | Read |"
 )
 _TABLE_RULE = "|" + "---|" * 14
+_COLUMN_NOTE = (
+    "`Net cash / mcap` = net cash as a % of the whole company's market value (the "
+    "headline number, sorted high-to-low). `Biz / mcap` = what's left, i.e. what "
+    "you're paying for the operating business itself; negative means the price is "
+    "below the cash pile. `FCF yld on biz` = free cash flow as a % of that business "
+    "value."
+)
 
 
 def _row_line(r: dict) -> str:
@@ -280,6 +302,11 @@ def render_report(result: dict) -> str:
     lines = [
         "# Cash-Value Scan",
         "",
+        f"**Last run: {_today_sydney()}** - scanned {result['us_scanned']} US + "
+        f"{result['asx_scanned']} ASX names ({result.get('usable_count', 0)} returned "
+        f"balance-sheet data), {result['qualifying_count']} qualify at net cash "
+        f">= {pct} of market cap.",
+        "",
         f"What this is: companies whose net cash (cash minus all debt) is at least "
         f"{pct} of their market cap AND that generate positive operating cash flow - "
         f"the market is pricing the whole operating business at a steep discount and "
@@ -287,11 +314,9 @@ def render_report(result: dict) -> str:
         f"screen. Free cash flow is shown and tagged when negative, but is not a "
         f"filter (positive OCF with negative FCF is usually growth capex, not burn).",
         "",
-        _DISCLAIMER,
+        _COLUMN_NOTE,
         "",
-        f"## Run: {_today_sydney()}",
-        f"Scanned {result['us_scanned']} US + {result['asx_scanned']} ASX name(s); "
-        f"{result['qualifying_count']} qualify at >= {pct} net cash / market cap.",
+        _DISCLAIMER,
         "",
     ]
     if result["asx_unavailable"]:
@@ -311,7 +336,7 @@ def render_report(result: dict) -> str:
         lines += [
             "",
             f"... and {result['overflow']} more below the top {config.CASH_VALUE_REPORT_MAX_ROWS} "
-            f"(by cash ratio).",
+            f"(by net cash / mcap).",
         ]
 
     lines += [
@@ -321,24 +346,25 @@ def render_report(result: dict) -> str:
         "`shrinking revenue` = negative YoY revenue growth; "
         "`negative FCF` = free cash flow negative (heavy capex or cash burn - check which); "
         "`REVIEW:` = borderline ethical-filter flag.",
-        "",
-        f"Last auto-generated: {_today_sydney()}.",
     ]
     return "\n".join(lines) + "\n"
 
 
-def _write_stale_banner() -> None:
-    """US (Finviz) fetch failed -> keep yesterday's report, prepend a single banner
-    (banners must not stack across consecutive failures). If there is no prior
-    report at all, write a minimal 'scan failed' file."""
+_BANNER_SUFFIX = "showing the last good run below."
+
+
+def _write_banner(reason: str) -> None:
+    """A run couldn't produce trustworthy output (Finviz scrape failed, or Yahoo
+    rate-limited the fundamentals pass) -> keep the previous report and prepend a
+    single banner. Banners must not stack across consecutive bad runs. If there is
+    no prior report at all, write a minimal placeholder."""
     path = config.CASH_VALUE_REPORT_PATH
-    banner = (
-        f"> STALE - Finviz fetch failed {_today_sydney()}, showing the last good run below.\n\n"
-    )
+    banner = f"> {reason} ({_today_sydney()}) - {_BANNER_SUFFIX}\n\n"
     if path.exists():
         existing = path.read_text(encoding="utf-8")
-        if existing.startswith("> STALE - Finviz fetch failed"):
-            existing = existing.split("\n\n", 1)[1] if "\n\n" in existing else ""
+        first_para, sep, rest = existing.partition("\n\n")
+        if first_para.startswith("> ") and first_para.rstrip().endswith(_BANNER_SUFFIX):
+            existing = rest if sep else ""
         path.write_text(banner + existing, encoding="utf-8")
     else:
         path.write_text(
@@ -349,6 +375,12 @@ def _write_stale_banner() -> None:
 
 def write_report(result: dict) -> None:
     if result.get("stale"):
-        _write_stale_banner()
+        _write_banner("STALE - Finviz screener fetch failed")
+        return
+    if result.get("degraded"):
+        _write_banner(
+            f"DEGRADED - Yahoo Finance rate-limited the fundamentals pass "
+            f"(only {result['asx_usable']}/{result['asx_scanned']} ASX names returned data)"
+        )
         return
     config.CASH_VALUE_REPORT_PATH.write_text(render_report(result), encoding="utf-8")

@@ -589,6 +589,17 @@ CASH_VALUE_EXCLUDED_SECTORS = frozenset({
 CASH_VALUE_REPORT_MAX_ROWS = 60  # if more than this qualify, show the top N by cash
     # ratio and note the overflow count. Ratio sort + the OCF gate should keep it
     # well under this in practice. v1 best-guess cap.
+CASH_VALUE_FETCH_DELAY_SECONDS = 0.2  # pause between per-ticker yfinance .info calls
+    # in the enrichment loop -- ~700 back-to-back lookups reliably trips Yahoo's
+    # rate limit, and a throttled lookup is indistinguishable from "no data" (the
+    # ticker silently drops). ~700 * 0.2s = ~2.5min added to a nightly job -- fine.
+CASH_VALUE_DEGRADED_ASX_MIN_FRACTION = 0.20  # the S&P/ASX 200 is large-caps with
+    # near-complete yfinance coverage, so it's a controlled reference set: if fewer
+    # than this fraction of ASX constituents return balance-sheet data in a run,
+    # Yahoo is hard-rate-limiting and the whole run is treated as degraded -- keep
+    # the previous report with a banner rather than overwrite it with a throttled-
+    # empty one (same instinct as the stale-Finviz banner). Healthy runs clear ~0.7+
+    # (200 minus ~35 financials/REITs minus a few genuine data gaps).
 
 # Finviz screener scraper (mytrader/finviz_screener.py) -- the US universe source for
 # the cash-value scan. Coarse Price/Cash prefilter only; the precise net-cash test

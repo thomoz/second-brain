@@ -103,13 +103,23 @@ tuned the same day after the first run at the original 0.80 threshold found noth
   runs the shared ethical filter (defense contractors dropped, `BA`/`PLTR` tagged
   `REVIEW:`).
 
-**Output.** One ranked Markdown table (by cash ratio, desc) at
+**Output.** One ranked Markdown table (by `Net cash / mcap`, desc) at
 `investments/my-trader/cash-value-report.md` — overwritten every run, advisor notes
-only, no staging / watchlist-add / alerts. Row tags: `held` / `watchlist` (matched
-against the real DB, read-only), `micro` (small market cap), `shrinking revenue`,
-`negative FCF`, `REVIEW:`. If the Finviz scrape fails the previous report is kept
-with a `STALE` banner; if only the ASX scrape fails the US report still writes with
-a note.
+only, no staging / watchlist-add / alerts. Header carries a **Last run** date + a
+count of how many scanned names returned balance-sheet data. Row tags: `held` /
+`watchlist` (matched against the real DB, read-only), `micro` (small market cap),
+`shrinking revenue`, `negative FCF`, `REVIEW:`.
+
+**Failure handling.** yfinance rate-limits hard if you run the scan several times in
+quick succession (a throttled lookup is silently indistinguishable from "no data",
+so names just vanish). Guards: a small delay between lookups
+(`CASH_VALUE_FETCH_DELAY_SECONDS`); the ASX 200 is used as a rate-limit tripwire —
+if fewer than `CASH_VALUE_DEGRADED_ASX_MIN_FRACTION` of its constituents return data
+the run is **DEGRADED** and the previous report is kept with a banner rather than
+blanked; if the Finviz scrape fails outright the previous report is kept with a
+`STALE` banner; if only the ASX scrape fails the US report still writes with a note.
+The systemd timer has **no `Persistent=`** — a missed day is fine, and a catch-up
+run right after a manual one just gets throttled.
 
 **Tweakable config** — all in `investments/my-trader/mytrader/config.py`:
 
@@ -119,6 +129,8 @@ a note.
 | `CASH_VALUE_MICRO_CAP_TAG_USD` / `_AUD` | `50M` / `75M` | Market cap below which a row gets the `⚠ micro` tag (never dropped, just flagged as thinner/riskier). |
 | `CASH_VALUE_EXCLUDED_SECTORS` | Financial(s) / Financial Services / Real Estate | Sectors dropped before the test. Matches Finviz, GICS/Wikipedia, and yfinance wording. |
 | `CASH_VALUE_REPORT_MAX_ROWS` | `60` | If more than this qualify, show the top N by ratio and note the overflow count. |
+| `CASH_VALUE_FETCH_DELAY_SECONDS` | `0.2` | Pause between per-ticker yfinance lookups (~700/run) to ease off Yahoo's rate limit. Adds ~2.5 min to a run. |
+| `CASH_VALUE_DEGRADED_ASX_MIN_FRACTION` | `0.20` | If fewer than this fraction of ASX 200 constituents return balance-sheet data, the run is treated as rate-limited (DEGRADED) and the previous report is kept. Healthy runs clear ~0.7+. |
 | `FINVIZ_SCREENER_FILTERS` | `fa_pc_u3,geo_usa,sh_avgvol_o100,sh_price_o1` | The coarse US prefilter (Price/Cash < 3, US-listed, avg vol > 100K, price > $1). P/C < 3 safely contains any true net-cash positive. |
 | `FINVIZ_MAX_PAGES` / `FINVIZ_REQUEST_DELAY_SECONDS` | `40` / `0.5` | Scrape safety cap + courtesy delay between the ~25 sequential page fetches. |
 
