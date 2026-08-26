@@ -1,7 +1,10 @@
-"""Cash-Value Scanner ("Cash 80% Trading Value") -- daily VPS-scheduled screener,
-per .agent/plans/cash-value-scanner.md. Finds companies trading at ~cash value:
-net cash (cash + short-term investments minus total debt) >= 80% of market cap,
-AND positive trailing operating cash flow AND positive free cash flow.
+"""Cash-Value Scanner -- daily VPS-scheduled screener, per
+.agent/plans/cash-value-scanner.md. Finds companies trading near cash value: net
+cash (cash + short-term investments minus total debt) >= config.CASH_VALUE_RATIO_
+THRESHOLD of market cap, AND positive trailing operating cash flow. Free cash flow
+is computed and shown (and tagged when negative) but is NOT a hard gate -- loosened
+from OCF+FCF by Shaun 2026-08-26: positive OCF with negative FCF usually means heavy
+growth capex, not cash burn, and FCF is the sparsest yfinance field.
 
 Advisor-notes report only -- no candidate staging, no auto-watchlist-add, no
 WhatsApp alert. Shaun runs his own `find` / `assess` on anything he likes.
@@ -55,7 +58,7 @@ def compute_cash_value_metrics(data) -> dict | None:
     ev = market_cap - net_cash  # enterprise-value proxy -- the "stub" you pay for
 
     ocf = info.get("operatingCashflow")
-    fcf = info.get("freeCashflow")
+    fcf = info.get("freeCashflow")  # shown + tagged, not gated
     source = "info"
     if ocf is None or fcf is None:
         annual = market_data.fetch_cash_flow_statement(data.ticker)  # latest ANNUAL or None
@@ -67,7 +70,7 @@ def compute_cash_value_metrics(data) -> dict | None:
             source = "annual" if (info.get("operatingCashflow") is None
                                   and info.get("freeCashflow") is None) else "partial-annual"
 
-    cash_flow_ok = ocf is not None and fcf is not None and ocf > 0 and fcf > 0
+    cash_flow_ok = ocf is not None and ocf > 0  # OCF-only gate (see module docstring)
 
     return {
         "net_cash": net_cash,
@@ -179,6 +182,9 @@ def _enrich_universe(
             rg = metrics["revenue_growth"]
             if rg is not None and rg < 0:
                 tags.append("shrinking revenue")
+            fcf = metrics["free_cash_flow"]
+            if fcf is not None and fcf < 0:
+                tags.append("negative FCF")
             if review_reason:
                 tags.append(review_reason)  # "REVIEW: borderline defense exposure (BA)"
 
@@ -270,19 +276,22 @@ def _row_line(r: dict) -> str:
 
 
 def render_report(result: dict) -> str:
+    pct = f"{config.CASH_VALUE_RATIO_THRESHOLD * 100:.0f}%"
     lines = [
-        "# Cash 80% Trading Value",
+        "# Cash-Value Scan",
         "",
-        "What this is: companies whose net cash (cash minus debt) is at least 80% of "
-        "their market cap AND that are cash-flow positive - you are paying roughly the "
-        "cash balance and getting the operating business for the stub. Classic "
-        "Graham / deep-value screen with a going-concern quality gate.",
+        f"What this is: companies whose net cash (cash minus all debt) is at least "
+        f"{pct} of their market cap AND that generate positive operating cash flow - "
+        f"the market is pricing the whole operating business at a steep discount and "
+        f"handing you the balance-sheet cash on top. Classic Graham / deep-value "
+        f"screen. Free cash flow is shown and tagged when negative, but is not a "
+        f"filter (positive OCF with negative FCF is usually growth capex, not burn).",
         "",
         _DISCLAIMER,
         "",
         f"## Run: {_today_sydney()}",
         f"Scanned {result['us_scanned']} US + {result['asx_scanned']} ASX name(s); "
-        f"{result['qualifying_count']} qualify at >= 80% net cash / market cap.",
+        f"{result['qualifying_count']} qualify at >= {pct} net cash / market cap.",
         "",
     ]
     if result["asx_unavailable"]:
@@ -310,6 +319,7 @@ def render_report(result: dict) -> str:
         "Tag key: `held` / `watchlist` = already tracked in my-trader; "
         "`micro` = market cap under US$50M / A$75M (thinner liquidity, higher risk); "
         "`shrinking revenue` = negative YoY revenue growth; "
+        "`negative FCF` = free cash flow negative (heavy capex or cash burn - check which); "
         "`REVIEW:` = borderline ethical-filter flag.",
         "",
         f"Last auto-generated: {_today_sydney()}.",
@@ -332,7 +342,7 @@ def _write_stale_banner() -> None:
         path.write_text(banner + existing, encoding="utf-8")
     else:
         path.write_text(
-            f"# Cash 80% Trading Value\n\n{banner}No prior report to show.\n",
+            f"# Cash-Value Scan\n\n{banner}No prior report to show.\n",
             encoding="utf-8",
         )
 

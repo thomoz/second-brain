@@ -61,10 +61,19 @@ def test_cash_flow_falls_back_to_annual_when_info_missing(monkeypatch):
     assert m["operating_cash_flow"] == 3e6
 
 
-def test_cash_flow_not_ok_when_fcf_negative():
+def test_cash_flow_ok_when_fcf_negative_but_ocf_positive():
+    # OCF-only gate: negative FCF (heavy capex) does NOT disqualify.
     m = cash_value_scan.compute_cash_value_metrics(_td(
         "X", marketCap=100e6, totalCash=90e6, totalDebt=1e6,
         operatingCashflow=5e6, freeCashflow=-1e6,
+    ))
+    assert m["cash_flow_ok"] is True
+
+
+def test_cash_flow_not_ok_when_ocf_negative():
+    m = cash_value_scan.compute_cash_value_metrics(_td(
+        "X", marketCap=100e6, totalCash=90e6, totalDebt=1e6,
+        operatingCashflow=-2e6, freeCashflow=1e6,
     ))
     assert m["cash_flow_ok"] is False
 
@@ -87,8 +96,8 @@ def test_rejects_financial_services_sector():
 
 
 def test_rejects_below_threshold_ratio():
-    assert cash_value_scan._passes(_metrics(ratio=0.79)) is False
-    assert cash_value_scan._passes(_metrics(ratio=0.80)) is True
+    assert cash_value_scan._passes(_metrics(ratio=0.49)) is False
+    assert cash_value_scan._passes(_metrics(ratio=0.50)) is True
 
 
 def test_rejects_when_cash_flow_not_ok():
@@ -151,6 +160,15 @@ def test_run_scan_filters_ranks_and_tags(db_conn, monkeypatch):
     assert "micro" in aaa["tags"]  # 50M AUD < A$75M floor
 
 
+def test_run_scan_tags_negative_fcf_but_still_qualifies(db_conn, monkeypatch):
+    us = [{"ticker": "NFC", "company": "NegFCF Co", "sector": "Technology"}]
+    tmap = {"NFC": _td("NFC", **{**_QUALIFIER, "freeCashflow": -3e6})}  # OCF still +6e6
+    _patch_universes(monkeypatch, us=us, asx=None, ticker_map=tmap)
+    result = cash_value_scan.run_scan(db_conn)
+    assert [r["ticker"] for r in result["rows"]] == ["NFC"]
+    assert "negative FCF" in result["rows"][0]["tags"]
+
+
 def test_run_scan_returns_stale_when_finviz_fails(db_conn, monkeypatch):
     monkeypatch.setattr("mytrader.finviz_screener.fetch_screener_universe", lambda: None)
     result = cash_value_scan.run_scan(db_conn)
@@ -201,7 +219,7 @@ def _rendered_row(ticker="GEM", **over):
 
 def test_render_includes_run_date_and_advisor_disclaimer():
     out = cash_value_scan.render_report(_result([_rendered_row()]))
-    assert "# Cash 80% Trading Value" in out
+    assert "# Cash-Value Scan" in out
     assert "## Run:" in out
     assert "Advisor notes only" in out
     assert "GEM" in out
@@ -238,7 +256,7 @@ def test_render_below_net_cash_row_does_not_crash():
 
 def test_write_stale_banner_prepends_to_existing_report():
     path = config.CASH_VALUE_REPORT_PATH
-    path.write_text("# Cash 80% Trading Value\n\noriginal body\n", encoding="utf-8")
+    path.write_text("# Cash-Value Scan\n\noriginal body\n", encoding="utf-8")
     cash_value_scan.write_report({"stale": True})
     out = path.read_text(encoding="utf-8")
     assert out.startswith("> STALE - Finviz fetch failed")
@@ -247,7 +265,7 @@ def test_write_stale_banner_prepends_to_existing_report():
 
 def test_write_stale_banner_does_not_stack():
     path = config.CASH_VALUE_REPORT_PATH
-    path.write_text("# Cash 80% Trading Value\n\nbody\n", encoding="utf-8")
+    path.write_text("# Cash-Value Scan\n\nbody\n", encoding="utf-8")
     cash_value_scan.write_report({"stale": True})
     cash_value_scan.write_report({"stale": True})
     out = path.read_text(encoding="utf-8")
@@ -266,5 +284,5 @@ def test_write_stale_banner_with_no_prior_report():
 def test_write_report_writes_full_report_when_not_stale():
     cash_value_scan.write_report(_result([_rendered_row()]))
     out = config.CASH_VALUE_REPORT_PATH.read_text(encoding="utf-8")
-    assert "# Cash 80% Trading Value" in out
+    assert "# Cash-Value Scan" in out
     assert "| Ticker | Company |" in out

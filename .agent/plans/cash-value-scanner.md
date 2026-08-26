@@ -87,6 +87,16 @@ already imported by `mytrader/engine.py`).
 
 ## Decisions Confirmed With Shaun (2026-08-26, planning session — treat as settled)
 
+> **AMENDED post-first-live-run (2026-08-26):** the first VPS run of the built
+> scanner returned **zero** names across 492 US + 200 ASX. Shaun loosened two knobs:
+> (1) cash-flow gate is now **positive operating cash flow only** — FCF is still
+> computed, shown, and given a `negative FCF` tag, but does not filter (positive OCF
+> with negative FCF is usually growth capex, not burn); (2) cash-ratio threshold is
+> now **0.50** (`CASH_VALUE_RATIO_THRESHOLD` in `config.py`), 0.80 being effectively
+> net-net territory that doesn't exist in developed markets. Report `#` title
+> changed to threshold-agnostic "Cash-Value Scan". Decisions 1 and 2 below are the
+> original planning-session calls, kept for the record.
+
 1. **Cash-flow gate**: positive trailing **operating cash flow AND positive free cash
    flow**. Read from yfinance `.info` (`operatingCashflow`, `freeCashflow`); when
    either is missing, fall back to the latest **annual** figures via

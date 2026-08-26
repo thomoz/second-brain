@@ -295,6 +295,7 @@ def cmd_gold_backtest(args) -> None:
 
 def cmd_cash_value_scan(args) -> None:
     from .cash_value_scan import run_scan, write_report
+    from .config import CASH_VALUE_RATIO_THRESHOLD
 
     conn = _open_conn()  # read-only use -- tag held/watchlist rows only
     result = run_scan(conn)
@@ -309,7 +310,7 @@ def cmd_cash_value_scan(args) -> None:
     asx_note = " (ASX universe unavailable)" if result.get("asx_unavailable") else ""
     print(
         f"Cash-value scan complete: {result['qualifying_count']} name(s) at "
-        f">=80% net cash / market cap{asx_note}. "
+        f">={CASH_VALUE_RATIO_THRESHOLD * 100:.0f}% net cash / market cap{asx_note}. "
         f"See investments/my-trader/cash-value-report.md"
     )
 

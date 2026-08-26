@@ -554,18 +554,22 @@ INSIDER_SELLING_FLAG_PCT_THRESHOLD = 10.0  # % of the insider's own position --
     # here, not a first/repeat pair.
 
 # ---------------------------------------------------------------------------
-# Cash-Value Scanner ("Cash 80% Trading Value") -- mytrader/cash_value_scan.py,
-# per .agent/plans/cash-value-scanner.md. Scheduled daily on the VPS. Screens for
-# companies trading at ~cash value: net cash (cash + short-term investments minus
-# total debt) >= 80% of market cap, AND positive operating + free cash flow.
+# Cash-Value Scanner -- mytrader/cash_value_scan.py, per
+# .agent/plans/cash-value-scanner.md. Scheduled daily on the VPS. Screens for
+# companies trading near cash value: net cash (cash + short-term investments minus
+# total debt) >= CASH_VALUE_RATIO_THRESHOLD of market cap, AND positive operating
+# cash flow (free cash flow is shown + tagged, not a hard gate).
 # Advisor-notes report only; no staging, no alerts. Shaun's idea 2026-08-26.
 # ---------------------------------------------------------------------------
 CASH_VALUE_REPORT_PATH = MY_TRADER_DIR / "cash-value-report.md"
 
-CASH_VALUE_RATIO_THRESHOLD = 0.80  # qualifies when net cash / market cap >= this.
-    # Higher = more of the share price is just the bank balance. 0.80 = "paying
-    # ~20c on the dollar for everything the business does except its cash." Plain
-    # hard cutoff, no near-miss band -- Shaun's call, 2026-08-26.
+CASH_VALUE_RATIO_THRESHOLD = 0.50  # qualifies when net cash / market cap >= this.
+    # Higher = more of the share price is just the bank balance. 0.50 = "the market
+    # values the whole operating business at ~50c on the dollar and hands the other
+    # ~50c back as balance-sheet cash." Still squarely deep-value (a normal healthy
+    # company runs 5-15% net cash / mcap; 20%+ is already cash-rich). Loosened from
+    # 0.80 by Shaun 2026-08-26 after the first live run returned zero names -- 0.80
+    # is near-net-net territory, effectively non-existent in developed markets.
 CASH_VALUE_MICRO_CAP_TAG_USD = 50_000_000.0  # tag (NOT drop) US rows below this
     # market cap with "micro" -- cash-value micro-caps are disproportionately
     # distressed / illiquid, but Finviz's coarse filter (avg vol > 100K, price > $1)
@@ -583,8 +587,8 @@ CASH_VALUE_EXCLUDED_SECTORS = frozenset({
     # and yfinance's .info sector, which use different wording -- verified live
     # 2026-08-26 that the ASX 200 Wikipedia table says "Financials".
 CASH_VALUE_REPORT_MAX_ROWS = 60  # if more than this qualify, show the top N by cash
-    # ratio and note the overflow count. Ratio sort + the cash-flow gate should keep
-    # it well under this in practice. v1 best-guess cap.
+    # ratio and note the overflow count. Ratio sort + the OCF gate should keep it
+    # well under this in practice. v1 best-guess cap.
 
 # Finviz screener scraper (mytrader/finviz_screener.py) -- the US universe source for
 # the cash-value scan. Coarse Price/Cash prefilter only; the precise net-cash test
