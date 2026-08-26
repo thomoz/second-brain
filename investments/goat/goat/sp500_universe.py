@@ -1,6 +1,7 @@
 """S&P 500 constituent universe for the heartbeat scanner -- Goat Phase 3. Scrapes
-Wikipedia's constituent table (no official free API exists), weekly-cached in the
-goat_sp500_constituents table so the scan itself doesn't re-scrape every run. Mirrors
+Wikipedia's constituent table (no official free API exists), cached for
+GOAT_SP500_CACHE_TTL_DAYS in the goat_sp500_constituents table so the daily scan
+doesn't re-scrape every run. Mirrors
 mytrader/asx_announcements.py's direct-fetch style (requests + BeautifulSoup, headers
 dict, timeout, try/except-returns-None-on-any-failure) -- no third-party HTML-table
 wrapper library (neither lxml nor html5lib is a declared dependency anywhere in the

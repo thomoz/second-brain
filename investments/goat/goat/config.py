@@ -306,9 +306,10 @@ GOAT_CASH_RUNWAY_FLAG_YEARS = 1.0  # cash-burning companies with less than this 
                                       # cash-runway-concern floor. v1/tunable.
 
 GOAT_SP500_WIKI_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-GOAT_SP500_CACHE_TTL_DAYS = 7  # matches the weekly scan cadence -- no point
-                                  # re-scraping Wikipedia more often than the scan itself
-                                  # runs.
+GOAT_SP500_CACHE_TTL_DAYS = 7  # S&P 500 membership changes only a handful of times a
+                                  # year, so a 7-day cache stays plenty fresh and avoids
+                                  # re-scraping Wikipedia on every daily heartbeat scan
+                                  # (cadence moved weekly -> daily 2026-08-26).
 GOAT_SP500_USER_AGENT = "Mozilla/5.0 (compatible; SecondBrainGoat/1.0)"
 
 # GICS Sector (Wikipedia's own column values) -> GOAT_SECTOR_ETFS label mapping.

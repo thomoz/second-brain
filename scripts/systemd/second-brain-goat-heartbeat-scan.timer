@@ -3,7 +3,7 @@ Description=Goat Heartbeat Scan Timer
 Requires=second-brain-goat-heartbeat-scan.service
 
 [Timer]
-OnCalendar=Sat *-*-* 08:00:00 Australia/Sydney
+OnCalendar=*-*-* 22:45:00 UTC
 Persistent=true
 
 [Install]

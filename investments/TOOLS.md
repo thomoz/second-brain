@@ -20,11 +20,11 @@ Freshest reports worth actually opening most days:
 | [investments/fourteen-crash-signals-daily-check/crash-signals-report.md](fourteen-crash-signals-daily-check/crash-signals-report.md) | Fourteen Crash Signals (daily) | [→](#fourteen-crash-signals) |
 | [investments/my-trader/gold-outlook.md](my-trader/gold-outlook.md) | Part of my-trader Monitor, gold section | [→](#mytrader-monitor) |
 | [investments/my-trader/cash-value-report.md](my-trader/cash-value-report.md) | Cash-Value Scan (daily, ~22:30 UTC) | [→](#cashvalue-scan) |
+| [investments/goat/heartbeat-candidates-pending-review.md](goat/heartbeat-candidates-pending-review.md) | Goat Heartbeat Scan (daily, ~22:45 UTC) | [→](#goat-heartbeat) |
 
 Staging files (only worth checking when you want to review pending candidates, not a
 daily habit): `investments/my-trader/synced-candidates-pending-review.md`,
-`investments/goat/sector-candidates-pending-review.md`,
-`investments/goat/heartbeat-candidates-pending-review.md`. WhatsApp already pushes new
+`investments/goat/sector-candidates-pending-review.md`. WhatsApp already pushes new
 alerts/discoveries as they fire — these files are for batch review, not discovery.
 
 ## Automated (scheduled)
@@ -35,7 +35,7 @@ alerts/discoveries as they fire — these files are for batch review, not discov
 | <a id="cashvalue-scan"></a>[↑](#daily-read) **Cash-Value Scan** | Screens US (Finviz) + ASX 200 (Wikipedia) for net cash ≥ 50% of market cap + positive operating cash flow (threshold `CASH_VALUE_RATIO_THRESHOLD` in `mytrader/config.py`); ranked advisor-notes list, no staging/alerts | VPS systemd (`second-brain-mytrader-cashvalue-scan.timer`) | Daily, 22:30 UTC | `investments/my-trader/cash-value-report.md` |
 | <a id="goat-monitor"></a>[↑](#daily-read) **Goat Monitor** (150DMA exit check + sector rotation scan) | Flags holdings AND every watchlist ticker closing below their 150-day MA; ranks the 11 SPDR sector ETFs and stages fresh breakout candidates; also refreshes the industry rotation ranking | VPS systemd (`second-brain-goat-monitor.timer`) | Daily, 21:35 UTC (07:35 AEST / 08:35 AEDT) | `investments/goat/goat-report.md`, `sector-ranking.md`, `sector-candidates-pending-review.md`, `industry-ranking.md` |
 | **Goat Intraday Live-Check** | Live-price 150DMA check against currently-open-market holdings | VPS systemd (`second-brain-goat-live-check.timer`) | Every 10 min around the clock (no-ops outside ASX/US session hours) | WhatsApp alert only if breached — no standalone report file |
-| **Goat Heartbeat Scan** (S&P 500) | Screens S&P 500 constituents in currently-rising sectors for a tight sideways base sitting at/above a flat-to-rising 150-day MA (price mostly below its 50-day MA through the base), then a fresh 50-day-MA breakout, with fundamentals survival context | VPS systemd (`second-brain-goat-heartbeat-scan.timer`) | Weekly, Saturday 8:00am Sydney local | `investments/goat/heartbeat-candidates-pending-review.md` |
+| <a id="goat-heartbeat"></a>[↑](#daily-read) **Goat Heartbeat Scan** (S&P 500) | Screens S&P 500 constituents in currently-rising sectors for a tight sideways base sitting at/above a flat-to-rising 150-day MA (price mostly below its 50-day MA through the base), then a fresh 50-day-MA breakout, with fundamentals survival context. Stages fresh finds into `goat_pending_candidates` (`source="goat_heartbeat_scan"`) and pushes new ones to WhatsApp; zero-candidate days are silent. | VPS systemd (`second-brain-goat-heartbeat-scan.timer`) | Daily, 22:45 UTC (~08:45 AEST / 09:45 AEDT) | `investments/goat/heartbeat-candidates-pending-review.md` |
 | <a id="goat-insider-scan"></a>[↑](#daily-read) **Goat Insider Scan** (OpenInsider) | Checks Form 4 filings on holdings, stages market-wide $25k+ buys as candidates, tracks $100k+ sells; price-since-trade tracking; feeds pattern analysis | VPS systemd (`second-brain-goat-insider-scan.timer`) | Daily, 21:50 UTC (~15min after Goat Monitor) | `investments/goat/insider-scan-report.md`; nightly pattern slice in `insider-pattern-analysis.md` |
 | <a id="fourteen-crash-signals"></a>[↑](#daily-read) **Fourteen Crash Signals Daily Check** | Tracks all 14 crash-warning markers against a dynamically-recomputed hot-company watchlist | VPS systemd (`second-brain-fourteen-signals.timer`) | Daily, 22:05 UTC | `investments/fourteen-crash-signals-daily-check/crash-signals-report.md` |
 
@@ -59,7 +59,7 @@ undoing the 2026-08-23 fix.
 | **Goat sector scan (on-demand)** | Same sector-rotation ranking, without the 150DMA holdings check | `-Package goat -Command "scan-sectors"` | `investments/goat/sector-ranking.md`, `sector-candidates-pending-review.md` |
 | **Goat industry scan (on-demand)** | Same industry-rotation ranking (39 of 143 Finviz industries with a dedicated ETF, 6-month window), right now | `-Package goat -Command "scan-industries"` | `investments/goat/industry-ranking.md` |
 | **Goat live-check (on-demand)** | Same intraday 150DMA check, right now | `-Package goat -Command "check-live"` | WhatsApp alert only |
-| **Goat heartbeat scan (on-demand)** | Same weekly S&P 500 scan, right now | `-Package goat -Command "scan-heartbeat"` | `investments/goat/heartbeat-candidates-pending-review.md` |
+| **Goat heartbeat scan (on-demand)** | Same daily S&P 500 scan, right now | `-Package goat -Command "scan-heartbeat"` | `investments/goat/heartbeat-candidates-pending-review.md` |
 | **Goat insider scan (on-demand)** | Same OpenInsider scan, right now | `-Package goat -Command "scan-insiders"` | `investments/goat/insider-scan-report.md` |
 | **Goat Hormuz risk scan (on-demand)** | Strait of Hormuz war-risk check — not on a timer, manual only | `-Package goat -Command "scan-hormuz"` | `investments/goat/hormuz-risk-report.md` |
 | **Goat promote/dismiss candidate** | Move a staged Goat candidate into my-trader's real watchlist, or discard it | `-Package goat -Command "promote-candidate --ticker TICKER"` / `"dismiss-candidate --ticker TICKER"` | Watchlist DB row (promote only) |
