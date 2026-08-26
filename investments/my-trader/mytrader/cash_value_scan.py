@@ -1,0 +1,344 @@
+"""Cash-Value Scanner ("Cash 80% Trading Value") -- daily VPS-scheduled screener,
+per .agent/plans/cash-value-scanner.md. Finds companies trading at ~cash value:
+net cash (cash + short-term investments minus total debt) >= 80% of market cap,
+AND positive trailing operating cash flow AND positive free cash flow.
+
+Advisor-notes report only -- no candidate staging, no auto-watchlist-add, no
+WhatsApp alert. Shaun runs his own `find` / `assess` on anything he likes.
+
+Two universes:
+  - US:  Finviz screener (coarse Price/Cash prefilter) -> yfinance precise test.
+  - ASX: S&P/ASX 200 Wikipedia constituents -> yfinance precise test (.AX).
+The net-cash-to-market-cap RATIO is currency-consistent per company (both figures
+from the same yfinance .info in the listing currency), so no FX handling is needed
+for the ratio; absolute-dollar columns are labelled with each row's currency.
+
+`conn` is used READ-ONLY here -- only to tag rows Shaun already holds / watchlists.
+Nothing in this module writes to investments.db.
+"""
+
+from __future__ import annotations
+
+import sqlite3
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+from scripts.ethical_filter import check_ticker as ethical_check
+
+from . import asx200_universe, config, db as mt_db, finviz_screener, market_data, tickers
+
+SYDNEY_TZ = ZoneInfo("Australia/Sydney")
+
+
+def _today_sydney() -> str:
+    """Report date label -- always Sydney local, regardless of host clock/timezone."""
+    return datetime.now(SYDNEY_TZ).date().isoformat()
+
+
+# --- metric math (pure) ------------------------------------------------------
+
+def compute_cash_value_metrics(data) -> dict | None:
+    """`data` is a market_data.TickerData. Returns None when marketCap / totalCash /
+    totalDebt are not all present (can't run the test). net_cash uses raw totalDebt
+    -- yfinance bundles IFRS 16 capitalised leases into it, and that is the
+    conservative, defensible number (see checks/balance_sheet.py). Higher cash_ratio
+    = more of the share price is just the bank balance."""
+    info = data.info
+    total_cash = info.get("totalCash")
+    total_debt = info.get("totalDebt")
+    market_cap = info.get("marketCap")
+    if total_cash is None or total_debt is None or not market_cap:  # 0 mcap = unusable
+        return None
+
+    net_cash = total_cash - total_debt
+    cash_ratio = net_cash / market_cap
+    ev = market_cap - net_cash  # enterprise-value proxy -- the "stub" you pay for
+
+    ocf = info.get("operatingCashflow")
+    fcf = info.get("freeCashflow")
+    source = "info"
+    if ocf is None or fcf is None:
+        annual = market_data.fetch_cash_flow_statement(data.ticker)  # latest ANNUAL or None
+        if annual is not None:
+            if ocf is None:
+                ocf = annual.get("operating_cash_flow")
+            if fcf is None:
+                fcf = annual.get("free_cash_flow")
+            source = "annual" if (info.get("operatingCashflow") is None
+                                  and info.get("freeCashflow") is None) else "partial-annual"
+
+    cash_flow_ok = ocf is not None and fcf is not None and ocf > 0 and fcf > 0
+
+    return {
+        "net_cash": net_cash,
+        "cash_ratio": cash_ratio,
+        "ev": ev,
+        "ev_pct_of_mcap": ev / market_cap,  # = 1 - cash_ratio; negative if below net cash
+        "market_cap": market_cap,
+        "operating_cash_flow": ocf,
+        "free_cash_flow": fcf,
+        "fcf_yield_on_ev": (fcf / ev) if (fcf is not None and ev > 0) else None,
+        "revenue_growth": info.get("revenueGrowth"),
+        "sector": info.get("sector"),
+        "currency": info.get("financialCurrency") or info.get("currency"),
+        "cash_flow_ok": cash_flow_ok,
+        "cash_flow_source": source,
+    }
+
+
+def _passes(metrics: dict | None) -> bool:
+    return (
+        metrics is not None
+        and metrics["cash_ratio"] >= config.CASH_VALUE_RATIO_THRESHOLD
+        and metrics["cash_flow_ok"]
+        and metrics["sector"] not in config.CASH_VALUE_EXCLUDED_SECTORS
+    )
+
+
+# --- formatting -------------------------------------------------------------
+
+def _human_money(value: float | None) -> str:
+    if value is None:
+        return "n/a"
+    a = abs(value)
+    sign = "-" if value < 0 else ""
+    if a >= 1e9:
+        return f"{sign}{a / 1e9:.2f}B"
+    if a >= 1e6:
+        return f"{sign}{a / 1e6:.1f}M"
+    if a >= 1e3:
+        return f"{sign}{a / 1e3:.0f}K"
+    return f"{sign}{a:.0f}"
+
+
+def _money(value: float | None, currency: str | None) -> str:
+    if value is None:
+        return "n/a"
+    cur = f" {currency}" if currency else ""
+    return f"{_human_money(value)}{cur}"
+
+
+def _pct(value: float | None) -> str:
+    return "n/a" if value is None else f"{value * 100:.0f}%"
+
+
+def _plain_english_read(row: dict) -> str:
+    cur = row["currency"]
+    cash = f"{_money(row['net_cash'], cur)} net cash"
+    mcap = f"{_money(row['market_cap'], cur)} mcap"
+    fcf = row["free_cash_flow"]
+    if row["ev"] <= 0:
+        stub = (
+            f"the market is paying less than the cash pile "
+            f"({_pct(row['ev_pct_of_mcap'])} of mcap for the business)"
+        )
+    else:
+        stub = f"paying ~{_money(row['ev'], cur)} for the operating business"
+    fcf_bit = f", {_money(fcf, cur)} FCF" if fcf is not None else ""
+    return f"{cash}, {mcap}{fcf_bit} - {stub}."
+
+
+# --- enrichment ------------------------------------------------------------
+
+def _enrich_universe(
+    coarse_rows: list[dict], *, market: str, held: set[str], watched: set[str]
+) -> list[dict]:
+    micro_floor = (
+        config.CASH_VALUE_MICRO_CAP_TAG_USD if market == "US"
+        else config.CASH_VALUE_MICRO_CAP_TAG_AUD
+    )
+    results: list[dict] = []
+    for row in coarse_rows:
+        bare = row["ticker"]
+        yf_ticker = bare if market == "US" else tickers.asx_variant(bare)
+        try:
+            # Cheap pre-skip on the coarse universe sector (Finviz/Wikipedia wording)
+            # -- saves a yfinance call for banks/REITs.
+            if (row.get("sector") or "") in config.CASH_VALUE_EXCLUDED_SECTORS:
+                continue
+
+            excluded, review_reason = ethical_check(bare)
+            if excluded:
+                continue  # defense contractor -- dropped entirely, never shown
+
+            data = market_data.fetch_ticker_data(yf_ticker)
+            if data is None:
+                continue
+            metrics = compute_cash_value_metrics(data)
+            if not _passes(metrics):
+                continue
+
+            assert metrics is not None  # _passes guarantees this
+            tags: list[str] = []
+            if bare in held or yf_ticker in held:
+                tags.append("held")
+            elif bare in watched or yf_ticker in watched:
+                tags.append("watchlist")
+            if metrics["market_cap"] < micro_floor:
+                tags.append("micro")
+            rg = metrics["revenue_growth"]
+            if rg is not None and rg < 0:
+                tags.append("shrinking revenue")
+            if review_reason:
+                tags.append(review_reason)  # "REVIEW: borderline defense exposure (BA)"
+
+            result = {
+                "ticker": bare,
+                "yf_ticker": yf_ticker,
+                "company": row.get("company") or "",
+                "market": market,
+                "review_reason": review_reason,
+                "tags": tags,
+                **metrics,
+            }
+            result["read"] = _plain_english_read(result)
+            results.append(result)
+        except Exception as e:  # one bad ticker must not sink the run
+            print(f"[cash-value-scan] error on {yf_ticker}: {e}")
+    return results
+
+
+# --- orchestration -------------------------------------------------------
+
+def run_scan(conn: sqlite3.Connection) -> dict:
+    held = {r["ticker"] for r in mt_db.get_all_holdings(conn)}
+    watched = {r["ticker"] for r in mt_db.get_all_watchlist(conn)}
+
+    us_coarse = finviz_screener.fetch_screener_universe()
+    if us_coarse is None:
+        # Total US failure -- caller re-serves the previous report with a banner.
+        return {"stale": True}
+
+    asx_coarse = asx200_universe.fetch_asx200_constituents()
+
+    with market_data.cached_session():
+        us_rows = _enrich_universe(us_coarse, market="US", held=held, watched=watched)
+        asx_rows = (
+            _enrich_universe(asx_coarse, market="ASX", held=held, watched=watched)
+            if asx_coarse is not None else []
+        )
+
+    combined = sorted(us_rows + asx_rows, key=lambda r: r["cash_ratio"], reverse=True)
+    max_rows = config.CASH_VALUE_REPORT_MAX_ROWS
+    shown, overflow = combined[:max_rows], max(0, len(combined) - max_rows)
+
+    return {
+        "stale": False,
+        "rows": shown,
+        "overflow": overflow,
+        "qualifying_count": len(combined),
+        "asx_unavailable": asx_coarse is None,
+        "us_scanned": len(us_coarse),
+        "asx_scanned": len(asx_coarse or []),
+    }
+
+
+# --- report -------------------------------------------------------------
+
+_DISCLAIMER = (
+    "Auto-generated daily - overwritten every run. Advisor notes only; no trade "
+    "action is ever suggested here (see SOUL.md). Run your own `find` / `assess` "
+    "on anything you like the look of."
+)
+
+_TABLE_HEADER = (
+    "| Ticker | Company | Mkt | Cash ratio | EV % of mcap | Market cap | "
+    "OCF (TTM) | FCF | FCF yld on EV | Net cash | Rev growth YoY | Sector | Tags | Read |"
+)
+_TABLE_RULE = "|" + "---|" * 14
+
+
+def _row_line(r: dict) -> str:
+    cur = r["currency"]
+    rg = r["revenue_growth"]
+    return "| " + " | ".join([
+        r["ticker"],
+        (r["company"] or "").replace("|", "/"),
+        r["market"],
+        f"{r['cash_ratio'] * 100:.0f}%",
+        _pct(r["ev_pct_of_mcap"]) + (" (below net cash)" if r["ev"] <= 0 else ""),
+        _money(r["market_cap"], cur),
+        _money(r["operating_cash_flow"], cur),
+        _money(r["free_cash_flow"], cur),
+        ("n/a" if r["fcf_yield_on_ev"] is None else f"{r['fcf_yield_on_ev'] * 100:.1f}%"),
+        _money(r["net_cash"], cur),
+        ("n/a" if rg is None else f"{rg * 100:+.0f}%"),
+        r["sector"] or "n/a",
+        ", ".join(r["tags"]) if r["tags"] else "-",
+        r["read"].replace("|", "/"),
+    ]) + " |"
+
+
+def render_report(result: dict) -> str:
+    lines = [
+        "# Cash 80% Trading Value",
+        "",
+        "What this is: companies whose net cash (cash minus debt) is at least 80% of "
+        "their market cap AND that are cash-flow positive - you are paying roughly the "
+        "cash balance and getting the operating business for the stub. Classic "
+        "Graham / deep-value screen with a going-concern quality gate.",
+        "",
+        _DISCLAIMER,
+        "",
+        f"## Run: {_today_sydney()}",
+        f"Scanned {result['us_scanned']} US + {result['asx_scanned']} ASX name(s); "
+        f"{result['qualifying_count']} qualify at >= 80% net cash / market cap.",
+        "",
+    ]
+    if result["asx_unavailable"]:
+        lines += [
+            "> ASX universe unavailable this run (Wikipedia scrape failed) - US results only.",
+            "",
+        ]
+
+    rows = result["rows"]
+    if rows:
+        lines += [_TABLE_HEADER, _TABLE_RULE]
+        lines += [_row_line(r) for r in rows]
+    else:
+        lines.append("No companies qualify this run.")
+
+    if result["overflow"]:
+        lines += [
+            "",
+            f"... and {result['overflow']} more below the top {config.CASH_VALUE_REPORT_MAX_ROWS} "
+            f"(by cash ratio).",
+        ]
+
+    lines += [
+        "",
+        "Tag key: `held` / `watchlist` = already tracked in my-trader; "
+        "`micro` = market cap under US$50M / A$75M (thinner liquidity, higher risk); "
+        "`shrinking revenue` = negative YoY revenue growth; "
+        "`REVIEW:` = borderline ethical-filter flag.",
+        "",
+        f"Last auto-generated: {_today_sydney()}.",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def _write_stale_banner() -> None:
+    """US (Finviz) fetch failed -> keep yesterday's report, prepend a single banner
+    (banners must not stack across consecutive failures). If there is no prior
+    report at all, write a minimal 'scan failed' file."""
+    path = config.CASH_VALUE_REPORT_PATH
+    banner = (
+        f"> STALE - Finviz fetch failed {_today_sydney()}, showing the last good run below.\n\n"
+    )
+    if path.exists():
+        existing = path.read_text(encoding="utf-8")
+        if existing.startswith("> STALE - Finviz fetch failed"):
+            existing = existing.split("\n\n", 1)[1] if "\n\n" in existing else ""
+        path.write_text(banner + existing, encoding="utf-8")
+    else:
+        path.write_text(
+            f"# Cash 80% Trading Value\n\n{banner}No prior report to show.\n",
+            encoding="utf-8",
+        )
+
+
+def write_report(result: dict) -> None:
+    if result.get("stale"):
+        _write_stale_banner()
+        return
+    config.CASH_VALUE_REPORT_PATH.write_text(render_report(result), encoding="utf-8")

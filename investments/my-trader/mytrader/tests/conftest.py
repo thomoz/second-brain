@@ -45,6 +45,7 @@ def _isolate_snapshot_paths(monkeypatch, tmp_path):
     monkeypatch.setattr(mt_config, "HOLDINGS_MD_PATH", tmp_path / "holdings.md")
     monkeypatch.setattr(mt_config, "WATCHLIST_MD_PATH", tmp_path / "watchlist.md")
     monkeypatch.setattr(mt_config, "PENDING_CANDIDATES_MD_PATH", tmp_path / "synced-candidates-pending-review.md")
+    monkeypatch.setattr(mt_config, "CASH_VALUE_REPORT_PATH", tmp_path / "cash-value-report.md")
 
 
 @pytest.fixture(autouse=True)
@@ -164,3 +165,26 @@ def _no_real_ibkr_connection(monkeypatch):
         raise ConnectionError("no real IB Gateway available in tests")
 
     monkeypatch.setattr("mytrader.ibkr_sync._connect", _raise_no_gateway)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_finviz_fetch(monkeypatch):
+    """cash_value_scan.run_scan() calls finviz_screener.fetch_screener_universe() --
+    a real paginated HTTP scrape -- global/autouse for the same reason as the
+    fixtures above: no real network call by default. Tests exercising run_scan
+    re-patch this with fixture data."""
+    monkeypatch.setattr("mytrader.finviz_screener.fetch_screener_universe", lambda: None)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_asx200_fetch(monkeypatch):
+    """cash_value_scan.run_scan() calls asx200_universe.fetch_asx200_constituents()
+    -- a real Wikipedia scrape -- global/autouse, same reason. test_asx200_universe.py
+    restores the real function for its own direct tests (test_market_data.py:16 idiom)."""
+    monkeypatch.setattr("mytrader.asx200_universe.fetch_asx200_constituents", lambda: None)
+
+# NOTE: deliberately NO global stub for market_data.fetch_cash_flow_statement -- the
+# scan path only reaches it from compute_cash_value_metrics when a ticker's .info
+# lacks operatingCashflow/freeCashflow, which the run_scan tests never construct, and
+# a global stub would break test_market_data.py's own direct tests of that function.
+# test_cash_value_scan.py's annual-fallback test patches it explicitly.

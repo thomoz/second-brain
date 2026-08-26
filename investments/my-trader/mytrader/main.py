@@ -293,6 +293,27 @@ def cmd_gold_backtest(args) -> None:
     print_stats(results)
 
 
+def cmd_cash_value_scan(args) -> None:
+    from .cash_value_scan import run_scan, write_report
+
+    conn = _open_conn()  # read-only use -- tag held/watchlist rows only
+    result = run_scan(conn)
+    conn.close()
+    write_report(result)
+    if result.get("stale"):
+        print(
+            "Cash-value scan: Finviz fetch FAILED — kept the previous "
+            "cash-value-report.md with a STALE banner."
+        )
+        return
+    asx_note = " (ASX universe unavailable)" if result.get("asx_unavailable") else ""
+    print(
+        f"Cash-value scan complete: {result['qualifying_count']} name(s) at "
+        f">=80% net cash / market cap{asx_note}. "
+        f"See investments/my-trader/cash-value-report.md"
+    )
+
+
 def cmd_monitor(args) -> None:
     from .monitor import maybe_notify, run_monitor, write_report
 
@@ -361,6 +382,11 @@ def main() -> None:
         "gold-backtest",
         help="Force a fresh backtest of gold's macro signals + technical indicators (slow, on-demand)",
     )
+    subparsers.add_parser(
+        "cash-value-scan",
+        help="Screen US + ASX for companies with net cash >= 0.8x market cap and "
+             "positive cash flow (writes cash-value-report.md)",
+    )
 
     p_promote = subparsers.add_parser(
         "promote-candidate", help="Move a pending synced candidate into the real watchlist",
@@ -412,6 +438,7 @@ def main() -> None:
         "monitor": cmd_monitor,
         "sync-candidates": cmd_sync_candidates,
         "gold-backtest": cmd_gold_backtest,
+        "cash-value-scan": cmd_cash_value_scan,
         "promote-candidate": cmd_promote_candidate,
         "dismiss-candidate": cmd_dismiss_candidate,
         "refresh-watchlist-data": cmd_refresh_watchlist_data,

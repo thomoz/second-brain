@@ -4,7 +4,7 @@ Four packages share `investments/briefs-finance/data/investments.db` (VPS-only s
 2026-08-23 — see `.agent/plans/completed/investments-db-ssh-single-source.md`):
 **my-trader**, **briefs-finance**, **goat**, **fourteen-crash-signals-daily-check**.
 
-Last updated 2026-08-23 — update this file whenever a tool's schedule, command, or
+Last updated 2026-08-26 — update this file whenever a tool's schedule, command, or
 output path changes; it isn't regenerated automatically.
 
 ## Daily Read
@@ -19,6 +19,7 @@ Freshest reports worth actually opening most days:
 | [investments/goat/insider-scan-report.md](goat/insider-scan-report.md) | Goat Insider Scan (~7:50am Sydney) | [→](#goat-insider-scan) |
 | [investments/fourteen-crash-signals-daily-check/crash-signals-report.md](fourteen-crash-signals-daily-check/crash-signals-report.md) | Fourteen Crash Signals (daily) | [→](#fourteen-crash-signals) |
 | [investments/my-trader/gold-outlook.md](my-trader/gold-outlook.md) | Part of my-trader Monitor, gold section | [→](#mytrader-monitor) |
+| [investments/my-trader/cash-value-report.md](my-trader/cash-value-report.md) | Cash-Value Scan (daily, ~22:30 UTC) | [→](#cashvalue-scan) |
 
 Staging files (only worth checking when you want to review pending candidates, not a
 daily habit): `investments/my-trader/synced-candidates-pending-review.md`,
@@ -31,6 +32,7 @@ alerts/discoveries as they fire — these files are for batch review, not discov
 | Tool | What it does | Where it runs | Schedule | Output |
 |------|--------------|----------------|----------|--------|
 | <a id="mytrader-monitor"></a>[↑](#daily-read) **my-trader Monitor** | Re-checks all holdings + vetted watchlist rows | Windows Task Scheduler (`SecondBrain-MyTraderMonitor`), this dev machine | Daily, 7:30am Sydney local | `investments/my-trader/my-trader-report.md`, refreshes `gold-outlook.md` |
+| <a id="cashvalue-scan"></a>[↑](#daily-read) **Cash-Value Scan** ("Cash 80% Trading Value") | Screens US (Finviz) + ASX 200 (Wikipedia) for net cash ≥ 80% of market cap + positive operating & free cash flow; ranked advisor-notes list, no staging/alerts | VPS systemd (`second-brain-mytrader-cashvalue-scan.timer`) | Daily, 22:30 UTC | `investments/my-trader/cash-value-report.md` |
 | <a id="goat-monitor"></a>[↑](#daily-read) **Goat Monitor** (150DMA exit check + sector rotation scan) | Flags holdings AND every watchlist ticker closing below their 150-day MA; ranks the 11 SPDR sector ETFs and stages fresh breakout candidates; also refreshes the industry rotation ranking | VPS systemd (`second-brain-goat-monitor.timer`) | Daily, 21:35 UTC (07:35 AEST / 08:35 AEDT) | `investments/goat/goat-report.md`, `sector-ranking.md`, `sector-candidates-pending-review.md`, `industry-ranking.md` |
 | **Goat Intraday Live-Check** | Live-price 150DMA check against currently-open-market holdings | VPS systemd (`second-brain-goat-live-check.timer`) | Every 10 min around the clock (no-ops outside ASX/US session hours) | WhatsApp alert only if breached — no standalone report file |
 | **Goat Heartbeat Scan** (S&P 500) | Screens S&P 500 constituents in currently-rising sectors for the low-volatility-consolidation-then-breakout pattern, with fundamentals survival context | VPS systemd (`second-brain-goat-heartbeat-scan.timer`) | Weekly, Saturday 8:00am Sydney local | `investments/goat/heartbeat-candidates-pending-review.md` |
@@ -52,6 +54,7 @@ undoing the 2026-08-23 fix.
 | **my-trader snapshot** | Regenerate markdown from the DB | `-Package my-trader -Command "snapshot"` | `investments/my-trader/holdings.md`, `watchlist.md` |
 | **my-trader sync-candidates** | Pull new Briefs Finance recs into staging | `-Package my-trader -Command "sync-candidates"` | `investments/my-trader/synced-candidates-pending-review.md` |
 | **my-trader gold-backtest** | Force a fresh gold backtest | `-Package my-trader -Command "gold-backtest"` | `investments/my-trader/gold-outlook.md` |
+| **Cash-Value Scan (on-demand)** | Same US + ASX net-cash screen (net cash ≥ 80% of market cap + cash-flow positive), right now | `-Package my-trader -Command "cash-value-scan"` | `investments/my-trader/cash-value-report.md` |
 | **my-trader IBKR sync** | Diff real IB Gateway positions against tracked holdings — fetch is local (IB Gateway only runs here), diff/write happens on the VPS | `uv run --directory investments/my-trader python -m mytrader.main sync-ibkr [--apply]` (this one stays local — see `ibkr-setup-guide.md`) | Terminal report; `--apply` writes DB corrections + stages new positions |
 | **Goat sector scan (on-demand)** | Same sector-rotation ranking, without the 150DMA holdings check | `-Package goat -Command "scan-sectors"` | `investments/goat/sector-ranking.md`, `sector-candidates-pending-review.md` |
 | **Goat industry scan (on-demand)** | Same industry-rotation ranking (39 of 143 Finviz industries with a dedicated ETF, 6-month window), right now | `-Package goat -Command "scan-industries"` | `investments/goat/industry-ranking.md` |

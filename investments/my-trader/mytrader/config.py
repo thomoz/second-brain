@@ -552,3 +552,67 @@ INSIDER_SELLING_FLAG_PCT_THRESHOLD = 10.0  # % of the insider's own position --
     # matches GOAT_INSIDER_SALE_PCT_THRESHOLD_FIRST. No repeat-sale state exists in a
     # one-shot Find check (unlike goat's Holdings Watch), so there's one threshold
     # here, not a first/repeat pair.
+
+# ---------------------------------------------------------------------------
+# Cash-Value Scanner ("Cash 80% Trading Value") -- mytrader/cash_value_scan.py,
+# per .agent/plans/cash-value-scanner.md. Scheduled daily on the VPS. Screens for
+# companies trading at ~cash value: net cash (cash + short-term investments minus
+# total debt) >= 80% of market cap, AND positive operating + free cash flow.
+# Advisor-notes report only; no staging, no alerts. Shaun's idea 2026-08-26.
+# ---------------------------------------------------------------------------
+CASH_VALUE_REPORT_PATH = MY_TRADER_DIR / "cash-value-report.md"
+
+CASH_VALUE_RATIO_THRESHOLD = 0.80  # qualifies when net cash / market cap >= this.
+    # Higher = more of the share price is just the bank balance. 0.80 = "paying
+    # ~20c on the dollar for everything the business does except its cash." Plain
+    # hard cutoff, no near-miss band -- Shaun's call, 2026-08-26.
+CASH_VALUE_MICRO_CAP_TAG_USD = 50_000_000.0  # tag (NOT drop) US rows below this
+    # market cap with "micro" -- cash-value micro-caps are disproportionately
+    # distressed / illiquid, but Finviz's coarse filter (avg vol > 100K, price > $1)
+    # already removes the untradeable shells and Shaun wants to eyeball everything.
+    # Smaller = less liquid / higher risk. Shaun's call, 2026-08-26.
+CASH_VALUE_MICRO_CAP_TAG_AUD = 75_000_000.0  # ~same threshold for AUD-denominated
+    # ASX rows (rough USD->AUD, not a live FX rate -- this is a display tag only).
+CASH_VALUE_EXCLUDED_SECTORS = frozenset({
+    "Financial",           # Finviz's sector string
+    "Financials",          # GICS / Wikipedia S&P/ASX 200 sector string
+    "Financial Services",  # yfinance's .info["sector"] string
+    "Real Estate",         # all three vocabularies agree on this one
+})  # net cash is not a meaningful concept for a bank / REIT -- Shaun's call,
+    # 2026-08-26. Checked against BOTH the coarse universe sector (Finviz/Wikipedia)
+    # and yfinance's .info sector, which use different wording -- verified live
+    # 2026-08-26 that the ASX 200 Wikipedia table says "Financials".
+CASH_VALUE_REPORT_MAX_ROWS = 60  # if more than this qualify, show the top N by cash
+    # ratio and note the overflow count. Ratio sort + the cash-flow gate should keep
+    # it well under this in practice. v1 best-guess cap.
+
+# Finviz screener scraper (mytrader/finviz_screener.py) -- the US universe source for
+# the cash-value scan. Coarse Price/Cash prefilter only; the precise net-cash test
+# runs in the yfinance enrichment pass. Live-verified 2026-08-26: 492 matches / 25
+# pages, public, no login. robots.txt disallows /screener?* and /export + /api/*,
+# but not the legacy /screener.ashx path used here, and the export endpoints are
+# never touched -- same acceptable-scrape class as openinsider.com / en.wikipedia.org
+# already scraped in this repo.
+FINVIZ_SCREENER_URL = "https://finviz.com/screener.ashx"
+FINVIZ_USER_AGENT = (  # a real browser UA -- Finviz blocks obviously-bot UAs on
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "  # some paths,
+    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"              # same reason
+)                                                                     # as ASX_USER_AGENT.
+FINVIZ_SCREENER_FILTERS = "fa_pc_u3,geo_usa,sh_avgvol_o100,sh_price_o1"  # Price/Cash
+    # < 3 + US-listed + avg vol > 100K + price > $1. P/C uses GROSS cash and net cash
+    # <= gross cash, so net cash >= 80% of mcap implies P/C <= 1.25 -- a P/C < 3 net
+    # safely contains every true positive. Lower P/C = more cash-like.
+FINVIZ_SCREENER_ROWS_PER_PAGE = 20  # free tier; pagination is &r=1,21,41,...
+FINVIZ_MAX_PAGES = 40  # safety cap (~25 pages of real data today) -- stop paginating
+    # past this even if the end-of-results signal is somehow missed.
+FINVIZ_REQUEST_DELAY_SECONDS = 0.5  # courtesy delay between sequential page GETs --
+    # same class as SEC_REQUEST_DELAY_SECONDS (0.2), a little wider for a third-party
+    # site with bot detection.
+
+# S&P/ASX 200 constituent scrape (mytrader/asx200_universe.py) -- the ASX universe
+# source. Wikipedia is scrape-friendly; a descriptive UA is enough (same style as
+# OPENINSIDER_USER_AGENT). Live-verified 2026-08-26: a "Constituent companies"
+# wikitable, 200 rows, columns Code / Company / Sector / Market Capitalisation (A$) /
+# Headquarters. yfinance ticker form is <CODE>.AX.
+ASX200_WIKI_URL = "https://en.wikipedia.org/wiki/S%26P/ASX_200"
+ASX200_USER_AGENT = "Mozilla/5.0 (compatible; SecondBrainMyTrader/1.0)"

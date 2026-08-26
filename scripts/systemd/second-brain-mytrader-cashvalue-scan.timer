@@ -1,0 +1,10 @@
+[Unit]
+Description=my-trader Cash-Value Scan Timer
+Requires=second-brain-mytrader-cashvalue-scan.service
+
+[Timer]
+OnCalendar=*-*-* 22:30:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
