@@ -11,6 +11,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
 | BXB.AX | 4 | FY26 full results due 27 Aug 2026 (US repair-capacity bottleneck was the May guidance cut) |
+| COUR | unassigned | From Cash Value Report - net cash ~55% of mcap, +366M FCF, revenue +60% |
 | MLM | 4 | Lhoist 13.5B acquisition expected to close Q3 2026 |
 | WES.AX | 4 | FY26 full results due 27 Aug 2026 |
 
