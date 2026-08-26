@@ -263,16 +263,22 @@ _DISCLAIMER = (
 )
 
 _TABLE_HEADER = (
-    "| Ticker | Company | Mkt | Net cash / mcap | Biz / mcap | Market cap | "
-    "OCF (TTM) | FCF | FCF yld on biz | Net cash | Rev growth YoY | Sector | Tags | Read |"
+    "| Ticker | Company | Mkt | Net cash / mcap (more = cheaper) | "
+    "Biz / mcap (less = cheaper) | Market cap | OCF (TTM) | FCF | FCF yld on biz | "
+    "Net cash (more = bigger cushion) | Rev growth YoY | Sector | Tags | Read |"
 )
 _TABLE_RULE = "|" + "---|" * 14
 _COLUMN_NOTE = (
-    "`Net cash / mcap` = net cash as a % of the whole company's market value (the "
-    "headline number, sorted high-to-low). `Biz / mcap` = what's left, i.e. what "
-    "you're paying for the operating business itself; negative means the price is "
-    "below the cash pile. `FCF yld on biz` = free cash flow as a % of that business "
-    "value."
+    "The three net-cash columns carry a `(more/less = cheaper)` hint in the header. "
+    "`Net cash / mcap` = net cash (cash + short-term investments minus all debt) as a "
+    "% of the whole company's market value; higher means more of the share price is "
+    "just the bank balance (sorted high-to-low). `Biz / mcap` = what's left after the "
+    "cash, i.e. what you're paying for the operating business itself; lower is cheaper "
+    "and negative means the price is below the cash pile. `Net cash` = the same figure "
+    "in dollars. `FCF yld on biz` = free cash flow as a % of that business value. "
+    "Note: a high `Net cash / mcap` reads as *cheap*, not automatically *good* - the "
+    "market often prices a company below its cash because it expects that cash to be "
+    "burned, trapped, or never paid out (see the Read column, then run `find` / `assess`)."
 )
 
 
