@@ -224,42 +224,74 @@ GOAT_US_TZ = "America/New_York"
 GOAT_US_MARKET_OPEN = (9, 30)    # 9:30am US Eastern
 GOAT_US_MARKET_CLOSE = (16, 0)   # 4:00pm US Eastern
 
-# S&P 500 heartbeat scanner, per investments/goat/HANDOFF.md Phase 3. See
-# .agent/plans/goat-phase3-heartbeat-scanner.md's "RESEARCH RESOLVED" section
-# for why BBW-percentile-squeeze was chosen over Minervini's VCP.
-GOAT_HEARTBEAT_HISTORY_LOOKBACK_DAYS = 500  # calendar days -- same margin
-                                               # philosophy as GOLD_MA_HISTORY_LOOKBACK_DAYS
-                                               # (500 calendar days for a 200-day MA in
-                                               # mytrader/config.py); here it must
-                                               # comfortably cover the 252-trading-day BBW
-                                               # percentile lookback below plus the 20-day
-                                               # Bollinger period plus weekday/holiday margin.
-GOAT_HEARTBEAT_BBW_PERIOD_DAYS = 20  # textbook Bollinger default -- same value as
-                                        # mytrader.config.GOLD_TA_BOLLINGER_PERIOD_DAYS,
-                                        # reused for consistency, not re-derived.
-GOAT_HEARTBEAT_BBW_STD_MULTIPLIER = 2.0  # textbook default -- same value as
-                                            # mytrader.config.GOLD_TA_BOLLINGER_STD_MULTIPLIER.
-GOAT_HEARTBEAT_BBW_PERCENTILE_LOOKBACK_DAYS = 252  # ~1 trading year -- the window BBW's
-                                                       # own rolling percentile is measured
-                                                       # against (self-relative to each
-                                                       # ticker's own volatility regime, not
-                                                       # a universal fixed %). v1/tunable.
-GOAT_HEARTBEAT_BBW_PERCENTILE = 10  # flag when BBW sits at/below its own trailing
-                                       # GOAT_HEARTBEAT_BBW_PERCENTILE_LOOKBACK_DAYS-day
-                                       # 10th percentile -- "near a 1-year volatility low".
-                                       # v1/tunable, not literature-final, same status as
-                                       # GOAT_SECTOR_CROSS_RECENCY_DAYS.
-GOAT_HEARTBEAT_MIN_DURATION_DAYS = 63  # ~3 calendar months of trading days -- matches the
-                                          # webinar's own "3 months minimum" and this
-                                          # codebase's existing GOAT_SECTOR_RANK_WINDOW_TRADING_DAYS
-                                          # precedent for that exact figure.
-GOAT_HEARTBEAT_SQUEEZE_MIN_FRACTION = 0.8  # at least 80% of the trailing
-                                              # GOAT_HEARTBEAT_MIN_DURATION_DAYS days must be
-                                              # in-squeeze -- the webinar describes "smooth
-                                              # up-down-up-down", not a perfectly unbroken
-                                              # flat line, so a strict 100%-of-days
-                                              # requirement would misfire on ordinary
-                                              # single-day noise. v1/tunable.
+# S&P 500 heartbeat scanner, per investments/goat/HANDOFF.md Phase 3. The
+# "quiet" / consolidation leg was redesigned 2026-08-26 -- see
+# .agent/plans/goat-heartbeat-quiet-redesign.md and
+# investments/goat/heartbeat-quiet-redesign-handoff.md. The original
+# BBW-percentile squeeze (see
+# .agent/plans/completed/goat-phase3-heartbeat-scanner.md's "RESEARCH RESOLVED"
+# section) was structurally unable to pass on real history: it measured
+# quietness against each ticker's own trailing 252-trading-day Bollinger
+# BandWidth percentile, which needs ~345 trading days just to produce one usable
+# reading -- the tool only fetches ~343. It flagged zero candidates on every run
+# 2026-08-17 -> 2026-08-26 (quiet score pinned near 0.00 for 42 of 42
+# hand-checked large caps). The replacement below is direct and recent-window:
+# no trailing-year self-percentile anchor anywhere.
+GOAT_HEARTBEAT_HISTORY_LOOKBACK_DAYS = 500  # calendar days (~343 trading days from
+    # yfinance) -- must cover GOAT_MA_LONG_DAYS (150) + GOAT_HEARTBEAT_MIN_DURATION_DAYS
+    # (63) + GOAT_HEARTBEAT_MA_LONG_SLOPE_LOOKBACK_DAYS (20) +
+    # GOAT_SECTOR_CROSS_RECENCY_DAYS (10) ~= 243 trading days, plus slack for the base
+    # window to sit earlier than the freshest possible cross. 500 calendar days clears
+    # that floor by ~100 trading days. Same margin philosophy as
+    # GOLD_MA_HISTORY_LOOKBACK_DAYS (500 for a 200-day MA in mytrader/config.py); the
+    # redesign handoff says explicitly not to shrink it below ~1 year + base + slope +
+    # margin, and 500 already sits right at that floor.
+GOAT_HEARTBEAT_MIN_DURATION_DAYS = 63  # ~3 calendar months of trading days -- the length
+    # of the tight-base ("heartbeat") measurement window, the closes ending the day
+    # before the most recent 50-day-MA cross. Matches the webinar's own "3 months
+    # minimum" and this codebase's existing GOAT_SECTOR_RANK_WINDOW_TRADING_DAYS
+    # precedent for that exact figure. (Same value as the old pre-cross squeeze window
+    # -- clearer meaning.)
+
+# Tight-base ("heartbeat") consolidation leg -- redesigned 2026-08-26 per
+# .agent/plans/goat-heartbeat-quiet-redesign.md. Replaces the old BBW-percentile
+# squeeze, which was structurally unable to pass on real history (needed ~345
+# trading days to compute one usable reading; the tool fetches ~343). All measures
+# below are direct and recent-window -- no trailing-year self-percentile anchor.
+# Price series is close-only (no intraday high/low), so range is a close-range.
+GOAT_HEARTBEAT_BASE_RANGE_MAX_PCT = 15.0  # max (max_close - min_close) / mean_close
+    # over the GOAT_HEARTBEAT_MIN_DURATION_DAYS base window, as a percent -- tighter
+    # is better. Between Minervini's VCP "final contraction <= ~8-10%" and "whole
+    # base <= 35%" (finermarketpoints / deepvue / tradingmomentum, 2026-08-26); the
+    # Goat webinar's "smooth 3-month heartbeat" is broader than the final
+    # contraction, so this leans toward the tight end of the base range. v1/tunable,
+    # not literature-final -- same status as GOAT_SECTOR_CROSS_RECENCY_DAYS.
+GOAT_HEARTBEAT_BASE_INNER_BAND_PCT = 8.0  # at least
+    # GOAT_HEARTBEAT_BASE_SMOOTHNESS_MIN_FRACTION of base-window closes must sit
+    # within +/- this percent of the base-window mean -- the "smooth up-down-up-down"
+    # shape test (webinar's own words), distinct from the outright
+    # GOAT_HEARTBEAT_BASE_RANGE_MAX_PCT ceiling which one lone spike day could still
+    # satisfy. ~half the range ceiling. v1/tunable design number, not sourced.
+GOAT_HEARTBEAT_BASE_SMOOTHNESS_MIN_FRACTION = 0.8  # >= this fraction of base-window
+    # closes must be inside the GOAT_HEARTBEAT_BASE_INNER_BAND_PCT band. Renamed from
+    # GOAT_HEARTBEAT_SQUEEZE_MIN_FRACTION (same 0.8 value) -- the webinar describes
+    # "smooth up-down-up-down", not a dead-flat line, so a strict 100%-of-days test
+    # would misfire on ordinary noise. v1/tunable.
+GOAT_HEARTBEAT_BASE_BELOW_MA50_MIN_FRACTION = 0.6  # >= this fraction of base-window
+    # closes must be at/below the 50-day MA, so the breakout cross-up is a genuine
+    # reclaim of the 50 rather than noise chopping across a flat fast MA. Shaun
+    # confirmed this shape requirement 2026-08-26. v1/tunable design number.
+GOAT_HEARTBEAT_MA_LONG_TOLERANCE_PCT = 3.0  # during the base, price may close up to
+    # this percent below its 150-day MA (the webinar's exit rule explicitly tolerates
+    # brief dips through the 150) -- but price must be AT/ABOVE the 150-day MA on the
+    # breakout bar itself. Distinct from GOAT_150DMA_FLAG_PCT (0.0): that is Shaun's
+    # "alert the instant a HOLDING touches its 150DMA" exit number; this is an
+    # entry-pattern shape tolerance, a different purpose. v1/tunable design number.
+GOAT_HEARTBEAT_MA_LONG_SLOPE_LOOKBACK_DAYS = 20  # 150-day MA today vs. N trading days
+    # ago for the flat-to-rising check (ma150.iloc[-1] >= ma150.iloc[-1 - N]).
+    # Deliberately longer than GOAT_SECTOR_SLOPE_LOOKBACK_DAYS (5, correct for the
+    # fast 50DMA) -- a 150-day line barely moves in a trading week, so 5 days of it
+    # is noise. ~1 trading month. v1/tunable design number.
 
 # Fundamentals survival context, per HANDOFF.md's debt -> cash runway -> margins ->
 # revenue growth -> cash generation priority order. Informational on every candidate,
