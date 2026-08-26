@@ -264,6 +264,8 @@ def render_sector_ranking_report(result: dict[str, Any]) -> str:
         "trading days across the 11 SPDR Select Sector ETFs. Advisor notes only; "
         "no trade action is ever suggested here (see SOUL.md).",
         "",
+        f"## Run: {_today_sydney()}",
+        "",
         "| Rank | Ticker | Sector | Return | Rising |",
         "|------|--------|--------|--------|--------|",
     ]
@@ -333,6 +335,8 @@ def render_industry_ranking_report(result: dict[str, Any]) -> str:
         "sector-ranking.md (11 broad sectors) -- see that file for the "
         "3-month sector-level view. Advisor notes only; no trade action is "
         "ever suggested here (see SOUL.md).",
+        "",
+        f"## Run: {_today_sydney()}",
         "",
         "## Top 5 Rising",
         "| Rank | Ticker | Industry | Return |",
