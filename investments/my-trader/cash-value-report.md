@@ -1,8 +1,6 @@
-> DEGRADED - Yahoo Finance rate-limited the fundamentals pass (only 0/200 ASX names returned data) (2026-08-29) - showing the last good run below.
-
 # Cash-Value Scan
 
-**Last run: 2026-08-29** - scanned 498 US + 200 ASX names (555 returned balance-sheet data), 10 qualify at net cash >= 50% of market cap.
+**Last run: 2026-08-30** - scanned 498 US + 200 ASX names (555 returned balance-sheet data), 10 qualify at net cash >= 50% of market cap.
 
 What this is: companies whose net cash (cash minus all debt) is at least 50% of their market cap AND that generate positive operating cash flow - the market is pricing the whole operating business at a steep discount and handing you the balance-sheet cash on top. Classic Graham / deep-value screen. Free cash flow is shown and tagged when negative, but is not a filter (positive OCF with negative FCF is usually growth capex, not burn).
 
