@@ -100,3 +100,7 @@ Skip drafts for: Newsletters, automated notifications, spam
 ## 2026-08-26 Reflection
 - (Aug 26) Wrapper strips literal `$` from command args; use `USD 6.19` style prices
 - (Aug 26) `SecondBrain-MyTraderMonitor` 7:30am run should use VPS over SSH, not local DB
+
+## 2026-08-29 Reflection
+- (Aug 29) GOAT insider discovery excludes institutional bare `10%` Form 4 filers
+- (Aug 29) `GOAT_INSIDER_DISCOVERY_EXCLUDE_INSTITUTIONAL_10PCT` is live on VPS

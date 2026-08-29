@@ -78,3 +78,6 @@ _(not yet populated)_
 
 ## 2026-06-26 Update
 - (Jun 26) Live work currently earns about $500/week after tax
+
+## 2026-08-29 Update
+- (Aug 29) Avoid long-term holds in clean-energy names without pricing power
