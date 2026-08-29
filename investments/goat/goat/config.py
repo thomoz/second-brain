@@ -371,6 +371,35 @@ GOAT_INSIDER_HOLDINGS_WATCH_LOOKBACK_DAYS = 5  # Form 4 must be filed within 2 U
     # pattern-detection window, which looks back across many runs' worth of history.
 GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS = 5  # same reasoning as above -- a safety net on
     # top of OpenInsider's own latest-first page ordering.
+
+GOAT_INSIDER_DISCOVERY_EXCLUDE_INSTITUTIONAL_10PCT = True  # Shaun 2026-08-29: keep
+    # outside asset managers / funds / holding vehicles out of the discovery review
+    # queue. Once a firm crosses the 13(d) 10% threshold it must file a Form 4 on
+    # every trade -- the same paperwork a CEO files -- but its buying is portfolio
+    # management, not an insider-conviction signal (prompted by "Metlife Investment
+    # Management, LLC" filing $22M+ Mandatory Redeemable Preferred Share purchases
+    # across 4 Calamos closed-end funds, CCD/CHI/CHW/CHY, on 2026-08-26). A filer
+    # is treated as institutional when its name matches a corporate-designator
+    # pattern AND its Form 4 title is a bare "10%" beneficial-owner designation with
+    # no officer/director role -- so individual 10% owners (founders, large private
+    # holders) and entities that also hold a board seat are still kept. This filter
+    # applies to run_discovery_scan ONLY -- the filing is dropped before any
+    # goat_insider_filings_seen row is written (keeps it out of the price-outcome
+    # maturation job's yfinance loop too). run_discovery_sell_tracking and
+    # run_holdings_watch (a small curated set) are untouched.
+GOAT_INSIDER_INSTITUTIONAL_NAME_RE_PARTS: tuple[str, ...] = (
+    r"LLC", r"L\.?L\.?C\.?", r"L\.?P\.?", r"LLP", r"LTD", r"PLC", r"INC",
+    r"CORP", r"CO", r"COMPANY", r"TRUST", r"FUND", r"FUNDS", r"PARTNERS",
+    r"PARTNERSHIP", r"CAPITAL", r"MANAGEMENT", r"ADVISOR", r"ADVISORS",
+    r"ADVISER", r"ADVISERS", r"HOLDING", r"HOLDINGS", r"VENTURES", r"GROUP",
+    r"ASSOCIATES", r"ASSET", r"INVESTMENT", r"INVESTMENTS", r"SPONSOR",
+    r"BANCORP", r"BANCSHARES",
+)  # word-boundary tokens -- tuned against the 2026-08-28 discovery list (Metlife,
+    # Saba Capital Management, Winmill & Co. Inc, Cascade Investment L.L.C.,
+    # Divisadero Street Capital Management, Prescott Group Capital Management,
+    # Goldentree Asset Management, Empery Asset Management, Hartree Partners,
+    # Donegal Mutual Insurance Co, Adar1 Capital Management, Red Oak Partners).
+
 GOAT_INSIDER_SCAN_REPORT_PATH = GOAT_DIR / "insider-scan-report.md"
 
 GOAT_INSIDER_PRICE_FLAG_TIERS: list[tuple[int, float]] = [

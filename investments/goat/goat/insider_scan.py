@@ -37,6 +37,39 @@ def _within_lookback(trade_date_str: str, lookback_days: int) -> bool:
     return (date.today() - trade_date).days <= lookback_days
 
 
+_INSTITUTIONAL_NAME_RE = re.compile(
+    r"\b(?:" + "|".join(config.GOAT_INSIDER_INSTITUTIONAL_NAME_RE_PARTS) + r")\b",
+    re.IGNORECASE,
+)
+
+# Officer / board-seat roles -- deliberately excludes the ambiguous
+# "Managing Member" / "Partner" / "Principal" style titles that institutional
+# filers also use, so those don't rescue an entity filer from the filter.
+_OFFICER_DIRECTOR_TITLE_RE = re.compile(
+    r"\b(?:CEO|CFO|COO|CTO|CIO|CMO|CAO|CCO|CDO|CHRO|COB|PRES|PRESIDENT|DIR|"
+    r"DIRECTOR|CHAIR|CHAIRMAN|CHAIRPERSON|CHAIRWOMAN|OFFICER|VP|EVP|SVP|AVP|"
+    r"VICE|TREASURER|SECRETARY|CONTROLLER|COUNSEL|GC|TRUSTEE|FOUNDER|CHIEF|"
+    r"EXEC)\b",
+    re.IGNORECASE,
+)
+
+
+def _is_institutional_10pct_filer(insider_name: str, title: str) -> bool:
+    """True when a discovery filing's reporting person is an outside institution
+    filing only because it crossed the 10% beneficial-owner threshold, not a
+    company officer/director -- see GOAT_INSIDER_DISCOVERY_EXCLUDE_INSTITUTIONAL_10PCT
+    in config for the rationale.
+
+    Requires BOTH: the name matches a corporate-designator pattern (LLC / L.P. /
+    Capital / Management / Fund / ...), AND the title names no officer or director
+    role. So an individual who owns 10% (title "10%", name "Lynch Timothy P") is
+    kept, and an entity that also holds a board seat (title "Dir, 10%") is kept.
+    """
+    if not insider_name or not _INSTITUTIONAL_NAME_RE.search(insider_name):
+        return False
+    return not _OFFICER_DIRECTOR_TITLE_RE.search(title or "")
+
+
 def _pct_owned_change_clause(row: dict) -> str:
     """Informational context, not a filter (same precedent as heartbeat_scan's
     fundamentals survival context) -- a $2M sale reads very differently against
@@ -147,6 +180,10 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
             continue
         ticker = row["ticker"]
         if ticker in config.GOAT_BANNED_TICKERS:
+            continue
+        if config.GOAT_INSIDER_DISCOVERY_EXCLUDE_INSTITUTIONAL_10PCT and _is_institutional_10pct_filer(
+            row.get("insider_name", ""), row.get("title", "")
+        ):
             continue
         if mt_db.get_holding_row(conn, ticker) is not None:
             continue

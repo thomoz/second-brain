@@ -261,6 +261,75 @@ def test_run_discovery_scan_skips_banned_ticker(db_conn, monkeypatch):
     assert goat_db.get_goat_pending_candidate(db_conn, "ACME") is None
 
 
+def _inst_purchase_row(ticker, insider_name, title):
+    row = _purchase_row(ticker=ticker)
+    row["insider_name"] = insider_name
+    row["title"] = title
+    return row
+
+
+def test_is_institutional_10pct_filer_classification():
+    inst = insider_scan._is_institutional_10pct_filer
+    # dropped: corporate-designator name + bare "10%" / remarks title
+    assert inst("Metlife Investment Management, LLC", "10%") is True
+    assert inst("Saba Capital Management, L.P.", "10%") is True
+    assert inst("Winmill & Co. Inc", 'See "Explanation of Responses"') is True
+    assert inst("Cascade Investment, L.L.C.", "10%") is True
+    assert inst("Donegal Mutual Insurance Co", "10%") is True
+    assert inst("B&R Technology Sponsor LLC (Cayman)", "10%") is True
+    assert inst("Goldentree Asset Management LP", "10%") is True
+    # kept: individuals (no corporate designator), even at 10%
+    assert inst("Lynch Timothy P", "10%") is False
+    assert inst("Rady Ernest S", "Exec COB, 10%") is False
+    assert inst("Chernett Jorey", "10%") is False
+    # kept: entity that also holds a board seat
+    assert inst("Haveli Investments, L.P.", "Dir, 10%") is False
+    assert inst("Perceptive Advisors LLC", "Dir") is False
+    # kept: empty / missing name
+    assert inst("", "10%") is False
+
+
+def test_run_discovery_scan_skips_institutional_10pct_filer(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [_inst_purchase_row("CHI", "Metlife Investment Management, LLC", "10%")],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert result["new_candidates"] == []
+    assert goat_db.get_goat_pending_candidate(db_conn, "CHI") is None
+    # dropped before any goat_insider_filings_seen row is written
+    assert goat_db.get_recent_insider_filings_seen(db_conn, kind="discovery") == []
+
+
+def test_run_discovery_scan_keeps_individual_10pct_owner(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [_inst_purchase_row("AEON", "Lynch Timothy P", "10%")],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert len(result["new_candidates"]) == 1
+    assert goat_db.get_goat_pending_candidate(db_conn, "AEON") is not None
+
+
+def test_run_discovery_scan_keeps_entity_filer_with_board_seat(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [_inst_purchase_row("BLND", "Haveli Investments, L.P.", "Dir, 10%")],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert len(result["new_candidates"]) == 1
+
+
+def test_run_discovery_scan_institutional_filter_can_be_disabled(db_conn, monkeypatch):
+    monkeypatch.setattr(goat_config, "GOAT_INSIDER_DISCOVERY_EXCLUDE_INSTITUTIONAL_10PCT", False)
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [_inst_purchase_row("CHI", "Metlife Investment Management, LLC", "10%")],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert len(result["new_candidates"]) == 1
+
+
 def test_run_discovery_scan_stays_quiet_on_repeat_run(db_conn, monkeypatch):
     monkeypatch.setattr(
         "goat.insider_scan.openinsider.fetch_discovery_purchases",
