@@ -15,4 +15,4 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 | URNM.AX |  | 300.0 | $3,384.00 | $10.32 | +$288.87 | 1 |
 | V | Visa Inc (Class A) | 0.1001 | $38.20 | $318.41 | +$6.33 | 1 |
 
-Last auto-generated: 2026-08-29.
+Last auto-generated: 2026-08-30.
