@@ -31,3 +31,6 @@ Deep dive Main, XLK.
 
 ## 2026-08-18 [WhatsApp save]
 Guitar strings for Eric.
+
+## 2026-08-30 [WhatsApp save]
+I wanted to design a more immediate way of alerting me when a message is sent to Computer from second brain.
