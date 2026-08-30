@@ -8,4 +8,4 @@ Scanned 327 ticker(s) across 7 rising sector(s): Consumer Staples, Energy, Finan
 |--------|--------|--------|---------|
 | KMI | Energy | KMI (Energy): 63 trading days of tight sideways consolidation before the breakout -- 7.3% high-low close range vs. the 15% ceiling (tighter is better), 100% of days inside the smooth inner band, price at/below its 50-day MA on 60% of base days -- held at/above its 150-day MA throughout (worst dip 2.5% below, within the 3% tolerance) with that 150-day MA flat-to-rising. Then a fresh cross above the 50-day MA 0 trading day(s) ago, 50-day MA now sloping up -- heartbeat entry signal (webinar Step 1); survival context: debt/equity 98.6 (below flag threshold), N/A — cash generative, gross margin 49.4%, operating margin 30.1%, revenue growth +10.8% YoY, cash-generating | 2026-08-26 |
 
-Last auto-generated: 2026-08-29.
+Last auto-generated: 2026-08-30.
