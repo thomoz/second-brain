@@ -52,6 +52,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - Notify Shaun only for long/background task completion, not quick routine tasks
 - Use WhatsApp for task completion notifications, not `PushNotification`
 - Phrase unclear questions simply
+- Prefer more immediate alerts when a message is sent to local computer
 ---
 
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_
