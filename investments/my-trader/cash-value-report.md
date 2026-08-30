@@ -1,6 +1,6 @@
 # Cash-Value Scan
 
-**Last run: 2026-08-30** - scanned 498 US + 200 ASX names (555 returned balance-sheet data), 10 qualify at net cash >= 50% of market cap.
+**Last run: 2026-08-31** - scanned 499 US + 200 ASX names (556 returned balance-sheet data), 11 qualify at net cash >= 50% of market cap.
 
 What this is: companies whose net cash (cash minus all debt) is at least 50% of their market cap AND that generate positive operating cash flow - the market is pricing the whole operating business at a steep discount and handing you the balance-sheet cash on top. Classic Graham / deep-value screen. Free cash flow is shown and tagged when negative, but is not a filter (positive OCF with negative FCF is usually growth capex, not burn).
 
@@ -10,6 +10,7 @@ Auto-generated daily - overwritten every run. Advisor notes only; no trade actio
 
 | Ticker | Company | Mkt | Net cash / mcap (more = cheaper) | Biz / mcap (less = cheaper) | Market cap | OCF (TTM) | FCF | FCF yld on biz | Net cash (more = bigger cushion) | Rev growth YoY | Sector | Tags | Read |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| HOLO | MicroCloud Hologram Inc | US | 6658% | -6558% (below net cash) | 40.4M CNY | 56.4M CNY | 11.8M CNY | n/a | 2.69B CNY | +51% | Technology | micro | 2.69B CNY net cash, 40.4M CNY mcap, 11.8M CNY FCF - the market is paying less than the cash pile (-6558% of mcap for the business). |
 | FBIO | Fortress Biotech Inc | US | 155% | -55% (below net cash) | 92.4M USD | 125.9M USD | -17.1M USD | n/a | 143.3M USD | +14% | Healthcare | negative FCF | 143.3M USD net cash, 92.4M USD mcap, -17.1M USD FCF - the market is paying less than the cash pile (-55% of mcap for the business). |
 | MED | Medifast Inc | US | 104% | -4% (below net cash) | 136.2M USD | 8.8M USD | 11.4M USD | n/a | 142.2M USD | -28% | Consumer Cyclical | shrinking revenue | 142.2M USD net cash, 136.2M USD mcap, 11.4M USD FCF - the market is paying less than the cash pile (-4% of mcap for the business). |
 | MTRX | Matrix Service Co | US | 70% | 30% | 304.7M USD | 56.4M USD | 99.4M USD | 110.0% | 214.3M USD | +3% | Industrials | - | 214.3M USD net cash, 304.7M USD mcap, 99.4M USD FCF - paying ~90.4M USD for the operating business. |
