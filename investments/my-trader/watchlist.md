@@ -13,6 +13,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | BXB.AX | 4 | FY26 full results due 27 Aug 2026 (US repair-capacity bottleneck was the May guidance cut) |
 | COUR | unassigned | From Cash Value Report - price USD 6.19 (2026-08-26), net cash ~55% of mcap, +366M FCF, revenue +60% |
 | MLM | 4 | Lhoist 13.5B acquisition expected to close Q3 2026 |
+| NFLX | unassigned | Keep an eye on (Shaun request 2026-09-01) |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
 | WES.AX | 4 | FY26 full results due 27 Aug 2026 |
 
@@ -39,6 +40,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | MCD | McDonald's Corp | stock | 1 | 2.65% | +175% | Not yet discussed. Flagged "defensive?" |
 | MLPX | Global X MLP & Energy Infrastructure ETF | etf | unassigned | — | — | Fund (not an MLP itself, no K-1/UBTI issue) holding MLPs + midstream corporations (TC Energy, Enbridge, Williams). Expense ratio 0.45%, AUM 3.64B, dividend +7.7%. Watching for a better entry point -- no active flags at deep-dive 2026-08-12, PE 21.2 (good), amplifies crashes ~2x (COVID -62.3%). |
 | MOUS | Mous | private | unassigned | — | — | Private UK phone-case company (Airo Shock material), not publicly traded -- no ticker, no yfinance data, no SEC filings. Opened pre-registration for an investment round; terms/valuation not yet known. Inert placeholder: Find/Monitor cannot check this (no market data source exists for a private company), so this row will never populate price/PE/dividend fields or receive automated re-checks -- requires manual follow-up when pre-registration details firm up. |
+| NFLX | Netflix Inc | stock | unassigned | — | — | Added at Shaun request 2026-09-01. Not yet discussed. |
 | NU | Nu Holdings | stock | 1 | — | +32% | Digital-first Latin American bank with 135 million customers, profit up 41%, four million new customers in one quarter, and shares down about 24% in 2026 despite nearly 40% annual business expansion. |
 | OLLI | Ollie's Bargain Outlet | stock | 1 | — | +159% | Not yet discussed. Dollar-store category |
 | PALI | Palisades Goldcorp Ltd | stock | 2 | — | -100% | Not yet discussed (previously mislabeled as vetted, corrected 2026-07-19). Holds equity/warrant stakes in 100+ junior miners — diversified critical-metals exposure, not a pure gold play. Should be sized very small if ever confirmed |
@@ -114,4 +116,4 @@ Major AI-boom names with real moats (chip/foundry monopoly, hyperscaler platform
 | SNDK | SanDisk | stock | ai_postcrash | — | +3663% | Major U.S.-listed NAND flash provider for AI long-term memory with sold-out enterprise inventory, rising margins, strong data center revenue growth, and a hard-to-replicate Kioxia manufacturing partnership. |
 | TSM | Taiwan Semiconductor Manufacturing Company Limited | stock | ai_postcrash | 2.93% | +1713% | Named as one of the companies powering AI that has been crushing it, fitting the report's AI chip supply-chain thesis. |
 
-Last auto-generated: 2026-08-31.
+Last auto-generated: 2026-09-01.
