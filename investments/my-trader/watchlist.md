@@ -14,7 +14,6 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | MLM | 4 | Lhoist 13.5B acquisition expected to close Q3 2026 |
 | NFLX | unassigned | Keep an eye on (Shaun request 2026-09-01) |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
-| WES.AX | 4 | FY26 full results due 27 Aug 2026 |
 
 | Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |
 |--------|------|------|--------|----------|------------|--------|
