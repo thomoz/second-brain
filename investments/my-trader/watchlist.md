@@ -14,6 +14,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | MLM | 4 | Lhoist 13.5B acquisition expected to close Q3 2026 |
 | NFLX | unassigned | Keep an eye on (Shaun request 2026-09-01) |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
+| XRO.AX | unassigned | Watching next few results for US/Melio payments traction; PE 42 rich (deep dive 2026-09-01) |
 
 | Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |
 |--------|------|------|--------|----------|------------|--------|
@@ -61,6 +62,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | XLK |  | etf | unassigned | — | — | Goat-approved sector rotation candidate — XLK (Technology): crossed above its 50-day MA 4 trading day(s) ago, MA now sloping up -- breakout entry signal (webinar Step 1) |
 | XLP | Consumer Staples Select Sector SPDR ETF | etf | 1 | 2.02% | +100% | Not yet discussed. Fee 0.08%; also flagged for bucket re-homing |
 | XLU | Utilities Select Sector SPDR ETF | etf | unassigned | 4.29% | +138% | Not yet discussed. Sector/thematic |
+| XRO.AX | Xero Limited | stock | unassigned | — | — | Deep dive 2026-09-01. ANZ accounting SaaS moat + high-risk US/Melio payments bet. PE 42.4 flagged rich (0/10), principles-fit avg 44/100. Down ~45pct from peak, bounced 17pct in a month. Watching next few results for US/payments traction. |
 
 ## Bucket 4 — Crash Discount Buys
 
