@@ -13,3 +13,4 @@
 - (Jul 07) Facebook developer notification: user data deletion request needs review/action
 - (Jul 09) PHP upgrade path is 7.4 -> 8.0 first, then one major version at a time
 - (Aug 26) Apple Developer asked to confirm organisation address change request
+- (Sep 01) Xero Ignite plan price increase email received; review SongbookDB cost impact
