@@ -11,7 +11,6 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
 | BXB.AX | 4 | FY26 full results due 27 Aug 2026 (US repair-capacity bottleneck was the May guidance cut) |
-| COUR | unassigned | From Cash Value Report - price USD 6.19 (2026-08-26), net cash ~55% of mcap, +366M FCF, revenue +60% |
 | MLM | 4 | Lhoist 13.5B acquisition expected to close Q3 2026 |
 | NFLX | unassigned | Keep an eye on (Shaun request 2026-09-01) |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
