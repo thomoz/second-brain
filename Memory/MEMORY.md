@@ -53,6 +53,8 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - Use WhatsApp for task completion notifications, not `PushNotification`
 - Phrase unclear questions simply
 - Prefer more immediate alerts when a message is sent to local computer
+- Shaun must run `/plan-feature` manually; never auto-run it
+- For SongbookDB PHP upgrade, process files in strict alphabetical order
 ---
 
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_

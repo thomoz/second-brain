@@ -104,3 +104,7 @@ Skip drafts for: Newsletters, automated notifications, spam
 ## 2026-08-29 Reflection
 - (Aug 29) GOAT insider discovery excludes institutional bare `10%` Form 4 filers
 - (Aug 29) `GOAT_INSIDER_DISCOVERY_EXCLUDE_INSTITUTIONAL_10PCT` is live on VPS
+
+## 2026-09-02 Reflection
+- (Sep 02) Codex backend replaced Gemini after quota issues
+- (Sep 02) `/commit` now auto-pushes and deploys to VPS
