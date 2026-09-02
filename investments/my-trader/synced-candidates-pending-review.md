@@ -13,4 +13,4 @@ Auto-generated from Briefs Finance's `recommendations` table by `sync-candidates
 | OKE | ONEOK | Natural gas pipeline and processing business with fee-based, long-term contracted cash flows, rising demand from data centers, power grid growth, and LNG exports, plus a dividend yield around 4.8%. | 2026-07-19 |
 | SOFI | SoFi Technologies | Market is pricing in noise instead of results for a profitable U.S. neobank with record sales, rapid membership and lending growth, and a bank charter that helps it hold up better in a high-rate environment. | 2026-07-19 |
 
-Last auto-generated: 2026-09-01.
+Last auto-generated: 2026-09-02.
