@@ -108,3 +108,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 ## 2026-09-02 Reflection
 - (Sep 02) Codex backend replaced Gemini after quota issues
 - (Sep 02) `/commit` now auto-pushes and deploys to VPS
+
+## 2026-09-06 Reflection
+- (Sep 06) Heartbeat Codex backend is configured to unsupported model gpt-5.4
