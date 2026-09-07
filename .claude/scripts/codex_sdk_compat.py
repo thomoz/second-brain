@@ -36,7 +36,7 @@ How it maps onto Codex (and where it differs from Pi)
   in parallel only for the thread id (continuity), token usage, and errors.
 * Models: Claude tier names (haiku/sonnet/opus) map to Codex models via env
   (see _resolve_model). Any unrecognized string is passed through as a literal
-  Codex model ref (e.g. "gpt-5.4", "gpt-5.2-codex").
+  Codex model ref (e.g. "gpt-5.5") - must be one the ChatGPT-authed CLI exposes.
 * Tools / safety: Codex exec has no per-tool allow-list and no tool_call hook
   (Pi's pi_safety.ts has no direct equivalent). Safety is enforced with the OS
   sandbox instead: a pure-reasoning call (allowed_tools=[]) runs `read-only`; a
@@ -111,16 +111,17 @@ _SKILLS_DIR = _SCRIPTS_DIR.parent / "skills"
 # Model alias mapping (Claude tier name -> Codex model ref)
 # ---------------------------------------------------------------------------
 
-# Cole's Codex is a ChatGPT subscription. Cheap tier uses the mini for
-# guardrail/scoring; strong tier uses the top model the installed Codex CLI
-# exposes. On Codex CLI 0.117 the listed models are gpt-5.4 ("Strong model for
-# everyday coding") and gpt-5.4-mini; gpt-5.5 requires a NEWER Codex CLI and is
-# rejected with a 400 if requested. So strong defaults to gpt-5.4 here; when a
-# newer CLI ships gpt-5.5, set CODEX_MODEL_STRONG=gpt-5.5. Override any tier to
-# whatever your Codex plan/CLI exposes.
-_MODEL_CHEAP = os.getenv("CODEX_MODEL_CHEAP", "gpt-5.4-mini")
-_MODEL_MID = os.getenv("CODEX_MODEL_MID", "gpt-5.4")
-_MODEL_STRONG = os.getenv("CODEX_MODEL_STRONG", "gpt-5.4")
+# The Codex CLI is authed with a ChatGPT subscription, which only accepts the
+# handful of models that CLI version exposes to ChatGPT accounts - bare API
+# model refs (e.g. "gpt-5-codex", "codex-mini-latest") are rejected with a 400.
+# The accepted set moves with the CLI: 0.117 shipped gpt-5.4 / gpt-5.4-mini;
+# 0.139 dropped gpt-5.4 entirely and ships gpt-5.5 (now the CLI default). So the
+# defaults track the current CLI (gpt-5.5). When the VPS CLI updates again and a
+# 400 says a model "is not supported", run `codex exec "ok"` to see the new
+# default and set CODEX_MODEL_CHEAP/MID/STRONG in .claude/scripts/.env to match.
+_MODEL_CHEAP = os.getenv("CODEX_MODEL_CHEAP", "gpt-5.5")
+_MODEL_MID = os.getenv("CODEX_MODEL_MID", "gpt-5.5")
+_MODEL_STRONG = os.getenv("CODEX_MODEL_STRONG", "gpt-5.5")
 _MODEL_DEFAULT = os.getenv("CODEX_MODEL_DEFAULT", _MODEL_MID)
 
 _MODEL_ALIASES = {
