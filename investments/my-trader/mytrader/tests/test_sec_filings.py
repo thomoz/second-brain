@@ -203,3 +203,89 @@ def test_edgar_fulltext_search_count_no_cik_param_when_omitted(monkeypatch):
 
     monkeypatch.setattr(sec_filings.requests, "get", _fake_get)
     assert sec_filings.edgar_fulltext_search_count("S-1") == 85
+
+
+# --- recent_filings_of_types --------------------------------------------------
+
+from datetime import date  # noqa: E402
+
+
+def _columnar_index(rows):
+    return {"filings": {"recent": {
+        "form": [r[0] for r in rows],
+        "accessionNumber": [r[1] for r in rows],
+        "primaryDocument": [r[2] for r in rows],
+        "primaryDocDescription": [r[3] for r in rows],
+        "filingDate": [r[4] for r in rows],
+        "acceptanceDateTime": [r[4] + "T18:00:00Z" for r in rows],
+    }}}
+
+
+def test_recent_filings_of_types_filters_by_form_and_date():
+    index = _columnar_index([
+        ("4", "acc-1", "form4.xml", "FORM 4", "2026-09-05"),
+        ("SC 13G", "acc-2", "primary_doc.xml", "SC 13G", "2026-09-04"),
+        ("10-K", "acc-3", "d10k.htm", "10-K", "2026-09-05"),
+        ("4", "acc-4", "form4.xml", "FORM 4", "2026-07-01"),
+    ])
+    out = sec_filings.recent_filings_of_types(index, {"4", "SC 13G"}, date(2026, 9, 1))
+    accs = {r["accession_number"] for r in out}
+    assert accs == {"acc-1", "acc-2"}
+    assert out[0]["form"] == "4"
+    assert out[0]["primary_document"] == "form4.xml"
+
+
+def test_recent_filings_of_types_handles_missing_keys_and_ragged_arrays():
+    assert sec_filings.recent_filings_of_types({}, {"4"}, date(2026, 1, 1)) == []
+    ragged = {"filings": {"recent": {
+        "form": ["4", "4"],
+        "accessionNumber": ["acc-1"],  # shorter -- zip to shortest
+        "primaryDocument": ["form4.xml"],
+        "filingDate": ["2026-09-05"],
+    }}}
+    out = sec_filings.recent_filings_of_types(ragged, {"4"}, date(2026, 9, 1))
+    assert len(out) == 1
+
+
+def test_edgar_fulltext_search_hits_maps_rows(monkeypatch):
+    payload = {"hits": {"hits": [
+        {"_id": "0001549575-26-000010:form4.xml", "_source": {
+            "form_type": "4", "file_date": "2026-09-05",
+            "display_names": ["Dalal Street, LLC (CIK 0001549575)"], "ciks": ["0001549575"],
+        }},
+    ]}}
+    monkeypatch.setattr(sec_filings.requests, "get", lambda *a, **k: _FakeSearchResponse(200, payload))
+    rows = sec_filings.edgar_fulltext_search_hits("SC 13D,SC 13G", entity_name="pabrai")
+    assert rows is not None
+    assert rows[0]["accession"] == "0001549575-26-000010"
+    assert rows[0]["form_type"] == "4"
+    assert rows[0]["ciks"] == ["0001549575"]
+
+
+def test_edgar_fulltext_search_hits_tolerates_entity_name_key(monkeypatch):
+    payload = {"hits": {"hits": [
+        {"_id": "0001549575-26-000010:form4.xml",
+         "_source": {"form_type": "4", "entity_name": "PABRAI MOHNISH", "ciks": ["0001173334"]}},
+    ]}}
+    monkeypatch.setattr(sec_filings.requests, "get", lambda *a, **k: _FakeSearchResponse(200, payload))
+    rows = sec_filings.edgar_fulltext_search_hits("4", entity_name="pabrai")
+    assert rows[0]["display_names"] == ["PABRAI MOHNISH"]
+
+
+def test_edgar_fulltext_search_hits_none_on_failure(monkeypatch):
+    monkeypatch.setattr(sec_filings.requests, "get", lambda *a, **k: _FakeSearchResponse(500))
+    assert sec_filings.edgar_fulltext_search_hits("4") is None
+
+
+def test_fetch_filing_directory_index_returns_json(monkeypatch):
+    payload = {"directory": {"item": [{"name": "form4.xml"}, {"name": "xslF345X03/form4.htm"}]}}
+    monkeypatch.setattr(sec_filings.requests, "get", lambda *a, **k: _FakeSearchResponse(200, payload))
+    out = sec_filings.fetch_filing_directory_index("1549575", "0001549575-26-000010")
+    assert out["directory"]["item"][0]["name"] == "form4.xml"
+
+
+def test_get_ticker_for_cik_reverse_lookup(db_conn):
+    db.upsert_cik_map_bulk(db_conn, {"AMR": "1301063", "KO": "21344"})
+    assert db.get_ticker_for_cik(db_conn, "0001301063") == "AMR"
+    assert db.get_ticker_for_cik(db_conn, "1301063") == "AMR"
+    assert db.get_ticker_for_cik(db_conn, "9999999") is None

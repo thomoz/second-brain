@@ -463,6 +463,18 @@ def get_cik_for_ticker(conn: sqlite3.Connection, ticker: str) -> str | None:
     return row["cik"] if row else None
 
 
+def get_ticker_for_cik(conn: sqlite3.Connection, cik: str) -> str | None:
+    """Reverse of get_cik_for_ticker -- issuer CIK -> ticker, for the
+    superinvestor-filings scanner (added 2026-09-07). sec_cik_map.cik is stored as the
+    plain int-string from company_tickers.json, so a zero-padded input is normalised
+    with str(int(cik)) first. Dual-class tickers share one CIK -- the first row is
+    fine for an alert headline."""
+    row = conn.execute(
+        "SELECT ticker FROM sec_cik_map WHERE cik = ? LIMIT 1", (str(int(cik)),)
+    ).fetchone()
+    return row["ticker"] if row else None
+
+
 def get_cached_filing_summary(
     conn: sqlite3.Connection, ticker: str, filing_type: str
 ) -> sqlite3.Row | None:

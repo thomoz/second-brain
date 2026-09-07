@@ -214,6 +214,11 @@ SEC_SUBMISSIONS_URL_TEMPLATE = "https://data.sec.gov/submissions/CIK{cik_padded}
 SEC_ARCHIVES_URL_TEMPLATE = (
     "https://www.sec.gov/Archives/edgar/data/{cik}/{accession_no_dashes}/{document}"
 )
+SEC_ARCHIVES_DIR_URL_TEMPLATE = (
+    "https://www.sec.gov/Archives/edgar/data/{cik}/{accession_no_dashes}/index.json"
+)  # filing-directory listing -- lets a parser find the raw .xml when primaryDocument
+   # points at a rendered xslF345X03/*.htm wrapper (added 2026-09-07 for the
+   # superinvestor-filings scanner's Form 3/4/5 + 13D/G parse).
 SEC_CIK_MAP_REFRESH_DAYS = 30  # bulk ticker->CIK file changes rarely; a brand-new
                                  # IPO not yet in a <30-day-old cache is a known,
                                  # accepted gap -- not solved in v1, see SKILL.md.

@@ -1,10 +1,11 @@
 # Investments Tools — What Runs, When, Where It Writes, How to Run It Now
 
-Four packages share `investments/briefs-finance/data/investments.db` (VPS-only since
+Five packages share `investments/briefs-finance/data/investments.db` (VPS-only since
 2026-08-23 — see `.agent/plans/completed/investments-db-ssh-single-source.md`):
-**my-trader**, **briefs-finance**, **goat**, **fourteen-crash-signals-daily-check**.
+**my-trader**, **briefs-finance**, **goat**, **fourteen-crash-signals-daily-check**,
+**superinvestor-filings**.
 
-Last updated 2026-08-26 — update this file whenever a tool's schedule, command, or
+Last updated 2026-09-07 — update this file whenever a tool's schedule, command, or
 output path changes; it isn't regenerated automatically.
 
 ## Daily Read
@@ -38,6 +39,7 @@ alerts/discoveries as they fire — these files are for batch review, not discov
 | <a id="goat-heartbeat"></a>[↑](#daily-read) **Goat Heartbeat Scan** (S&P 500) | Screens S&P 500 constituents in currently-rising sectors for a tight sideways base sitting at/above a flat-to-rising 150-day MA (price mostly below its 50-day MA through the base), then a fresh 50-day-MA breakout, with fundamentals survival context. Stages fresh finds into `goat_pending_candidates` (`source="goat_heartbeat_scan"`) and pushes new ones to WhatsApp; zero-candidate days are silent. | VPS systemd (`second-brain-goat-heartbeat-scan.timer`) | Daily, 22:45 UTC (~08:45 AEST / 09:45 AEDT) | `investments/goat/heartbeat-candidates-pending-review.md` |
 | <a id="goat-insider-scan"></a>[↑](#daily-read) **Goat Insider Scan** (OpenInsider) | Checks Form 4 filings on holdings, stages market-wide $25k+ buys as candidates (institutional 10%-owner filers excluded — outside asset managers/funds, not company insiders), tracks $100k+ sells; price-since-trade tracking; feeds pattern analysis | VPS systemd (`second-brain-goat-insider-scan.timer`) | Daily, 21:50 UTC (~15min after Goat Monitor) | `investments/goat/insider-scan-report.md`; nightly pattern slice in `insider-pattern-analysis.md` |
 | <a id="fourteen-crash-signals"></a>[↑](#daily-read) **Fourteen Crash Signals Daily Check** | Tracks all 14 crash-warning markers against a dynamically-recomputed hot-company watchlist | VPS systemd (`second-brain-fourteen-signals.timer`) | Daily, 22:05 UTC | `investments/fourteen-crash-signals-daily-check/crash-signals-report.md` |
+| <a id="superinvestor-filings"></a>**Superinvestor Filings Scanner** (EDGAR leg) | Polls each tracked concentrated-value investor's SEC EDGAR submissions feed (Mohnish Pabrai / Dalal Street first) for fast-disclosure forms (13D/G + Form 3/4/5), parses each genuinely-new filing, tags 5%/10%/below-5% crossings, fires one grouped WhatsApp digest. Advisor notes only — never touches watchlist/holdings. India / SEBI SAST leg is Phase 5 (pending a feed spike — see `investments/superinvestor-filings/INDIA-LEG-FINDINGS.md`). | VPS systemd (`second-brain-superinvestor-edgar.timer`) | Daily, 02:35 UTC (~12:35 AEST) | `investments/superinvestor-filings/superinvestor-filings-report.md` |
 
 ## Manual / on-demand only
 
@@ -69,6 +71,8 @@ undoing the 2026-08-23 fix.
 | **Briefs Finance assess / context / stats / excluded** | Full assessment / sector+macro context / track record / exclusion list | `-Package briefs-finance -Command "assess --ticker TICKER [--output markdown]"` / `"context"` / `"stats"` / `"excluded"` | Terminal by default; `--output markdown` writes to `investments/briefs-finance/assessments/` |
 | **Fourteen Crash Signals (on-demand)** | Same daily check, right now | `-Package fourteen-signals -Command "daily-check"` | `investments/fourteen-crash-signals-daily-check/crash-signals-report.md` |
 | **Fourteen Crash Signals: record bond yield** | Manually record a bond yield for Marker #12 (no live source exists) | `-Package fourteen-signals -Command "record-bond-yield TICKER YIELD_PCT [--cusip CUSIP]"` | DB only |
+| **Superinvestor Filings scan (on-demand)** | Same EDGAR fast-disclosure poll, right now (`--edgar-only` / `--india-only` flags available) | `-Package superinvestor-filings -Command "scan --edgar-only"` | `investments/superinvestor-filings/superinvestor-filings-report.md` |
+| **Superinvestor Filings resolve-ciks** | Print `(entity name, CIK)` pairs EDGAR full-text search returns for a tracked filer's name — for manual `config.py` editing, never writes | `-Package superinvestor-filings -Command "resolve-ciks"` | Terminal only |
 
 Full invocation is `.\scripts\invoke_investments.ps1` from the repo root — table rows
 above show only the `-Package`/`-Command` args for brevity.

@@ -1,0 +1,29 @@
+{
+    "cik": "1549575",
+    "name": "Dalal Street, LLC",
+    "filings": {
+        "recent": {
+            "form": ["4", "SC 13G", "13F-HR", "SC 13G/A"],
+            "accessionNumber": [
+                "0001549575-26-000010",
+                "0001549575-26-000009",
+                "0001549575-26-000008",
+                "0001549575-26-000007"
+            ],
+            "primaryDocument": [
+                "form4.xml",
+                "primary_doc.xml",
+                "primary_doc.xml",
+                "primary_doc.xml"
+            ],
+            "primaryDocDescription": ["FORM 4", "SC 13G", "13F-HR", "SC 13G/A"],
+            "filingDate": ["2026-09-04", "2026-09-05", "2026-08-14", "2026-09-06"],
+            "acceptanceDateTime": [
+                "2026-09-04T18:30:00.000Z",
+                "2026-09-05T17:00:00.000Z",
+                "2026-08-14T16:00:00.000Z",
+                "2026-09-06T16:45:00.000Z"
+            ]
+        }
+    }
+}

@@ -19,6 +19,7 @@ members = [
     "fourteen-crash-signals-daily-check",
     "goat",
     "my-trader",
+    "superinvestor-filings",
 ]
 
 [[package]]
@@ -1160,6 +1161,36 @@ sdist = { url = "https://files.pythonhosted.org/packages/80/f1/93422647dd7e461f2
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7b/d6/3185ab5ad1280319b31986898f3206dd7227cd75e293d4dba2a5e6bf27a0/soupsieve-2.9-py3-none-any.whl", hash = "sha256:a2b2c76d67df2382d245409fd71e321a571717e58463efa32ace87dcadac2c12", size = 37387, upload-time = "2026-07-19T01:35:17.106Z" },
 ]
+
+[[package]]
+name = "superinvestor-filings"
+version = "0.1.0"
+source = { editable = "superinvestor-filings" }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "my-trader" },
+    { name = "requests" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.12.0" },
+    { name = "my-trader", editable = "my-trader" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
+    { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.12.0" },
+    { name = "requests", specifier = ">=2.31.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.2.0" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "typing-extensions"
