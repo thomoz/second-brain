@@ -18,7 +18,17 @@ from mytrader.db import get_sync_watermark, set_sync_watermark
 from . import config, db, edgar_parse, issuer_lookup
 
 _OWNERSHIP_FORMS = {"3", "4", "4/A", "5"}
-_SCHEDULE_FORMS = {"SC 13D", "SC 13D/A", "SC 13G", "SC 13G/A"}
+_SCHEDULE_FORMS = {
+    "SC 13D", "SC 13D/A", "SC 13G", "SC 13G/A",
+    "SCHEDULE 13D", "SCHEDULE 13D/A", "SCHEDULE 13G", "SCHEDULE 13G/A",
+}
+
+
+def _canonical_form(form: str) -> str:
+    """EDGAR labels the same Schedule 13D/G family both "SC 13G/A" (legacy) and
+    "SCHEDULE 13G/A" (post-2024 structured submissions). Collapse to the short form
+    so the dedup key and the report never split one form family in two."""
+    return form.replace("SCHEDULE ", "SC ", 1) if form.startswith("SCHEDULE ") else form
 
 
 def build_dedup_key(source: str, filer_key: str, form_type: str, issuer: str, accession: str) -> str:
@@ -145,7 +155,7 @@ def _process_schedule(
     conn: sqlite3.Connection, filer_key: str, filer_display: str, cik: str, filing: dict[str, str]
 ) -> dict[str, Any] | None:
     accession = filing["accession_number"]
-    form_type = filing["form"]
+    form_type = _canonical_form(filing["form"])
     filed_date = filing["filing_date"]
     doc_text = _resolve_schedule_text(cik, accession, filing["primary_document"])
     parsed = edgar_parse.parse_schedule_13dg(doc_text) if doc_text else None

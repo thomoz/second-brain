@@ -12,10 +12,17 @@ PKG_DIR = Path(__file__).resolve().parent.parent  # -> investments/superinvestor
 SUPERINVESTOR_REPORT_PATH = PKG_DIR / "superinvestor-filings-report.md"
 
 # The fast-disclosure form set (see investments/superinvestor-filings-scanner-handoff.md
-# for why each beats the ~135-day 13F lag). Values match EDGAR's own `form` strings in
-# data.sec.gov/submissions/CIK*.json exactly.
+# for why each beats the ~135-day 13F lag). Values must match EDGAR's own `form`
+# strings in data.sec.gov/submissions/CIK*.json exactly. EDGAR emits BOTH the legacy
+# "SC 13x" and the post-2024 structured-submission "SCHEDULE 13x" label for the same
+# form family -- confirmed live 2026-09-08: Pabrai Mohnish's two most recent 13G
+# filings (2026-05-14, 2026-08-13) come through as "SCHEDULE 13G" / "SCHEDULE 13G/A".
+# Both spellings must be here or the newest, highest-value filings are silently missed;
+# edgar_monitor._canonical_form collapses them for dedup + display.
 SUPERINVESTOR_EDGAR_FORMS: set[str] = {
-    "SC 13D", "SC 13D/A", "SC 13G", "SC 13G/A", "3", "4", "4/A", "5",
+    "SC 13D", "SC 13D/A", "SC 13G", "SC 13G/A",
+    "SCHEDULE 13D", "SCHEDULE 13D/A", "SCHEDULE 13G", "SCHEDULE 13G/A",
+    "3", "4", "4/A", "5",
 }
 
 # How far back a filing counts as "recent" -- also the window silent-seeded into the

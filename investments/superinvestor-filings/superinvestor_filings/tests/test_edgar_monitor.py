@@ -121,6 +121,29 @@ def test_filing_outside_lookback_window_is_ignored(db_conn, monkeypatch):
     assert db.count_seen(db_conn) == 0
 
 
+def test_canonical_form_collapses_schedule_prefix():
+    assert edgar_monitor._canonical_form("SCHEDULE 13G/A") == "SC 13G/A"
+    assert edgar_monitor._canonical_form("SCHEDULE 13D") == "SC 13D"
+    assert edgar_monitor._canonical_form("SC 13G/A") == "SC 13G/A"
+    assert edgar_monitor._canonical_form("4") == "4"
+
+
+def test_structured_schedule_13g_label_is_caught_and_canonicalised(db_conn, monkeypatch):
+    _seed_done(db_conn)
+    monkeypatch.setattr(
+        "mytrader.sec_filings.fetch_filing_index",
+        lambda cik: _index(["SCHEDULE 13G/A"], ["0001173334-26-000050"], ["primary_doc.xml"],
+                           [date.today().isoformat()]),
+    )
+    monkeypatch.setattr("mytrader.sec_filings.fetch_filing_document", lambda c, a, d: SC13G_XML)
+    result = edgar_monitor.scan_edgar(db_conn)
+    assert len(result["new_filings"]) == 1
+    assert result["new_filings"][0]["form_type"] == "SC 13G/A"
+    row = db.get_recent_superinvestor_filings_seen(db_conn)[0]
+    assert row["form_type"] == "SC 13G/A"
+    assert "SCHEDULE" not in row["dedup_key"]
+
+
 def test_non_tracked_form_is_ignored(db_conn, monkeypatch):
     _seed_done(db_conn)
     monkeypatch.setattr(
