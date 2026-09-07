@@ -28,7 +28,8 @@ all action requires Shaun's explicit review.
 - Chat sessions: .claude/data/chat.db
 - Phase plans: .agent/plans/
 - Project PRD: .agent/plans/second-brain-prd.md
-- Investments tool: investments/ (my-trader + briefs-finance, uv workspace; skills: .claude/skills/my-trader/, .claude/skills/investments/)
+- Investments tool: investments/ (uv workspace: my-trader + briefs-finance + goat + fourteen-crash-signals-daily-check + superinvestor-filings; skills: .claude/skills/my-trader/, .claude/skills/investments/; see investments/TOOLS.md for what runs when)
+- Superinvestor Filings Scanner: investments/superinvestor-filings/ — daily VPS scan of tracked concentrated-value investors' SEC EDGAR fast-disclosure filings (13D/G + Form 3/4/5), grouped WhatsApp digest, advisor-notes only. Run via `scripts/invoke_investments.ps1 -Package superinvestor-filings -Command "scan --edgar-only"`. India / SEBI SAST leg is Phase 5 (pending, see investments/superinvestor-filings/INDIA-LEG-FINDINGS.md).
 - Investments DB: investments/briefs-finance/data/investments.db (shared SQLite — generates investments/my-trader/holdings.md, watchlist.md, my-trader-report.md). Lives only on the VPS as of 2026-08-23 — gitignored, never opened locally. Interactive my-trader/briefs-finance commands run on the VPS via `scripts/invoke_investments.ps1` (see both skills' SKILL.md); IBKR sync is the one workflow that still fetches locally (against IB Gateway) but writes remotely.
 
 ## Project Conventions

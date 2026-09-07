@@ -162,6 +162,132 @@ def edgar_fulltext_search_count(
     except Exception:
         return None
 
+
+def edgar_fulltext_search_hits(
+    forms: str,
+    *,
+    entity_name: str | None = None,
+    cik: str | None = None,
+    startdt: date | None = None,
+    enddt: date | None = None,
+    size: int = 100,
+) -> list[dict[str, Any]] | None:
+    """Sibling of edgar_fulltext_search_count that returns the individual hit rows
+    rather than just the total. Same endpoint, same GOTCHAs (never send `q`; `cik` is
+    zero-padded internally). `size` is the efts page size (max 100 per SEC's docs) --
+    a single page is enough for the superinvestor-filings `resolve-ciks` discovery
+    command, which just needs the distinct (display_name, CIK) pairs for a filer name.
+
+    Each row is mapped to {accession, form_type, file_date, display_names, ciks,
+    raw_url}. The efts `_source` key for the entity label is unverified across
+    sources (blog says `entity_name`, the SEC UI implies `display_names`) -- this
+    tolerates both and logs a print if neither is present. Returns None on any
+    network/parse failure, never raises (module policy)."""
+    params: dict[str, str] = {"forms": forms, "from": "0", "size": str(size)}
+    if entity_name is not None:
+        params["entityName"] = entity_name
+    if cik is not None:
+        params["ciks"] = f"{int(cik):010d}"
+    if startdt is not None:
+        params["startdt"] = startdt.isoformat()
+    if enddt is not None:
+        params["enddt"] = enddt.isoformat()
+    try:
+        r = requests.get(
+            "https://efts.sec.gov/LATEST/search-index", params=params, headers=_HEADERS, timeout=20
+        )
+        if r.status_code != 200:
+            return None
+        hits = r.json().get("hits", {}).get("hits", [])
+    except Exception:
+        return None
+
+    rows: list[dict[str, Any]] = []
+    for hit in hits:
+        src = hit.get("_source", {}) or {}
+        raw_id = hit.get("_id", "") or ""
+        accession = raw_id.split(":", 1)[0] if raw_id else ""
+        display_names = src.get("display_names")
+        if display_names is None:
+            single = src.get("entity_name") or src.get("entityName")
+            display_names = [single] if single else []
+        if not display_names:
+            print(f"[sec_filings] edgar_fulltext_search_hits: no entity label in _source keys {list(src)}")
+        ciks = src.get("ciks") or []
+        raw_url = None
+        if accession and ciks:
+            raw_url = (
+                f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany"
+                f"&CIK={ciks[0]}&type={src.get('form_type', '')}"
+            )
+        rows.append({
+            "accession": accession,
+            "form_type": src.get("form_type"),
+            "file_date": src.get("file_date"),
+            "display_names": display_names,
+            "ciks": ciks,
+            "raw_url": raw_url,
+        })
+    return rows
+
+
+def fetch_filing_directory_index(cik: str, accession_number: str) -> dict[str, Any] | None:
+    """GET the filing-directory listing (index.json) for one accession -- returns the
+    parsed JSON whose `directory.item[]` lists every file in the filing, so a parser
+    can locate the raw `.xml` primary document when `primaryDocument` points at a
+    rendered `xslF345X03/*.htm` wrapper instead. Returns None on any failure."""
+    url = config.SEC_ARCHIVES_DIR_URL_TEMPLATE.format(
+        cik=str(int(cik)), accession_no_dashes=accession_number.replace("-", ""),
+    )
+    try:
+        r = requests.get(url, headers=_HEADERS, timeout=15)
+        if r.status_code != 200:
+            return None
+        return r.json()
+    except Exception:
+        return None
+
+
+def recent_filings_of_types(
+    index: dict[str, Any], forms: set[str], since: date
+) -> list[dict[str, str]]:
+    """Walk the columnar `filings.recent` block of a filer's submissions JSON and
+    return every entry whose `form` is in `forms` and whose `filingDate` is on/after
+    `since`. Unlike latest_filing_entry (first match of one form type) this returns
+    all matches across a set of forms -- the core of a filer-keyed daily poll.
+
+    `filings.recent` fields are parallel arrays; a filer with zero filings may be
+    missing keys entirely, so every column is `.get(..., [])` and the walk is bounded
+    by the shortest array (zip-to-shortest)."""
+    recent = index.get("filings", {}).get("recent", {})
+    forms_col = recent.get("form", [])
+    accession_col = recent.get("accessionNumber", [])
+    primary_doc_col = recent.get("primaryDocument", [])
+    primary_desc_col = recent.get("primaryDocDescription", [])
+    filing_date_col = recent.get("filingDate", [])
+    acceptance_col = recent.get("acceptanceDateTime", [])
+
+    n = min(len(forms_col), len(accession_col), len(primary_doc_col), len(filing_date_col))
+    out: list[dict[str, str]] = []
+    for i in range(n):
+        if forms_col[i] not in forms:
+            continue
+        filing_date_str = filing_date_col[i]
+        try:
+            if date.fromisoformat(filing_date_str) < since:
+                continue
+        except (ValueError, TypeError):
+            continue
+        out.append({
+            "form": forms_col[i],
+            "accession_number": accession_col[i],
+            "primary_document": primary_doc_col[i],
+            "primary_doc_description": primary_desc_col[i] if i < len(primary_desc_col) else "",
+            "filing_date": filing_date_str,
+            "acceptance_datetime": acceptance_col[i] if i < len(acceptance_col) else "",
+        })
+    return out
+
 # --- Section extraction ------------------------------------------------------
 
 

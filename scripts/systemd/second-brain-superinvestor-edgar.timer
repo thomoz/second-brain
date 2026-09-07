@@ -1,0 +1,10 @@
+[Unit]
+Description=Superinvestor Fast-Disclosure Filings Scan Timer (SEC EDGAR leg)
+Requires=second-brain-superinvestor-edgar.service
+
+[Timer]
+OnCalendar=*-*-* 02:35:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

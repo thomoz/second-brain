@@ -7,6 +7,7 @@
 #   .\scripts\invoke_investments.ps1 -Package briefs-finance -Command "assess --ticker KGC --output markdown"
 #   .\scripts\invoke_investments.ps1 -Package goat -Command "scan-sectors"
 #   .\scripts\invoke_investments.ps1 -Package fourteen-signals -Command "daily-check"
+#   .\scripts\invoke_investments.ps1 -Package superinvestor-filings -Command "scan --edgar-only"
 #
 # goat/fourteen-signals share the same VPS-only investments.db as my-trader/briefs-
 # finance -- never run them via a local `uv run --directory investments/goat ...`;
@@ -20,7 +21,7 @@
 
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("my-trader", "briefs-finance", "goat", "fourteen-signals")]
+    [ValidateSet("my-trader", "briefs-finance", "goat", "fourteen-signals", "superinvestor-filings")]
     [string]$Package,
 
     [Parameter(Mandatory=$true)]
@@ -35,6 +36,7 @@ $PACKAGES = @{
     "briefs-finance"   = @{ Dir = "briefs-finance"; Module = "scripts.main" }
     "goat"             = @{ Dir = "goat"; Module = "goat.main" }
     "fourteen-signals" = @{ Dir = "fourteen-crash-signals-daily-check"; Module = "fourteen_crash_signals_daily_check.main" }
+    "superinvestor-filings" = @{ Dir = "superinvestor-filings"; Module = "superinvestor_filings.main" }
 }
 
 $pkg = $PACKAGES[$Package]
