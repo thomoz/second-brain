@@ -111,3 +111,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-09-06 Reflection
 - (Sep 06) Heartbeat Codex backend is configured to unsupported model gpt-5.4
+
+## 2026-09-07 Reflection
+- Codex backend was fixed from unsupported gpt-5.4 to gpt-5.5
