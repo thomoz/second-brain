@@ -66,3 +66,10 @@ def test_classify_material_crossing_initial_filing_no_prior():
     assert edgar_parse.classify_material_crossing("SC 13D", 11.0, None) == "10% cross"
     assert edgar_parse.classify_material_crossing("SC 13G/A", 5.5, None) is None
     assert edgar_parse.classify_material_crossing("SC 13G", None, None) is None
+
+
+def test_classify_material_crossing_amendment_below_5pct_with_no_prior_is_exit():
+    # A 13G/A implies a prior >= 5% filing -- reporting < 5% now is a drop below the
+    # threshold even on the first observation of the filer+issuer pair.
+    assert edgar_parse.classify_material_crossing("SC 13G/A", 4.76, None) == "below 5%"
+    assert edgar_parse.classify_material_crossing("SCHEDULE 13D/A", 3.0, None) == "below 5%"

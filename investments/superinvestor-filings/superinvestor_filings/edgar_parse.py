@@ -232,7 +232,13 @@ def classify_material_crossing(
 
     if prior_pct_owned is None:
         if is_amendment:
-            return None
+            # A 13D/G *amendment* implies a prior >= 5% filing by convention (you
+            # only amend a schedule you were required to file). So an amendment now
+            # reporting < 5%, even on the first time this scanner sees the pair, is a
+            # drop through the threshold -- a near/full exit, the handoff's
+            # highest-value 13G event. >= 5% with no prior stays None (could be a
+            # routine holding-steady amendment).
+            return "below 5%" if pct_owned < 5.0 else None
         if pct_owned >= 10.0:
             return "10% cross"
         if pct_owned >= 5.0:
