@@ -1,16 +1,29 @@
 # Superinvestor Fast-Disclosure Filings Scanner — Session Handoff
 
-## Status: BUILT (EDGAR leg) 2026-09-07 — Phase 5 India / SEBI SAST: NOT STARTED (spike pending Shaun's sign-off, see `investments/superinvestor-filings/INDIA-LEG-FINDINGS.md`).
+## Status: BOTH LEGS BUILT 2026-09-08. EDGAR leg LIVE on VPS timer. India/SAST leg built + code-deployed + first-run seeded on VPS; its systemd timer still needs a manual `sudo` install (see `investments/superinvestor-filings/DEPLOY.md`).
 
 Plan: `.agent/plans/superinvestor-filings-scanner.md`. Package:
-`investments/superinvestor-filings/`. Phases 1-4 complete: EDGAR submissions poll +
-Form 3/4/5 + Schedule 13D/G parsers + seen-log dedup + grouped WhatsApp digest +
-markdown report + `resolve-ciks` discovery command + systemd timer
-(`second-brain-superinvestor-edgar.timer`, 02:35 UTC) + `invoke_investments.ps1` /
-`deploy.ps1` wiring. Deploy is a manual step — see
-`investments/superinvestor-filings/DEPLOY.md`. 36 new package tests + 7 new
-`mytrader.sec_filings` tests pass; full `investments/` suite green apart from 3
-pre-existing `test_retail_leverage` failures unrelated to this work.
+`investments/superinvestor-filings/`.
+
+**EDGAR leg (US)** — `scan --edgar-only`, `second-brain-superinvestor-edgar.timer`
+02:35 UTC, LIVE. Submissions poll + Form 3/4/5 + Schedule 13D/G parsers (handles the
+legacy `SC 13x` AND the post-2024 `SCHEDULE 13x` label) + seen-log dedup + crossing
+tags + grouped WhatsApp digest + `resolve-ciks`. All 6 Pabrai/Dalal Street CIKs
+confirmed valid against the live SEC API. First live run caught Pabrai's 2026-08-13
+SC 13G/A cutting Alpha Metallurgical below 5%.
+
+**India / SEBI SAST leg (BSE)** — `scan --india-only`,
+`second-brain-superinvestor-sast.timer` 12:30 UTC. `sast_monitor.py` polls BSE's
+"Insider Trading / SAST" feed, filters to Reg 29(1)/(2), name-matches the acquirer
+(from the row HEADLINE) against `india_aliases`. NSE is blocked for the VPS IP →
+BSE-only. Feed validated live: 1163 rows / 864 Reg-29 / 470 acquirers fetched
+cleanly; no Pabrai activity in the seed window (genuine, not a failure). PDF holds
+the exact % (usually scanned) so v1 links it. **Still to do:** `sudo` timer install
+(DEPLOY.md), and verify `india_aliases` (`["pabrai","dalal street","dhandho"]`)
+once a real Pabrai SAST hit appears.
+
+A bare `scan` runs both legs. 47 package tests + 7 `mytrader.sec_filings` tests
+pass; `my-trader` 559 green.
 
 ## What This Is
 
