@@ -114,3 +114,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-09-07 Reflection
 - Codex backend was fixed from unsupported gpt-5.4 to gpt-5.5
+
+## 2026-09-08 Reflection
+- PowerShell Package: prompt means scripts/invoke_investments.ps1 is waiting for mandatory -Package

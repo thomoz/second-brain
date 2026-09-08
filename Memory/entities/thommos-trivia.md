@@ -19,3 +19,4 @@ Active
 - (Jun 18) Nicky Haslam can cover the first trivia while you're away; July 15 still needs confirmation
 - (Jul 08) Add this week's free answer to The Racquet Club trivia run sheet if needed
 - (Aug 07) Jason Dean flagged a Bonus Question screen change needed before next week's game
+- (Sep 08) The Racquet Club Wednesday 7pm trivia themes/answers arrived for show prep
