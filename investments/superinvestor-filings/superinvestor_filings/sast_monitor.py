@@ -1,11 +1,17 @@
 """India / SEBI SAST Regulation 29 leg -- Phase 5.
 
-STATUS 2026-09-07: SPIKE NOT YET DONE. The NSE / BSE "System Driven Disclosures
-(SAST)" feeds have not been verified as no-login, machine-readable endpoints from
-this environment, and NSE is known to block non-browser clients (needs a cookie
-primed from GET https://www.nseindia.com, reused via a requests.Session, plus a
-browser-like User-Agent). Per the plan's STOP CONDITION, no scraper is built here
-without Shaun's sign-off on a confirmed feed. See
+STATUS 2026-09-08: SPIKE DONE -- feed CONFIRMED on BSE, build pending Shaun's go.
+Working endpoint (no login):
+  GET https://api.bseindia.com/BseIndiaAPI/api/AnnSubCategoryGetData/w
+      ?pageno=N&strCat=Insider Trading / SAST&strPrevDate=YYYYMMDD
+      &strToDate=YYYYMMDD&strScrip=&strSearch=P&strType=C&subcategory=-1
+Needs browser UA + Referer https://www.bseindia.com/corporates/ann.html + Origin
+https://www.bseindia.com + Sec-Fetch-* headers, and a GET https://www.bseindia.com/
+session prime. Range must be <= 1 month; 50 rows/page; ~30 SAST rows/day.
+Row: NEWSSUB carries "Regulation 29(1)/(2)" + issuer + acquirer (trailing segment
+after the last " - "); SLONGNAME/SCRIP_CD = issuer; NEWS_DT = date; NEWSID = dedup
+ref; ATTACHMENTNAME = PDF (holds the exact % -- not in the JSON).
+NSE is a dead end from this VPS (403 at the Akamai edge). Full write-up:
 investments/superinvestor-filings/INDIA-LEG-FINDINGS.md.
 
 When the spike confirms a feed, this module becomes structurally parallel to
