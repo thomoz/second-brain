@@ -1,9 +1,9 @@
 """CLI for the superinvestor fast-disclosure filings scanner.
 
 Subcommands:
-  scan                 run the EDGAR leg (Phase 5 will also run the India leg)
-  scan --edgar-only    force the EDGAR leg only
-  scan --india-only    force the India / SEBI SAST leg only (Phase 5)
+  scan                 run both legs: US SEC EDGAR + India BSE SEBI SAST
+  scan --edgar-only    US SEC EDGAR leg only
+  scan --india-only    India BSE SEBI SAST leg only
   resolve-ciks         print (entity name, CIK) pairs EDGAR full-text search returns
                        for a tracked investor's name -- for manual config editing;
                        never writes config
@@ -34,30 +34,35 @@ def _open_conn():
 
 
 def cmd_scan(args) -> None:
-    from . import config, notify, report
+    from . import config, db, notify, report
     from .edgar_monitor import scan_edgar
+    from .sast_monitor import scan_india
 
+    # A bare `scan` runs both legs; --edgar-only / --india-only restrict it.
     run_edgar = not args.india_only
-    # Phase 5: change the default so a bare `scan` runs both legs -- for now the India
-    # leg runs only when explicitly asked for (--india-only).
-    run_india = args.india_only
+    run_india = not args.edgar_only
 
     conn = _open_conn()
     result: dict = {"new_filings": [], "recent_filings": [], "first_seed": False}
     if run_edgar:
-        result = scan_edgar(conn)
+        edgar_result = scan_edgar(conn)
+        result["new_filings"] += edgar_result["new_filings"]
+        result["first_seed"] = result["first_seed"] or edgar_result["first_seed"]
     if run_india:
-        from .sast_monitor import scan_india
-
         india_result = scan_india(conn)
-        result["new_filings"] = result.get("new_filings", []) + india_result.get("new_filings", [])
-        result["recent_filings"] = result.get("recent_filings", []) + india_result.get("recent_filings", [])
+        result["new_filings"] += india_result["new_filings"]
+        result["first_seed"] = result["first_seed"] or india_result["first_seed"]
+    # The report always shows the full picture from the seen-log (both legs), not
+    # just the leg that ran this time -- the two timers overwrite the same file.
+    result["recent_filings"] = [
+        dict(r) for r in db.get_recent_superinvestor_filings_seen(conn, limit=200)
+    ]
     conn.close()
 
     report.write_report(result)
     notify.send_digest(result["new_filings"])
 
-    seed_note = " (first-run seed complete, no alerts)" if result.get("first_seed") else ""
+    seed_note = " (first-run seed complete, no alerts)" if result["first_seed"] else ""
     print(
         f"Superinvestor filings scan complete: {len(result['new_filings'])} new "
         f"filing(s){seed_note}. See {config.SUPERINVESTOR_REPORT_PATH.name}"
@@ -102,7 +107,7 @@ def main() -> None:
 
     p_scan = subparsers.add_parser("scan", help="Poll tracked filers for new fast-disclosure filings")
     p_scan.add_argument("--edgar-only", action="store_true", help="Run the US / SEC EDGAR leg only")
-    p_scan.add_argument("--india-only", action="store_true", help="Run the India / SEBI SAST leg only (Phase 5)")
+    p_scan.add_argument("--india-only", action="store_true", help="Run the India / BSE SEBI SAST leg only")
 
     p_resolve = subparsers.add_parser(
         "resolve-ciks",

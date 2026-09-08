@@ -6,6 +6,6 @@ After=network.target
 Type=oneshot
 User=secondbrain
 WorkingDirectory=/home/secondbrain/second-brain/investments/superinvestor-filings
-ExecStart=/home/secondbrain/second-brain/investments/.venv/bin/python -m superinvestor_filings.main scan
+ExecStart=/home/secondbrain/second-brain/investments/.venv/bin/python -m superinvestor_filings.main scan --edgar-only
 StandardOutput=append:/home/secondbrain/second-brain/investments/superinvestor-filings/superinvestor_edgar_runs.log
 StandardError=append:/home/secondbrain/second-brain/investments/superinvestor-filings/superinvestor_edgar_runs.log

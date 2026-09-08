@@ -1,0 +1,60 @@
+{
+  "Table": [
+    {
+      "NEWSID": "aaaa1111-0000-0000-0000-000000000001",
+      "SCRIP_CD": 500111,
+      "SLONGNAME": "Rain Industries Placeholder Ltd",
+      "NEWSSUB": "Rain Industries Placeholder Ltd - 500111 - Disclosures under Reg. 29(2) of SEBI (SAST) Regulations, 2011",
+      "SUBCATNAME": "Disclosures under Reg. 29(2) of SEBI (SAST) Regulations, 2011",
+      "HEADLINE": "The Exchange has received the disclosure under Regulation 29(2) of SEBI (Substantial Acquisition of Shares & Takeovers) Regulations, 2011 for Dalal Street LLC",
+      "NEWS_DT": "2026-09-06T15:40:11.000",
+      "ATTACHMENTNAME": "AAAA1111_0001_165005.pdf",
+      "NSURL": "https://www.bseindia.com/stock-share-price/rain-industries/rain/500111/"
+    },
+    {
+      "NEWSID": "aaaa1111-0000-0000-0000-000000000002",
+      "SCRIP_CD": 500222,
+      "SLONGNAME": "Sunteck Placeholder Realty Ltd",
+      "NEWSSUB": "Sunteck Placeholder Realty Ltd - 500222 - Disclosures under Reg. 29(1) of SEBI (SAST) Regulations, 2011",
+      "SUBCATNAME": "Disclosures under Reg. 29(1) of SEBI (SAST) Regulations, 2011",
+      "HEADLINE": "The Exchange has received the disclosure under Regulation 29(1) of SEBI (Substantial Acquisition of Shares & Takeovers) Regulations, 2011 for Mohnish Pabrai",
+      "NEWS_DT": "2026-09-05T11:05:00.000",
+      "ATTACHMENTNAME": "AAAA1111_0002_110500.pdf",
+      "NSURL": "https://www.bseindia.com/stock-share-price/sunteck/sunteck/500222/"
+    },
+    {
+      "NEWSID": "bbbb2222-0000-0000-0000-000000000003",
+      "SCRIP_CD": 500333,
+      "SLONGNAME": "Some Other Company Ltd",
+      "NEWSSUB": "Some Other Company Ltd - 500333 - Disclosures under Reg. 29(2) of SEBI (SAST) Regulations, 2011",
+      "SUBCATNAME": "Disclosures under Reg. 29(2) of SEBI (SAST) Regulations, 2011",
+      "HEADLINE": "The Exchange has received the disclosure under Regulation 29(2) of SEBI (Substantial Acquisition of Shares & Takeovers) Regulations, 2011 for Bhavik N Mehta",
+      "NEWS_DT": "2026-09-04T18:00:00.000",
+      "ATTACHMENTNAME": "BBBB2222_0003_180000.pdf",
+      "NSURL": ""
+    },
+    {
+      "NEWSID": "cccc3333-0000-0000-0000-000000000004",
+      "SCRIP_CD": 500444,
+      "SLONGNAME": "Promoter Encumbrance Co Ltd",
+      "NEWSSUB": "Promoter Encumbrance Co Ltd - 500444 - Disclosures under Reg. 31(1) and 31(2) of SEBI (SAST) Regulations, 2011",
+      "SUBCATNAME": "Disclosures under Reg. 31(1) and 31(2) of SEBI (SAST) Regulations, 2011",
+      "HEADLINE": "The Exchange has received the disclosure under Regulation 31 for Dalal Street LLC",
+      "NEWS_DT": "2026-09-03T10:00:00.000",
+      "ATTACHMENTNAME": "CCCC3333_0004_100000.pdf",
+      "NSURL": ""
+    },
+    {
+      "NEWSID": "dddd4444-0000-0000-0000-000000000005",
+      "SCRIP_CD": 500555,
+      "SLONGNAME": "Window Closure Ltd",
+      "NEWSSUB": "Window Closure Ltd - 500555 - Closure of Trading Window",
+      "SUBCATNAME": "Closure of Trading Window",
+      "HEADLINE": "Closure of Trading Window",
+      "NEWS_DT": "2026-09-02T09:00:00.000",
+      "ATTACHMENTNAME": "",
+      "NSURL": ""
+    }
+  ],
+  "Table1": [{ "ROWCNT": 5 }]
+}

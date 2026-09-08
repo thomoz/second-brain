@@ -1,0 +1,10 @@
+[Unit]
+Description=Superinvestor Fast-Disclosure Filings Scan Timer (India BSE SEBI SAST leg)
+Requires=second-brain-superinvestor-sast.service
+
+[Timer]
+OnCalendar=*-*-* 12:30:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

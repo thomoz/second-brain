@@ -1,0 +1,11 @@
+[Unit]
+Description=Superinvestor Fast-Disclosure Filings Scan (India BSE SEBI SAST leg)
+After=network.target
+
+[Service]
+Type=oneshot
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain/investments/superinvestor-filings
+ExecStart=/home/secondbrain/second-brain/investments/.venv/bin/python -m superinvestor_filings.main scan --india-only
+StandardOutput=append:/home/secondbrain/second-brain/investments/superinvestor-filings/superinvestor_sast_runs.log
+StandardError=append:/home/secondbrain/second-brain/investments/superinvestor-filings/superinvestor_sast_runs.log

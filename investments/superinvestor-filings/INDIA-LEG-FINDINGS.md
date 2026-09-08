@@ -1,6 +1,11 @@
-# India / SEBI SAST Leg (Phase 5) — Spike Findings
+# India / SEBI SAST Leg (Phase 5) — Feed Reference
 
-## Status: FEED CONFIRMED on BSE — 2026-09-08. Ready to build, pending Shaun's go.
+## Status: BUILT 2026-09-08 (`sast_monitor.py`). Deploy = manual timer install (see DEPLOY.md).
+
+The build filters on `SUBCATNAME` ("Disclosures under Reg. 29(1)/(2)..."), takes the
+acquirer from `HEADLINE` (after "...Regulations, 2011 for "), name-matches against
+`india_aliases`, and links the PDF rather than parsing it (the PDFs are usually
+scanned images with no text layer — confirmed). Below is the raw feed reference.
 
 The Task 5.1 spike (live recon from the VPS) found a working, no-login,
 machine-readable feed of SEBI SAST Regulation 29 disclosures on **BSE**. NSE is a

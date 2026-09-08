@@ -37,6 +37,19 @@ SUPERINVESTOR_FIRST_SEED_WATERMARK = "superinvestor_first_seed_done"
 # number. ~6 CIKs x N filings per run stays well under SEC's ~10 req/s limit.
 SUPERINVESTOR_SEC_REQUEST_DELAY_SECONDS = 0.2
 
+# --- India / SEBI SAST leg (Phase 5) ----------------------------------------
+# Feed: BSE AnnSubCategoryGetData, category "Insider Trading / SAST". Confirmed
+# live 2026-09-08 (see INDIA-LEG-FINDINGS.md). NSE is blocked at the edge for the
+# VPS IP, so BSE-only -- acceptable, SAST disclosures are dual-filed. The acquirer
+# name comes from the row's HEADLINE ("...Regulations, 2011 for <acquirer>"); the
+# exact % is only in a (usually scanned/image) PDF, so v1 alerts on the event,
+# not the number.
+SUPERINVESTOR_SAST_FIRST_SEED_WATERMARK = "superinvestor_sast_first_seed_done"
+SUPERINVESTOR_SAST_LOOKBACK_DAYS = 28   # BSE requires the date range <= 1 month
+SUPERINVESTOR_SAST_MAX_PAGES = 40      # 50 rows/page; the SAST category runs
+                                        # ~1300 rows/month -> ~26 pages, cap generous
+SUPERINVESTOR_SAST_REQUEST_DELAY_SECONDS = 0.4  # BSE is slower/flakier than EDGAR
+
 SUPERINVESTOR_TRACKED: dict[str, dict] = {
     "pabrai": {
         "display": "Mohnish Pabrai / Dalal Street",
@@ -52,10 +65,13 @@ SUPERINVESTOR_TRACKED: dict[str, dict] = {
             "1415742",   # Pabrai Investment Fund IV LP
             "1571786",   # Pabrai Investment Fund IV, L.P.
         ],
-        # Phase 5 (India / SEBI SAST) -- VERIFY current BSE/NSE entity names before
-        # relying on these; Pabrai's fund entities have been renamed over the years.
+        # India / SEBI SAST -- case-insensitive substring match against the acquirer
+        # name in a BSE SAST row's HEADLINE. "pabrai" is a rare-enough token to use
+        # bare (catches "Mohnish Pabrai", "Pabrai Investment Fund II LP", etc.).
+        # VERIFY against real hits: run `scan --india-only` and eyeball the acquirer
+        # names in the report -- Pabrai's fund entities have been renamed over the years.
         "india_aliases": [
-            "pabrai investment fund", "dalal street", "dhandho",
+            "pabrai", "dalal street", "dhandho",
         ],
     },
     # Add more investors here (Li Lu / Himalaya, Guy Spier / Aquamarine, ...) -- data only.

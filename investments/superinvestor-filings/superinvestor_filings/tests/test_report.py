@@ -29,6 +29,25 @@ def test_render_groups_by_investor_and_lists_filings():
     assert "All Recent Filings" in md
 
 
+def test_recent_filings_table_shows_source_column():
+    result = {
+        "new_filings": [],
+        "recent_filings": [
+            {"source": "edgar", "filer_display": "Mohnish Pabrai / Dalal Street",
+             "form_type": "SC 13G/A", "issuer": "AMR", "pct_owned": 4.76,
+             "material_crossing": "below 5%", "filed_date": "2026-08-13"},
+            {"source": "sast", "filer_display": "Mohnish Pabrai / Dalal Street",
+             "form_type": "SAST Reg 29(2)", "issuer": "Rain Industries Ltd",
+             "filed_date": "2026-09-06"},
+        ],
+        "first_seed": False,
+    }
+    md = report.render_report(result)
+    assert "US EDGAR" in md
+    assert "IN BSE SAST" in md
+    assert "SAST Reg 29(2)" in md
+
+
 def test_render_how_to_read_caveat_present():
     md = report.render_report({"new_filings": [], "recent_filings": [], "first_seed": False})
     assert "still waits for the quarterly cycle" in md
@@ -42,7 +61,7 @@ def test_render_empty_new_filings_message():
 
 def test_render_first_seed_note():
     md = report.render_report({"new_filings": [], "recent_filings": [], "first_seed": True})
-    assert "First run:" in md
+    assert "First run" in md
     assert "no alert was sent" in md
 
 
