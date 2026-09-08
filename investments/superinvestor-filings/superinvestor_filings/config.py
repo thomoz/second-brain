@@ -11,8 +11,9 @@ from scripts.config import DB_PATH  # noqa: F401  (re-exported for callers)
 PKG_DIR = Path(__file__).resolve().parent.parent  # -> investments/superinvestor-filings
 SUPERINVESTOR_REPORT_PATH = PKG_DIR / "superinvestor-filings-report.md"
 
-# The fast-disclosure form set (see investments/superinvestor-filings-scanner-handoff.md
-# for why each beats the ~135-day 13F lag). Values must match EDGAR's own `form`
+# The fast-disclosure form set (see
+# .agent/plans/completed/superinvestor-filings-scanner.md for why each beats the
+# ~135-day 13F lag). Values must match EDGAR's own `form`
 # strings in data.sec.gov/submissions/CIK*.json exactly. EDGAR emits BOTH the legacy
 # "SC 13x" and the post-2024 structured-submission "SCHEDULE 13x" label for the same
 # form family -- confirmed live 2026-09-08: Pabrai Mohnish's two most recent 13G

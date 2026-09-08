@@ -12,8 +12,9 @@ from . import config
 
 _SYDNEY_TZ = "Australia/Sydney"
 
-# Reproduced verbatim from investments/superinvestor-filings-scanner-handoff.md so the
-# alert is never oversold.
+# The "high-value events are threshold crossings + Form 4s on >10% names" caveat,
+# kept in the report so the alert is never oversold (see
+# .agent/plans/completed/superinvestor-filings-scanner.md).
 _HOW_TO_READ = (
     "For a passive concentrated filer like Pabrai the high-value events are "
     "**threshold crossings** (5%, 10%, exit) and **Form 4s on any name where they're "

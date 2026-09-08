@@ -2,7 +2,7 @@
 fast-disclosure filing this scanner has ever surfaced for a tracked investor. A filing
 alerts only on its first insert. Kept deliberately separate from
 goat_insider_filings_seen (different filer scope, different purpose -- see
-.agent/plans/superinvestor-filings-scanner.md NOTES #12). Mirrors goat/db.py's
+.agent/plans/completed/superinvestor-filings-scanner.md NOTES #12). Mirrors goat/db.py's
 INSERT-OR-IGNORE + rowcount dedup idiom and its idempotent ALTER-TABLE migration
 pattern."""
 
