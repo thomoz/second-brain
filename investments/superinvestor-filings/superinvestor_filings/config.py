@@ -116,6 +116,88 @@ SUPERINVESTOR_TRACKED: dict[str, dict] = {
         ],
         "india_aliases": [],
     },
+    "rule": {
+        "display": "Rick Rule (Arthur Richards Rule) / Rule Investment Media",
+        # Resource-sector investor, ex-CEO Sprott US Holdings (retired 2021), now
+        # runs Rule Investment Media / Battle Bank and sits on / holds >5% of many
+        # junior mining names. Files as an individual insider / >10% owner, not a
+        # fund manager -- resolved + verified 2026-09-09: CIK 1166902 submissions
+        # feed carries 16 Form 4, Form 3 (+ 3/A), 1 SC 13D, 8 SC 13D/A, SC 13G,
+        # SC 13G/A. Cadence has slowed since the Sprott retirement (latest recent-
+        # window filing 2024-09-25) but it's still squarely in the tracked form set.
+        # His old firm Global Resource Investments Ltd (CIK 1172505) is dead since
+        # 2003 -- deliberately not added, same rule as the Li Lu / Guy Spier note below.
+        "edgar_ciks": ["1166902"],   # RULE ARTHUR RICHARDS (individual)
+        "india_aliases": [],
+    },
+    "paulson": {
+        "display": "John Paulson / Paulson & Co",
+        # Gold-miner activist/insider -- NovaGold (board seat), Perpetua Resources,
+        # Trilogy Metals, International Tower Hill, AngloGold. Verified 2026-09-09:
+        # individual CIK 1394923 is all Form 3/4 (director filings), latest 2026-07-02;
+        # Paulson & Co CIK 1035674 carries the SC 13D/G stream (28 SC 13G/A, 20 SC
+        # 13D/A, 13 SC 13G, 27 Form 4) + 13F, active to 2026-08. Both needed.
+        "edgar_ciks": [
+            "1394923",   # PAULSON JOHN (individual -- Section 16 / board filings)
+            "1035674",   # PAULSON & CO. INC. (SC 13D/G filer)
+        ],
+        "india_aliases": [],
+    },
+    "sprott": {
+        "display": "Eric Sprott",
+        # Largest living individual precious-metals investor -- First Majestic, New
+        # Found Gold, Vizsla Silver, Hycroft, Gold Royalty, Kirkland Lake. Verified
+        # 2026-09-09: CIK 1491714 recent window holds 20 Form 4, 15 SC 13D/A, 3 SC
+        # 13G, 2 SC 13G/A, 2 SC 13D, 1 Form 3; active to 2026-06-12. Much of his
+        # junior-miner activity is Canadian SEDI (not covered) -- this catches the
+        # US-listed slice. Note: Sprott Asset Management LP (CIK 1277006) is dead
+        # since 2016 (post-restructure) -- deliberately not added.
+        "edgar_ciks": ["1491714"],   # SPROTT ERIC (individual)
+        "india_aliases": [],
+    },
+    "kopernik": {
+        "display": "David Iben / Kopernik Global Investors",
+        # Deep-value contrarian, heavy resource/hard-asset tilt -- Seabridge Gold,
+        # Northern Dynasty, NovaGold, Perpetua, IAMGOLD, Turquoise Hill, Peabody.
+        # Verified 2026-09-09: CIK 1599814 ~9-10 filings/month, 38 SC 13G/13G/A +
+        # ~9 SC 13D-family in the recent window; active to 2026-08-18.
+        "edgar_ciks": ["1599814"],   # Kopernik Global Investors, LLC
+        "india_aliases": [],
+    },
+    "baupost": {
+        "display": "Seth Klarman / Baupost Group",
+        # Concentrated deep-value / distressed. Verified 2026-09-09: firm CIK
+        # 1061768 carries 89 SC 13G/A, 22 SC 13G, 15 SC 13D/A, 12 Form 4 + 13F,
+        # ~8-10 filings/month, active to 2026-08-13. Klarman's individual CIK
+        # 899869 went dormant after 2023-12 -- not added, the firm CIK is the live one.
+        "edgar_ciks": ["1061768"],   # BAUPOST GROUP LLC/MA
+        "india_aliases": [],
+    },
+    "buffett": {
+        "display": "Warren Buffett / Berkshire Hathaway",
+        # Berkshire files Form 4 / SC 13D-G only where it is a > 10% owner --
+        # Occidental (OXY), Kraft Heinz (KHC), DaVita (DVA), historically Bank of
+        # America. Those Form 4s are the ~2-day signal of Buffett adding to OXY etc.
+        # The rest of the book (AAPL, AXP, KO, ...) stays 13F-only and is invisible
+        # here -- set expectations accordingly. Verified 2026-09-09: CIK 1067983
+        # ~40-50 Form 4/yr + ~80 SC 13G/13G-A, active to 2026-09-04. Buffett's
+        # individual CIK 315090 co-files some schedules -- cheap to keep.
+        "edgar_ciks": [
+            "1067983",   # BERKSHIRE HATHAWAY INC
+            "315090",    # BUFFETT WARREN E (individual)
+        ],
+        "india_aliases": [],
+    },
+    "watsa": {
+        "display": "Prem Watsa / Fairfax Financial",
+        # Concentrated value, "Canadian Buffett", some resource (Orla Mining, Foran).
+        # Verified 2026-09-09: group-filing entity CIK 938869 (WATSA V PREM ET AL)
+        # carries 85 Form 4, 5 SC 13G/A, Form 3/5, active to 2026-08. Fairfax's own
+        # company CIK 915191 is mostly 6-K/40-F (filtered out by the form set) --
+        # 938869 is the clean investor-side entity.
+        "edgar_ciks": ["938869"],   # WATSA V PREM ET AL
+        "india_aliases": [],
+    },
 
     # --- India / SEBI SAST only (no SEC EDGAR presence) ------------------------
     # These disclose SAST Reg 29 on BSE, not with the SEC, so edgar_ciks is empty.
@@ -158,6 +240,47 @@ SUPERINVESTOR_TRACKED: dict[str, dict] = {
         # VERIFY: "kedia" alone collides with the Kedia commodities group -- keep tight.
         "india_aliases": ["vijay kedia", "kedia securities"],
     },
+    "mukul_agrawal": {
+        "display": "Mukul Agrawal",
+        "edgar_ciks": [],
+        # Very active concentrated small/mid-cap investor. Files SAST as "Mukul
+        # Mahavir Agrawal" / "Mukul Mahavir Prasad Agrawal". Bare "agrawal" is far
+        # too common -- keep the full name forms only. Added 2026-09-09, VERIFY
+        # against a real `scan --india-only` before trusting.
+        "india_aliases": [
+            "mukul agrawal", "mukul mahavir agrawal", "mukul mahavir prasad agrawal",
+        ],
+    },
+    "khanna": {
+        "display": "Dolly Khanna / Rajiv Khanna",
+        "edgar_ciks": [],
+        # Dolly Khanna's small-cap positions are held in husband Rajiv Khanna's name;
+        # SAST rows name one or the other. Added 2026-09-09, VERIFY -- "rajiv khanna"
+        # is a common name, drop it if it false-matches.
+        "india_aliases": ["dolly khanna", "rajiv khanna"],
+    },
+    "kela": {
+        "display": "Madhusudan Kela / MK Ventures",
+        "edgar_ciks": [],
+        # Ex-Reliance MF, now runs MK Ventures family office. Added 2026-09-09,
+        # VERIFY -- keep to the full name + the vehicle, "kela" alone is a surname.
+        "india_aliases": ["madhusudan kela", "madhu kela", "mk ventures"],
+    },
+    "goel": {
+        "display": "Anil Kumar Goel",
+        "edgar_ciks": [],
+        # Agri / sugar / textile small-cap investor; positions also held by wife
+        # Seema Goel. Added 2026-09-09, VERIFY -- "anil goel" and "goel" alone are
+        # too common, keep the full forms.
+        "india_aliases": ["anil kumar goel", "seema goel"],
+    },
+    "porinju": {
+        "display": "Porinju Veliyath / Equity Intelligence",
+        "edgar_ciks": [],
+        # Kerala-based deep-value small-cap PMS. "porinju" is a rare, safe token.
+        # Added 2026-09-09, VERIFY against a real india-only run.
+        "india_aliases": ["porinju", "equity intelligence"],
+    },
 
     # NOTE: Li Lu / Himalaya Capital (CIK 1709323) and Guy Spier / Aquamarine
     # (CIK 1404599) were evaluated 2026-09-09 and deliberately NOT added -- both
@@ -165,4 +288,15 @@ SUPERINVESTOR_TRACKED: dict[str, dict] = {
     # fast-disclosure set), so the scanner would never see them. Same for Norbert
     # Lou / Punch Card Management (CIK 1631664). Only add a filer whose submissions
     # feed actually carries SC 13D/G or Form 3/4/5.
+    #
+    # ALSO rejected 2026-09-09:
+    #   - Ray Dalio / Bridgewater Associates -- 13F-only, zero SC 13D/G or Form 4
+    #     ever (confirmed via full-text search). Macro allocator running diversified
+    #     index/EM baskets, not a concentrated stock-picker; retired from Bridgewater
+    #     2022 with no personal fast-disclosure stream. Nothing for this tool to see.
+    #   - Horizon Kinetics / Murray Stahl (CIK 1056823 / 1207097) -- ideal hard-asset
+    #     thematic fit but files 70-100 Form 4s/month; would swamp the digest. Revisit
+    #     only after adding a per-filer form-subset filter ("13D/G only").
+    #   - Mario Nawfal, David Lin, Felix Prehn -- media commentators, no EDGAR CIK,
+    #     not filers.
 }
