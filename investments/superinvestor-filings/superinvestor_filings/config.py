@@ -126,8 +126,13 @@ SUPERINVESTOR_TRACKED: dict[str, dict] = {
     "jhunjhunwala": {
         "display": "Rekha Jhunjhunwala / RARE Enterprises (Rakesh Jhunjhunwala estate)",
         "edgar_ciks": [],
-        # "jhunjhunwala" is a rare, safe token; "rare enterprises" is the family office.
-        "india_aliases": ["jhunjhunwala", "rare enterprises"],
+        # Bare "jhunjhunwala" was too loose -- it false-matched "Bhavna Jhunjhunwala"
+        # (a Vibrant Global Capital promoter) on 2026-09-09. Keep it to the full name
+        # + the family office / known investment vehicles.
+        "india_aliases": [
+            "rekha jhunjhunwala", "rekha rakesh jhunjhunwala",
+            "rare enterprises", "rare equity",
+        ],
     },
     "kacholia": {
         "display": "Ashish Kacholia",
