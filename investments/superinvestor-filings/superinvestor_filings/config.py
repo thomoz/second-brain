@@ -35,7 +35,7 @@ SUPERINVESTOR_LOOKBACK_DAYS = 30
 SUPERINVESTOR_FIRST_SEED_WATERMARK = "superinvestor_first_seed_done"
 
 # Courtesy delay between EDGAR document fetches -- reuses my-trader's SEC pacing
-# number. ~6 CIKs x N filings per run stays well under SEC's ~10 req/s limit.
+# number. ~12 CIKs x N filings per run stays well under SEC's ~10 req/s limit.
 SUPERINVESTOR_SEC_REQUEST_DELAY_SECONDS = 0.2
 
 # --- India / SEBI SAST leg (Phase 5) ----------------------------------------
@@ -75,5 +75,89 @@ SUPERINVESTOR_TRACKED: dict[str, dict] = {
             "pabrai", "dalal street", "dhandho",
         ],
     },
-    # Add more investors here (Li Lu / Himalaya, Guy Spier / Aquamarine, ...) -- data only.
+
+    # --- US / SEC EDGAR filers ---------------------------------------------------
+    # CIKs resolved 2026-09-09 via EDGAR company search, then each one's
+    # data.sec.gov/submissions feed was checked to confirm it actually carries
+    # fast-disclosure forms (SC 13D/G or Form 3/4/5) and not just quarterly 13F.
+    "abrams": {
+        "display": "David Abrams / Abrams Capital",
+        # Prolific fast-disclosure filer -- recent-submissions window held
+        # 25 SC 13G, 72 SC 13G/A, 2 SC 13D, 10 SC 13D/A, 71 Form 4, 11 Form 3.
+        "edgar_ciks": [
+            "1358706",   # Abrams Capital Management, L.P. (manager -- primary filer)
+            "1426355",   # Abrams Capital Management, LLC (general partner / co-filer)
+        ],
+        "india_aliases": [],
+    },
+    "southeastern": {
+        "display": "Mason Hawkins / Southeastern Asset Management (Longleaf)",
+        # Deep value, concentrated, takes board-level stakes -- one of the heaviest
+        # Schedule 13D/G filers on EDGAR (85 SC 13G, 156 SC 13G/A, 15 SC 13D,
+        # 36 SC 13D/A). DFAN14A proxy-fight filings fall outside the tracked form
+        # set and are ignored.
+        "edgar_ciks": ["807985"],   # SOUTHEASTERN ASSET MANAGEMENT INC/TN/
+        "india_aliases": [],
+    },
+    "fairholme": {
+        "display": "Bruce Berkowitz / Fairholme Capital Management",
+        # Hyper-concentrated (St. Joe / JOE dominates the book). Active filer:
+        # 13 SC 13G, 40 SC 13G/A, 5 SC 13D, 28 SC 13D/A, 67 Form 4, 4 Form 3.
+        "edgar_ciks": ["1056831"],  # FAIRHOLME CAPITAL MANAGEMENT LLC
+        "india_aliases": [],
+    },
+    "chou": {
+        "display": "Francis Chou / Chou Associates",
+        # Deep value in small-cap / distressed names -- crosses 5% often enough to
+        # matter, though at lower volume (3 SC 13G, 8 SC 13G/A, 4 Form 4, 1 Form 3).
+        "edgar_ciks": [
+            "1389403",   # Chou Associates Management Inc. (manager)
+            "1389402",   # Chou Associates Fund (co-filer on some schedules)
+        ],
+        "india_aliases": [],
+    },
+
+    # --- India / SEBI SAST only (no SEC EDGAR presence) ------------------------
+    # These disclose SAST Reg 29 on BSE, not with the SEC, so edgar_ciks is empty.
+    # The India leg matches india_aliases (case-insensitive substring) against the
+    # acquirer name parsed from each BSE SAST row's HEADLINE. RUN
+    # `scan --india-only` ONCE and eyeball the matched acquirer names before
+    # trusting these -- several common Indian surnames collide.
+    "jhunjhunwala": {
+        "display": "Rekha Jhunjhunwala / RARE Enterprises (Rakesh Jhunjhunwala estate)",
+        "edgar_ciks": [],
+        # "jhunjhunwala" is a rare, safe token; "rare enterprises" is the family office.
+        "india_aliases": ["jhunjhunwala", "rare enterprises"],
+    },
+    "kacholia": {
+        "display": "Ashish Kacholia",
+        "edgar_ciks": [],
+        # "kacholia" is rare and safe on its own; "bengal finance" is his PMS vehicle.
+        "india_aliases": ["kacholia", "bengal finance & investment"],
+    },
+    "abakkus": {
+        "display": "Sunil Singhania / Abakkus Asset Manager",
+        "edgar_ciks": [],
+        "india_aliases": ["abakkus", "sunil singhania"],
+    },
+    "damani": {
+        "display": "Radhakishan Damani / Bright Star Investments",
+        "edgar_ciks": [],
+        # Bare "damani" was left out on purpose -- it catches unrelated Damani-family
+        # filers. Add it back only if these two strings miss real disclosures.
+        "india_aliases": ["radhakishan damani", "bright star investments"],
+    },
+    "kedia": {
+        "display": "Vijay Kedia / Kedia Securities",
+        "edgar_ciks": [],
+        # VERIFY: "kedia" alone collides with the Kedia commodities group -- keep tight.
+        "india_aliases": ["vijay kedia", "kedia securities"],
+    },
+
+    # NOTE: Li Lu / Himalaya Capital (CIK 1709323) and Guy Spier / Aquamarine
+    # (CIK 1404599) were evaluated 2026-09-09 and deliberately NOT added -- both
+    # hold large-caps below the 5% line and file only quarterly 13F (nothing in the
+    # fast-disclosure set), so the scanner would never see them. Same for Norbert
+    # Lou / Punch Card Management (CIK 1631664). Only add a filer whose submissions
+    # feed actually carries SC 13D/G or Form 3/4/5.
 }
