@@ -35,6 +35,14 @@ def build_dedup_key(source: str, filer_key: str, form_type: str, issuer: str, ac
     return "|".join([source, filer_key, form_type, issuer or "", accession or ""])
 
 
+def _same_cik(a: str | None, b: str | None) -> bool:
+    """CIKs compare equal ignoring zero-padding ("0001067983" == "1067983")."""
+    try:
+        return a is not None and b is not None and int(a) == int(b)
+    except (TypeError, ValueError):
+        return False
+
+
 def _archive_url(cik: str, accession: str, document: str) -> str:
     return SEC_ARCHIVES_URL_TEMPLATE.format(
         cik=str(int(cik)), accession_no_dashes=accession.replace("-", ""), document=document,
@@ -101,13 +109,23 @@ def _summarize_ownership(parsed: dict[str, Any], form_type: str) -> tuple[str, s
 
 
 def _process_ownership(
-    conn: sqlite3.Connection, filer_key: str, filer_display: str, cik: str, filing: dict[str, str]
+    conn: sqlite3.Connection, filer_key: str, filer_display: str, cik: str,
+    filing: dict[str, str], filer_ciks: list[str] | None = None,
 ) -> dict[str, Any] | None:
     accession = filing["accession_number"]
     form_type = filing["form"]
     filed_date = filing["filing_date"]
     xml_text = _resolve_ownership_xml(cik, accession, filing["primary_document"])
     parsed = edgar_parse.parse_ownership_form(xml_text) if xml_text else None
+
+    # A filer tracked by a company CIK (e.g. Berkshire Hathaway) also has its own
+    # directors/officers filing Form 3/4/5 on that company's stock -- those land in
+    # the filer's submissions feed but carry no portfolio signal. This tool is about
+    # what the investor buys in *other* companies, so skip a filing whose issuer is
+    # one of the filer's own tracked identities.
+    own_ciks = filer_ciks if filer_ciks is not None else [cik]
+    if parsed and any(_same_cik(parsed.get("issuer_cik"), own) for own in own_ciks):
+        return None
 
     issuer_name = parsed.get("issuer_name") if parsed else None
     issuer_ticker = issuer_lookup.resolve_ticker(
@@ -228,7 +246,9 @@ def scan_edgar(conn: sqlite3.Connection) -> dict[str, Any]:
             for filing in filings:
                 form_type = filing["form"]
                 if form_type in _OWNERSHIP_FORMS:
-                    alert = _process_ownership(conn, filer_key, filer_display, cik, filing)
+                    alert = _process_ownership(
+                        conn, filer_key, filer_display, cik, filing, cfg["edgar_ciks"]
+                    )
                 elif form_type in _SCHEDULE_FORMS:
                     alert = _process_schedule(conn, filer_key, filer_display, cik, filing)
                 else:

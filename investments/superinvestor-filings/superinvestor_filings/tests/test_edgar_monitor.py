@@ -144,6 +144,52 @@ def test_structured_schedule_13g_label_is_caught_and_canonicalised(db_conn, monk
     assert "SCHEDULE" not in row["dedup_key"]
 
 
+def test_self_issued_form4_is_skipped(db_conn, monkeypatch):
+    # FORM4_XML's issuer is Alpha Metallurgical (CIK 1301063). If a filer is tracked
+    # by that same CIK, the Form 4 is that company's own insider trading its stock --
+    # no portfolio signal, must be skipped (not alerted, not seen-logged).
+    monkeypatch.setattr(config, "SUPERINVESTOR_TRACKED", {
+        "selftest": {
+            "display": "Self Issuer Test",
+            "edgar_ciks": ["1301063"],
+            "india_aliases": [],
+        }
+    })
+    _seed_done(db_conn)
+    monkeypatch.setattr(
+        "mytrader.sec_filings.fetch_filing_index",
+        lambda cik: _index(["4"], ["0001301063-26-000010"], ["form4.xml"],
+                           [date.today().isoformat()]),
+    )
+    monkeypatch.setattr("mytrader.sec_filings.fetch_filing_document", lambda c, a, d: FORM4_XML)
+    result = edgar_monitor.scan_edgar(db_conn)
+    assert result["new_filings"] == []
+    assert db.count_seen(db_conn) == 0
+
+
+def test_form4_on_other_company_still_alerts_for_company_cik_filer(db_conn, monkeypatch):
+    # Same filer tracked by a company CIK, but the Form 4 is on a *different* issuer
+    # (AMR, 1301063) -- this is the real "what did they buy" signal, must pass through.
+    monkeypatch.setattr(config, "SUPERINVESTOR_TRACKED", {
+        "berkshire": {
+            "display": "Berkshire-style company-CIK filer",
+            "edgar_ciks": ["1067983"],
+            "india_aliases": [],
+        }
+    })
+    _seed_done(db_conn)
+    monkeypatch.setattr(
+        "mytrader.sec_filings.fetch_filing_index",
+        lambda cik: _index(["4"], ["0001067983-26-000010"], ["form4.xml"],
+                           [date.today().isoformat()]),
+    )
+    monkeypatch.setattr("mytrader.sec_filings.fetch_filing_document", lambda c, a, d: FORM4_XML)
+    result = edgar_monitor.scan_edgar(db_conn)
+    assert len(result["new_filings"]) == 1
+    assert "AMR" in result["new_filings"][0]["summary"]
+    assert db.count_seen(db_conn) == 1
+
+
 def test_non_tracked_form_is_ignored(db_conn, monkeypatch):
     _seed_done(db_conn)
     monkeypatch.setattr(
