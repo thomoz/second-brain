@@ -1,0 +1,1 @@
+CreateObject("Wscript.Shell").Run "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File ""O:\AI\Dynamous\Courses\second-brain-workshop\scripts\invoke_investments.ps1"" -Package ""my-trader"" -Command ""monitor""", 0, False
