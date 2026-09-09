@@ -1258,4 +1258,4 @@ Filings where the price has fallen since the trade, biggest drop first.
 | V | Sold | $2,161,236 | 2026-08-21 | -0.6% since trade |
 | V | Sold | $6,650,860 | 2026-08-21 | -0.6% since trade |
 
-Last auto-generated: 2026-09-09 11:46 AEST.
+Last auto-generated: 2026-09-09 12:18 AEST.
