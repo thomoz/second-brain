@@ -33,7 +33,7 @@ def send_digest(new_filings: list[dict[str, Any]]) -> None:
         summary + " -- see investments/superinvestor-filings/superinvestor-filings-report.md",
     )
 
-    lines: list[str] = []
+    lines: list[str] = ["Superinvestor filing:", ""]
     for investor, items in by_investor.items():
         lines.append(f"{investor} -- {len(items)} new fast disclosure(s):")
         lines.extend(f"- {s}" for s in items)

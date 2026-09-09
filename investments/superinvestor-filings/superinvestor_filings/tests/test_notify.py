@@ -30,6 +30,7 @@ def test_grouped_whatsapp_body_contains_every_filing(monkeypatch):
     assert len(toast) == 1
     assert len(whatsapp) == 1
     (body,), _ = whatsapp[0]
+    assert body.startswith("Superinvestor filing:")
     assert "SC 13G on RAIN" in body
     assert "Form 4 on AMR" in body
     assert "2 new fast disclosure(s)" in body
