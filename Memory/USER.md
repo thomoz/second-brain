@@ -117,3 +117,7 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-09-08 Reflection
 - PowerShell Package: prompt means scripts/invoke_investments.ps1 is waiting for mandatory -Package
+
+## 2026-09-09 Reflection
+- (Sep 09) Repo convention uses .agent/plans, not .agents/plans
+- (Sep 09) Superinvestor WhatsApp digests now use heading "Superinvestor filing:"
