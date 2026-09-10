@@ -112,7 +112,7 @@ Market-wide $25k+ open-market insider purchases, staged for explicit review. Rev
 | CVBF | Insider Buy | Maddox Mike (Dir) bought $220,300 of CVBF (319% of position) on 2026-08-31 | -0.4% since trade | 2026-08-31 |
 | CVM | Insider Buy | Kersten Geert R (CEO) bought $138,000 of CVM (19% of position) on 2026-08-25 | +4.1% since trade | 2026-08-26 |
 | CVRX | Insider Buy | Binkowski Brent (COO) bought $76,432 of CVRX on 2026-08-13 | -3.7% since trade | 2026-08-17 |
-| CWBHF | Insider Buy | Kunkel Raymond J. (COO) bought $39,311 of CWBHF (18% of position) on 2026-09-03 | +9.3% since trade 🚩 confirms signal | 2026-09-04 |
+| CWBHF | Insider Buy | Kunkel Raymond J. (COO) bought $39,311 of CWBHF (18% of position) on 2026-09-03 | +10.0% since trade 🚩 confirms signal | 2026-09-04 |
 | DFDV | Insider Buy | Kang Daniel (Chief Strategy Officer) bought $37,830 of DFDV (24% of position) on 2026-08-14 | +77.2% since trade 🚩 confirms signal | 2026-08-18 |
 | DFIN | Insider Buy | Binz Joseph Leo (Dir) bought $999,990 of DFIN (530% of position) on 2026-09-01 | +1.5% since trade | 2026-09-04 |
 | DGXX | Insider Buy | Amar Michel (CEO, 10%) bought $72,000 of DGXX (0% of position) on 2026-08-19 | +6.1% since trade | 2026-08-20 |
@@ -125,7 +125,7 @@ Market-wide $25k+ open-market insider purchases, staged for explicit review. Rev
 | EDAP | Insider Buy | Horn David R. (Dir) bought $47,500 of EDAP on 2026-08-14 | price unavailable | 2026-08-17 |
 | ELAN | Insider Buy | Harrington Michael J (Dir) bought $109,100 of ELAN on 2026-08-12 | +6.4% since trade | 2026-08-17 |
 | EMBC | Insider Buy | Kurdikar Devdatt (Pres, CEO) bought $140,937 of EMBC on 2026-08-12 | +8.0% since trade | 2026-08-17 |
-| EMYB | Insider Buy | Lobach David M Jr (COB, Pres, CEO) bought $44,660 of EMYB (0% of position) on 2026-08-18 | -0.9% since trade | 2026-08-20 |
+| EMYB | Insider Buy | Lobach David M Jr (COB, Pres, CEO) bought $44,660 of EMYB (0% of position) on 2026-08-18 | -0.7% since trade | 2026-08-20 |
 | ENHA | Insider Buy | Apeiron Investment Group Ltd. (Dir, 10%) bought $295,620 of ENHA (0% of position) on 2026-08-14 | -17.3% since trade | 2026-08-17 |
 | ENOV | Insider Buy | Engert Oliver (Chief Administrative Officer) bought $149,971 of ENOV (14% of position) on 2026-09-02 | -5.8% since trade | 2026-09-05 |
 | EOS | Insider Buy | Quinton Keith (Trustee) bought $106,950 of EOS on 2026-08-21 | -0.2% since trade | 2026-08-21 |
@@ -179,7 +179,7 @@ Market-wide $25k+ open-market insider purchases, staged for explicit review. Rev
 | IPGP | Insider Buy | Peeler John R (Dir) bought $199,400 of IPGP (15% of position) on 2026-08-26 | +8.2% since trade 🚩 confirms signal | 2026-08-27 |
 | ITT | Insider Buy | Savi Luca (Pres, CEO) bought $1,001,592 of ITT (2% of position) on 2026-08-31 | -0.8% since trade | 2026-09-01 |
 | JMSB | Insider Buy | Kinney Jonathan Craig (Dir) bought $54,022 of JMSB (0% of position) on 2026-08-26 | +1.2% since trade | 2026-08-28 |
-| JUSH | Insider Buy | Cacioppo James (CEO, 10%) bought $342,154 of JUSH (5% of position) on 2026-08-24 | +27.7% since trade 🚩 confirms signal | 2026-08-26 |
+| JUSH | Insider Buy | Cacioppo James (CEO, 10%) bought $342,154 of JUSH (5% of position) on 2026-08-24 | +27.9% since trade 🚩 confirms signal | 2026-08-26 |
 | KDP | Insider Buy | Alt Aaron E (Dir) bought $250,247 of KDP on 2026-08-25 | +0.8% since trade | 2026-08-28 |
 | KEEL | Insider Buy | Gagnon Benjamin (CEO) bought $196,097 of KEEL on 2026-08-13 | +12.1% since trade 🚩 confirms signal | 2026-08-17 |
 | KLAR | Insider Buy | Siemiatkowski Sebastian (CEO) bought $9,949,164 of KLAR (3% of position) on 2026-08-26 | -2.3% since trade | 2026-08-28 |
@@ -340,7 +340,7 @@ Same candidates, re-sorted by the insider's trade date, most recent first.
 | YDES | Insider Buy | Shen Ethan Phd (CEO) bought $67,447 of YDES (0% of position) on 2026-09-04 | +10.9% since trade 🚩 confirms signal | 2026-09-08 |
 | ARQ | Insider Buy | Steinmetz Shimon (CFO) bought $36,148 of ARQ (5% of position) on 2026-09-03 | -4.0% since trade | 2026-09-08 |
 | CMTG | Insider Buy | Mack Richard (CEO, COB) bought $351,241 of CMTG (8% of position) on 2026-09-03 | -1.2% since trade | 2026-09-08 |
-| CWBHF | Insider Buy | Kunkel Raymond J. (COO) bought $39,311 of CWBHF (18% of position) on 2026-09-03 | +9.3% since trade 🚩 confirms signal | 2026-09-04 |
+| CWBHF | Insider Buy | Kunkel Raymond J. (COO) bought $39,311 of CWBHF (18% of position) on 2026-09-03 | +10.0% since trade 🚩 confirms signal | 2026-09-04 |
 | MOALX | Insider Buy | Solender Daniel S (Portfolio Manager) bought $50,000 of MOALX (4% of position) on 2026-09-03 | -0.7% since trade | 2026-09-08 |
 | OBIO | Insider Buy | Hochman David P (See Remarks) bought $47,900 of OBIO (1% of position) on 2026-09-03 | +15.0% since trade 🚩 confirms signal | 2026-09-08 |
 | AON | Insider Buy | Knight Lester B (Dir) bought $6,549,688 of AON (7% of position) on 2026-09-02 | -7.9% since trade | 2026-09-04 |
@@ -436,7 +436,7 @@ Same candidates, re-sorted by the insider's trade date, most recent first.
 | FNKO | Insider Buy | Denson Charles D (Dir) bought $499,995 of FNKO (31% of position) on 2026-08-24 | -21.5% since trade | 2026-08-26 |
 | HKHC | Insider Buy | Rosenthal Brent D (Dir) bought $54,000 of HKHC (82% of position) on 2026-08-24 | -0.9% since trade | 2026-08-25 |
 | HYNE | Insider Buy | Healy Walter F (Pres, CEO, Dir) bought $25,670 of HYNE (4% of position) on 2026-08-24 | +0.9% since trade | 2026-08-26 |
-| JUSH | Insider Buy | Cacioppo James (CEO, 10%) bought $342,154 of JUSH (5% of position) on 2026-08-24 | +27.7% since trade 🚩 confirms signal | 2026-08-26 |
+| JUSH | Insider Buy | Cacioppo James (CEO, 10%) bought $342,154 of JUSH (5% of position) on 2026-08-24 | +27.9% since trade 🚩 confirms signal | 2026-08-26 |
 | LDI | Insider Buy | Hsieh Anthony Li (Exec Chair, CEO, Pres, 10%) bought $430,861 of LDI (217% of position) on 2026-08-24 | -12.5% since trade | 2026-08-26 |
 | LYTS | Insider Buy | Marshall Ernest W Jr (Dir) bought $39,456 of LYTS (8% of position) on 2026-08-24 | +0.3% since trade | 2026-08-24 |
 | OPLN | Insider Buy | Kelly Peter J (CEO) bought $499,999 of OPLN on 2026-08-24 | +3.5% since trade | 2026-08-27 |
@@ -503,7 +503,7 @@ Same candidates, re-sorted by the insider's trade date, most recent first.
 | BKKT | Insider Buy | Alfred Michael (Dir) bought $2,111,557 of BKKT (33% of position) on 2026-08-18 | +19.2% since trade 🚩 confirms signal | 2026-08-20 |
 | CBAN | Insider Buy | Canup Edward G (CHIEF BANKING OFFICER) bought $86,500 of CBAN (9% of position) on 2026-08-18 | -3.2% since trade | 2026-08-20 |
 | CORZ | Insider Buy | Weiss Eric Stanton (Dir) bought $134,358 of CORZ (3% of position) on 2026-08-18 | -4.0% since trade | 2026-08-20 |
-| EMYB | Insider Buy | Lobach David M Jr (COB, Pres, CEO) bought $44,660 of EMYB (0% of position) on 2026-08-18 | -0.9% since trade | 2026-08-20 |
+| EMYB | Insider Buy | Lobach David M Jr (COB, Pres, CEO) bought $44,660 of EMYB (0% of position) on 2026-08-18 | -0.7% since trade | 2026-08-20 |
 | ET | Insider Buy | Warren Kelcy L (Dir) bought $21,263,520 of ET (0% of position) on 2026-08-18 | +1.2% since trade | 2026-08-20 |
 | EYPT | Insider Buy | Zaderej Karen L. (Dir) bought $52,258 of EYPT (28% of position) on 2026-08-18 | -20.7% since trade | 2026-08-18 |
 | FFIN | Insider Buy | Denny Michael B. (Dir) bought $103,980 of FFIN (3% of position) on 2026-08-18 | -5.6% since trade | 2026-08-20 |
@@ -704,7 +704,7 @@ Same candidates, re-sorted by the dollar value of the insider's buy (highest fir
 | BDSX | Insider Buy | Schuler Jack W (Emeritus Director, 10%) bought $366,992 of BDSX on 2026-08-12 | +11.8% since trade | 2026-08-17 |
 | BAER | Insider Buy | Kelter Jeffrey E (Dir) bought $354,050 of BAER (16% of position) on 2026-08-19 | -6.0% since trade | 2026-08-21 |
 | CMTG | Insider Buy | Mack Richard (CEO, COB) bought $351,241 of CMTG (8% of position) on 2026-09-03 | -1.2% since trade | 2026-09-08 |
-| JUSH | Insider Buy | Cacioppo James (CEO, 10%) bought $342,154 of JUSH (5% of position) on 2026-08-24 | +27.7% since trade 🚩 confirms signal | 2026-08-26 |
+| JUSH | Insider Buy | Cacioppo James (CEO, 10%) bought $342,154 of JUSH (5% of position) on 2026-08-24 | +27.9% since trade 🚩 confirms signal | 2026-08-26 |
 | NOMD | Insider Buy | Baldew Ruben (CFO) bought $335,231 of NOMD (8% of position) on 2026-08-19 | -6.4% since trade | 2026-08-21 |
 | NRGV | Insider Buy | Hixon Dylan (Dir) bought $319,780 of NRGV (8% of position) on 2026-08-14 | +13.2% since trade 🚩 confirms signal | 2026-08-18 |
 | REZI | Insider Buy | Foster Joshua Peter (SVP, GC, Corp Sec) bought $315,224 of REZI (9% of position) on 2026-08-14 | -7.9% since trade | 2026-08-18 |
@@ -868,7 +868,7 @@ Same candidates, re-sorted by the dollar value of the insider's buy (highest fir
 | FGBI | Insider Buy | Walker Robert W (Dir) bought $46,200 of FGBI on 2026-08-13 | -5.3% since trade | 2026-08-17 |
 | TISI | Insider Buy | McGinnis Pamela J. (Dir) bought $45,800 of TISI (150% of position) on 2026-08-13 | +20.4% since trade 🚩 confirms signal | 2026-08-18 |
 | INV | Insider Buy | Brown Bruce (Dir) bought $45,399 of INV (39% of position) on 2026-08-20 | -30.0% since trade | 2026-08-21 |
-| EMYB | Insider Buy | Lobach David M Jr (COB, Pres, CEO) bought $44,660 of EMYB (0% of position) on 2026-08-18 | -0.9% since trade | 2026-08-20 |
+| EMYB | Insider Buy | Lobach David M Jr (COB, Pres, CEO) bought $44,660 of EMYB (0% of position) on 2026-08-18 | -0.7% since trade | 2026-08-20 |
 | ALT | Insider Buy | Durso Jerome Benedict (Pres, CEO) bought $44,250 of ALT on 2026-08-13 | +16.3% since trade 🚩 confirms signal | 2026-08-17 |
 | STIM | Insider Buy | Chernett Jorey (10%) bought $44,240 of STIM (0% of position) on 2026-08-14 | -7.9% since trade | 2026-08-18 |
 | RHLD | Insider Buy | Schoen Kurt (CFO) bought $44,190 of RHLD (13% of position) on 2026-08-20 | +8.4% since trade 🚩 confirms signal | 2026-08-25 |
@@ -884,7 +884,7 @@ Same candidates, re-sorted by the dollar value of the insider's buy (highest fir
 | AVD | Insider Buy | Macicek Steven D (Dir) bought $39,710 of AVD (24% of position) on 2026-08-17 | -0.9% since trade | 2026-08-18 |
 | CAMP | Insider Buy | Gold Kelly (CFO) bought $39,600 of CAMP (13% of position) on 2026-08-31 | +9.3% since trade 🚩 confirms signal | 2026-09-03 |
 | LYTS | Insider Buy | Marshall Ernest W Jr (Dir) bought $39,456 of LYTS (8% of position) on 2026-08-24 | +0.3% since trade | 2026-08-24 |
-| CWBHF | Insider Buy | Kunkel Raymond J. (COO) bought $39,311 of CWBHF (18% of position) on 2026-09-03 | +9.3% since trade 🚩 confirms signal | 2026-09-04 |
+| CWBHF | Insider Buy | Kunkel Raymond J. (COO) bought $39,311 of CWBHF (18% of position) on 2026-09-03 | +10.0% since trade 🚩 confirms signal | 2026-09-04 |
 | AVBC | Insider Buy | Doane Thomas (EVP- HR) bought $38,507 of AVBC (9% of position) on 2026-08-17 | -2.8% since trade | 2026-08-20 |
 | BZUN | Insider Buy | Wu Junhua (Chief Strategy Officer) bought $38,475 of BZUN (5% of position) on 2026-09-02 | -2.5% since trade | 2026-09-04 |
 | CIA | Insider Buy | Harwood Michael Philip (Dir) bought $38,000 of CIA (913% of position) on 2026-08-31 | -4.0% since trade | 2026-09-01 |
@@ -943,8 +943,8 @@ Candidates whose price has risen since the insider's buy, biggest gain first.
 | BMRA | Insider Buy | Barbieri Allen (Exec Vice COB) bought $32,000 of BMRA (37% of position) on 2026-08-26 | +34.3% since trade 🚩 confirms signal | 2026-08-27 |
 | ANGX | Insider Buy | Sarowitz Steven I (Dir) bought $1,355,594 of ANGX on 2026-08-12 | +34.0% since trade 🚩 confirms signal | 2026-08-17 |
 | ORBS | Insider Buy | O'Donnell Kevin J (CEO) bought $40,385 of ORBS (4% of position) on 2026-08-28 | +29.4% since trade 🚩 confirms signal | 2026-08-31 |
+| JUSH | Insider Buy | Cacioppo James (CEO, 10%) bought $342,154 of JUSH (5% of position) on 2026-08-24 | +27.9% since trade 🚩 confirms signal | 2026-08-26 |
 | IDAI | Insider Buy | Genner Gareth Neville (CEO) bought $30,103 of IDAI (7% of position) on 2026-08-19 | +27.7% since trade 🚩 confirms signal | 2026-08-21 |
-| JUSH | Insider Buy | Cacioppo James (CEO, 10%) bought $342,154 of JUSH (5% of position) on 2026-08-24 | +27.7% since trade 🚩 confirms signal | 2026-08-26 |
 | AGCO | Insider Buy | De Lange Bob (Dir) bought $100,710 of AGCO (6% of position) on 2026-08-14 | +25.2% since trade 🚩 confirms signal | 2026-08-18 |
 | TISI | Insider Buy | McGinnis Pamela J. (Dir) bought $45,800 of TISI (150% of position) on 2026-08-13 | +20.4% since trade 🚩 confirms signal | 2026-08-18 |
 | HGBL | Insider Buy | Dove Nicholas Kirk (Pres, Industrial Assets) bought $65,940 of HGBL (48% of position) on 2026-08-17 | +19.7% since trade 🚩 confirms signal | 2026-08-18 |
@@ -976,12 +976,12 @@ Candidates whose price has risen since the insider's buy, biggest gain first.
 | CLPR | Insider Buy | Levinson Sam (Dir, 10%) bought $488,796 of CLPR on 2026-08-12 | +10.4% since trade | 2026-08-17 |
 | VRXA | Insider Buy | Baumann Oliver Rolf (Dir) bought $75,000 of VRXA (1% of position) on 2026-08-27 | +10.4% since trade 🚩 confirms signal | 2026-08-31 |
 | PLSE | Insider Buy | Teplitsky Liane Rae (COO) bought $99,965 of PLSE on 2026-08-26 | +10.1% since trade 🚩 confirms signal | 2026-08-29 |
+| CWBHF | Insider Buy | Kunkel Raymond J. (COO) bought $39,311 of CWBHF (18% of position) on 2026-09-03 | +10.0% since trade 🚩 confirms signal | 2026-09-04 |
 | AUGO | Insider Buy | Sousa Mauad Bruno (Dir) bought $868,230 of AUGO (3% of position) on 2026-08-17 | +9.6% since trade | 2026-08-20 |
 | TXO | Insider Buy | Simpson Bob R (Dir, 10%) bought $2,150,545 of TXO on 2026-08-12 | +9.6% since trade | 2026-08-17 |
 | MLAB | Insider Buy | Kadia Siddhartha (Pres, CEO) bought $800,090 of MLAB on 2026-08-13 | +9.6% since trade | 2026-08-18 |
 | UAMY | Insider Buy | Evans Gary C (COB, CEO) bought $98,400 of UAMY (1% of position) on 2026-08-28 | +9.5% since trade 🚩 confirms signal | 2026-08-29 |
 | CAMP | Insider Buy | Gold Kelly (CFO) bought $39,600 of CAMP (13% of position) on 2026-08-31 | +9.3% since trade 🚩 confirms signal | 2026-09-03 |
-| CWBHF | Insider Buy | Kunkel Raymond J. (COO) bought $39,311 of CWBHF (18% of position) on 2026-09-03 | +9.3% since trade 🚩 confirms signal | 2026-09-04 |
 | SGI | Insider Buy | Thompson Scott L (CEO, Pres) bought $1,885,314 of SGI (1% of position) on 2026-08-27 | +9.2% since trade 🚩 confirms signal | 2026-08-28 |
 | ASYS | Insider Buy | Shechter Guy (Pres, CEO) bought $49,456 of ASYS (7% of position) on 2026-08-24 | +9.0% since trade 🚩 confirms signal | 2026-08-26 |
 | PAM | Insider Buy | Mindlin Marcos Marcelo (Dir, 10%) bought $4,342,831 of PAM (6% of position) on 2026-08-18 | +8.7% since trade | 2026-08-20 |
@@ -1210,11 +1210,11 @@ Candidates whose price has fallen since the insider's buy, biggest drop first.
 | GWRS | Insider Buy | Levine Jonathan L (Dir) bought $5,766,819 of GWRS (5% of position) on 2026-08-20 | -0.9% since trade | 2026-08-22 |
 | AVD | Insider Buy | Macicek Steven D (Dir) bought $39,710 of AVD (24% of position) on 2026-08-17 | -0.9% since trade | 2026-08-18 |
 | HKHC | Insider Buy | Rosenthal Brent D (Dir) bought $54,000 of HKHC (82% of position) on 2026-08-24 | -0.9% since trade | 2026-08-25 |
-| EMYB | Insider Buy | Lobach David M Jr (COB, Pres, CEO) bought $44,660 of EMYB (0% of position) on 2026-08-18 | -0.9% since trade | 2026-08-20 |
 | SGRY | Insider Buy | Deluca Teresa (Dir) bought $143,500 of SGRY (18% of position) on 2026-08-18 | -0.8% since trade | 2026-08-20 |
 | ITT | Insider Buy | Savi Luca (Pres, CEO) bought $1,001,592 of ITT (2% of position) on 2026-08-31 | -0.8% since trade | 2026-09-01 |
 | WALD | Insider Buy | Souza Cristiano (Dir, 10%) bought $505,649 of WALD (3% of position) on 2026-08-28 | -0.7% since trade | 2026-09-01 |
 | CC | Insider Buy | Familiar Calderon Gerardo (See Remarks) bought $30,051 of CC on 2026-08-12 | -0.7% since trade | 2026-08-17 |
+| EMYB | Insider Buy | Lobach David M Jr (COB, Pres, CEO) bought $44,660 of EMYB (0% of position) on 2026-08-18 | -0.7% since trade | 2026-08-20 |
 | MOALX | Insider Buy | Solender Daniel S (Portfolio Manager) bought $50,000 of MOALX (4% of position) on 2026-09-03 | -0.7% since trade | 2026-09-08 |
 | KRMD | Insider Buy | Kalbermatten Adam R (Chief Commercial Officer) bought $101,120 of KRMD (9% of position) on 2026-09-08 | -0.6% since trade | 2026-09-09 |
 | NYC | Insider Buy | Schorsch Nicholas S (10%) bought $67,450 of NYC (1% of position) on 2026-08-26 | -0.5% since trade | 2026-08-28 |
@@ -1290,4 +1290,4 @@ Filings where the price has fallen since the trade, biggest drop first.
 | V | Sold | $2,161,236 | 2026-08-21 | -1.0% since trade |
 | V | Sold | $6,650,860 | 2026-08-21 | -1.0% since trade |
 
-Last auto-generated: 2026-09-10 13:05 AEST.
+Last auto-generated: 2026-09-10 14:12 AEST.
