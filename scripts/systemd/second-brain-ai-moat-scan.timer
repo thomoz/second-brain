@@ -1,0 +1,10 @@
+[Unit]
+Description=AI-Resistant Moat Scan Timer
+Requires=second-brain-ai-moat-scan.service
+
+[Timer]
+OnCalendar=*-*-* 23:30:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

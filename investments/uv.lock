@@ -15,6 +15,7 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "ai-resistant-moat-scanner",
     "briefs-finance",
     "fourteen-crash-signals-daily-check",
     "goat",
@@ -33,6 +34,40 @@ sdist = { url = "https://files.pythonhosted.org/packages/5c/8c/c08db1a1910f8d04e
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8d/8c/2a4b912b1afa201b25bdd0f5bccf96d5a8b5dccb6131316a8dd2d9cabcc1/aeventkit-2.1.0-py3-none-any.whl", hash = "sha256:962d43f79e731ac43527f2d0defeed118e6dbaa85f1487f5667540ebb8f00729", size = 26678, upload-time = "2025-06-22T15:54:02.141Z" },
 ]
+
+[[package]]
+name = "ai-resistant-moat-scanner"
+version = "0.1.0"
+source = { editable = "ai-resistant-moat-scanner" }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "my-trader" },
+    { name = "pandas" },
+    { name = "requests" },
+    { name = "yfinance" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.12.0" },
+    { name = "my-trader", editable = "my-trader" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8.0" },
+    { name = "pandas", specifier = ">=2.0.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
+    { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.12.0" },
+    { name = "requests", specifier = ">=2.31.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.2.0" },
+    { name = "yfinance", specifier = ">=0.2.40" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "ast-serialize"

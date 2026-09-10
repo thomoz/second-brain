@@ -1,12 +1,12 @@
 # Investments Tools — What Runs, When, Where It Writes, How to Run It Now
 
-Five packages share `investments/briefs-finance/data/investments.db` (VPS-only since
+Six packages share `investments/briefs-finance/data/investments.db` (VPS-only since
 2026-08-23 — see `.agent/plans/completed/investments-db-ssh-single-source.md`):
 **my-trader**, **briefs-finance**, **goat**, **fourteen-crash-signals-daily-check**,
-**superinvestor-filings**.
+**superinvestor-filings**, **ai-resistant-moat-scanner**.
 
-Last updated 2026-09-09 — update this file whenever a tool's schedule, command, or
-output path changes; it isn't regenerated automatically.
+Last updated 2026-09-09 (added ai-resistant-moat-scanner) — update this file whenever a
+tool's schedule, command, or output path changes; it isn't regenerated automatically.
 
 ## Daily Read
 
@@ -23,6 +23,7 @@ Freshest reports worth actually opening most days:
 | [investments/my-trader/cash-value-report.md](my-trader/cash-value-report.md) | Cash-Value Scan (daily, ~22:30 UTC) | [→](#cashvalue-scan) |
 | [investments/goat/heartbeat-candidates-pending-review.md](goat/heartbeat-candidates-pending-review.md) | Goat Heartbeat Scan (daily, ~22:45 UTC) | [→](#goat-heartbeat) |
 | [investments/superinvestor-filings/superinvestor-filings-report.md](superinvestor-filings/superinvestor-filings-report.md) | Superinvestor Filings Scanner — US EDGAR leg (daily, 02:35 UTC) + India BSE SAST leg (daily, 12:30 UTC) | [→](#superinvestor-filings) |
+| [investments/ai-resistant-moat-scanner/moat-candidates-pending-review.md](ai-resistant-moat-scanner/moat-candidates-pending-review.md) | AI-Resistant Moat Scan (daily, 23:30 UTC) | [→](#ai-moat-scan) |
 
 Staging files (only worth checking when you want to review pending candidates, not a
 daily habit): `investments/my-trader/synced-candidates-pending-review.md`,
@@ -42,6 +43,7 @@ alerts/discoveries as they fire — these files are for batch review, not discov
 | <a id="fourteen-crash-signals"></a>[↑](#daily-read) **Fourteen Crash Signals Daily Check** | Tracks all 14 crash-warning markers against a dynamically-recomputed hot-company watchlist | VPS systemd (`second-brain-fourteen-signals.timer`) | Daily, 22:05 UTC | `investments/fourteen-crash-signals-daily-check/crash-signals-report.md` |
 | <a id="superinvestor-filings"></a>[↑](#daily-read) **Superinvestor Filings Scanner** — US EDGAR leg | Polls each tracked concentrated-value investor's SEC EDGAR submissions feed (Mohnish Pabrai / Dalal Street first) for fast-disclosure forms (13D/G + Form 3/4/5), parses each genuinely-new filing, tags 5%/10%/below-5% crossings, fires one grouped WhatsApp digest. Advisor notes only — never touches watchlist/holdings. Modelled on Goat Insider Scan; a Form 4 by a >10%-owner fund entity can surface in both, not cross-suppressed. | VPS systemd (`second-brain-superinvestor-edgar.timer`) | Daily, 02:35 UTC (~12:35 AEST) | `investments/superinvestor-filings/superinvestor-filings-report.md` (shared — both legs write it) + DB seen-log + WhatsApp digest |
 | [↑](#daily-read) **Superinvestor Filings Scanner** — India BSE SEBI SAST leg | Polls BSE's "Insider Trading / SAST" feed for Regulation 29(1)/(2) disclosures, name-matches the acquirer against each tracked investor's `india_aliases`, same seen-log + grouped WhatsApp digest as the EDGAR leg. Catches Pabrai's India-only FPI positions (Rain Industries etc.) that never touch EDGAR. NSE is blocked for the VPS IP so this is BSE-only (SAST disclosures are dual-filed). The exact % is in a (usually scanned) PDF — the alert links to it rather than parsing it. | VPS systemd (`second-brain-superinvestor-sast.timer`) | Daily, 12:30 UTC (~22:30 AEST / ~18:00 IST) | same shared report (`superinvestor-filings-report.md` shows the full both-leg seen-log) |
+| <a id="ai-moat-scan"></a>[↑](#daily-read) **AI-Resistant Moat Scan** ([details + tuning ↓](#ai-moat-scan-how)) | Ranks US-listed firms by how AI-durable their embedded-software moat is (Salesforce-style lock-in). Scores 1/5 of a Finviz sector-screen → industry-allow-list universe (rotating by date) + all seed names + all staged names; blended 0–100 (50% quant yfinance margins/Rule-of-40/revenue-durability, 50% an LLM 6-part rubric against the latest 10-K, cached per accession). Stages fresh names ≥ 80 into `moat_pending_candidates`, one WhatsApp + toast "AI-Resistant Moat Alert" on a fresh name, silent on zero. Advisor notes only. | VPS systemd (`second-brain-ai-moat-scan.timer`) | Daily, 23:30 UTC (after the 22:45 Goat Heartbeat) | `moat-scan-report.md` (full ranked table) + `moat-candidates-pending-review.md` (fresh ≥ 80) |
 
 ## Manual / on-demand only
 
@@ -75,6 +77,8 @@ undoing the 2026-08-23 fix.
 | **Fourteen Crash Signals: record bond yield** | Manually record a bond yield for Marker #12 (no live source exists) | `-Package fourteen-signals -Command "record-bond-yield TICKER YIELD_PCT [--cusip CUSIP]"` | DB only |
 | **Superinvestor Filings scan (on-demand)** | Both legs (US EDGAR + India BSE SAST) right now; `--edgar-only` / `--india-only` to restrict | `-Package superinvestor-filings -Command "scan"` | `investments/superinvestor-filings/superinvestor-filings-report.md` |
 | **Superinvestor Filings resolve-ciks** | Print `(entity name, CIK)` pairs EDGAR full-text search returns for a tracked filer's name — for manual `config.py` editing, never writes | `-Package superinvestor-filings -Command "resolve-ciks"` | Terminal only |
+| **AI-Resistant Moat Scan (on-demand)** | Same daily scan (universe slice + seed + staged, blended quant/qualitative 0–100, stages ≥ 80), right now | `-Package ai-resistant-moat-scanner -Command "scan"` | `investments/ai-resistant-moat-scanner/moat-scan-report.md` + `moat-candidates-pending-review.md` |
+| **AI-Resistant Moat promote/dismiss candidate** | Move a staged AI-moat candidate into my-trader's real watchlist (`source="ai_resistant_moat"`, thesis in notes), or discard it | `-Package ai-resistant-moat-scanner -Command "promote-candidate --ticker TICKER"` / `"dismiss-candidate --ticker TICKER"` | Watchlist DB row + regenerates `watchlist.md` (promote only) |
 
 Full invocation is `.\scripts\invoke_investments.ps1` from the repo root — table rows
 above show only the `-Package`/`-Command` args for brevity.
@@ -143,6 +147,63 @@ run right after a manual one just gets throttled.
 The cash-flow gate (`operatingCashflow > 0`, FCF as a tag not a filter) is a one-line
 rule in `compute_cash_value_metrics`, not a config constant — change it there if you
 want OCF+FCF back or an OCF margin floor.
+
+## <a id="ai-moat-scan-how"></a>AI-Resistant Moat Scan — how it works + tuning [↑](#daily-read)
+
+**The idea.** Find the next Salesforce: a public company whose software is embedded so
+deeply in its customers' operations that the ROI of building an AI replacement doesn't
+make sense (system of record, switching costs, ecosystem lock-in, regulatory
+entrenchment, workflow breadth, mission criticality). Built 2026-09 from
+`.agent/plans/ai-resistant-moat-scanner.md`. **Dated caveat:** the rubric
+(`RUBRIC_VERSION`, currently `2026-09`) encodes a 2026 view of what AI can cheaply
+rebuild — revisit it periodically; bumping `RUBRIC_VERSION` re-scores every cached
+name.
+
+**Two universes:**
+- **Screened** — one coarse Finviz screen per target sector
+  (`cap_midover,fa_grossmargin_o60,geo_usa,sh_avgvol_o100,sec_<sector>`, sectors
+  technology / healthcare / financial / communicationservices / industrials), then
+  filtered client-side to `MOAT_TARGET_INDUSTRIES` (Finviz can't OR industries in
+  `f=`). Cached in `moat_universe_cache` for 7 days with a stale-fallback.
+- **Seed** — 30 curated known-embedded-moat names (`MOAT_SEED_TICKERS`: CRM, NOW,
+  INTU, VEEV, TYL, ADSK, FICO, MSCI …), re-scored every day so the scan is anchored
+  even if the Finviz screen drifts.
+
+Each run scores **1/5 of the screened universe** (rotating by calendar date) **+ all
+seed names + all currently-staged names**.
+
+**The blended score (0–100, `0.5*quant + 0.5*qualitative`):**
+- **Quant** (`quant.py`, pure over yfinance `.info` + revenue history) — six ramped
+  sub-metrics: gross margin, FCF margin, operating margin, Rule of 40, revenue
+  durability (worst annual YoY over ~4 yrs of `income_stmt`; degrades to neutral below
+  3 years), and disclosed recurring-revenue %. Plus up to +5 disclosure bonus for
+  strong disclosed NRR / growing RPO / low logo churn. Below `$2B` market cap or no
+  gross margin → no score.
+- **Qualitative** (`qualitative.py`) — one LLM extraction call (nullable NRR / RPO /
+  churn / customer count, "not disclosed → null, never guessed") + one LLM rubric call
+  (six 0–10 sub-scores + anti-signals + a one-line thesis) against the latest 10-K's
+  Item 1 / 1A. Cached per `(ticker, accession_number, rubric_version)` — a same-day
+  re-run or an unchanged filing costs zero LLM calls. A failed rubric call → `None` →
+  quant-only row, never staged (no fabricated 50).
+
+**Staging.** A fresh name scoring ≥ `MOAT_STAGE_THRESHOLD` (80) that isn't held /
+watchlisted / already staged goes into `moat_pending_candidates` and fires one
+WhatsApp + toast "AI-Resistant Moat Alert". Held / watchlisted names are scored and
+shown (tagged) but never staged. Ethical filter: `DEFENSE_TICKERS` dropped entirely,
+`BA`/`PLTR` shown with a `REVIEW:` tag. `promote-candidate` writes the one deliberate
+cross-package row into my-trader's watchlist.
+
+**Tweakable config** — all in `investments/ai-resistant-moat-scanner/ai_resistant_moat_scanner/config.py`:
+
+| Constant | Now | What it does |
+|----------|-----|--------------|
+| `MOAT_STAGE_THRESHOLD` | `80.0` | **The headline knob.** Blended score at/above which a fresh name is staged + alerted. Start conservative; loosen after the first live run (cash-value's 0.80 → 0.50 precedent). |
+| `MOAT_BLEND_QUANT_WEIGHT` | `0.5` | Quant vs qualitative weight in the blend (qualitative = `1 - this`). |
+| `MOAT_QUANT_WEIGHTS` | dict, sums to 1.0 | Relative weight of the six quant sub-metrics. |
+| `MOAT_UNIVERSE_SLICES` | `5` | Fraction of the screened universe scored per day (1/N, rotating). Seed + staged names are every day regardless. |
+| `MOAT_FINVIZ_SECTOR_SCREENS` | 5 sector strings | The coarse Finviz screens. Verified live at build; a wrong token → smaller/empty screened universe, seed list still carries the scan. |
+| `MOAT_SEED_TICKERS` | 30 names | Curated embedded-moat anchor list. |
+| `RUBRIC_VERSION` | `"2026-09"` | Bump when the rubric prompt changes — invalidates every cached qualitative sub-score. |
 
 ## Notes on the schedule mismatch
 

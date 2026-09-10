@@ -157,6 +157,37 @@ def fetch_balance_sheet_financials(ticker: str) -> dict[str, float] | None:
         return None
 
 
+def fetch_income_statement_history(ticker: str) -> list[float] | None:
+    """Annual "Total Revenue" history, oldest-first, for a revenue-durability read
+    (used by the AI-resistant-moat scanner). yfinance's `income_stmt` columns are
+    newest-first and typically only ~4 annual periods deep -- callers must degrade to
+    neutral when fewer than 3 values are available (pre-2021 history is usually
+    absent). Mirrors fetch_cash_flow_statement's exact try/except/return-None shape.
+    NaN values are dropped."""
+    import math
+
+    import yfinance as yf
+
+    try:
+        t = yf.Ticker(ticker)
+        stmt = t.income_stmt
+        if stmt is None or stmt.empty or "Total Revenue" not in stmt.index:
+            return None
+        row = stmt.loc["Total Revenue"]
+        # yfinance columns are newest-first -> reverse for oldest-first.
+        values: list[float] = []
+        for v in reversed(list(row.values)):
+            if v is None:
+                continue
+            fv = float(v)
+            if math.isnan(fv):
+                continue
+            values.append(fv)
+        return values or None
+    except Exception:
+        return None
+
+
 def fetch_cash_flow_statement(ticker: str) -> dict[str, float] | None:
     """Latest ANNUAL cash-flow statement (not quarterly/TTM -- Phase 2 handoff, Marker #4
     resolution: matches the fact-check's own cited Oracle numbers, which are FY26 annual,

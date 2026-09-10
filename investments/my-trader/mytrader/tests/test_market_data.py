@@ -120,7 +120,7 @@ def test_fetch_current_price_falls_back_to_current_price(monkeypatch):
     assert market_data.fetch_current_price("AG") == 19.0
 
 
-def _install_fake_yfinance(monkeypatch, balance_sheet=None, financials=None, cashflow=None):
+def _install_fake_yfinance(monkeypatch, balance_sheet=None, financials=None, cashflow=None, income_stmt=None):
     class _FakeTicker:
         def __init__(self, symbol):
             self._symbol = symbol
@@ -136,6 +136,10 @@ def _install_fake_yfinance(monkeypatch, balance_sheet=None, financials=None, cas
         @property
         def cashflow(self):
             return cashflow if cashflow is not None else pd.DataFrame()
+
+        @property
+        def income_stmt(self):
+            return income_stmt if income_stmt is not None else pd.DataFrame()
 
     fake_yf = types.ModuleType("yfinance")
     fake_yf.Ticker = _FakeTicker
@@ -220,3 +224,41 @@ def test_fetch_cash_flow_statement_partial_when_capital_expenditure_missing(monk
     result = market_data.fetch_cash_flow_statement("X")
     assert result["free_cash_flow"] == -23_686_000_000.0
     assert "capital_expenditure" not in result
+
+
+def test_fetch_income_statement_history_reverses_to_oldest_first(monkeypatch):
+    # yfinance columns are newest-first; helper returns oldest-first.
+    stmt = pd.DataFrame(
+        {
+            pd.Timestamp("2026-06-30"): [40.0, 10.0],
+            pd.Timestamp("2025-06-30"): [35.0, 8.0],
+            pd.Timestamp("2024-06-30"): [30.0, 6.0],
+        },
+        index=["Total Revenue", "Net Income"],
+    )
+    _install_fake_yfinance(monkeypatch, income_stmt=stmt)
+    assert market_data.fetch_income_statement_history("CRM") == [30.0, 35.0, 40.0]
+
+
+def test_fetch_income_statement_history_drops_nan(monkeypatch):
+    stmt = pd.DataFrame(
+        {
+            pd.Timestamp("2026-06-30"): [40.0],
+            pd.Timestamp("2025-06-30"): [float("nan")],
+            pd.Timestamp("2024-06-30"): [30.0],
+        },
+        index=["Total Revenue"],
+    )
+    _install_fake_yfinance(monkeypatch, income_stmt=stmt)
+    assert market_data.fetch_income_statement_history("CRM") == [30.0, 40.0]
+
+
+def test_fetch_income_statement_history_none_when_missing_row(monkeypatch):
+    stmt = pd.DataFrame({pd.Timestamp("2026-06-30"): [1.0]}, index=["Net Income"])
+    _install_fake_yfinance(monkeypatch, income_stmt=stmt)
+    assert market_data.fetch_income_statement_history("X") is None
+
+
+def test_fetch_income_statement_history_none_when_empty(monkeypatch):
+    _install_fake_yfinance(monkeypatch)
+    assert market_data.fetch_income_statement_history("X") is None

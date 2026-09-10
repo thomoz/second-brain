@@ -116,7 +116,7 @@ def test_fetch_screener_universe_paginates_until_short_page(monkeypatch):
     short3 = _SYNTH[40:45]
     requested: list[int] = []
 
-    def fake_fetch(offset: int) -> str:
+    def fake_fetch(offset: int, **kwargs) -> str:
         requested.append(offset)
         return {1: _page_with(full1), 21: _page_with(full2), 41: _page_with(short3)}[offset]
 
@@ -128,7 +128,7 @@ def test_fetch_screener_universe_paginates_until_short_page(monkeypatch):
 
 
 def test_fetch_screener_universe_returns_none_when_first_page_fails(monkeypatch):
-    monkeypatch.setattr(finviz_screener, "_fetch_page", lambda offset: None)
+    monkeypatch.setattr(finviz_screener, "_fetch_page", lambda offset, **kwargs: None)
     monkeypatch.setattr(finviz_screener.time, "sleep", lambda *_: None)
     assert finviz_screener.fetch_screener_universe() is None
 
@@ -136,7 +136,7 @@ def test_fetch_screener_universe_returns_none_when_first_page_fails(monkeypatch)
 def test_fetch_screener_universe_stops_early_and_returns_partial_on_later_failure(monkeypatch):
     full1 = _SYNTH[0:20]
 
-    def fake_fetch(offset: int):
+    def fake_fetch(offset: int, **kwargs):
         return _page_with(full1) if offset == 1 else None
 
     monkeypatch.setattr(finviz_screener, "_fetch_page", fake_fetch)
@@ -148,7 +148,7 @@ def test_fetch_screener_universe_stops_early_and_returns_partial_on_later_failur
 def test_fetch_screener_universe_dedupes_across_pages(monkeypatch):
     page = _page_with(_SYNTH[0:20])
 
-    def fake_fetch(offset: int):
+    def fake_fetch(offset: int, **kwargs):
         return page  # every page identical -> second page is all duplicates
 
     monkeypatch.setattr(finviz_screener, "_fetch_page", fake_fetch)
@@ -162,13 +162,47 @@ def test_fetch_screener_universe_sleeps_between_pages_not_after_last(monkeypatch
     short2 = _SYNTH[20:23]
     calls = {"n": 0}
 
-    def fake_fetch(offset: int):
+    def fake_fetch(offset: int, **kwargs):
         return {1: _page_with(full1), 21: _page_with(short2)}[offset]
 
     monkeypatch.setattr(finviz_screener, "_fetch_page", fake_fetch)
     monkeypatch.setattr(finviz_screener.time, "sleep", lambda *_: calls.__setitem__("n", calls["n"] + 1))
     finviz_screener.fetch_screener_universe()
     assert calls["n"] == 1  # slept once (after page 1), not after the short page 2
+
+
+def test_fetch_page_threads_filters_and_sort(monkeypatch):
+    captured: dict = {}
+
+    class _Resp:
+        status_code = 200
+        text = "x"
+
+    def _fake_get(url, headers=None, params=None, timeout=None):
+        captured.update(params)
+        return _Resp()
+
+    monkeypatch.setattr("requests.get", _fake_get)
+    finviz_screener._fetch_page(1, filters="sec_technology,cap_midover", sort="marketcap")
+    assert captured["f"] == "sec_technology,cap_midover"
+    assert captured["o"] == "marketcap"
+
+
+def test_fetch_page_defaults_unchanged(monkeypatch):
+    captured: dict = {}
+
+    class _Resp:
+        status_code = 200
+        text = "x"
+
+    def _fake_get(url, headers=None, params=None, timeout=None):
+        captured.update(params)
+        return _Resp()
+
+    monkeypatch.setattr("requests.get", _fake_get)
+    finviz_screener._fetch_page(1)
+    assert captured["f"] == finviz_screener.config.FINVIZ_SCREENER_FILTERS
+    assert captured["o"] == "pricecash"
 
 
 def test_descramble_ticker_edge_cases():

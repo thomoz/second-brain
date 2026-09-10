@@ -21,7 +21,7 @@
 
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("my-trader", "briefs-finance", "goat", "fourteen-signals", "superinvestor-filings")]
+    [ValidateSet("my-trader", "briefs-finance", "goat", "fourteen-signals", "superinvestor-filings", "ai-resistant-moat-scanner")]
     [string]$Package,
 
     [Parameter(Mandatory=$true)]
@@ -37,6 +37,7 @@ $PACKAGES = @{
     "goat"             = @{ Dir = "goat"; Module = "goat.main" }
     "fourteen-signals" = @{ Dir = "fourteen-crash-signals-daily-check"; Module = "fourteen_crash_signals_daily_check.main" }
     "superinvestor-filings" = @{ Dir = "superinvestor-filings"; Module = "superinvestor_filings.main" }
+    "ai-resistant-moat-scanner" = @{ Dir = "ai-resistant-moat-scanner"; Module = "ai_resistant_moat_scanner.main" }
 }
 
 $pkg = $PACKAGES[$Package]

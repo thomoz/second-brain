@@ -408,6 +408,13 @@ def _extract_def14a_sections(text: str) -> dict[str, str]:
     return sections
 
 
+def extract_sections(html: str, filing_type: str) -> dict[str, str]:
+    """Public alias for _extract_sections -- the TOC-gotcha-aware section splitter,
+    so other workspace packages (e.g. the AI-resistant-moat scanner) don't reach into
+    a `_`-private function."""
+    return _extract_sections(html, filing_type)
+
+
 def _extract_sections(html: str, filing_type: str) -> dict[str, str]:
     text = strip_html(html)
     if filing_type == "10-K":

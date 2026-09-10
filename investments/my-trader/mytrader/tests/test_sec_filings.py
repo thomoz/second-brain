@@ -72,6 +72,11 @@ def test_extract_10k_sections_against_real_fixture():
     assert sections.get("financial_statements")
 
 
+def test_public_extract_sections_alias_matches_private():
+    html = (_FIXTURES / "sec_10k_sample.html").read_text(encoding="utf-8")
+    assert sec_filings.extract_sections(html, "10-K") == sec_filings._extract_sections(html, "10-K")
+
+
 def test_extract_10q_sections_against_real_fixture():
     html = (_FIXTURES / "sec_10q_sample.html").read_text(encoding="utf-8")
     sections = sec_filings._extract_sections(html, "10-Q")

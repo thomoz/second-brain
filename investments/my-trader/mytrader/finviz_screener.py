@@ -48,13 +48,15 @@ _EXPECTED_COLUMNS = {
 _RESULTS_PAGE_MARKER = "Total"
 
 
-def _fetch_page(row_offset: int) -> str | None:
+def _fetch_page(
+    row_offset: int, filters: str | None = None, sort: str = "pricecash"
+) -> str | None:
     import requests
 
     params = {
         "v": "111",
-        "f": config.FINVIZ_SCREENER_FILTERS,
-        "o": "pricecash",
+        "f": filters or config.FINVIZ_SCREENER_FILTERS,
+        "o": sort,
         "r": str(row_offset),
     }
     try:
@@ -144,16 +146,22 @@ def _parse_page(html: str) -> list[dict] | None:
     return None
 
 
-def fetch_screener_universe() -> list[dict] | None:
+def fetch_screener_universe(
+    filters: str | None = None, sort: str = "pricecash"
+) -> list[dict] | None:
     """Paginate the coarse Finviz screen. Returns the deduped list of rows, or None
     if the FIRST page fails (total failure -- the caller serves a stale report). A
     later-page failure stops pagination early and returns what was gathered so far
-    (a partial coarse list is fine -- the precise test runs downstream anyway)."""
+    (a partial coarse list is fine -- the precise test runs downstream anyway).
+
+    `filters` / `sort` default to the cash-value scan's own screen + Price/Cash sort;
+    other callers (e.g. the AI-resistant-moat scanner) pass their own. Default
+    behaviour is byte-for-byte unchanged."""
     all_rows: list[dict] = []
     seen: set[str] = set()
     for page in range(config.FINVIZ_MAX_PAGES):
         offset = 1 + page * config.FINVIZ_SCREENER_ROWS_PER_PAGE
-        html = _fetch_page(offset)
+        html = _fetch_page(offset, filters=filters, sort=sort)
         if html is None:
             if page == 0:
                 return None
