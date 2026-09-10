@@ -50,7 +50,7 @@ All 39 covered industries.
 | 21 | IBUY | Internet Retail | +4.6% | Yes |
 | 22 | PAVE | Engineering & Construction | +4.3% | Yes |
 | 23 | ESPO | Electronic Gaming & Multimedia | +2.7% | Yes |
-| 24 | INDS | REIT - Industrial | +0.7% | Yes |
+| 24 | INDS | REIT - Industrial | +2.0% | Yes |
 | 25 | PHO | Utilities - Regulated Water | +0.6% | Yes |
 | 26 | EVX | Waste Management | +0.5% | Yes |
 | 27 | REM | REIT - Mortgage | -0.4% | No |
