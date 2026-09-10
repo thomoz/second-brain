@@ -67,9 +67,9 @@ def test_score_rubric_none_when_run_text_raises(monkeypatch):
 
 def test_compute_qualitative_score_penalty_is_capped():
     rubric = {"sub_scores": {k: 10 for k in qualitative._RUBRIC_KEYS},
-              "anti_signals": ["a", "b", "c", "d"]}
-    # raw 100, penalty min(4*8, 30) = 30
-    assert qualitative.compute_qualitative_score(rubric) == 70.0
+              "anti_signals": ["a", "b", "c", "d", "e"]}
+    # raw 100, penalty min(5*4, 16) = 16
+    assert qualitative.compute_qualitative_score(rubric) == 84.0
 
 
 def test_get_qualitative_none_when_no_10k(db_conn, monkeypatch):

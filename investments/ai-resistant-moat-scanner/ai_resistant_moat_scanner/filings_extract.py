@@ -12,6 +12,7 @@ import asyncio
 import json
 import sqlite3
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -51,13 +52,35 @@ def _all_none() -> dict[str, Any]:
     return {k: (None if k != "notes" else "") for k in _EXTRACTION_KEYS}
 
 
+def _paced_filing_index(cik: str) -> dict[str, Any] | None:
+    """sec_filings.fetch_filing_index with a courtesy delay before the call and one
+    backoff retry on a None (EDGAR throttled the moat scan's burst on the first live
+    run -- see config.MOAT_SEC_REQUEST_DELAY_SECONDS)."""
+    time.sleep(config.MOAT_SEC_REQUEST_DELAY_SECONDS)
+    index = sec_filings.fetch_filing_index(cik)
+    if index is None:
+        time.sleep(config.MOAT_SEC_RETRY_BACKOFF_SECONDS)
+        index = sec_filings.fetch_filing_index(cik)
+    return index
+
+
+def _paced_filing_document(cik: str, accession_number: str, document: str) -> str | None:
+    """sec_filings.fetch_filing_document with the same delay-then-retry pacing."""
+    time.sleep(config.MOAT_SEC_REQUEST_DELAY_SECONDS)
+    html = sec_filings.fetch_filing_document(cik, accession_number, document)
+    if html is None:
+        time.sleep(config.MOAT_SEC_RETRY_BACKOFF_SECONDS)
+        html = sec_filings.fetch_filing_document(cik, accession_number, document)
+    return html
+
+
 def latest_10k(conn: sqlite3.Connection, ticker: str) -> dict[str, str] | None:
     """The most recent 10-K filing entry for a ticker, or None (non-US / no CIK / no
     10-K / fetch failure). Keys: cik, accession_number, primary_document, filing_date."""
     cik = sec_filings.get_cik(conn, ticker.upper())
     if cik is None:
         return None
-    index = sec_filings.fetch_filing_index(cik)
+    index = _paced_filing_index(cik)
     if index is None:
         return None
     entry = sec_filings.latest_filing_entry(index, "10-K")
@@ -74,7 +97,7 @@ def latest_10k(conn: sqlite3.Connection, ticker: str) -> dict[str, str] | None:
 def fetch_10k_sections(entry: dict[str, str]) -> dict[str, str] | None:
     """Item 1 / 1A / 7 text for a 10-K filing entry (keys business / risk_factors /
     mda). None on fetch failure or empty extraction."""
-    html = sec_filings.fetch_filing_document(
+    html = _paced_filing_document(
         entry["cik"], entry["accession_number"], entry["primary_document"]
     )
     if html is None:

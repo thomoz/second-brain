@@ -5,8 +5,9 @@ Six packages share `investments/briefs-finance/data/investments.db` (VPS-only si
 **my-trader**, **briefs-finance**, **goat**, **fourteen-crash-signals-daily-check**,
 **superinvestor-filings**, **ai-resistant-moat-scanner**.
 
-Last updated 2026-09-09 (added ai-resistant-moat-scanner) — update this file whenever a
-tool's schedule, command, or output path changes; it isn't regenerated automatically.
+Last updated 2026-09-10 (ai-resistant-moat-scanner first-run tuning) — update this file
+whenever a tool's schedule, command, or output path changes; it isn't regenerated
+automatically.
 
 ## Daily Read
 
@@ -155,9 +156,12 @@ deeply in its customers' operations that the ROI of building an AI replacement d
 make sense (system of record, switching costs, ecosystem lock-in, regulatory
 entrenchment, workflow breadth, mission criticality). Built 2026-09 from
 `.agent/plans/ai-resistant-moat-scanner.md`. **Dated caveat:** the rubric
-(`RUBRIC_VERSION`, currently `2026-09`) encodes a 2026 view of what AI can cheaply
+(`RUBRIC_VERSION`, currently `2026-09b`) encodes a 2026 view of what AI can cheaply
 rebuild — revisit it periodically; bumping `RUBRIC_VERSION` re-scores every cached
-name.
+name. (`2026-09b` = first-live-run tuning: the anti-signal guidance was tightened so
+the rubric only flags material weaknesses, and the per-anti-signal penalty was halved
+— the first run put even Salesforce at qual 53 because routine competitive boilerplate
+maxed the penalty.)
 
 **Two universes:**
 - **Screened** — one coarse Finviz screen per target sector
@@ -203,7 +207,9 @@ cross-package row into my-trader's watchlist.
 | `MOAT_UNIVERSE_SLICES` | `5` | Fraction of the screened universe scored per day (1/N, rotating). Seed + staged names are every day regardless. |
 | `MOAT_FINVIZ_SECTOR_SCREENS` | 5 sector strings | The coarse Finviz screens. Verified live at build; a wrong token → smaller/empty screened universe, seed list still carries the scan. |
 | `MOAT_SEED_TICKERS` | 30 names | Curated embedded-moat anchor list. |
-| `RUBRIC_VERSION` | `"2026-09"` | Bump when the rubric prompt changes — invalidates every cached qualitative sub-score. |
+| `MOAT_ANTI_SIGNAL_PENALTY_EACH` / `_CAP` | `4.0` / `16.0` | Points knocked off the qualitative half per rubric-flagged anti-signal, and the max total. Halved from `8.0`/`30.0` after the first live run (see `RUBRIC_VERSION` note). |
+| `MOAT_SEC_REQUEST_DELAY_SECONDS` / `_RETRY_BACKOFF_SECONDS` | `0.7` / `8.0` | Pause before every SEC EDGAR request + the extra wait before one retry on a throttled (None) response. Raised from `0.2` after the first run got ~35/46 names throttled to "no 10-K". |
+| `RUBRIC_VERSION` | `"2026-09b"` | Bump when the rubric prompt changes — invalidates every cached qualitative sub-score. |
 
 ## Notes on the schedule mismatch
 

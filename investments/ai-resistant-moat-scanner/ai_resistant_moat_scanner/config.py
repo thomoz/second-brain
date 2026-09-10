@@ -27,7 +27,10 @@ MOAT_CANDIDATES_MD_PATH = PKG_DIR / "moat-candidates-pending-review.md"
 
 # Surfaced in the report header + stored on every moat_qualitative_cache row; a bump
 # here makes every cached rubric sub-score miss on the next run (see db.py PK).
-RUBRIC_VERSION = "2026-09"
+# 2026-09b: first-live-run tuning -- tightened the anti_signals guidance so the rubric
+# only flags material weaknesses, not routine competitive boilerplate (first run put
+# even Salesforce at qual 53 because 4 mild anti-signals maxed the penalty).
+RUBRIC_VERSION = "2026-09b"
 
 # --- Universe --------------------------------------------------------------------
 # One coarse Finviz screen string per target sector. Finviz's industry filter is
@@ -97,8 +100,10 @@ MOAT_RECURRING_REVENUE_RAMP = (0.50, 0.90)
 
 MOAT_DISCLOSURE_BONUS_MAX = 5.0  # max points added to quant_score for strong disclosed
     # NRR (>=110%) + growing RPO + low logo churn (<10%); null fields contribute nothing.
-MOAT_ANTI_SIGNAL_PENALTY_EACH = 8.0
-MOAT_ANTI_SIGNAL_PENALTY_CAP = 30.0
+MOAT_ANTI_SIGNAL_PENALTY_EACH = 4.0  # was 8.0 -- first live run showed the LLM emits 3-5
+MOAT_ANTI_SIGNAL_PENALTY_CAP = 16.0  # anti-signals for nearly every name, so -30 was
+    # effectively a flat tax on the whole qualitative half. Paired with the 2026-09b
+    # prompt change that tells the rubric to only flag MATERIAL weaknesses.
 MOAT_QUANT_NEUTRAL = 50.0  # score for an unavailable-but-not-negative sub-metric.
 
 MOAT_MIN_MARKET_CAP_USD = 2_000_000_000.0  # re-checked precisely per ticker in quant.py,
@@ -109,7 +114,12 @@ MOAT_RUBRIC_MODEL = "sonnet"  # 6-part rubric grading against filing text.
 MOAT_EXTRACTION_MODEL = "haiku"  # nullable structured extraction (mirrors score.py's haiku).
 
 # --- Pacing --------------------------------------------------------------------
-MOAT_SEC_REQUEST_DELAY_SECONDS = 0.2
+# SEC EDGAR throttles a naive burst: the first live run (2026-09-10) hammered the
+# submissions API for ~46 tickers back-to-back and ~35 came back "no 10-K" mid-run.
+# filings_extract now sleeps MOAT_SEC_REQUEST_DELAY_SECONDS before every SEC request
+# and retries once after MOAT_SEC_RETRY_BACKOFF_SECONDS on a None (throttled) response.
+MOAT_SEC_REQUEST_DELAY_SECONDS = 0.7
+MOAT_SEC_RETRY_BACKOFF_SECONDS = 8.0
 MOAT_FETCH_DELAY_SECONDS = 0.2
 MOAT_FINVIZ_REQUEST_DELAY_SECONDS = 0.5
 

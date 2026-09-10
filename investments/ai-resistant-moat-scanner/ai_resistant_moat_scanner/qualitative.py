@@ -20,7 +20,6 @@ import asyncio
 import json
 import sqlite3
 import sys
-import time
 from pathlib import Path
 from typing import Any
 
@@ -76,9 +75,16 @@ filing text that justifies each score in `citations`.
 6. mission_criticality: what breaks, and how badly, if the product goes away.
 
 Also return:
-- anti_signals: a list of short strings for anything that WEAKENS AI-durability -- \
-  point-solution, core value an LLM could cheaply reproduce, low switching cost, \
-  commoditization, moat-eroding management language, customer-concentration risk.
+- anti_signals: a list of short strings for MATERIAL weaknesses in AI-durability \
+  only. Include an item only if it genuinely lowers the odds this software survives \
+  the AI wave: a true point-solution, core value an LLM could cheaply reproduce, \
+  genuinely low switching cost, real commoditization, management explicitly \
+  conceding moat erosion or pricing pressure it cannot resist, or serious \
+  customer-concentration risk. Do NOT list routine competitive boilerplate, \
+  generic "technology changes rapidly" risk-factor language, standard SaaS churn \
+  disclosure, or a vendor describing its own product as easy to use / configurable. \
+  A textbook-strong moat usually has 0-2 items here; an empty list is the right \
+  answer for the strongest names.
 - thesis: <= 25 words, one line, what makes this AI-durable or not.
 
 Return ONLY valid JSON (no markdown, no commentary):
@@ -203,5 +209,4 @@ def get_qualitative(conn: sqlite3.Connection, ticker: str) -> dict[str, Any] | N
         rubric_json=json.dumps(rubric),
         thesis=rubric["thesis"],
     )
-    time.sleep(config.MOAT_SEC_REQUEST_DELAY_SECONDS)
     return _result_from_rubric(rubric, extraction, entry)

@@ -65,3 +65,28 @@ def test_extract_disclosures_all_none_when_no_sections(monkeypatch):
 def test_latest_10k_none_without_cik(db_conn):
     # conftest stubs sec_filings.get_cik -> None
     assert filings_extract.latest_10k(db_conn, "CRM") is None
+
+
+def test_paced_filing_index_retries_once_on_none(monkeypatch):
+    calls = {"n": 0}
+
+    def _flaky(cik):
+        calls["n"] += 1
+        return None if calls["n"] == 1 else {"filings": {"recent": {}}}
+
+    monkeypatch.setattr(sec_filings, "fetch_filing_index", _flaky)
+    result = filings_extract._paced_filing_index("320193")
+    assert calls["n"] == 2
+    assert result == {"filings": {"recent": {}}}
+
+
+def test_paced_filing_document_retries_once_then_gives_up(monkeypatch):
+    calls = {"n": 0}
+
+    def _always_none(cik, acc, doc):
+        calls["n"] += 1
+        return None
+
+    monkeypatch.setattr(sec_filings, "fetch_filing_document", _always_none)
+    assert filings_extract._paced_filing_document("1", "a", "d") is None
+    assert calls["n"] == 2  # one initial + one retry, then stop

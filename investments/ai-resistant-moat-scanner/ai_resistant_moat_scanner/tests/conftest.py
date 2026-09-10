@@ -42,6 +42,7 @@ def _isolate_report_paths(monkeypatch, tmp_path):
     monkeypatch.setattr(cfg, "MOAT_SCAN_REPORT_PATH", tmp_path / "moat-scan-report.md")
     monkeypatch.setattr(cfg, "MOAT_CANDIDATES_MD_PATH", tmp_path / "moat-candidates-pending-review.md")
     monkeypatch.setattr(cfg, "MOAT_SEC_REQUEST_DELAY_SECONDS", 0)
+    monkeypatch.setattr(cfg, "MOAT_SEC_RETRY_BACKOFF_SECONDS", 0)
     monkeypatch.setattr(cfg, "MOAT_FETCH_DELAY_SECONDS", 0)
     monkeypatch.setattr(cfg, "MOAT_FINVIZ_REQUEST_DELAY_SECONDS", 0)
 
