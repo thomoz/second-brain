@@ -121,3 +121,7 @@ Skip drafts for: Newsletters, automated notifications, spam
 ## 2026-09-09 Reflection
 - (Sep 09) Repo convention uses .agent/plans, not .agents/plans
 - (Sep 09) Superinvestor WhatsApp digests now use heading "Superinvestor filing:"
+
+## 2026-09-10 Reflection
+- (Sep 10) Superinvestor reports run 12:35pm and 10:30pm Sydney time during AEST
+- (Sep 10) Heartbeat Codex backend gpt-5.5 returned 404 before later successful run
