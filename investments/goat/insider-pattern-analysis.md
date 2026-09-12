@@ -45,4 +45,4 @@ Among filings whose 7-day move already confirmed the signal, what fraction still
 
 Not enough data yet (n=19, need 20)
 
-Last auto-generated: 2026-09-12 12:49 AEST.
+Last auto-generated: 2026-09-13 07:50 AEST.
