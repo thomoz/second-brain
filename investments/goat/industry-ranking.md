@@ -50,8 +50,8 @@ All 39 covered industries.
 | 21 | PAVE | Engineering & Construction | +7.3% | Yes |
 | 22 | ESPO | Electronic Gaming & Multimedia | +5.9% | Yes |
 | 23 | PHO | Utilities - Regulated Water | +2.3% | Yes |
-| 24 | INDS | REIT - Industrial | +2.2% | Yes |
-| 25 | MOO | Agricultural Inputs | +2.0% | Yes |
+| 24 | MOO | Agricultural Inputs | +2.0% | Yes |
+| 25 | INDS | REIT - Industrial | +1.5% | Yes |
 | 26 | EVX | Waste Management | +0.9% | Yes |
 | 27 | WOOD | Lumber & Wood Production | +0.2% | Yes |
 | 28 | REM | REIT - Mortgage | -1.2% | No |
