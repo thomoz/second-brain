@@ -125,3 +125,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 ## 2026-09-10 Reflection
 - (Sep 10) Superinvestor reports run 12:35pm and 10:30pm Sydney time during AEST
 - (Sep 10) Heartbeat Codex backend gpt-5.5 returned 404 before later successful run
+
+## 2026-09-12 Reflection
+- (Sep 12) codex_sdk_compat.py retries transient Codex errors; CODEX_MAX_ATTEMPTS defaults to 3.
