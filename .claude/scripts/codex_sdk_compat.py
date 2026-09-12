@@ -137,6 +137,22 @@ def _resolve_model(model: str | None) -> str:
     return _MODEL_ALIASES.get(model.lower(), model)
 
 
+# Cloudflare-fronted ChatGPT backend occasionally 404s a model ref that is
+# valid the rest of the time (seen repeatedly: adjacent calls seconds apart
+# succeed on the same model). This is edge/backend-pool routing inconsistency
+# during a rollout, not a wrong model name - retrying a couple of times fixes
+# it far more often than it doesn't. Keep this pattern narrow so a genuinely
+# unsupported model (a real config error) still fails fast on the first try.
+_RETRYABLE_ERROR_SUBSTRINGS = (
+    "does not exist or you do not have access to it",
+)
+
+
+def _is_retryable_codex_error(detail: str) -> bool:
+    d = detail.lower()
+    return any(p in d for p in _RETRYABLE_ERROR_SUBSTRINGS)
+
+
 # ---------------------------------------------------------------------------
 # Tool interpretation
 # ---------------------------------------------------------------------------
@@ -501,9 +517,6 @@ async def query(
         mt = options.max_turns or 5
         timeout_s = min(1800.0, max(120.0, mt * 25.0))
 
-    last_msg_file = Path(
-        _DATA_DIR / f".codex_last_{os.getpid()}_{int(time.monotonic() * 1000)}.txt"
-    )
     composed = _compose_prompt(prompt, options, lean)
 
     try:
@@ -511,115 +524,136 @@ async def query(
     except OSError:
         pass
 
-    argv = _build_argv(
-        options,
-        resume_thread_id=resume_thread_id,
-        ephemeral=ephemeral,
-        lean=lean,
-        last_msg_file=last_msg_file,
-        cwd=cwd,
-    )
-
-    proc = await asyncio.create_subprocess_exec(
-        *argv,
-        cwd=cwd,
-        stdin=asyncio.subprocess.PIPE,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-        env=os.environ.copy(),
-    )
-
-    writer = asyncio.ensure_future(_feed_stdin(proc, composed))
-
+    # A transient edge/backend-routing 404 on an otherwise-valid model (see
+    # _is_retryable_codex_error) is common enough to warrant a few quick
+    # retries before surfacing an error to the user - see CODEX_MAX_ATTEMPTS.
+    max_attempts = max(1, int(os.getenv("CODEX_MAX_ATTEMPTS", "3")))
     thread_id: str | None = resume_thread_id
-    stream_text = ""
+    final_text = ""
     had_error = False
     error_detail = ""
     turns = 0
+    proc_returncode = 0
+    stderr_bytes = b""
 
-    assert proc.stdout is not None
-    buf = b""
-    deadline = time.monotonic() + timeout_s
-    try:
-        while True:
-            try:
-                chunk = await asyncio.wait_for(
-                    proc.stdout.read(65536),
-                    timeout=max(1.0, deadline - time.monotonic()),
-                )
-            except TimeoutError:
-                had_error = True
-                error_detail = f"codex timed out after {timeout_s:.0f}s"
+    for attempt in range(1, max_attempts + 1):
+        last_msg_file = Path(
+            _DATA_DIR / f".codex_last_{os.getpid()}_{int(time.monotonic() * 1000)}.txt"
+        )
+        argv = _build_argv(
+            options,
+            resume_thread_id=resume_thread_id,
+            ephemeral=ephemeral,
+            lean=lean,
+            last_msg_file=last_msg_file,
+            cwd=cwd,
+        )
+
+        proc = await asyncio.create_subprocess_exec(
+            *argv,
+            cwd=cwd,
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            env=os.environ.copy(),
+        )
+
+        writer = asyncio.ensure_future(_feed_stdin(proc, composed))
+
+        thread_id = resume_thread_id
+        stream_text = ""
+        had_error = False
+        error_detail = ""
+        turns = 0
+
+        assert proc.stdout is not None
+        buf = b""
+        deadline = time.monotonic() + timeout_s
+        try:
+            while True:
                 try:
-                    proc.kill()
-                except ProcessLookupError:
-                    pass
-                break
-            if not chunk:
-                break
-            buf += chunk
-            while b"\n" in buf:
-                raw, buf = buf.split(b"\n", 1)
-                line = raw.rstrip(b"\r").decode("utf-8", "replace").strip()
-                if not line or not line.startswith("{"):
-                    continue
-                try:
-                    evt = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                etype = evt.get("type")
-                if etype == "thread.started":
-                    tid = evt.get("thread_id")
-                    if isinstance(tid, str):
-                        thread_id = tid
-                elif etype in ("item.completed", "item.updated"):
-                    item = evt.get("item")
-                    if isinstance(item, dict):
-                        text = _item_text(item)
-                        if text.strip():
-                            stream_text = text
-                elif etype == "turn.completed":
-                    turns += 1
-                elif etype == "turn.failed":
+                    chunk = await asyncio.wait_for(
+                        proc.stdout.read(65536),
+                        timeout=max(1.0, deadline - time.monotonic()),
+                    )
+                except TimeoutError:
                     had_error = True
-                    err = evt.get("error")
-                    if isinstance(err, dict):
-                        error_detail = str(err.get("message", "")) or error_detail
-                elif etype == "error":
-                    had_error = True
-                    msg = evt.get("message")
-                    if isinstance(msg, str):
-                        error_detail = msg or error_detail
-    finally:
-        if not writer.done():
-            writer.cancel()
+                    error_detail = f"codex timed out after {timeout_s:.0f}s"
+                    try:
+                        proc.kill()
+                    except ProcessLookupError:
+                        pass
+                    break
+                if not chunk:
+                    break
+                buf += chunk
+                while b"\n" in buf:
+                    raw, buf = buf.split(b"\n", 1)
+                    line = raw.rstrip(b"\r").decode("utf-8", "replace").strip()
+                    if not line or not line.startswith("{"):
+                        continue
+                    try:
+                        evt = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    etype = evt.get("type")
+                    if etype == "thread.started":
+                        tid = evt.get("thread_id")
+                        if isinstance(tid, str):
+                            thread_id = tid
+                    elif etype in ("item.completed", "item.updated"):
+                        item = evt.get("item")
+                        if isinstance(item, dict):
+                            text = _item_text(item)
+                            if text.strip():
+                                stream_text = text
+                    elif etype == "turn.completed":
+                        turns += 1
+                    elif etype == "turn.failed":
+                        had_error = True
+                        err = evt.get("error")
+                        if isinstance(err, dict):
+                            error_detail = str(err.get("message", "")) or error_detail
+                    elif etype == "error":
+                        had_error = True
+                        msg = evt.get("message")
+                        if isinstance(msg, str):
+                            error_detail = msg or error_detail
+        finally:
+            if not writer.done():
+                writer.cancel()
 
-    stderr_bytes = await proc.stderr.read() if proc.stderr else b""
-    await proc.wait()
+        stderr_bytes = await proc.stderr.read() if proc.stderr else b""
+        await proc.wait()
+        proc_returncode = proc.returncode
 
-    # Final text: prefer the --output-last-message file, fall back to the
-    # text captured from the event stream.
-    final_text = ""
-    try:
-        final_text = last_msg_file.read_text(encoding="utf-8").strip()
-    except OSError:
+        # Final text: prefer the --output-last-message file, fall back to the
+        # text captured from the event stream.
         final_text = ""
-    if not final_text:
-        final_text = stream_text.strip()
+        try:
+            final_text = last_msg_file.read_text(encoding="utf-8").strip()
+        except OSError:
+            final_text = ""
+        if not final_text:
+            final_text = stream_text.strip()
+
+        try:
+            last_msg_file.unlink()
+        except OSError:
+            pass
+
+        if final_text or not (proc_returncode != 0 or had_error):
+            break  # success - stop retrying
+
+        stderr_txt = stderr_bytes.decode("utf-8", "replace").strip()
+        detail = error_detail or stderr_txt[-500:] or f"codex exited {proc_returncode}"
+        if attempt >= max_attempts or not _is_retryable_codex_error(detail):
+            raise RuntimeError(f"codex failed (exit {proc_returncode}): {detail}")
+        await asyncio.sleep(min(15.0, 3.0 * attempt))
 
     # Persist a newly created session id so the next turn can resume it.
     if resume_key and not resume_thread_id and thread_id:
         _save_session(resume_key, thread_id)
-
-    try:
-        last_msg_file.unlink()
-    except OSError:
-        pass
-
-    if not final_text and (proc.returncode != 0 or had_error):
-        stderr_txt = stderr_bytes.decode("utf-8", "replace").strip()
-        detail = error_detail or stderr_txt[-500:] or f"codex exited {proc.returncode}"
-        raise RuntimeError(f"codex failed (exit {proc.returncode}): {detail}")
 
     # Round-trip the caller's deterministic key as the session id when one was
     # supplied (so they keep resuming the same logical session); otherwise
