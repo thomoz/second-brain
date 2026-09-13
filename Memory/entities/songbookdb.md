@@ -15,3 +15,4 @@
 - (Aug 26) Apple Developer asked to confirm organisation address change request
 - (Sep 01) Xero Ignite plan price increase email received; review SongbookDB cost impact
 - (Sep 02) PHP upgrade target path is 7.4 to 8.5
+- (Sep 13) songbookdb.com renewal notice from Crazy Domains needs action to avoid interruption.
