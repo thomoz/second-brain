@@ -10,6 +10,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
+| MTA | unassigned | Not yet discussed -- flagged to watch. |
 | NFLX | unassigned | Keep an eye on (Shaun request 2026-09-01) |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
 | VLGEA | unassigned | Felix watching -- waiting for a break above recent highs. |
@@ -38,6 +39,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | MCD | McDonald's Corp | stock | 1 | 2.65% | +175% | Not yet discussed. Flagged "defensive?" |
 | MLPX | Global X MLP & Energy Infrastructure ETF | etf | unassigned | — | — | Fund (not an MLP itself, no K-1/UBTI issue) holding MLPs + midstream corporations (TC Energy, Enbridge, Williams). Expense ratio 0.45%, AUM 3.64B, dividend +7.7%. Watching for a better entry point -- no active flags at deep-dive 2026-08-12, PE 21.2 (good), amplifies crashes ~2x (COVID -62.3%). |
 | MOUS | Mous | private | unassigned | — | — | Private UK phone-case company (Airo Shock material), not publicly traded -- no ticker, no yfinance data, no SEC filings. Opened pre-registration for an investment round; terms/valuation not yet known. Inert placeholder: Find/Monitor cannot check this (no market data source exists for a private company), so this row will never populate price/PE/dividend fields or receive automated re-checks -- requires manual follow-up when pre-registration details firm up. |
+| MTA | Metalla Royalty & Streaming Ltd. | stock | unassigned | — | — | Not yet discussed. |
 | NFLX | Netflix Inc | stock | unassigned | — | — | Added at Shaun request 2026-09-01. Not yet discussed. |
 | NU | Nu Holdings | stock | 1 | — | +32% | Digital-first Latin American bank with 135 million customers, profit up 41%, four million new customers in one quarter, and shares down about 24% in 2026 despite nearly 40% annual business expansion. |
 | OLLI | Ollie's Bargain Outlet | stock | 1 | — | +159% | Not yet discussed. Dollar-store category |
