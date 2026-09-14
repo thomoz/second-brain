@@ -12,7 +12,7 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 | PMGOLD.AX |  | 50.0 | $897.00 | $62.06 | $-2,206.18 | 3b |
 | SOFI |  | 50.0 | $866.00 | $19.01 | $-84.33 | unassigned |
 | UBER |  | 10.0 | $716.70 | $79.08 | $-74.06 | unassigned |
-| URNM.AX |  | 300.0 | $2,967.00 | $10.32 | $-128.13 | 1 |
+| URNM.AX |  | 300.0 | $2,970.00 | $10.32 | $-125.13 | 1 |
 | V | Visa Inc (Class A) | 0.1001 | $37.08 | $318.41 | +$5.21 | 1 |
 
 Last auto-generated: 2026-09-14.
