@@ -14,6 +14,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | MLM | 4 | Lhoist 13.5B acquisition expected to close Q3 2026 |
 | NFLX | unassigned | Keep an eye on (Shaun request 2026-09-01) |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
+| VLGEA | unassigned | Not yet discussed -- flagged to watch. |
 | XRO.AX | unassigned | Watching next few results for US/Melio payments traction; PE 42 rich (deep dive 2026-09-01) |
 
 | Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |
@@ -54,6 +55,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | VDC | Vanguard Consumer Staples ETF | etf | 1 | 2.13% | +107% | Not yet discussed. Fee 0.09% |
 | VGS | Vanguard MSCI World ETF (ASX, AU-domiciled) | etf | 1 | — | +267% | Not yet discussed. Broad index option — pick one (paired with VAS), depends on broker/domicile |
 | VGT | Vanguard Information Technology ETF | etf | unassigned | — | — | Added at Shaun request 2026-09-01. Broad US tech-sector ETF. Watching alongside XLK/SMH tech-rotation strength. |
+| VLGEA | Village Super Market, Inc. | stock | unassigned | — | — | Not yet discussed. |
 | VOO | Vanguard S&P 500 ETF | etf | 1 | 0.79% | +306% | Not yet discussed. Broad index option — pick one (paired with VTI), depends on broker/domicile |
 | VT | Vanguard Total World Stock ETF | etf | unassigned | 1.58% | +219% | Not yet discussed. Broad world exposure |
 | VTI | Vanguard Total US Market ETF | etf | 1 | 0.76% | +289% | Not yet discussed. Broad index option — pick one (paired with VOO), depends on broker/domicile |
@@ -119,4 +121,4 @@ Major AI-boom names with real moats (chip/foundry monopoly, hyperscaler platform
 | SNDK | SanDisk | stock | ai_postcrash | — | +3663% | Major U.S.-listed NAND flash provider for AI long-term memory with sold-out enterprise inventory, rising margins, strong data center revenue growth, and a hard-to-replicate Kioxia manufacturing partnership. |
 | TSM | Taiwan Semiconductor Manufacturing Company Limited | stock | ai_postcrash | 2.93% | +1713% | Named as one of the companies powering AI that has been crushing it, fitting the report's AI chip supply-chain thesis. |
 
-Last auto-generated: 2026-09-13.
+Last auto-generated: 2026-09-14.
