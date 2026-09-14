@@ -14,7 +14,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | MLM | 4 | Lhoist 13.5B acquisition expected to close Q3 2026 |
 | NFLX | unassigned | Keep an eye on (Shaun request 2026-09-01) |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
-| VLGEA | unassigned | Not yet discussed -- flagged to watch. |
+| VLGEA | unassigned | Felix watching -- waiting for a break above recent highs. |
 | XRO.AX | unassigned | Watching next few results for US/Melio payments traction; PE 42 rich (deep dive 2026-09-01) |
 
 | Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |
@@ -55,7 +55,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | VDC | Vanguard Consumer Staples ETF | etf | 1 | 2.13% | +107% | Not yet discussed. Fee 0.09% |
 | VGS | Vanguard MSCI World ETF (ASX, AU-domiciled) | etf | 1 | — | +267% | Not yet discussed. Broad index option — pick one (paired with VAS), depends on broker/domicile |
 | VGT | Vanguard Information Technology ETF | etf | unassigned | — | — | Added at Shaun request 2026-09-01. Broad US tech-sector ETF. Watching alongside XLK/SMH tech-rotation strength. |
-| VLGEA | Village Super Market, Inc. | stock | unassigned | — | — | Not yet discussed. |
+| VLGEA | Village Super Market, Inc. | stock | unassigned | — | — | Felix added it to his watchlist -- waiting for it to beat recent highs. |
 | VOO | Vanguard S&P 500 ETF | etf | 1 | 0.79% | +306% | Not yet discussed. Broad index option — pick one (paired with VTI), depends on broker/domicile |
 | VT | Vanguard Total World Stock ETF | etf | unassigned | 1.58% | +219% | Not yet discussed. Broad world exposure |
 | VTI | Vanguard Total US Market ETF | etf | 1 | 0.76% | +289% | Not yet discussed. Broad index option — pick one (paired with VOO), depends on broker/domicile |
