@@ -128,3 +128,8 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-09-12 Reflection
 - (Sep 12) codex_sdk_compat.py retries transient Codex errors; CODEX_MAX_ATTEMPTS defaults to 3.
+
+## 2026-09-15 Reflection
+- (Sep 15) Moat scanner deployed; daily timer runs 23:30 UTC / about 09:30 AEST.
+- (Sep 15) Moat scanner VPS is secondbrain@137.184.102.104.
+- (Sep 15) Moat scan command uses local PowerShell to SSH remote bash via base64.
