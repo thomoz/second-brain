@@ -23,3 +23,4 @@ On hold — income stabilisation takes priority in short-medium term
 - (Jul 29) Sync Opp: Video Game | Regional Music due Fri 31 Jul 2026 5:00am AEST
 - (Aug 12) APRA AMCOS Professional Development Awards open until Sep 23 2026.
 - (Aug 19) APRA AMCOS royalty payment email arrived; check payment details
+- (Sep 14) finntwist.com renewal notice arrived from Crazy Domains.
