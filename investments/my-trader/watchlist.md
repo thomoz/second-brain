@@ -12,6 +12,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 |--------|-----------|-----|
 | MTA | unassigned | Not yet discussed -- flagged to watch. |
 | NFLX | unassigned | Keep an eye on (Shaun request 2026-09-01) |
+| ROSY.TO | unassigned | New TSX macro fund, too new for data - watching for price history/AUM to build up |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
 | VLGEA | unassigned | Felix watching -- waiting for a break above recent highs. |
 | XRO.AX | unassigned | Watching next few results for US/Melio payments traction; PE 42 rich (deep dive 2026-09-01) |
@@ -47,6 +48,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | PDD | PDD Holdings Inc | stock | unassigned | — | — | Not yet discussed. |
 | PMGOLD | Perth Mint Gold Structured Product | etf | 3a | 0.00% | +224% | Confirmed — never-sell ballast, hold/sell rule = no formal rule (periodic check-in) |
 | PMGOLD | Perth Mint Gold Structured Product | etf | 3b | 0.00% | +224% | Confirmed — same vehicle as core sleeve, tracked separately; conditions-dependent, hold/sell rule = no formal rule (periodic check-in) to start |
+| ROSY.TO | Corton Rosenberg Global Macro Fund | etf | unassigned | — | — | Newly launched TSX macro fund ETF, Sept 2026 - too new for price history/expense ratio data yet |
 | SCHD | Schwab US Dividend Equity ETF | etf | 1 | 3.30% | +223% | Candidate — dividend aristocrats-style ETF; not yet deeply discussed (no mechanics/overlap review done) |
 | SPY | SPDR S&P 500 ETF Trust | etf | 1 | — | — | Core S&P 500 index ETF. Expense ratio 0.0945% (vs IVV's 0.03% -- IVV is cheaper for the same S&P 500 exposure, matches VOO/VTI already in bucket 1). PE 26.9, no valuation/balance-sheet flags. Crash resilience roughly tracks the broad market by construction (2008 -55.2%, 2022 -24.5%) since it IS the broad market. Principles fit avg 34/100 -- expected and not meaningful for a diversified index fund (Buffett/Graham/Lynch/Fisher frameworks are built to grade single operating businesses, not baskets). |
 | TBIL | US Treasury 3 Month Bill ETF | etf | unassigned | — | — | Crash hedge - buy once price is lower. Ultra-short-duration T-bill ETF, added for capital preservation during a drawdown, not a growth position. |
@@ -121,4 +123,4 @@ Major AI-boom names with real moats (chip/foundry monopoly, hyperscaler platform
 | SNDK | SanDisk | stock | ai_postcrash | — | +3663% | Major U.S.-listed NAND flash provider for AI long-term memory with sold-out enterprise inventory, rising margins, strong data center revenue growth, and a hard-to-replicate Kioxia manufacturing partnership. |
 | TSM | Taiwan Semiconductor Manufacturing Company Limited | stock | ai_postcrash | 2.93% | +1713% | Named as one of the companies powering AI that has been crushing it, fitting the report's AI chip supply-chain thesis. |
 
-Last auto-generated: 2026-09-14.
+Last auto-generated: 2026-09-15.
