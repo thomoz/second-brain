@@ -113,6 +113,15 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
             conn.execute("ALTER TABLE goat_insider_filings_seen ADD COLUMN title TEXT")
         except sqlite3.OperationalError:
             pass
+    # Migration for DBs created before company_name existed on pending_candidates
+    # (added 2026-09-16 for dma_breakout_scan's report -- ticker alone doesn't tell
+    # Shaun which company a less-familiar symbol is). NULL for candidate sources
+    # that don't pass a company name through, same nullability posture as trade_date.
+    with conn:
+        try:
+            conn.execute("ALTER TABLE goat_pending_candidates ADD COLUMN company_name TEXT")
+        except sqlite3.OperationalError:
+            pass
 
 
 def get_open_goat_alert(
@@ -169,14 +178,14 @@ def get_all_goat_pending_candidates(conn: sqlite3.Connection) -> list[sqlite3.Ro
 def insert_goat_pending_candidate(
     conn: sqlite3.Connection, *, ticker: str, sector_label: str,
     signal_detail: str, source: str = "goat_sector_rotation",
-    trade_date: str | None = None,
+    trade_date: str | None = None, company_name: str | None = None,
 ) -> None:
     with conn:
         conn.execute(
             """INSERT OR IGNORE INTO goat_pending_candidates
-               (ticker, sector_label, signal_detail, source, flagged_at, trade_date)
-               VALUES (?, ?, ?, ?, ?, ?)""",
-            (ticker, sector_label, signal_detail, source, _now(), trade_date),
+               (ticker, sector_label, signal_detail, source, flagged_at, trade_date, company_name)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (ticker, sector_label, signal_detail, source, _now(), trade_date, company_name),
         )
 
 

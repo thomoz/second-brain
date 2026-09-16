@@ -36,6 +36,7 @@ an already-held/watchlisted ASX ticker dedup-match fail and re-stage it.
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from datetime import date
 from typing import Any
@@ -63,7 +64,7 @@ def fetch_universe_constituents(conn: sqlite3.Connection) -> list[dict[str, Any]
             continue
         rows.append({
             "ticker": tickers.normalize(bare), "label": c["gics_sector"],
-            "market": "US", "review_reason": review_reason,
+            "market": "US", "review_reason": review_reason, "company": c["security"],
         })
 
     asx_constituents = asx200_universe.fetch_asx200_constituents()
@@ -74,7 +75,7 @@ def fetch_universe_constituents(conn: sqlite3.Connection) -> list[dict[str, Any]
             continue
         rows.append({
             "ticker": tickers.asx_variant(bare), "label": c["sector"] or "ASX (sector unavailable)",
-            "market": "ASX", "review_reason": review_reason,
+            "market": "ASX", "review_reason": review_reason, "company": c["company"] or "",
         })
 
     return rows
@@ -213,6 +214,7 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
                 db.insert_goat_pending_candidate(
                     conn, ticker=ticker, sector_label=label,
                     signal_detail=signal_detail, source="goat_dma_breakout_scan",
+                    company_name=c["company"],
                 )
                 new_candidates.append({"ticker": ticker, "sector_label": label, "detail": signal_detail})
             except Exception as e:
@@ -230,6 +232,21 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
     }
 
 
+_DAYS_SINCE_CROSS_RE = re.compile(r"(\d+) trading day\(s\) ago")
+
+
+def _freshest_days_since_cross(signal_detail: str) -> int:
+    """A row's signal_detail embeds one or two "N trading day(s) ago" phrases
+    (150DMA and/or 200DMA -- see check_ma_cross's detail string). Sorting by
+    text rather than a dedicated column keeps this local to the report render
+    -- goat_pending_candidates is a shared table across every Goat scan, and
+    the other sources (heartbeat, sector rotation, insiders) have no equivalent
+    concept to store there. Rows somehow missing a match (shouldn't happen)
+    sort last, not first, so a parsing surprise doesn't masquerade as "newest"."""
+    matches = _DAYS_SINCE_CROSS_RE.findall(signal_detail)
+    return min((int(m) for m in matches), default=10**9)
+
+
 def render_dma_breakout_candidates_report(result: dict[str, Any]) -> str:
     lines = [
         "# DMA Breakout Candidates — Pending Review",
@@ -238,7 +255,8 @@ def render_dma_breakout_candidates_report(result: dict[str, Any]) -> str:
         "S&P 500 + ASX 200 universe whose close just crossed ABOVE its 150-day or "
         "200-day moving average (checked independently; a name can fire on one, "
         "the other, or both), with fundamentals survival context attached for you "
-        "to judge yourself. Broader and simpler than heartbeat-candidates-pending-"
+        "to judge yourself. Sorted newest first (freshest 150/200DMA cross at the "
+        "top). Broader and simpler than heartbeat-candidates-pending-"
         "review.md -- no base pattern required, no rising-sector filter, whole "
         "universe not just holdings/watchlist. Review each one and either "
         "`promote-candidate` (writes it into my-trader's real watchlist, labeled "
@@ -257,12 +275,17 @@ def render_dma_breakout_candidates_report(result: dict[str, Any]) -> str:
         )
     lines += [
         "",
-        "| Ticker | Sector | Signal | Flagged |",
-        "|--------|--------|--------|---------|",
+        "| Ticker | Company | Sector | Signal | Flagged |",
+        "|--------|---------|--------|--------|---------|",
     ]
-    for row in result["pending_candidates"]:
+    sorted_candidates = sorted(
+        result["pending_candidates"],
+        key=lambda r: _freshest_days_since_cross(r["signal_detail"]),
+    )
+    for row in sorted_candidates:
+        company = (row.get("company_name") or "n/a").replace("|", "/")
         lines.append(
-            f"| {row['ticker']} | {row['sector_label']} | {row['signal_detail']} "
+            f"| {row['ticker']} | {company} | {row['sector_label']} | {row['signal_detail']} "
             f"| {row['flagged_at'][:10]} |"
         )
     lines += ["", f"Last auto-generated: {date.today().isoformat()}."]

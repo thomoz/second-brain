@@ -245,6 +245,7 @@ def test_run_dma_breakout_scan_stages_new_candidate(db_conn, monkeypatch):
     row = goat_db.get_goat_pending_candidate(db_conn, "AAPL")
     assert row is not None
     assert row["source"] == "goat_dma_breakout_scan"
+    assert row["company_name"] == "Apple Inc."
 
 
 def test_run_dma_breakout_scan_skips_ticker_already_a_holding_ax_suffixed(db_conn, monkeypatch):
@@ -324,13 +325,26 @@ def test_render_dma_breakout_candidates_report_lists_pending_rows():
         "scanned": 700, "asx_unavailable": False, "already_staged_elsewhere": 0,
         "pending_candidates": [
             {"ticker": "AAPL", "sector_label": "Technology", "signal_detail": "DMA breakout signal",
-             "flagged_at": "2026-09-16T00:00:00+00:00"},
+             "company_name": "Apple Inc.", "flagged_at": "2026-09-16T00:00:00+00:00"},
         ],
     }
     report = dma_breakout_scan.render_dma_breakout_candidates_report(result)
     assert "AAPL" in report
+    assert "Apple Inc." in report
     assert "DMA breakout signal" in report
     assert "700" in report
+
+
+def test_render_dma_breakout_candidates_report_missing_company_name_shows_na():
+    result = {
+        "scanned": 700, "asx_unavailable": False, "already_staged_elsewhere": 0,
+        "pending_candidates": [
+            {"ticker": "AAPL", "sector_label": "Technology", "signal_detail": "DMA breakout signal",
+             "flagged_at": "2026-09-16T00:00:00+00:00"},
+        ],
+    }
+    report = dma_breakout_scan.render_dma_breakout_candidates_report(result)
+    assert "| AAPL | n/a |" in report
 
 
 def test_render_dma_breakout_candidates_report_surfaces_asx_unavailable_banner():
@@ -343,3 +357,31 @@ def test_render_dma_breakout_candidates_report_surfaces_already_staged_elsewhere
     result = {"scanned": 500, "asx_unavailable": False, "already_staged_elsewhere": 3, "pending_candidates": []}
     report = dma_breakout_scan.render_dma_breakout_candidates_report(result)
     assert "3 ticker(s)" in report
+
+
+def test_render_dma_breakout_candidates_report_sorts_newest_cross_first():
+    result = {
+        "scanned": 500, "asx_unavailable": False, "already_staged_elsewhere": 0,
+        "pending_candidates": [
+            {"ticker": "STALE", "sector_label": "Technology",
+             "signal_detail": "STALE (Technology): crossed above its 150-day MA 9 trading day(s) ago, "
+                               "now +1.0% above it (MA currently rising) -- DMA breakout discovery signal; "
+                               "survival context: n/a",
+             "flagged_at": "2026-09-10T00:00:00+00:00"},
+            {"ticker": "FRESH", "sector_label": "Technology",
+             "signal_detail": "FRESH (Technology): crossed above its 200-day MA 0 trading day(s) ago, "
+                               "now +0.2% above it (MA currently falling) -- DMA breakout discovery signal; "
+                               "survival context: n/a",
+             "flagged_at": "2026-09-16T00:00:00+00:00"},
+            {"ticker": "BOTH", "sector_label": "Technology",
+             "signal_detail": "BOTH (Technology): crossed above its 150-day MA 4 trading day(s) ago, "
+                               "now +2.0% above it (MA currently rising) -- DMA breakout discovery signal; "
+                               "BOTH (Technology): crossed above its 200-day MA 6 trading day(s) ago, "
+                               "now +3.0% above it (MA currently rising) -- DMA breakout discovery signal; "
+                               "survival context: n/a",
+             "flagged_at": "2026-09-14T00:00:00+00:00"},
+        ],
+    }
+    report = dma_breakout_scan.render_dma_breakout_candidates_report(result)
+    fresh_pos, both_pos, stale_pos = report.index("FRESH"), report.index("BOTH"), report.index("STALE")
+    assert fresh_pos < both_pos < stale_pos
