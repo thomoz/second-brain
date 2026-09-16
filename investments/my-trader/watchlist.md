@@ -12,6 +12,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 |--------|-----------|-----|
 | MTA | unassigned | Not yet discussed -- flagged to watch. |
 | NFLX | unassigned | Keep an eye on (Shaun request 2026-09-01) |
+| NOK | 4 | Keep an eye on (Shaun request 2026-09-16) |
 | PRS.OL | unassigned | Rebel Capitalist recommendation |
 | ROSY.TO | unassigned | New TSX macro fund, too new for data - watching for price history/AUM to build up |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
