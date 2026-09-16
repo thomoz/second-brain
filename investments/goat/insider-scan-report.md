@@ -1489,4 +1489,4 @@ Filings where the price has fallen since the trade, biggest drop first.
 | V | Sold | $773,378 | 2026-08-31 | -1.0% since trade |
 | UBER | Sold | $2,008,673 | 2026-09-11 | -0.3% since trade |
 
-Last auto-generated: 2026-09-16 16:16 AEST.
+Last auto-generated: 2026-09-16 16:53 AEST.
