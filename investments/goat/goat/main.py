@@ -117,6 +117,26 @@ def cmd_scan_heartbeat(args) -> None:
     )
 
 
+def cmd_scan_dma_breakout(args) -> None:
+    from .dma_breakout_scan import run_dma_breakout_scan, write_dma_breakout_candidates_report
+    from .monitor import maybe_notify
+
+    conn = _open_conn()
+    result = run_dma_breakout_scan(conn)
+    conn.close()
+    write_dma_breakout_candidates_report(result)
+    maybe_notify(
+        {"new_alerts": []}, new_candidates=result["new_candidates"],
+        candidate_label="new DMA breakout candidate(s)",
+    )
+    print(
+        f"DMA breakout scan complete: scanned {result['scanned']} ticker(s), "
+        f"{len(result['new_candidates'])} new candidate(s), "
+        f"{result['already_staged_elsewhere']} already staged elsewhere. "
+        f"See investments/goat/dma-breakout-candidates-pending-review.md"
+    )
+
+
 def cmd_scan_insiders(args) -> None:
     from .insider_pattern_analysis import compute_pattern_analysis, write_pattern_analysis_report
     from .insider_scan import (
@@ -253,6 +273,10 @@ def main() -> None:
         help="On-demand S&P 500 heartbeat-pattern scan within currently-rising sectors",
     )
     subparsers.add_parser(
+        "scan-dma-breakout",
+        help="On-demand discovery scan: S&P 500 + ASX 200 names that just crossed above their 150-day or 200-day MA",
+    )
+    subparsers.add_parser(
         "scan-insiders",
         help="Daily OpenInsider Form 4 scan -- holdings-watch (P/S on held tickers) + market-wide $25k+ purchase discovery",
     )
@@ -281,6 +305,7 @@ def main() -> None:
         "scan-industries": cmd_scan_industries,
         "check-live": cmd_check_live,
         "scan-heartbeat": cmd_scan_heartbeat,
+        "scan-dma-breakout": cmd_scan_dma_breakout,
         "scan-insiders": cmd_scan_insiders,
         "scan-hormuz": cmd_scan_hormuz,
         "promote-candidate": cmd_promote_candidate,

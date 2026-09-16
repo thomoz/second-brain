@@ -34,6 +34,9 @@ def _isolate_goat_report_path(monkeypatch, tmp_path):
         goat_config, "GOAT_HEARTBEAT_CANDIDATES_MD_PATH", tmp_path / "heartbeat-candidates-pending-review.md"
     )
     monkeypatch.setattr(
+        goat_config, "GOAT_DMA_BREAKOUT_CANDIDATES_MD_PATH", tmp_path / "dma-breakout-candidates-pending-review.md"
+    )
+    monkeypatch.setattr(
         goat_config, "GOAT_INSIDER_SCAN_REPORT_PATH", tmp_path / "insider-scan-report.md"
     )
     monkeypatch.setattr(

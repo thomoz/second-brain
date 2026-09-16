@@ -1,0 +1,10 @@
+[Unit]
+Description=Goat DMA Breakout Scan Timer
+Requires=second-brain-goat-dma-breakout-scan.service
+
+[Timer]
+OnCalendar=*-*-* 22:55:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

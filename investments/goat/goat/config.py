@@ -470,3 +470,38 @@ GOAT_LMA_JWC_URL = "https://lmalloyds.com/committee/joint-war-committee/"
 GOAT_LMA_JWC_USER_AGENT = "Mozilla/5.0 (compatible; SecondBrainGoat/1.0)"
 GOAT_HORMUZ_REPORT_PATH = GOAT_DIR / "hormuz-risk-report.md"
     # (candidates are never auto-removed, per my-trader's no-auto-delete convention).
+
+# DMA Breakout Scanner, per investments/goat/dma-breakout-scanner-handoff.md and
+# .agent/plans/goat-dma-breakout-scanner.md -- a broad discovery scan (S&P 500 +
+# ASX 200) for stocks that just crossed ABOVE their 150-day or 200-day MA. Distinct
+# from GOAT_SECTOR_MA_SHORT_DAYS (50DMA, Heartbeat Scan's entry signal) and
+# GOAT_MA_LONG_DAYS (150DMA, Monitor's holdings-only DOWNSIDE exit check) -- this is
+# a plain upside cross, two independent checks (150 AND 200 are each reported, not
+# gated together), no base-pattern requirement, no rising-sector filter, whole
+# universe not just holdings/watchlist.
+GOAT_DMA_BREAKOUT_MA_DAYS: tuple[int, int] = (150, 200)
+GOAT_DMA_BREAKOUT_HISTORY_LOOKBACK_DAYS = 500  # calendar days -- same margin
+    # philosophy as GOAT_HEARTBEAT_HISTORY_LOOKBACK_DAYS / GOLD_MA_HISTORY_LOOKBACK_DAYS
+    # (mytrader/config.py), sized for a 200-day MA + slope + recency margin.
+GOAT_DMA_BREAKOUT_CROSS_RECENCY_DAYS = 10  # a cross older than this no longer counts
+    # as "just crossed" -- same number and same reasoning as
+    # GOAT_SECTOR_CROSS_RECENCY_DAYS (Shaun's own words describing the LULU chart
+    # that originally prompted the cross-detection idiom). v1/tunable -- a 150/200DMA
+    # is slower-moving than a 50DMA, so this may need widening after the first live
+    # run; start here for consistency with every other cross check in this codebase.
+GOAT_DMA_BREAKOUT_MIN_MARKET_CAP_USD = 300_000_000.0  # liquidity/quality floor for
+    # US names -- a raw cross-detection scan over ~500 S&P 500 names is already
+    # large-cap by construction, but this also gates the ASX 200's long tail.
+    # Deliberately higher than CASH_VALUE_MICRO_CAP_TAG_USD (50M, a TAG not a floor
+    # on a value screen that wants to see micro-caps) -- this is a discovery scan
+    # meant to surface tradeable opportunities. v1/tunable, not literature-final.
+GOAT_DMA_BREAKOUT_MIN_MARKET_CAP_AUD = 300_000_000.0  # same number/reasoning as the
+    # USD floor -- both universes are already large/mid-cap index constituents, so a
+    # single round number for both currencies is fine (this is a coarse quality
+    # floor, not a precise cross-currency comparison).
+GOAT_DMA_BREAKOUT_MIN_AVG_VOLUME = 100_000  # shares/day -- matches Finviz's own
+    # sh_avgvol_o100 filter already used by finviz_screener.py for the same
+    # liquidity-floor purpose, applied here via yfinance's averageVolume field
+    # instead of a Finviz screener param since this scan's universe comes from
+    # S&P 500 / ASX 200 constituent lists, not a Finviz screen.
+GOAT_DMA_BREAKOUT_CANDIDATES_MD_PATH = GOAT_DIR / "dma-breakout-candidates-pending-review.md"
