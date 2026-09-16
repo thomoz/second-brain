@@ -4,15 +4,15 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 
 | Ticker | Name | Qty | Mkt Value | Avg Price | Unrealized P&L | Bucket |
 |--------|------|-----|-----------|-----------|-----------------|--------|
-| GOLD.AX |  | 20.0 | $1,110.60 | $59.34 | $-76.15 | unassigned |
+| GOLD.AX |  | 20.0 | $1,108.80 | $59.34 | $-77.95 | unassigned |
 | LLY | Eli Lilly & Co | 0.0001 | $0.11 | $1,148.00 | $-0.00 | 1 |
 | LULU | lululemon athletica inc. | 12.0 | $1,180.44 | $124.26 | $-310.71 | 1 |
 | LYV | Live Nation Entertainment Inc | 0.4 | $68.10 | $167.29 | +$1.18 | 1 |
-| OOO.AX | BetaShares Crude Oil Index ETF (Currency Hedged) | 500.0 | $5,360.00 | $8.48 | +$1,119.84 | 1 |
+| OOO.AX | BetaShares Crude Oil Index ETF (Currency Hedged) | 500.0 | $5,365.00 | $8.48 | +$1,124.84 | 1 |
 | PMGOLD.AX |  | 50.0 | $897.00 | $62.06 | $-2,206.18 | 3b |
 | SOFI |  | 50.0 | $853.50 | $19.01 | $-96.83 | unassigned |
 | UBER |  | 10.0 | $714.30 | $79.08 | $-76.46 | unassigned |
-| URNM.AX |  | 300.0 | $2,901.00 | $10.32 | $-194.13 | 1 |
+| URNM.AX |  | 300.0 | $2,898.00 | $10.32 | $-197.13 | 1 |
 | V | Visa Inc (Class A) | 0.1001 | $37.60 | $318.41 | +$5.73 | 1 |
 
 Last auto-generated: 2026-09-16.
