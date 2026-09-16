@@ -30,28 +30,15 @@ def _declining_then_spike_series(ma_days: int, days_since_cross: int = 1, spike:
     """Mirrors test_sector_rotation._declining_then_spike_series, generalized over
     ma_days: a steadily declining price series (so the MA is clearly sloping down)
     with a recent upward spike that crosses the close back above the MA
-    `days_since_cross` trading days ago -- proves check_ma_cross fires
-    'interesting' regardless of slope (the one behavioral difference from
-    check_sector_breakout, which requires slope_up too)."""
+    `days_since_cross` trading days ago, but too small/recent to have turned the
+    MA's own slope up yet -- proves check_ma_cross withholds 'interesting' on a
+    fresh cross when the MA is still sloping down (the slope gate added
+    2026-09-16, matching check_sector_breakout's own requirement)."""
     n_decline = ma_days + 100
     prices = [200.0 - i * 0.3 for i in range(n_decline)]
     spike_pos = len(prices) - 1 - days_since_cross
     for i in range(spike_pos, len(prices)):
         prices[i] = prices[spike_pos - 1] + spike
-    return pd.Series(prices, index=_dates(len(prices)))
-
-
-def _two_hundred_only_cross_series() -> pd.Series:
-    """A series where the 150-day MA crossed above 29 trading days ago (stale --
-    older than GOAT_DMA_BREAKOUT_CROSS_RECENCY_DAYS) while the 200-day MA only
-    crossed above 1 trading day ago (fresh) -- proves the two checks are run and
-    reported independently, not gated together. 250 days at 150.0 (so the 200-day
-    window still carries this high tail well into the next phase), 120 days at
-    50.0 (long enough the 150-day window is entirely inside this low phase but
-    the 200-day window still isn't), then 30 days at 80.0 (crosses the by-then-
-    lower 150DMA immediately but only catches up to the still-elevated 200DMA on
-    the last day). Parameters found empirically -- see the plan's Task 10 notes."""
-    prices = [150.0] * 250 + [50.0] * 120 + [80.0] * 30
     return pd.Series(prices, index=_dates(len(prices)))
 
 
@@ -87,16 +74,27 @@ def test_check_ma_cross_fresh_cross_above_150_is_interesting():
     assert result.data["ma_days"] == 150
 
 
-def test_check_ma_cross_150_stale_200_fresh_are_reported_independently():
-    close = _two_hundred_only_cross_series()
+def test_check_ma_cross_fresh_cross_above_200_is_interesting():
+    close = _series_with_cross(200, days_since_cross=config.GOAT_DMA_BREAKOUT_CROSS_RECENCY_DAYS)
+    result = dma_breakout_scan.check_ma_cross("AAPL", "Technology", close, 200, config.GOAT_DMA_BREAKOUT_CROSS_RECENCY_DAYS)
+    assert result.verdict == "interesting"
+    assert result.data["crossed_above"] is True
+    assert result.data["ma_days"] == 200
+
+
+def test_check_ma_cross_150_and_200_are_reported_independently():
+    """A series just long enough for a real 150-day check but too short for a
+    200-day one (min_len = ma_days + GOAT_SECTOR_SLOPE_LOOKBACK_DAYS) -- proves
+    ma_days is a genuine per-call parameter, not shared state."""
+    close = _series_with_cross(150, days_since_cross=config.GOAT_DMA_BREAKOUT_CROSS_RECENCY_DAYS)
     result_150 = dma_breakout_scan.check_ma_cross(
         "AAPL", "Technology", close, 150, config.GOAT_DMA_BREAKOUT_CROSS_RECENCY_DAYS
     )
     result_200 = dma_breakout_scan.check_ma_cross(
         "AAPL", "Technology", close, 200, config.GOAT_DMA_BREAKOUT_CROSS_RECENCY_DAYS
     )
-    assert result_150.verdict == "ok"
-    assert result_200.verdict == "interesting"
+    assert result_150.verdict == "interesting"
+    assert result_200.verdict == "unknown"
 
 
 def test_check_ma_cross_stale_cross_does_not_fire():
@@ -105,12 +103,13 @@ def test_check_ma_cross_stale_cross_does_not_fire():
     assert result.verdict == "ok"
 
 
-def test_check_ma_cross_fires_regardless_of_ma_slope():
-    """The one meaningful behavioral difference from check_sector_breakout: slope
-    is informational only here, never a gate."""
+def test_check_ma_cross_does_not_fire_when_ma_slope_is_down():
+    """Slope gate added 2026-09-16 at Shaun's request: a fresh cross above a
+    still-falling MA no longer counts as 'interesting' -- matches
+    check_sector_breakout's own wrong-slope test."""
     close = _declining_then_spike_series(150, days_since_cross=1)
     result = dma_breakout_scan.check_ma_cross("AAPL", "Technology", close, 150, config.GOAT_DMA_BREAKOUT_CROSS_RECENCY_DAYS)
-    assert result.verdict == "interesting"
+    assert result.verdict == "ok"
     assert result.data["crossed_above"] is True
     assert result.data["slope_up"] is False
 

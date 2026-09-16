@@ -11,11 +11,16 @@ This is deliberately the simplest of the three MA-cross tools in `goat`:
     already holds/watchlists, and only for the DOWNSIDE cross.
   - This tool: no base pattern, no sector filter, no holdings/watchlist
     restriction -- just "did this name in the whole index universe just cross
-    above its 150 or 200-day MA". The 150 and 200-day checks are run and
-    reported INDEPENDENTLY per ticker (a name can fire on one, the other, or
-    both) -- they are not gated together. MA slope is computed and shown as
-    informational context only; unlike check_sector_breakout/
-    check_heartbeat_breakout, a fresh cross fires here regardless of slope.
+    above its 150 or 200-day MA, with that MA itself sloping up". The 150 and
+    200-day checks are run and reported INDEPENDENTLY per ticker (a name can
+    fire on one, the other, or both) -- they are not gated together.
+
+    Slope gate added 2026-09-16 at Shaun's request (a cross above a still-
+    falling MA is a much weaker signal -- the same slope requirement
+    check_sector_breakout/check_heartbeat_breakout already apply to their own
+    50/150-day MAs). v1 had this as informational-only, deliberately not a
+    gate; superseded by this change, not a historical curiosity to preserve --
+    see check_ma_cross's own docstring for the exact condition.
 
 Reuses the sign-flip cross-detection idiom from sector_rotation.check_sector_
 breakout, generalized over ma_days/recency_days. Per heartbeat.py's module
@@ -83,11 +88,12 @@ def fetch_universe_constituents(conn: sqlite3.Connection) -> list[dict[str, Any]
 
 def check_ma_cross(ticker: str, label: str, close: pd.Series, ma_days: int, recency_days: int) -> CheckResult:
     """Flags 'interesting' when `ticker` crossed ABOVE its `ma_days`-day MA within
-    the last `recency_days` trading days -- a plain, direct upside cross with no
-    slope/base-pattern gate (unlike sector_rotation.check_sector_breakout and
-    heartbeat.check_heartbeat_breakout, which both require the MA to also be
-    sloping up -- see module docstring's design-decision note). MA slope is still
-    computed and included in `data`/`detail` as informational context only."""
+    the last `recency_days` trading days AND that MA is itself sloping up --
+    same slope requirement as sector_rotation.check_sector_breakout and
+    heartbeat.check_heartbeat_breakout (added 2026-09-16 at Shaun's request;
+    see module docstring's design-decision note -- v1 had this as
+    informational-only). No base-pattern requirement otherwise -- this stays
+    the simplest of the three MA-cross tools in `goat`."""
     name = f"dma_{ma_days}_cross"
     min_len = ma_days + config.GOAT_SECTOR_SLOPE_LOOKBACK_DAYS
     if len(close) < min_len:
@@ -125,12 +131,12 @@ def check_ma_cross(ticker: str, label: str, close: pd.Series, ma_days: int, rece
         "pct_above_ma_now": round(float((close.iloc[-1] / ma.iloc[-1] - 1) * 100), 2),
     }
 
-    if crossed_above and fresh:
+    if crossed_above and fresh and slope_up:
         detail = (
             f"{ticker} ({label}): crossed above its {ma_days}-day MA "
             f"{trading_days_since_cross} trading day(s) ago, now "
-            f"{data['pct_above_ma_now']:+.1f}% above it (MA currently "
-            f"{'rising' if slope_up else 'falling'}) -- DMA breakout discovery signal"
+            f"{data['pct_above_ma_now']:+.1f}% above it (MA currently rising) "
+            f"-- DMA breakout discovery signal"
         )
         return CheckResult(name=name, verdict="interesting", detail=detail, data=data)
 
@@ -138,7 +144,8 @@ def check_ma_cross(ticker: str, label: str, close: pd.Series, ma_days: int, rece
     return CheckResult(
         name=name, verdict="ok",
         detail=f"{ticker} ({label}): {direction} its {ma_days}-day MA "
-               f"{trading_days_since_cross} trading day(s) ago -- not (yet) a fresh "
+               f"{trading_days_since_cross} trading day(s) ago (MA currently "
+               f"{'rising' if slope_up else 'falling'}) -- not (yet) a fresh "
                f"breakout",
         data=data,
     )
