@@ -10,6 +10,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
+| KAR.AX | unassigned | Keep an eye on (Shaun request 2026-09-16) |
 | MTA | unassigned | Not yet discussed -- flagged to watch. |
 | NFLX | unassigned | Keep an eye on (Shaun request 2026-09-01) |
 | NOK | 4 | Keep an eye on (Shaun request 2026-09-16) |
@@ -38,6 +39,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | GRID | First Trust NASDAQ Clean Edge Smart Grid ETF | etf | unassigned | 0.75% | +441% | Not yet discussed. Sector/thematic |
 | IVV | iShares Core S&P 500 ETF | etf | 1 | — | — | Core S&P 500 index ETF. Expense ratio 0.03% -- cheaper than SPY's 0.0945% for identical index exposure, matches VOO/VTI already in bucket 1. PE 26.9, no valuation/balance-sheet flags. Crash resilience roughly tracks the broad market by construction (2008 -55.2%, 2022 -24.5%) since it IS the broad market. Principles fit avg 35/100 -- expected and not meaningful for a diversified index fund (Buffett/Graham/Lynch/Fisher frameworks are built to grade single operating businesses, not baskets). |
 | IXI.AX | iShares Global Consumer Staples ETF | etf | 1 | 1.78% | +84% | Not yet discussed. Fee 0.41% |
+| KAR.AX | Karoon Energy Ltd | stock | unassigned | — | — | Not yet discussed. |
 | LAND | Gladstone Land Corp | reit | 2 | 6.26% | +16% | Not yet discussed. Farmland REIT |
 | MCD | McDonald's Corp | stock | 1 | 2.65% | +175% | Not yet discussed. Flagged "defensive?" |
 | MLPX | Global X MLP & Energy Infrastructure ETF | etf | unassigned | — | — | Fund (not an MLP itself, no K-1/UBTI issue) holding MLPs + midstream corporations (TC Energy, Enbridge, Williams). Expense ratio 0.45%, AUM 3.64B, dividend +7.7%. Watching for a better entry point -- no active flags at deep-dive 2026-08-12, PE 21.2 (good), amplifies crashes ~2x (COVID -62.3%). |
