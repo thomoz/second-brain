@@ -157,6 +157,28 @@ def cmd_watchlist_watch(args) -> None:
         print(f"No watchlist row found for {ticker}. Add it first with watchlist-add.")
 
 
+def cmd_watchlist_rank(args) -> None:
+    from . import config
+    from .db import set_crash_discount_rank
+    from .snapshot import regenerate_all
+    from .tickers import normalize
+
+    if not 0 <= args.rank <= 10:
+        print("Rank must be between 0 and 10.")
+        return
+
+    conn = _open_conn()
+    ticker = normalize(args.ticker)
+    count = set_crash_discount_rank(conn, ticker, config.CRASH_DISCOUNT_BUCKET, args.rank)
+    if count:
+        regenerate_all(conn)
+    conn.close()
+    if count:
+        print(f"Ranked {ticker} {args.rank}/10 in Bucket 4 (Crash Discount Buys).")
+    else:
+        print(f"No Bucket 4 watchlist row found for {ticker}. Add it first with watchlist-add --bucket 4.")
+
+
 def cmd_watchlist_unwatch(args) -> None:
     from .db import set_watch_note
     from .snapshot import regenerate_all
@@ -408,6 +430,13 @@ def main() -> None:
     )
     p_watch_unflag.add_argument("--ticker", required=True)
 
+    p_watch_rank = subparsers.add_parser(
+        "watchlist-rank",
+        help="Set a Bucket 4 (Crash Discount Buys) ticker's 0-10 must-buy rank",
+    )
+    p_watch_rank.add_argument("--ticker", required=True)
+    p_watch_rank.add_argument("--rank", type=int, required=True, help="0-10, 10 = must-buy")
+
     subparsers.add_parser(
         "refresh-watchlist-data",
         help="Fetch dividend yield + 10Y return for every watchlist row via yfinance",
@@ -487,6 +516,7 @@ def main() -> None:
         "watchlist-move-bucket": cmd_watchlist_move_bucket,
         "watchlist-watch": cmd_watchlist_watch,
         "watchlist-unwatch": cmd_watchlist_unwatch,
+        "watchlist-rank": cmd_watchlist_rank,
         "holding-buy": cmd_holding_buy,
         "holding-sell": cmd_holding_sell,
         "snapshot": cmd_snapshot,

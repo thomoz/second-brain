@@ -109,6 +109,33 @@ def test_set_watch_note_returns_zero_when_ticker_not_on_watchlist(db_conn):
     assert db.set_watch_note(db_conn, "NOPE", "x") == 0
 
 
+def test_set_crash_discount_rank_sets_and_reads_back(db_conn):
+    db.upsert_watchlist_row(db_conn, ticker="NOK", name="Nokia Oyj", asset_type="stock", bucket="4")
+    n = db.set_crash_discount_rank(db_conn, "NOK", "4", 8)
+    assert n == 1
+    row = db.get_watchlist_row(db_conn, "NOK", "4")
+    assert row["crash_discount_rank"] == 8
+
+
+def test_set_crash_discount_rank_scoped_to_bucket_not_ticker(db_conn):
+    db.upsert_watchlist_row(db_conn, ticker="PMGOLD", name="Perth Mint Gold", asset_type="etf", bucket="3a")
+    db.upsert_watchlist_row(db_conn, ticker="PMGOLD", name="Perth Mint Gold", asset_type="etf", bucket="4")
+    assert db.set_crash_discount_rank(db_conn, "PMGOLD", "4", 5) == 1
+    assert db.get_watchlist_row(db_conn, "PMGOLD", "3a")["crash_discount_rank"] is None
+    assert db.get_watchlist_row(db_conn, "PMGOLD", "4")["crash_discount_rank"] == 5
+
+
+def test_set_crash_discount_rank_none_clears_it(db_conn):
+    db.upsert_watchlist_row(db_conn, ticker="NOK", name="Nokia Oyj", asset_type="stock", bucket="4")
+    db.set_crash_discount_rank(db_conn, "NOK", "4", 8)
+    db.set_crash_discount_rank(db_conn, "NOK", "4", None)
+    assert db.get_watchlist_row(db_conn, "NOK", "4")["crash_discount_rank"] is None
+
+
+def test_set_crash_discount_rank_returns_zero_when_row_not_found(db_conn):
+    assert db.set_crash_discount_rank(db_conn, "NOPE", "4", 8) == 0
+
+
 def test_upsert_watchlist_row_upserts_by_natural_key(db_conn):
     db.upsert_watchlist_row(
         db_conn, ticker="VRTX", name="Vertex Pharmaceuticals", asset_type="stock", bucket="1",

@@ -71,16 +71,33 @@ def _format_ten_year_return(value: float | None) -> str:
     return "—" if value is None else f"{value:+.0f}%"
 
 
-def _watchlist_table(rows: list[sqlite3.Row]) -> list[str]:
-    lines = [
-        "| Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |",
-        "|--------|------|------|--------|----------|------------|--------|",
-    ]
+def _format_rank(value: int | None) -> str:
+    return "—" if value is None else str(value)
+
+
+def _watchlist_table(rows: list[sqlite3.Row], show_rank: bool = False) -> list[str]:
+    if show_rank:
+        # Ranked (non-None) rows first, highest rank first; unranked rows keep
+        # their existing ticker order at the bottom rather than being scattered.
+        rows = sorted(
+            rows,
+            key=lambda r: (r["crash_discount_rank"] is None, -(r["crash_discount_rank"] or 0)),
+        )
+        lines = [
+            "| Rank | Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |",
+            "|------|--------|------|------|--------|----------|------------|--------|",
+        ]
+    else:
+        lines = [
+            "| Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |",
+            "|--------|------|------|--------|----------|------------|--------|",
+        ]
     for row in rows:
         dividend = _format_dividend(row["dividend_yield_pct"])
         ten_year = _format_ten_year_return(row["ten_year_return_pct"])
+        rank_cell = f"{_format_rank(row['crash_discount_rank'])} | " if show_rank else ""
         lines.append(
-            f"| {row['ticker']} | {row['name'] or ''} | {row['asset_type']} | {row['bucket']} "
+            f"| {rank_cell}{row['ticker']} | {row['name'] or ''} | {row['asset_type']} | {row['bucket']} "
             f"| {dividend} | {ten_year} | {_format_status(row)} |"
         )
     return lines
@@ -134,10 +151,11 @@ def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
         "waiting for a crash-driven discount to enter rather than buying at today's "
         "price. Not timed around a specific bubble like Post-Crash AI Watch below, "
         "and not a sell-after-recovery trade like Bucket 2. Once actually bought, "
-        "migrate to Bucket 1.",
+        "migrate to Bucket 1. Rank is a 0-10 must-buy score (10 = must-buy), set via "
+        "`watchlist-rank` — sorted highest-rank first; unranked rows sort last.",
         "",
     ]
-    lines += _watchlist_table(crash_discount)
+    lines += _watchlist_table(crash_discount, show_rank=True)
     lines += [
         "",
         "## Post-Crash AI Watch",

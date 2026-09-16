@@ -67,6 +67,10 @@ below). Every command runs via the SSH wrapper:
 # of watchlist.md (still shown in its normal bucket row too). Note is the reason.
 .\scripts\invoke_investments.ps1 -Package my-trader -Command "watchlist-watch --ticker WES.AX --note 'FY26 results 27 Aug'"
 .\scripts\invoke_investments.ps1 -Package my-trader -Command "watchlist-unwatch --ticker WES.AX"
+
+# Rank a Bucket 4 (Crash Discount Buys) ticker 0-10 (10 = must-buy) — sorts that
+# table highest-rank-first in watchlist.md, unranked rows sort last
+.\scripts\invoke_investments.ps1 -Package my-trader -Command "watchlist-rank --ticker NOK --rank 8"
 ```
 
 Quoting note: `-Command`'s value is reconstructed and re-parsed by the remote bash, so
@@ -99,7 +103,11 @@ IB Gateway, but its DB write still lands only on the VPS.
   Crash Discount Buys" (watchlist rows with `bucket="4"` — great, durable companies
   Shaun wants to buy at a crash-driven discount rather than today's price; not timed
   around a specific bubble and not a sell-after-recovery trade; migrates to Bucket 1
-  once actually bought; see `config.CRASH_DISCOUNT_BUCKET`), and "Post-Crash AI Watch"
+  once actually bought; see `config.CRASH_DISCOUNT_BUCKET`; rows carry an optional
+  `crash_discount_rank` 0-10 "must-buy" score set via `watchlist-rank`, added
+  2026-09-16 — Markdown tables have no native click-to-sort, so the Bucket 4 table is
+  sorted highest-rank-first at generation time instead, unranked rows last), and
+  "Post-Crash AI Watch"
   (watchlist rows with `bucket="ai_postcrash"` — major AI-boom names with real moats
   that Shaun has deliberately chosen not to buy at current AI-bubble valuations, kept
   for reconsideration if/when the sector corrects; see `config.AI_POSTCRASH_BUCKET`).

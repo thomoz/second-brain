@@ -161,6 +161,28 @@ def test_regenerate_watchlist_md_splits_bucket_4_section(db_conn, monkeypatch, t
     assert "KO" in rest
 
 
+def test_regenerate_watchlist_md_bucket_4_shows_rank_column_sorted_desc(db_conn, monkeypatch, tmp_path):
+    _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
+
+    db.upsert_watchlist_row(db_conn, ticker="KO", name="Coca-Cola Co", asset_type="stock", bucket="4")
+    db.upsert_watchlist_row(db_conn, ticker="NOK", name="Nokia Oyj", asset_type="stock", bucket="4")
+    db.upsert_watchlist_row(db_conn, ticker="WES", name="Wesfarmers", asset_type="stock", bucket="4")
+    db.set_crash_discount_rank(db_conn, "KO", "4", 3)
+    db.set_crash_discount_rank(db_conn, "NOK", "4", 8)
+    # WES left unranked
+    snapshot.regenerate_watchlist_md(db_conn)
+
+    content = watchlist_path.read_text(encoding="utf-8")
+    _, rest = content.split("## Bucket 4 — Crash Discount Buys")
+    assert "| Rank | Ticker |" in rest
+    assert "| 8 | NOK |" in rest
+    assert "| 3 | KO |" in rest
+    assert "| — | WES |" in rest
+    # highest rank first, unranked last
+    nok_pos, ko_pos, wes_pos = rest.index("NOK"), rest.index("KO"), rest.index("WES")
+    assert nok_pos < ko_pos < wes_pos
+
+
 def test_regenerate_all_writes_all_three_files(db_conn, monkeypatch, tmp_path):
     holdings_path, watchlist_path, pending_path = _patch_paths(monkeypatch, tmp_path)
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)

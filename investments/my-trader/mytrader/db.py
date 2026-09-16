@@ -26,6 +26,10 @@ def _ensure_watchlist_return_columns(conn: sqlite3.Connection) -> None:
             # NULL = not flagged; a non-empty string = "keep an eye on this", and the
             # string is the reason, surfaced at the top of watchlist.md.
             conn.execute("ALTER TABLE watchlist ADD COLUMN watch_note TEXT")
+        if "crash_discount_rank" not in cols:
+            # 0-10 (10 = must-buy), meaningful only for Bucket 4 rows -- sorts the
+            # "Crash Discount Buys" table in watchlist.md. NULL = not yet ranked.
+            conn.execute("ALTER TABLE watchlist ADD COLUMN crash_discount_rank INTEGER")
 
 
 def init_mytrader_tables(conn: sqlite3.Connection) -> None:
@@ -357,6 +361,21 @@ def set_watch_note(conn: sqlite3.Connection, ticker: str, note: str | None) -> i
         cur = conn.execute(
             "UPDATE watchlist SET watch_note = ?, updated_at = ? WHERE ticker = ?",
             (note or None, _now(), ticker),
+        )
+        return cur.rowcount
+
+
+def set_crash_discount_rank(
+    conn: sqlite3.Connection, ticker: str, bucket: str, rank: int | None,
+) -> int:
+    """Set (or clear, rank=None) a Bucket 4 row's 0-10 must-buy rank. Scoped to a
+    single (ticker, bucket) row -- unlike watch_note, rank is bucket-4-specific, not
+    a per-company flag. Returns rows touched."""
+    with conn:
+        cur = conn.execute(
+            "UPDATE watchlist SET crash_discount_rank = ?, updated_at = ? "
+            "WHERE ticker = ? AND bucket = ?",
+            (rank, _now(), ticker, bucket),
         )
         return cur.rowcount
 
