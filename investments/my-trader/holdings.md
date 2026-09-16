@@ -4,7 +4,7 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 
 | Ticker | Name | Qty | Mkt Value | Avg Price | Unrealized P&L | Bucket |
 |--------|------|-----|-----------|-----------|-----------------|--------|
-| GOLD.AX |  | 20.0 | $1,099.00 | $59.34 | $-87.75 | unassigned |
+| GOLD.AX |  | 20.0 | $1,098.20 | $59.34 | $-88.55 | unassigned |
 | LLY | Eli Lilly & Co | 0.0001 | $0.11 | $1,148.00 | $-0.00 | 1 |
 | LULU | lululemon athletica inc. | 12.0 | $1,180.44 | $124.26 | $-310.71 | 1 |
 | LYV | Live Nation Entertainment Inc | 0.4 | $68.10 | $167.29 | +$1.18 | 1 |
@@ -12,7 +12,7 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 | PMGOLD.AX |  | 50.0 | $897.00 | $62.06 | $-2,206.18 | 3b |
 | SOFI |  | 50.0 | $853.50 | $19.01 | $-96.83 | unassigned |
 | UBER |  | 10.0 | $714.30 | $79.08 | $-76.46 | unassigned |
-| URNM.AX |  | 300.0 | $2,883.00 | $10.32 | $-212.13 | 1 |
+| URNM.AX |  | 300.0 | $2,886.00 | $10.32 | $-209.13 | 1 |
 | V | Visa Inc (Class A) | 0.1001 | $37.60 | $318.41 | +$5.73 | 1 |
 
 Last auto-generated: 2026-09-16.
