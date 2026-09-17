@@ -137,6 +137,25 @@ def cmd_scan_dma_breakout(args) -> None:
     )
 
 
+def cmd_scan_hated_industries(args) -> None:
+    from .hated_industries_scan import run_hated_industries_scan, write_hated_industries_report
+    from .monitor import maybe_notify
+
+    conn = _open_conn()
+    result = run_hated_industries_scan(conn)
+    conn.close()
+    write_hated_industries_report(result)
+    maybe_notify(
+        {"new_alerts": []}, new_candidates=result["new_candidates"],
+        candidate_label="newly hated industrie(s) flagged",
+    )
+    print(
+        f"Hated industries scan complete: {len(result['flagged'])} industry(ies) "
+        f"cleared the severity gate, {len(result['new_candidates'])} newly flagged. "
+        f"See investments/goat/hated-industries-report.md"
+    )
+
+
 def cmd_scan_insiders(args) -> None:
     from .insider_pattern_analysis import compute_pattern_analysis, write_pattern_analysis_report
     from .insider_scan import (
@@ -277,6 +296,12 @@ def main() -> None:
         help="On-demand discovery scan: S&P 500 + ASX 200 names that just crossed above their 150-day or 200-day MA",
     )
     subparsers.add_parser(
+        "scan-hated-industries",
+        help="On-demand hated industries scan -- severity gate + narrative "
+             "classification + fundamentals-divergence check across the 39 "
+             "industry ETFs",
+    )
+    subparsers.add_parser(
         "scan-insiders",
         help="Daily OpenInsider Form 4 scan -- holdings-watch (P/S on held tickers) + market-wide $25k+ purchase discovery",
     )
@@ -306,6 +331,7 @@ def main() -> None:
         "check-live": cmd_check_live,
         "scan-heartbeat": cmd_scan_heartbeat,
         "scan-dma-breakout": cmd_scan_dma_breakout,
+        "scan-hated-industries": cmd_scan_hated_industries,
         "scan-insiders": cmd_scan_insiders,
         "scan-hormuz": cmd_scan_hormuz,
         "promote-candidate": cmd_promote_candidate,

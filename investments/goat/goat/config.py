@@ -505,3 +505,51 @@ GOAT_DMA_BREAKOUT_MIN_AVG_VOLUME = 100_000  # shares/day -- matches Finviz's own
     # instead of a Finviz screener param since this scan's universe comes from
     # S&P 500 / ASX 200 constituent lists, not a Finviz screen.
 GOAT_DMA_BREAKOUT_CANDIDATES_MD_PATH = GOAT_DIR / "dma-breakout-candidates-pending-review.md"
+
+# Hated Industries Scanner, per investments/hated-industries-scanner-handoff.md and
+# .agent/plans/hated-industries-scanner.md -- contrarian counterpart to
+# industry_rotation.py: finds industries suffering severe, still-live
+# underperformance that may be a narrative-driven overreaction rather than a
+# fundamentals-justified decline (Shaun's SaaS/AI-fear precedent, drafted 2026-09-16).
+GOAT_HATED_RANK_WINDOW_SHORT_TRADING_DAYS = 63  # ~3 calendar months -- same value as
+    # GOAT_SECTOR_RANK_WINDOW_TRADING_DAYS, reused here as the "short" severity
+    # window; GOAT_INDUSTRY_RANK_WINDOW_TRADING_DAYS (126/6mo, already defined above)
+    # doubles as the "long" window. A fear-driven selloff can be a 3-month event, not
+    # always a slow 6-month bleed -- both windows are checked, not just one.
+GOAT_HATED_BOTTOM_N = 5  # only the worst 5 of the 39 covered industries (by 6-month
+    # return) are even considered for the narrative/fundamentals checks below --
+    # matches industry-ranking.md's existing "Bottom 5 Falling" framing. v1/tunable.
+GOAT_HATED_MIN_UNDERPERFORMANCE_VS_SPY_PCT_3MO = 15.0  # percentage points --
+    # industry's 3-month return must trail SPY's own 3-month return by at least this
+    # much. v1/tunable, start conservative per this codebase's usual precedent
+    # (Cash-Value Scan's 0.80->0.50, Moat Scan's 80 stage threshold).
+GOAT_HATED_MIN_UNDERPERFORMANCE_VS_SPY_PCT_6MO = 20.0  # same idea, 6-month window.
+    # "Bottom 5 of 39" alone always exists even in a genuinely rising market where
+    # nothing is truly hated -- this vs-SPY margin is what makes the gate mean
+    # something. Both the 3mo AND 6mo margins must clear for a qualifying industry.
+GOAT_HATED_MIN_DRAWDOWN_FROM_HIGH_PCT = 25.0  # % below the trailing 52-week closing
+    # high -- a distinct severity dimension from windowed return (catches a sharp
+    # multi-week crash a windowed return can dilute against an older high). v1/tunable.
+GOAT_HATED_REVERSAL_LOOKBACK_DAYS = 10  # trading days -- same order of magnitude as
+    # GOAT_SECTOR_CROSS_RECENCY_DAYS / GOAT_DMA_BREAKOUT_CROSS_RECENCY_DAYS (both 10).
+GOAT_HATED_REVERSAL_MAX_RECENT_RETURN_PCT = 8.0  # if the industry has already gained
+    # more than this over the last GOAT_HATED_REVERSAL_LOOKBACK_DAYS trading days, it's
+    # treated as "already reversing" and excluded from this run's qualifying set --
+    # Shaun's own framing (2026-09-16) is to catch live pessimism before the reversal,
+    # not to flag it after the fact. v1/tunable.
+GOAT_HATED_HISTORY_LOOKBACK_DAYS = 500  # calendar days -- same margin philosophy as
+    # GOAT_DMA_BREAKOUT_HISTORY_LOOKBACK_DAYS / GOAT_HEARTBEAT_HISTORY_LOOKBACK_DAYS,
+    # comfortably covers a 252-trading-day (52-week) high lookup plus the 126-day rank
+    # window plus margin.
+GOAT_HATED_NARRATIVE_SUMMARY_MODEL = "sonnet"  # same alias as mytrader/config.py's
+    # NEWS_EVENTS_SUMMARY_MODEL -- this call is the same shape (sdk_compat.run_text +
+    # WebSearch), just industry-scoped instead of ticker-scoped.
+GOAT_HATED_NARRATIVE_CACHE_HOURS = 20.0  # matches NEWS_EVENTS_CACHE_HOURS exactly --
+    # same daily-scan cadence, same reasoning (a day-old narrative read is still
+    # useful; avoids a repeat WebSearch call if the scan is re-run same-day).
+GOAT_HATED_MIN_CONSTITUENT_FUNDAMENTALS_SAMPLE = 2  # at least this many of the
+    # narrative call's returned top-holdings tickers must resolve to usable yfinance
+    # revenue/earnings growth data for the divergence read to be stated with
+    # confidence -- below this, the report says "insufficient constituent data" rather
+    # than asserting a divergence read from 0-1 data points.
+GOAT_HATED_REPORT_PATH = GOAT_DIR / "hated-industries-report.md"

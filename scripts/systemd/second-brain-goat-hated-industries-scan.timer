@@ -1,0 +1,10 @@
+[Unit]
+Description=Goat Hated Industries Scan Timer
+Requires=second-brain-goat-hated-industries-scan.service
+
+[Timer]
+OnCalendar=*-*-* 23:50:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

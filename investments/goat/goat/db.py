@@ -4,6 +4,7 @@ same shared investments.db connection."""
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from datetime import datetime, timezone
 
@@ -66,6 +67,21 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
                 excess_pct_change     REAL,
                 snapshot_date         TEXT NOT NULL,
                 PRIMARY KEY (dedup_key, horizon_days)
+            );
+            CREATE TABLE IF NOT EXISTS goat_hated_industries_seen (
+                industry_label   TEXT PRIMARY KEY,
+                ticker           TEXT NOT NULL,
+                first_flagged_at TEXT NOT NULL,
+                last_flagged_at  TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS goat_hated_industries_narrative_cache (
+                industry_label    TEXT PRIMARY KEY,
+                ticker            TEXT NOT NULL,
+                narrative_thesis  TEXT NOT NULL,
+                systemic          INTEGER,
+                reasoning         TEXT NOT NULL,
+                top_holdings_json TEXT NOT NULL,
+                fetched_at        TEXT NOT NULL
             );
         """)
     # Migration for DBs created before pct_owned_change existed (added
@@ -352,3 +368,65 @@ def get_price_outcomes_for_pattern_analysis(conn: sqlite3.Connection) -> list[sq
            JOIN goat_insider_filings_seen f ON o.dedup_key = f.dedup_key
            WHERE f.kind IN ('discovery', 'discovery_sell')"""
     ).fetchall()
+
+
+def get_hated_industry_seen(conn: sqlite3.Connection, industry_label: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT * FROM goat_hated_industries_seen WHERE industry_label = ?", (industry_label,)
+    ).fetchone()
+
+
+def upsert_hated_industry_seen(conn: sqlite3.Connection, *, industry_label: str, ticker: str) -> bool:
+    """Returns True if this industry is newly seen this "wave" (alert-worthy) --
+    first_flagged_at is set once and never touched again; last_flagged_at is bumped
+    on every re-qualifying run. Reads before writing (same "check before insert"
+    idiom as monitor.py's _stage_new_sector_candidates) since SQLite's own
+    ON CONFLICT DO UPDATE doesn't tell you which branch fired."""
+    existing = get_hated_industry_seen(conn, industry_label)
+    now = _now()
+    with conn:
+        conn.execute(
+            """INSERT INTO goat_hated_industries_seen
+               (industry_label, ticker, first_flagged_at, last_flagged_at)
+               VALUES (?, ?, ?, ?)
+               ON CONFLICT(industry_label) DO UPDATE SET last_flagged_at = excluded.last_flagged_at""",
+            (industry_label, ticker, now, now),
+        )
+    return existing is None
+
+
+def delete_hated_industry_seen(conn: sqlite3.Connection, industry_label: str) -> int:
+    with conn:
+        cur = conn.execute(
+            "DELETE FROM goat_hated_industries_seen WHERE industry_label = ?", (industry_label,)
+        )
+        return cur.rowcount
+
+
+def get_all_hated_industries_seen(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute(
+        "SELECT * FROM goat_hated_industries_seen ORDER BY industry_label"
+    ).fetchall()
+
+
+def get_cached_hated_narrative(conn: sqlite3.Connection, industry_label: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT * FROM goat_hated_industries_narrative_cache WHERE industry_label = ?", (industry_label,)
+    ).fetchone()
+
+
+def upsert_hated_narrative_cache(
+    conn: sqlite3.Connection, *, industry_label: str, ticker: str, narrative_thesis: str,
+    systemic: bool | None, reasoning: str, top_holdings: list[dict],
+) -> None:
+    with conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO goat_hated_industries_narrative_cache
+               (industry_label, ticker, narrative_thesis, systemic, reasoning, top_holdings_json, fetched_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (
+                industry_label, ticker, narrative_thesis,
+                int(systemic) if systemic is not None else None,
+                reasoning, json.dumps(top_holdings), _now(),
+            ),
+        )
