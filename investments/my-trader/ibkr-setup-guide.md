@@ -49,9 +49,11 @@ uv run --directory investments/my-trader python -m mytrader.main sync-ibkr
 ```
 
 This is a dry run — it prints your positions, account summary, and a diff against
-`holdings.md`, with zero writes. Once you're happy with what it shows, corrections can
-be applied with `sync-ibkr --apply` (see `ibkr-sync-handoff.md` for the full command
-set: `sync-ibkr --apply`, `ibkr-assign-bucket`, `ibkr-dismiss-position`).
+`holdings.md`, with zero writes. Once you're happy with what it shows, run it again
+with `sync-ibkr --apply` to commit qty/avg-price corrections for tickers you already
+track, and add any brand-new position straight into `holdings.md` (bucket
+`unassigned` — re-bucket it yourself later whenever you get around to it, same as any
+other holding).
 
 ## Troubleshooting
 
@@ -70,3 +72,41 @@ settings is still `4001` and that "Enable ActiveX and Socket Clients" is still c
 **A position looks wrong or missing** — `sync-ibkr` only reads what IB Gateway reports
 at the moment you run it. If you traded very recently, give the account a minute to
 settle before syncing.
+
+## Quick Steps (super simple version)
+
+This is the "just tell me what to click" version, for whenever you forget the details
+above.
+
+1. Open **IB Gateway** on your computer.
+2. Log in like normal (your usual IBKR login + 2FA).
+3. Make sure it says **Live Trading**, not Paper Trading.
+4. Leave IB Gateway open — don't close it, just let it sit there running.
+5. Open a terminal and type:
+   ```
+   uv run --directory investments/my-trader python -m mytrader.main sync-ibkr
+   ```
+6. Press Enter and read what it shows you. This step is just "looking" — it doesn't
+   change anything yet.
+7. If everything it found looks right, type this instead to actually save it:
+   ```
+   uv run --directory investments/my-trader python -m mytrader.main sync-ibkr --apply
+   ```
+   Any position you already track gets its qty/price corrected. Any brand-new
+   position gets added straight in too — no extra step needed, it just shows up with
+   bucket `unassigned` until you re-bucket it yourself.
+8. Wait for it to finish — it'll print "Pulling latest holdings.md/watchlist.md from
+   the VPS..." near the end. That's it automatically fetching the update for you, so
+   just let it run to completion.
+9. Done! Check `holdings.md` — it should now match your real account.
+
+## Why there's a pull step at the end
+
+IB Gateway only runs on your computer, but the real database only lives on the VPS
+(a separate computer in the cloud) — so `sync-ibkr --apply` sends what it found to
+the VPS over the internet, the VPS updates `holdings.md` there, and step 8 above
+pulls that change back down to your computer automatically. You never need to run
+`git pull` yourself for this.
+
+If it doesn't work: IB Gateway probably logged itself out. Just reopen it, log back
+in, and try again from step 5.

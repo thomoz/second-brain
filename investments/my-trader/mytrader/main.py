@@ -283,6 +283,8 @@ def cmd_dismiss_candidate(args) -> None:
 
 
 def cmd_sync_ibkr(args) -> None:
+    import subprocess
+
     from .ibkr_remote_write import push_positions_remote
     from .ibkr_sync import fetch_account_summary, fetch_positions
 
@@ -302,39 +304,20 @@ def cmd_sync_ibkr(args) -> None:
     # source of truth for investments.db (see .agent/plans/investments-db-ssh-single-source.md).
     push_positions_remote(positions, summary, apply=args.apply)
 
-
-def cmd_ibkr_assign_bucket(args) -> None:
-    from .db import delete_ibkr_pending_position, get_ibkr_pending_position, upsert_holding
-    from .snapshot import regenerate_all
-    from .tickers import normalize
-
-    conn = _open_conn()
-    ticker = normalize(args.ticker)
-    pending = get_ibkr_pending_position(conn, ticker)
-    if pending is None:
-        conn.close()
-        print(f"No staged IBKR position found for {ticker}.")
-        return
-
-    upsert_holding(
-        conn, ticker=ticker, name=pending["name"], asset_type=args.asset_type or pending["asset_type"],
-        bucket=args.bucket, qty=pending["qty"], avg_price=pending["avg_price"], currency=pending["currency"],
-    )
-    delete_ibkr_pending_position(conn, ticker)
-    regenerate_all(conn)
-    conn.close()
-    print(f"Assigned {ticker} to bucket {args.bucket} and added to holdings.")
-
-
-def cmd_ibkr_dismiss_position(args) -> None:
-    from .db import delete_ibkr_pending_position
-    from .tickers import normalize
-
-    conn = _open_conn()
-    ticker = normalize(args.ticker)
-    count = delete_ibkr_pending_position(conn, ticker)
-    conn.close()
-    print(f"Dismissed {count} staged IBKR position(s) for {ticker}.")
+    if args.apply:
+        # ibkr_remote_apply.py (VPS-side) already committed + pushed holdings.md/
+        # watchlist.md by the time the SSH call above returns -- see its own
+        # docstring -- so this pull is deterministic, not a race against
+        # second-brain-vaultsync.timer's 2-minute cycle.
+        print("\nPulling latest holdings.md/watchlist.md from the VPS...")
+        result = subprocess.run(["git", "pull", "--no-rebase"], capture_output=True, text=True)
+        if result.returncode == 0:
+            print((result.stdout or "").strip() or "Already up to date.")
+        else:
+            print(
+                "git pull failed — pull manually to see the updated holdings.md:\n"
+                + ((result.stderr or "").strip() or "(no error output)")
+            )
 
 
 def cmd_gold_backtest(args) -> None:
@@ -491,21 +474,10 @@ def main() -> None:
     )
     p_sync_ibkr.add_argument(
         "--apply", action="store_true",
-        help="Commit qty/avg-price corrections for matched tickers and stage new IBKR positions "
-             "(default: dry run, prints the diff only)",
+        help="Commit qty/avg-price corrections for matched tickers and add new IBKR "
+             "positions straight to holdings (bucket 'unassigned' until you re-bucket "
+             "them yourself) (default: dry run, prints the diff only)",
     )
-
-    p_ibkr_assign = subparsers.add_parser(
-        "ibkr-assign-bucket", help="Assign a bucket to a staged new IBKR position and add it to holdings",
-    )
-    p_ibkr_assign.add_argument("--ticker", required=True)
-    p_ibkr_assign.add_argument("--bucket", required=True)
-    p_ibkr_assign.add_argument("--asset-type", dest="asset_type", default=None)
-
-    p_ibkr_dismiss = subparsers.add_parser(
-        "ibkr-dismiss-position", help="Discard a staged IBKR position without adding it to holdings",
-    )
-    p_ibkr_dismiss.add_argument("--ticker", required=True)
 
     args = parser.parse_args()
 
@@ -529,8 +501,6 @@ def main() -> None:
         "dismiss-candidate": cmd_dismiss_candidate,
         "refresh-watchlist-data": cmd_refresh_watchlist_data,
         "sync-ibkr": cmd_sync_ibkr,
-        "ibkr-assign-bucket": cmd_ibkr_assign_bucket,
-        "ibkr-dismiss-position": cmd_ibkr_dismiss_position,
     }
 
     if args.command in dispatch:

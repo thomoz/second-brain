@@ -3,20 +3,61 @@ over SSH as `python -m mytrader.ibkr_remote_apply`. Reads a JSON payload (IBKR
 positions + account summary, already fetched locally against IB Gateway, plus the
 --apply flag) from stdin, then does everything cmd_sync_ibkr (main.py) used to do
 after its own fetch step: diff against the VPS's own investments.db, print the
-report, and -- only if apply is true -- write corrections/staged positions and
+report, and -- only if apply is true -- write corrections/new positions and
 regenerate snapshots. This keeps the diff (and what it's compared against) on the
 same machine as the database it reads, per
 .agent/plans/investments-db-ssh-single-source.md Task 3.1.
+
+A ticker IBKR reports that isn't already tracked is added straight to `holdings`
+with bucket "unassigned" (same neutral placeholder already used for GOLD.AX/SOFI/
+UBER) -- Shaun's 2026-09-17 call: holdings.md must reflect his real account without
+a manual bucket-assignment step gating it. Re-bucketing later is a plain
+`holding-buy`/DB edit, same as any other holding. This replaced an earlier design
+(staged into a separate ibkr_pending_positions table, requiring `ibkr-assign-bucket`
+before it showed up anywhere) -- removed entirely, not just bypassed.
+
+Also commits + pushes holdings.md/watchlist.md immediately when regenerate_all()
+touches them, instead of waiting on second-brain-vaultsync.timer's own 2-minute
+cycle -- ibkr_remote_write.push_positions_remote's local caller does a `git pull`
+right after this process exits, so that pull needs the VPS's commit to already be on
+origin by then, not up to 2 minutes later. Scoped to just these two files (same
+scoping discipline as run_vault_sync.sh's own SYNC_PATHS) so this never sweeps up
+unrelated changes into an ibkr-sync commit. Non-fatal on any git failure (mirrors
+run_vault_sync.sh's "push failed (non-fatal)" posture) -- the regular vault-sync
+timer will pick up the commit on its own next cycle either way.
 """
 
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
+from datetime import datetime, timezone
+
+_SYNC_PATHS = ["holdings.md", "watchlist.md"]
+
+
+def _commit_and_push_holdings_files() -> None:
+    subprocess.run(["git", "add", *_SYNC_PATHS], check=False)
+    staged = subprocess.run(["git", "diff", "--quiet", "--cached", "--", *_SYNC_PATHS], check=False)
+    if staged.returncode == 0:
+        return  # nothing changed in these two files -- nothing to commit
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+    subprocess.run(["git", "commit", "-m", f"ibkr sync {ts}", "--", *_SYNC_PATHS], check=False)
+    subprocess.run(["git", "pull", "--no-rebase"], check=False)
+    push = subprocess.run(["git", "push", "origin", "HEAD"], check=False)
+    if push.returncode != 0:
+        print("Note: push to origin failed after IBKR sync -- vault sync will retry within 2 minutes.")
+
+
+_NEW_POSITION_BUCKET = "unassigned"  # matches the placeholder already used for
+    # GOLD.AX/SOFI/UBER -- a real bucket (1/2/3a/3b/4/ai_postcrash) is Shaun's own
+    # strategic categorization IBKR has no concept of, and holdings.md must show the
+    # real position either way rather than gate on that assignment.
 
 
 def main() -> None:
-    from .db import get_all_holdings, get_holding_row, insert_ibkr_pending_position, upsert_holding
+    from .db import get_all_holdings, get_holding_row, upsert_holding
     from .ibkr_sync import compute_diff
     from .main import _open_conn
     from .snapshot import regenerate_all
@@ -66,7 +107,7 @@ def main() -> None:
 
     if not apply:
         conn.close()
-        print("\nDry run only — no writes made. Re-run with --apply to commit corrections and stage new positions.")
+        print("\nDry run only — no writes made. Re-run with --apply to commit corrections and add new positions.")
         return
 
     corrected = 0
@@ -79,19 +120,22 @@ def main() -> None:
         )
         corrected += 1
 
-    staged = 0
+    added = 0
     for row in diff["new_to_ibkr"]:
-        insert_ibkr_pending_position(
-            conn, ticker=row["ticker"], name=row["name"], qty=row["qty"], avg_price=row["avg_price"],
-            currency=row["currency"], asset_type=row["asset_type"], exchange_raw=row["exchange_raw"],
+        upsert_holding(
+            conn, ticker=row["ticker"], name=row["name"], asset_type=row["asset_type"],
+            bucket=_NEW_POSITION_BUCKET, qty=row["qty"], avg_price=row["avg_price"],
+            currency=row["currency"],
         )
-        staged += 1
+        added += 1
 
-    if corrected:
+    if corrected or added:
         regenerate_all(conn)
+        _commit_and_push_holdings_files()
     conn.close()
     print(
-        f"\nApplied: {corrected} correction(s), {staged} new position(s) staged, "
+        f"\nApplied: {corrected} correction(s), {added} new position(s) added "
+        f"(bucket '{_NEW_POSITION_BUCKET}' — re-bucket them yourself when convenient), "
         f"{len(diff['missing_from_ibkr'])} missing (reported only)."
     )
 

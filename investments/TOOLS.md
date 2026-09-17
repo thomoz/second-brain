@@ -15,6 +15,7 @@ Freshest reports worth actually opening most days:
 
 | File | From | |
 |------|------|---|
+| [investments/my-trader/holdings.md](my-trader/holdings.md) | Current holdings snapshot — refreshed by my-trader Monitor (7:30am Sydney) and by any holdings change | [→](#holdings-md) |
 | [investments/my-trader/my-trader-report.md](my-trader/my-trader-report.md) | my-trader Monitor (7:30am Sydney) | [→](#mytrader-monitor) |
 | [investments/goat/goat-report.md](goat/goat-report.md) | Goat Monitor (~7:35am Sydney) | [→](#goat-monitor) |
 | [investments/goat/industry-ranking.md](goat/industry-ranking.md) | Part of Goat Monitor, industry rotation section (~7:35am Sydney) | [→](#goat-monitor) |
@@ -37,6 +38,7 @@ alerts/discoveries as they fire — these files are for batch review, not discov
 
 | Tool | What it does | Where it runs | Schedule | Output |
 |------|--------------|----------------|----------|--------|
+| <a id="holdings-md"></a>[↑](#daily-read) **Holdings tracking** (`holdings.md`) | Markdown snapshot of your current holdings (qty, avg price, market value, unrealized P&L, bucket). Fully regenerated — not merged — on every holdings change: my-trader Monitor's daily run, any buy/sell, watchlist ops, or an IBKR sync. To pull it fresh from your real Interactive Brokers account instead of updating it by hand, see the simple steps in [ibkr-setup-guide.md](my-trader/ibkr-setup-guide.md#quick-steps-super-simple-version). | Windows Task Scheduler (`SecondBrain-MyTraderMonitor`), this dev machine + on-demand | Daily, 7:30am Sydney local (also refreshes on any holdings write) | `investments/my-trader/holdings.md` |
 | <a id="mytrader-monitor"></a>[↑](#daily-read) **my-trader Monitor** | Re-checks all holdings + vetted watchlist rows | Windows Task Scheduler (`SecondBrain-MyTraderMonitor`), this dev machine | Daily, 7:30am Sydney local | `investments/my-trader/my-trader-report.md`, refreshes `gold-outlook.md` |
 | [↑](#daily-read) **Cash-Value Scan** ([details + tuning ↓](#cashvalue-scan)) | Screens US (Finviz) + ASX 200 (Wikipedia) for net cash ≥ 50% of market cap + positive operating cash flow; ranked advisor-notes list, no staging/alerts | VPS systemd (`second-brain-mytrader-cashvalue-scan.timer`) | Daily, 22:30 UTC | `investments/my-trader/cash-value-report.md` |
 | <a id="goat-monitor"></a>[↑](#daily-read) **Goat Monitor** (150DMA exit check + sector rotation scan) | Flags holdings AND every watchlist ticker closing below their 150-day MA; ranks the 11 SPDR sector ETFs and stages fresh breakout candidates; also refreshes the industry rotation ranking | VPS systemd (`second-brain-goat-monitor.timer`) | Daily, 21:35 UTC (07:35 AEST / 08:35 AEDT) | `investments/goat/goat-report.md`, `sector-ranking.md`, `sector-candidates-pending-review.md`, `industry-ranking.md` |
