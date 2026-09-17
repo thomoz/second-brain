@@ -48,6 +48,7 @@ def _healthy_ticker_data(ticker: str = "AAPL") -> TickerData:
         info={
             "debtToEquity": 50.0, "totalCash": 1_000_000_000, "freeCashflow": 100_000_000,
             "operatingCashflow": 100_000_000, "marketCap": 500_000_000.0, "averageVolume": 500_000,
+            "fullExchangeName": "NasdaqGS",
         },
         dividends=None,
     )
@@ -245,6 +246,7 @@ def test_run_dma_breakout_scan_stages_new_candidate(db_conn, monkeypatch):
     assert row is not None
     assert row["source"] == "goat_dma_breakout_scan"
     assert row["company_name"] == "Apple Inc."
+    assert row["exchange"] == "NasdaqGS"
 
 
 def test_run_dma_breakout_scan_skips_ticker_already_a_holding_ax_suffixed(db_conn, monkeypatch):
@@ -324,17 +326,18 @@ def test_render_dma_breakout_candidates_report_lists_pending_rows():
         "scanned": 700, "asx_unavailable": False, "already_staged_elsewhere": 0,
         "pending_candidates": [
             {"ticker": "AAPL", "sector_label": "Technology", "signal_detail": "DMA breakout signal",
-             "company_name": "Apple Inc.", "flagged_at": "2026-09-16T00:00:00+00:00"},
+             "company_name": "Apple Inc.", "exchange": "NasdaqGS", "flagged_at": "2026-09-16T00:00:00+00:00"},
         ],
     }
     report = dma_breakout_scan.render_dma_breakout_candidates_report(result)
     assert "AAPL" in report
     assert "Apple Inc." in report
+    assert "NasdaqGS" in report
     assert "DMA breakout signal" in report
     assert "700" in report
 
 
-def test_render_dma_breakout_candidates_report_missing_company_name_shows_na():
+def test_render_dma_breakout_candidates_report_missing_company_name_and_exchange_show_na():
     result = {
         "scanned": 700, "asx_unavailable": False, "already_staged_elsewhere": 0,
         "pending_candidates": [
@@ -343,7 +346,7 @@ def test_render_dma_breakout_candidates_report_missing_company_name_shows_na():
         ],
     }
     report = dma_breakout_scan.render_dma_breakout_candidates_report(result)
-    assert "| AAPL | n/a |" in report
+    assert "| AAPL | n/a | n/a |" in report
 
 
 def test_render_dma_breakout_candidates_report_surfaces_asx_unavailable_banner():

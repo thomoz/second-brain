@@ -208,6 +208,7 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
                 data = market_data.fetch_ticker_data(ticker)
                 if not passes_liquidity_floor(market, data):
                     continue
+                exchange_name = data.info.get("fullExchangeName") or data.info.get("exchange")
                 context = fundamentals_context.compute_survival_context(ticker, data)
                 if context["insolvency_risk"]:
                     print(f"[goat-dma-breakout-scan] {ticker} suppressed -- near-term insolvency risk")
@@ -221,7 +222,7 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
                 db.insert_goat_pending_candidate(
                     conn, ticker=ticker, sector_label=label,
                     signal_detail=signal_detail, source="goat_dma_breakout_scan",
-                    company_name=c["company"],
+                    company_name=c["company"], exchange=exchange_name,
                 )
                 new_candidates.append({"ticker": ticker, "sector_label": label, "detail": signal_detail})
             except Exception as e:
@@ -282,8 +283,8 @@ def render_dma_breakout_candidates_report(result: dict[str, Any]) -> str:
         )
     lines += [
         "",
-        "| Ticker | Company | Sector | Signal | Flagged |",
-        "|--------|---------|--------|--------|---------|",
+        "| Ticker | Company | Exchange | Sector | Signal | Flagged |",
+        "|--------|---------|----------|--------|--------|---------|",
     ]
     sorted_candidates = sorted(
         result["pending_candidates"],
@@ -291,8 +292,9 @@ def render_dma_breakout_candidates_report(result: dict[str, Any]) -> str:
     )
     for row in sorted_candidates:
         company = (row.get("company_name") or "n/a").replace("|", "/")
+        exchange = (row.get("exchange") or "n/a").replace("|", "/")
         lines.append(
-            f"| {row['ticker']} | {company} | {row['sector_label']} | {row['signal_detail']} "
+            f"| {row['ticker']} | {company} | {exchange} | {row['sector_label']} | {row['signal_detail']} "
             f"| {row['flagged_at'][:10]} |"
         )
     lines += ["", f"Last auto-generated: {date.today().isoformat()}."]
