@@ -1,0 +1,7 @@
+{
+    "files.watcherExclude": {
+        "**/.venv/**": true,
+        "**/__pycache__/**": true,
+        "**/.git/objects/**": true
+    }
+}
