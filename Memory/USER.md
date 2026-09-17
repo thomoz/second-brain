@@ -133,3 +133,10 @@ Skip drafts for: Newsletters, automated notifications, spam
 - (Sep 15) Moat scanner deployed; daily timer runs 23:30 UTC / about 09:30 AEST.
 - (Sep 15) Moat scanner VPS is secondbrain@137.184.102.104.
 - (Sep 15) Moat scan command uses local PowerShell to SSH remote bash via base64.
+
+## 2026-09-16 Reflection
+- (Sep 16) DMA breakout scanner plan created at .agent/plans/goat-dma-breakout-scanner.md.
+- (Sep 16) Hated Industries Scanner plan created at .agent/plans/hated-industries-scanner.md.
+- (Sep 16) Planned DMA scanner CLI subcommand is scan-dma-breakout.
+- (Sep 16) Planned Hated Industries Scanner CLI subcommand is scan-hated-industries.
+- (Sep 16) Suggested DMA timer is 22:55 UTC; suggested Hated Industries timer is 23:50 UTC.

@@ -55,6 +55,8 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - For SongbookDB PHP upgrade, process files in strict alphabetical order
 - Avoid dot-sourcing scripts/invoke_investments.ps1; call it with -Package and -Command args
 - Ask before pushing second-brain-workshop changes to origin.
+- For DMA scanner work, do not run live scans locally against investments.db; VPS-only.
+- ASX holdings/watchlist use .AX suffix; dedup must preserve qualified tickers.
 ---
 
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_
