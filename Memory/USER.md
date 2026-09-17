@@ -140,3 +140,12 @@ Skip drafts for: Newsletters, automated notifications, spam
 - (Sep 16) Planned DMA scanner CLI subcommand is scan-dma-breakout.
 - (Sep 16) Planned Hated Industries Scanner CLI subcommand is scan-hated-industries.
 - (Sep 16) Suggested DMA timer is 22:55 UTC; suggested Hated Industries timer is 23:50 UTC.
+
+## 2026-09-17 Reflection
+- (Sep 17) DMA breakout scanner uses yfinance daily bars; poll cadence is not bar interval.
+- (Sep 17) DMA breakout Exchange column should appear after next VPS scan.
+- (Sep 17) Earnings Deterioration Watch handoff drafted; feature is not built yet.
+- (Sep 17) Earnings Watch should scan my-trader holdings only, not full Monitor watchlist.
+- (Sep 17) Earnings Watch needs estimate-history table and 8-K support in sec_filings.py.
+- (Sep 17) Planned Earnings Watch CLI is scan-earnings-watch with report and systemd timer.
+- (Sep 17) Oroco/OCO.V insider scan needs SEDI, not US Form 4/OpenInsider.
