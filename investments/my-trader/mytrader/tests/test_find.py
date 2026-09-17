@@ -22,11 +22,13 @@ def test_lookup_ticker_opts_in_to_principles_fit_and_news_events(db_conn, monkey
     captured = {}
 
     def _fake_run_assessment(
-        ticker, conn, include_principles_fit=False, include_news_events=False, include_insider_selling=False,
+        ticker, conn, include_principles_fit=False, include_news_events=False,
+        include_insider_selling=False, include_earnings_watch=False,
     ):
         captured["include_principles_fit"] = include_principles_fit
         captured["include_news_events"] = include_news_events
         captured["include_insider_selling"] = include_insider_selling
+        captured["include_earnings_watch"] = include_earnings_watch
         return {"ticker": ticker}
 
     monkeypatch.setattr("mytrader.find.engine.run_assessment", _fake_run_assessment)
@@ -34,6 +36,7 @@ def test_lookup_ticker_opts_in_to_principles_fit_and_news_events(db_conn, monkey
     assert captured["include_principles_fit"] is True
     assert captured["include_news_events"] is True
     assert captured["include_insider_selling"] is True
+    assert captured["include_earnings_watch"] is True
 
 
 def test_add_to_watchlist_persists_row(db_conn, monkeypatch, tmp_path):

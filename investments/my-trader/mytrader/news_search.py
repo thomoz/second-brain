@@ -120,3 +120,66 @@ def get_news_events_for_ticker(ticker: str, conn: sqlite3.Connection) -> dict | 
 
     db.upsert_news_events_cache(conn, ticker=ticker, verdict=verdict, detail=detail)
     return {"verdict": verdict, "detail": detail}
+
+
+_EARNINGS_GUIDANCE_PROMPT = """\
+You are researching live guidance and management-commentary signals for {ticker} on \
+behalf of an investment analyst watching for early signs of earnings deterioration. \
+Use web search to check for:
+
+1. Lowered or cut full-year/quarterly guidance
+2. Missed analyst estimates in the most recent reported quarter
+3. Investor-day, conference, or earnings-call commentary describing softening demand, \
+margin pressure, or slowing growth
+4. Any published monthly/weekly operating metrics showing a slowdown (same-store \
+sales, subscriber counts, GMV, foot traffic, etc.)
+
+Ignore routine background noise and anything not from the last ~3 months unless still \
+actively relevant (e.g. guidance given for the current fiscal year).
+
+Respond with ONLY a JSON object, no markdown fences, no other text:
+{{"material": true or false, "detail": "one or two sentence summary of what you \
+found, or empty string if nothing material", "findings": ["short finding 1", ...]}}
+
+Set "material" to true only if something you found suggests earnings/results may come \
+in weaker than currently expected -- not for routine, long-resolved, or immaterial items.
+"""
+
+
+def _search_earnings_guidance(ticker: str) -> dict | None:
+    prompt = _EARNINGS_GUIDANCE_PROMPT.format(ticker=ticker)
+    try:
+        raw = asyncio.run(run_text(
+            prompt=prompt,
+            options=ClaudeAgentOptions(allowed_tools=["WebSearch"], model=config.EARNINGS_WATCH_SUMMARY_MODEL),
+        ))
+        return _parse_json(raw)
+    except Exception:
+        return None
+
+
+def get_earnings_guidance_for_ticker(ticker: str, conn: sqlite3.Connection) -> dict | None:
+    """Sibling of get_news_events_for_ticker -- same TTL-cache shape, earnings-focused
+    prompt, against the separate earnings_guidance_cache table (its own cache since
+    this is a materially different question than news_events' M&A/litigation/credit
+    scan, not a variant of the same cached row). Returns {"verdict": "flag"|"info",
+    "detail": str}, or None only when the search itself failed and no cached row
+    exists to fall back on."""
+    cached = db.get_cached_earnings_guidance(conn, ticker)
+    if cached is not None:
+        fetched_at = datetime.fromisoformat(cached["fetched_at"])
+        age_hours = (datetime.now(timezone.utc) - fetched_at).total_seconds() / 3600
+        if age_hours < config.EARNINGS_WATCH_GUIDANCE_CACHE_HOURS:
+            return {"verdict": cached["verdict"], "detail": cached["detail"]}
+
+    result = _search_earnings_guidance(ticker)
+    if result is None:
+        if cached is not None:
+            return {"verdict": cached["verdict"], "detail": cached["detail"]}  # stale-but-usable fallback
+        return None
+
+    verdict = "flag" if result.get("material") else "info"
+    detail = _format_detail(result)
+
+    db.upsert_earnings_guidance_cache(conn, ticker=ticker, verdict=verdict, detail=detail)
+    return {"verdict": verdict, "detail": detail}

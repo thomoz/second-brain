@@ -266,6 +266,7 @@ def recent_filings_of_types(
     primary_desc_col = recent.get("primaryDocDescription", [])
     filing_date_col = recent.get("filingDate", [])
     acceptance_col = recent.get("acceptanceDateTime", [])
+    items_col = recent.get("items", [])
 
     n = min(len(forms_col), len(accession_col), len(primary_doc_col), len(filing_date_col))
     out: list[dict[str, str]] = []
@@ -285,6 +286,9 @@ def recent_filings_of_types(
             "primary_doc_description": primary_desc_col[i] if i < len(primary_desc_col) else "",
             "filing_date": filing_date_str,
             "acceptance_datetime": acceptance_col[i] if i < len(acceptance_col) else "",
+            "items": items_col[i] if i < len(items_col) else "",  # additive field,
+                # 2026-09 -- comma-separated 8-K Item codes (e.g. "2.02,9.01"), only
+                # ever non-empty for 8-Ks; existing keys/callers unaffected.
         })
     return out
 

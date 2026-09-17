@@ -250,6 +250,20 @@ def test_run_assessment_includes_insider_selling_when_opted_in(db_conn, monkeypa
     assert len(result["checks"]) == 13
 
 
+def test_run_assessment_includes_earnings_watch_when_opted_in(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(ticker=ticker, info={"trailingPE": 20.0}, dividends=None),
+    )
+    monkeypatch.setattr(
+        "mytrader.engine.earnings_deterioration.check",
+        lambda *a, **k: CheckResult(name="earnings_deterioration", verdict="ok", detail="stub"),
+    )
+    result = engine.run_assessment("VRTX", db_conn, include_earnings_watch=True)
+    assert "earnings_deterioration" in {c.name for c in result["checks"]}
+    assert len(result["checks"]) == 13
+
+
 def test_insider_selling_flag_suppresses_opportunity(db_conn, monkeypatch):
     """A material insider_selling flag should gate opportunity.py the same way
     news_events does — confirms insider_selling is wired into other_checks (ahead
@@ -291,6 +305,31 @@ def test_news_events_flag_suppresses_opportunity(db_conn, monkeypatch):
         lambda *a, **k: CheckResult(name="news_events", verdict="flag", detail="Live takeover offer"),
     )
     result = engine.run_assessment("VRTX", db_conn, include_news_events=True)
+    opportunity_result = next(c for c in result["checks"] if c.name == "opportunity")
+    assert opportunity_result.verdict == "ok"
+    assert "Active risk flag" in opportunity_result.detail
+
+
+def test_earnings_watch_flag_suppresses_opportunity(db_conn, monkeypatch):
+    """A material earnings_deterioration flag should gate opportunity.py the same
+    way news_events/insider_selling do — confirms earnings_deterioration is wired
+    into other_checks (ahead of opportunity), not appended after like
+    principles_fit."""
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(
+            ticker=ticker,
+            info={"trailingPE": 5.0, "priceToBook": 0.5, "returnOnEquity": 0.30},
+            dividends=None,
+        ),
+    )
+    monkeypatch.setattr(
+        "mytrader.engine.earnings_deterioration.check",
+        lambda *a, **k: CheckResult(
+            name="earnings_deterioration", verdict="flag", detail="EPS estimate down 5.0%",
+        ),
+    )
+    result = engine.run_assessment("VRTX", db_conn, include_earnings_watch=True)
     opportunity_result = next(c for c in result["checks"] if c.name == "opportunity")
     assert opportunity_result.verdict == "ok"
     assert "Active risk flag" in opportunity_result.detail

@@ -361,6 +361,20 @@ def cmd_cash_value_scan(args) -> None:
     )
 
 
+def cmd_scan_earnings_watch(args) -> None:
+    from .earnings_watch import maybe_notify, run_earnings_watch, write_report
+
+    conn = _open_conn()
+    result = run_earnings_watch(conn)
+    conn.close()
+    write_report(result)
+    maybe_notify(result)
+    print(
+        f"Earnings watch complete: checked {result['checked_holdings']} holding(s), "
+        f"{len(result['new_alerts'])} new alert(s). See investments/my-trader/earnings-watch-report.md"
+    )
+
+
 def cmd_monitor(args) -> None:
     from .monitor import maybe_notify, run_monitor, write_report
 
@@ -453,6 +467,12 @@ def main() -> None:
         help="Screen US + ASX for companies with net cash >= 0.8x market cap and "
              "positive cash flow (writes cash-value-report.md)",
     )
+    subparsers.add_parser(
+        "scan-earnings-watch",
+        help="Daily early-warning check on holdings for signs of deteriorating "
+             "earnings -- estimate-revision trend, earnings-relevant SEC 8-Ks, "
+             "guidance search (writes earnings-watch-report.md)",
+    )
 
     p_promote = subparsers.add_parser(
         "promote-candidate", help="Move a pending synced candidate into the real watchlist",
@@ -497,6 +517,7 @@ def main() -> None:
         "sync-candidates": cmd_sync_candidates,
         "gold-backtest": cmd_gold_backtest,
         "cash-value-scan": cmd_cash_value_scan,
+        "scan-earnings-watch": cmd_scan_earnings_watch,
         "promote-candidate": cmd_promote_candidate,
         "dismiss-candidate": cmd_dismiss_candidate,
         "refresh-watchlist-data": cmd_refresh_watchlist_data,

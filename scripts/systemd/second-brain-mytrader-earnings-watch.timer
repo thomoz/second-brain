@@ -1,0 +1,10 @@
+[Unit]
+Description=my-trader Earnings Deterioration Watch Timer
+Requires=second-brain-mytrader-earnings-watch.service
+
+[Timer]
+OnCalendar=*-*-* 23:55:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

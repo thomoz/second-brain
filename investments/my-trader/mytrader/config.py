@@ -636,3 +636,70 @@ FINVIZ_REQUEST_DELAY_SECONDS = 0.5  # courtesy delay between sequential page GET
 # Headquarters. yfinance ticker form is <CODE>.AX.
 ASX200_WIKI_URL = "https://en.wikipedia.org/wiki/S%26P/ASX_200"
 ASX200_USER_AGENT = "Mozilla/5.0 (compatible; SecondBrainMyTrader/1.0)"
+
+# GOAT_INDUSTRY_ETFS + its two lookback/window constants, moved here from
+# goat/goat/config.py 2026-09 -- goat depends on my-trader (one-way workspace
+# dependency, `goat/pyproject.toml` declares `my-trader = { workspace = true }`),
+# not the reverse, so this was the only workspace-safe home for
+# earnings_watch.py's industry-context signal (checks/earnings_deterioration.py,
+# Decision #6) to read this map without creating a circular import. Same precedent
+# as OPENINSIDER_BASE_URL/OPENINSIDER_USER_AGENT above -- values/names unchanged,
+# `goat.config` re-exports these via `from mytrader.config import ...` so
+# `goat.industry_rotation.py`'s own `config.GOAT_INDUSTRY_ETFS` usage is
+# unaffected. The ranking functions themselves (`industry_rotation.py`) stay in
+# `goat/` untouched -- only the config dict moved.
+GOAT_INDUSTRY_ETFS: dict[str, str] = {
+    "ITA": "Aerospace & Defense", "JETS": "Airlines", "CARZ": "Auto Manufacturers",
+    "KBWB": "Banks - Diversified", "KRE": "Banks - Regional", "XBI": "Biotechnology",
+    "XHB": "Building Products & Equipment", "IAI": "Capital Markets",
+    "COPX": "Copper", "ESPO": "Electronic Gaming & Multimedia",
+    "PAVE": "Engineering & Construction", "BJK": "Gambling", "GDX": "Gold",
+    "IHF": "Healthcare Plans", "KIE": "Insurance - Diversified",
+    "FDN": "Internet Content & Information", "IBUY": "Internet Retail",
+    "WOOD": "Lumber & Wood Production", "BOAT": "Marine Shipping",
+    "IHI": "Medical Devices", "XOP": "Oil & Gas E&P",
+    "XES": "Oil & Gas Equipment & Services", "CRAK": "Oil & Gas Refining & Marketing",
+    "PICK": "Other Industrial Metals & Mining", "INDS": "REIT - Industrial",
+    "REM": "REIT - Mortgage", "ITB": "Residential Construction",
+    "EATZ": "Restaurants", "SMH": "Semiconductors", "SIL": "Silver",
+    "IGV": "Software - Application", "TAN": "Solar", "SLX": "Steel",
+    "IYZ": "Telecom Services", "URA": "Uranium",
+    "PHO": "Utilities - Regulated Water", "ICLN": "Utilities - Renewable",
+    "MOO": "Agricultural Inputs", "EVX": "Waste Management",
+}  # 39 of 143 Finviz industries with a real, dedicated, currently-trading ETF --
+   # researched 2026-08-23. dict[ticker, label] shape mirrors GOAT_SECTOR_ETFS.
+GOAT_INDUSTRY_HISTORY_LOOKBACK_DAYS = 400  # calendar days -- comfortably exceeds
+                                              # the 126-trading-day rank window below.
+GOAT_INDUSTRY_RANK_WINDOW_TRADING_DAYS = 126  # ~6 calendar months of trading days.
+
+# ---------------------------------------------------------------------------
+# Earnings Deterioration Watch -- mytrader/earnings_watch.py, per
+# .agent/plans/earnings-deterioration-watch.md. Daily advisor-notes check on
+# holdings only (never watchlist), also wired as an opt-in Find check
+# (checks/earnings_deterioration.py). Confirmed with Shaun 2026-09-17.
+# ---------------------------------------------------------------------------
+EARNINGS_WATCH_REPORT_PATH = MY_TRADER_DIR / "earnings-watch-report.md"
+
+EARNINGS_WATCH_8K_LOOKBACK_DAYS = 90  # Find's one-shot lookback window -- no
+    # persisted state at Find time, same reasoning as INSIDER_SELLING_LOOKBACK_DAYS
+    # being wider than Goat's own incremental-poll window.
+EARNINGS_WATCH_8K_ITEM_ALLOWLIST = frozenset({"2.02", "2.05", "2.06", "1.01", "1.02", "7.01"})
+    # SEC 8-K Item codes considered earnings-relevant: 2.02 (Results of Operations
+    # and Financial Condition), 2.05 (Costs Associated with Exit/Disposal
+    # Activities), 2.06 (Material Impairments), 1.01/1.02 (Entry into/Termination
+    # of a Material Definitive Agreement), 7.01 (Regulation FD Disclosure) -- from
+    # the source handoff's own Item-code research.
+EARNINGS_WATCH_TREND_WINDOW_DAYS = 30  # rolling window for the estimate-trend read.
+EARNINGS_WATCH_TREND_MIN_DATAPOINTS = 5  # minimum recorded daily snapshots before
+    # the trend check will flag anything -- this tool starts with zero history on
+    # day one, must degrade to "insufficient history" for the first ~5 days, not
+    # silently flag on noise from 1-2 data points.
+EARNINGS_WATCH_TREND_FLAG_PCT = 3.0  # best-guess default -- no history exists yet
+    # to derive this from (this is the first thing in the codebase to record this
+    # data); ship, then tune against real accumulated history, same "ship then
+    # tune" arc as CASH_VALUE_RATIO_THRESHOLD.
+EARNINGS_WATCH_GUIDANCE_CACHE_HOURS = 20.0  # mirrors NEWS_EVENTS_CACHE_HOURS exactly
+    # -- no version identifier to key off, time-based TTL.
+EARNINGS_WATCH_SUMMARY_MODEL = "sonnet"  # mirrors SEC_FILING_SUMMARY_MODEL/
+                                            # NEWS_EVENTS_SUMMARY_MODEL's
+                                            # already-locked-in tier.

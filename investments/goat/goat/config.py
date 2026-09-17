@@ -147,50 +147,12 @@ GOAT_FINVIZ_INDUSTRIES: list[str] = [
 ]  # 143 industries -- must match Finviz's own count exactly; a mismatch here would
    # silently skew the "Not Covered" gap list in industry-ranking.md.
 
-GOAT_INDUSTRY_ETFS: dict[str, str] = {
-    "ITA": "Aerospace & Defense", "JETS": "Airlines", "CARZ": "Auto Manufacturers",
-    "KBWB": "Banks - Diversified", "KRE": "Banks - Regional", "XBI": "Biotechnology",
-    "XHB": "Building Products & Equipment", "IAI": "Capital Markets",
-    "COPX": "Copper", "ESPO": "Electronic Gaming & Multimedia",
-    "PAVE": "Engineering & Construction", "BJK": "Gambling", "GDX": "Gold",
-    "IHF": "Healthcare Plans", "KIE": "Insurance - Diversified",
-    "FDN": "Internet Content & Information", "IBUY": "Internet Retail",
-    "WOOD": "Lumber & Wood Production", "BOAT": "Marine Shipping",
-    "IHI": "Medical Devices", "XOP": "Oil & Gas E&P",
-    "XES": "Oil & Gas Equipment & Services", "CRAK": "Oil & Gas Refining & Marketing",
-    "PICK": "Other Industrial Metals & Mining", "INDS": "REIT - Industrial",
-    "REM": "REIT - Mortgage", "ITB": "Residential Construction",
-    "EATZ": "Restaurants", "SMH": "Semiconductors", "SIL": "Silver",
-    "IGV": "Software - Application", "TAN": "Solar", "SLX": "Steel",
-    "IYZ": "Telecom Services", "URA": "Uranium",
-    "PHO": "Utilities - Regulated Water", "ICLN": "Utilities - Renewable",
-    "MOO": "Agricultural Inputs", "EVX": "Waste Management",
-}  # 39 of 143 Finviz industries with a real, dedicated, currently-trading ETF --
-   # researched 2026-08-23 (Finviz taxonomy cross-referenced against SPDR/iShares/
-   # VanEck/Invesco/Global X/First Trust/Pacer/AdvisorShares). dict[ticker, label]
-   # shape mirrors GOAT_SECTOR_ETFS -- one ticker per industry only; where an ETF
-   # plausibly fits two industries (e.g. IGV, BJK, IHI) only one label is kept here,
-   # the other stays a gap -- see the plan's "Gotcha" note before adding a ticker
-   # under two entries (silent overwrite, no error). The remaining 104 industries
-   # have no dedicated ETF and are surfaced as a "Not Covered" list in
-   # industry-ranking.md, never silently proxied -- Shaun's confirmed decision,
-   # 2026-08-23. INDS and EVX are lower-liquidity, medium-confidence picks (not
-   # individually web-verified this session) -- if either fails to resolve against
-   # real yfinance data, drop that one row to the gap list rather than guessing a
-   # replacement.
+from mytrader.config import (  # noqa: F401  (re-exported for goat callers, moved to
+    GOAT_INDUSTRY_ETFS,          # mytrader 2026-09 to avoid a circular import from
+    GOAT_INDUSTRY_HISTORY_LOOKBACK_DAYS,  # earnings_watch.py -- goat depends on
+    GOAT_INDUSTRY_RANK_WINDOW_TRADING_DAYS,  # my-trader, not the reverse)
+)
 
-GOAT_INDUSTRY_HISTORY_LOOKBACK_DAYS = 400  # calendar days -- same margin philosophy
-                                              # as GOAT_SECTOR_HISTORY_LOOKBACK_DAYS,
-                                              # comfortably exceeds the 126-trading-
-                                              # day rank window below.
-GOAT_INDUSTRY_RANK_WINDOW_TRADING_DAYS = 126  # ~6 calendar months of trading days --
-                                                 # matches the Finviz screenshots that
-                                                 # prompted this feature. Deliberately
-                                                 # a SEPARATE constant from
-                                                 # GOAT_SECTOR_RANK_WINDOW_TRADING_DAYS
-                                                 # (63/3-month) -- Shaun confirmed
-                                                 # 2026-08-23 these do not need to
-                                                 # match.
 GOAT_INDUSTRY_RANKING_MD_PATH = GOAT_DIR / "industry-ranking.md"
 
 # Intraday 150DMA live-check polling, per investments/goat/HANDOFF.md's

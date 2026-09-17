@@ -5,7 +5,7 @@ Six packages share `investments/briefs-finance/data/investments.db` (VPS-only si
 **my-trader**, **briefs-finance**, **goat**, **fourteen-crash-signals-daily-check**,
 **superinvestor-filings**, **ai-resistant-moat-scanner**.
 
-Last updated 2026-09-10 (ai-resistant-moat-scanner first-run tuning) — update this file
+Last updated 2026-09-17 (Earnings Deterioration Watch added) — update this file
 whenever a tool's schedule, command, or output path changes; it isn't regenerated
 automatically.
 
@@ -28,6 +28,7 @@ Freshest reports worth actually opening most days:
 | [investments/goat/hated-industries-report.md](goat/hated-industries-report.md) | Goat Hated Industries Scan (daily, 23:50 UTC) | [→](#goat-hated-industries-scan) |
 | [investments/superinvestor-filings/superinvestor-filings-report.md](superinvestor-filings/superinvestor-filings-report.md) | Superinvestor Filings Scanner — US EDGAR leg (daily, 02:35 UTC) + India BSE SAST leg (daily, 12:30 UTC) | [→](#superinvestor-filings) |
 | [investments/ai-resistant-moat-scanner/moat-candidates-pending-review.md](ai-resistant-moat-scanner/moat-candidates-pending-review.md) | AI-Resistant Moat Scan (daily, 23:30 UTC) | [→](#ai-moat-scan) |
+| [investments/my-trader/earnings-watch-report.md](my-trader/earnings-watch-report.md) | Earnings Deterioration Watch (daily, 23:55 UTC) | [→](#earnings-watch) |
 
 Staging files (only worth checking when you want to review pending candidates, not a
 daily habit): `investments/my-trader/synced-candidates-pending-review.md`,
@@ -51,6 +52,7 @@ alerts/discoveries as they fire — these files are for batch review, not discov
 | <a id="superinvestor-filings"></a>[↑](#daily-read) **Superinvestor Filings Scanner** — US EDGAR leg | Polls each tracked concentrated-value investor's SEC EDGAR submissions feed (Mohnish Pabrai / Dalal Street first) for fast-disclosure forms (13D/G + Form 3/4/5), parses each genuinely-new filing, tags 5%/10%/below-5% crossings, fires one grouped WhatsApp digest. Advisor notes only — never touches watchlist/holdings. Modelled on Goat Insider Scan; a Form 4 by a >10%-owner fund entity can surface in both, not cross-suppressed. | VPS systemd (`second-brain-superinvestor-edgar.timer`) | Daily, 02:35 UTC (~12:35 AEST) | `investments/superinvestor-filings/superinvestor-filings-report.md` (shared — both legs write it) + DB seen-log + WhatsApp digest |
 | [↑](#daily-read) **Superinvestor Filings Scanner** — India BSE SEBI SAST leg | Polls BSE's "Insider Trading / SAST" feed for Regulation 29(1)/(2) disclosures, name-matches the acquirer against each tracked investor's `india_aliases`, same seen-log + grouped WhatsApp digest as the EDGAR leg. Catches Pabrai's India-only FPI positions (Rain Industries etc.) that never touch EDGAR. NSE is blocked for the VPS IP so this is BSE-only (SAST disclosures are dual-filed). The exact % is in a (usually scanned) PDF — the alert links to it rather than parsing it. | VPS systemd (`second-brain-superinvestor-sast.timer`) | Daily, 12:30 UTC (~22:30 AEST / ~18:00 IST) | same shared report (`superinvestor-filings-report.md` shows the full both-leg seen-log) |
 | <a id="ai-moat-scan"></a>[↑](#daily-read) **AI-Resistant Moat Scan** ([details + tuning ↓](#ai-moat-scan-how)) | Ranks US-listed firms by how AI-durable their embedded-software moat is (Salesforce-style lock-in). Scores 1/5 of a Finviz sector-screen → industry-allow-list universe (rotating by date) + all seed names + all staged names; blended 0–100 (50% quant yfinance margins/Rule-of-40/revenue-durability, 50% an LLM 6-part rubric against the latest 10-K, cached per accession). Stages fresh names ≥ 80 into `moat_pending_candidates`, one WhatsApp + toast "AI-Resistant Moat Alert" on a fresh name, silent on zero. Advisor notes only. | VPS systemd (`second-brain-ai-moat-scan.timer`) | Daily, 23:30 UTC (after the 22:45 Goat Heartbeat) | `moat-scan-report.md` (full ranked table) + `moat-candidates-pending-review.md` (fresh ≥ 80) |
+| <a id="earnings-watch"></a>[↑](#daily-read) **Earnings Deterioration Watch** | Daily early-warning check on **holdings only** (never watchlist) for signs earnings may be deteriorating before the next 10-Q/10-K confirms it — analyst estimate-revision trend (daily-recorded `yfinance` eps_trend/estimate/revisions history), earnings-relevant SEC 8-Ks (Item-code allowlist filter before any document fetch), and a guidance/management-commentary web search. Also wired as an always-on opt-in check into `find --ticker X`. Advisor notes only, never a sell verdict. | VPS systemd (`second-brain-mytrader-earnings-watch.timer`) | Daily, 23:55 UTC (after the 23:50 Goat Hated Industries Scan) | `investments/my-trader/earnings-watch-report.md` |
 
 ## Manual / on-demand only
 
@@ -68,6 +70,7 @@ undoing the 2026-08-23 fix.
 | **my-trader sync-candidates** | Pull new Briefs Finance recs into staging | `-Package my-trader -Command "sync-candidates"` | `investments/my-trader/synced-candidates-pending-review.md` |
 | **my-trader gold-backtest** | Force a fresh gold backtest | `-Package my-trader -Command "gold-backtest"` | `investments/my-trader/gold-outlook.md` |
 | **Cash-Value Scan (on-demand)** | Same US + ASX net-cash screen (net cash ≥ 50% of market cap + positive operating cash flow), right now | `-Package my-trader -Command "cash-value-scan"` | `investments/my-trader/cash-value-report.md` |
+| **Earnings Deterioration Watch (on-demand)** | Same daily holdings-only earnings-deterioration check, right now | `-Package my-trader -Command "scan-earnings-watch"` | `investments/my-trader/earnings-watch-report.md` |
 | **my-trader IBKR sync** | Diff real IB Gateway positions against tracked holdings — fetch is local (IB Gateway only runs here), diff/write happens on the VPS | `uv run --directory investments/my-trader python -m mytrader.main sync-ibkr [--apply]` (this one stays local — see `ibkr-setup-guide.md`) | Terminal report; `--apply` writes DB corrections + stages new positions |
 | **Goat sector scan (on-demand)** | Same sector-rotation ranking, without the 150DMA holdings check | `-Package goat -Command "scan-sectors"` | `investments/goat/sector-ranking.md`, `sector-candidates-pending-review.md` |
 | **Goat industry scan (on-demand)** | Same industry-rotation ranking (39 of 143 Finviz industries with a dedicated ETF, 6-month window), right now | `-Package goat -Command "scan-industries"` | `investments/goat/industry-ranking.md` |

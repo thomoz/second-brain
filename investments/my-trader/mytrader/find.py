@@ -10,11 +10,13 @@ from . import db, engine, snapshot, tickers
 def lookup_ticker(ticker: str, conn: sqlite3.Connection) -> dict:
     """Ephemeral 'what do you think of TICKER' lookup. Persists nothing. Includes the
     principles-fit check (9-framework LLM grading), the news-events search
-    (live-catalyst web search), and the insider-selling check (30d OpenInsider
-    sale scan) — all three Find-only, none run by Monitor."""
+    (live-catalyst web search), the insider-selling check (30d OpenInsider sale
+    scan), and the earnings-deterioration check (estimate trend + earnings-relevant
+    8-Ks + guidance search) — all four Find-only, none run by Monitor."""
     return engine.run_assessment(
         ticker, conn,
         include_principles_fit=True, include_news_events=True, include_insider_selling=True,
+        include_earnings_watch=True,
     )
 
 

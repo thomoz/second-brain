@@ -52,7 +52,7 @@ MACRO_TICKER = "MACRO"
 MACRO_SOURCE_TABLE = "macro"
 
 
-def _reconcile_alerts(
+def reconcile_flag_alerts(
     ticker: str, source_table: str, checks: list, conn: sqlite3.Connection
 ) -> list[dict[str, Any]]:
     new_alerts: list[dict[str, Any]] = []
@@ -78,7 +78,7 @@ def _process_row(
 ) -> tuple[list[dict[str, Any]], Any, dict[str, Any]]:
     """Returns (new_alerts, opportunity_check, result). opportunity_check is the raw
     CheckResult (or None) — the "interesting" verdict deliberately does NOT go
-    through _reconcile_alerts/alert_history (confirmed 2026-07-19, Shaun: "I also
+    through reconcile_flag_alerts/alert_history (confirmed 2026-07-19, Shaun: "I also
     want to know if I should be interested in a holding on the watchlist"): unlike
     risk flags, which should go quiet after the first time so Shaun isn't renotified
     of an unchanged risk, an opportunity signal should keep showing up every run
@@ -89,7 +89,7 @@ def _process_row(
     ticker = row["ticker"]
     bucket = row["bucket"]
     result = engine.run_assessment(ticker, conn)
-    new_alerts = _reconcile_alerts(ticker, source_table, result["checks"], conn)
+    new_alerts = reconcile_flag_alerts(ticker, source_table, result["checks"], conn)
 
     etf_check = next((c for c in result["checks"] if c.name == "etf_mechanics"), None)
     expense_ratio = etf_check.data.get("expense_ratio") if etf_check else None
@@ -162,7 +162,7 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
     except Exception as e:
         print(f"[monitor] error running macro indicators: {e}")
         macro_checks = []
-    new_alerts.extend(_reconcile_alerts(MACRO_TICKER, MACRO_SOURCE_TABLE, macro_checks, conn))
+    new_alerts.extend(reconcile_flag_alerts(MACRO_TICKER, MACRO_SOURCE_TABLE, macro_checks, conn))
     if macro_checks:
         db.upsert_macro_snapshot(conn, macro_checks)
 

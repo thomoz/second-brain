@@ -14,6 +14,7 @@ from .checks import (
     concentration,
     crash_resilience,
     dividend,
+    earnings_deterioration,
     etf_mechanics,
     fx,
     insider_selling,
@@ -98,6 +99,7 @@ def run_assessment(
     include_principles_fit: bool = False,
     include_news_events: bool = False,
     include_insider_selling: bool = False,
+    include_earnings_watch: bool = False,
 ) -> dict[str, Any]:
     """include_principles_fit: opt-in, Find-only (see checks/principles_fit.py) — 9
     extra LLM calls per assessment, so defaulted off. Monitor never passes True, so
@@ -113,7 +115,13 @@ def run_assessment(
     already-held positions needs. Cheap (one OpenInsider scrape, no LLM call)
     unlike the other two opt-ins, but kept Find-only anyway since it's about
     deep-dive due diligence, not ongoing position monitoring. Also added to
-    other_checks so a "flag" here gates opportunity.py the same way."""
+    other_checks so a "flag" here gates opportunity.py the same way.
+
+    include_earnings_watch: opt-in, Find-only (see checks/earnings_deterioration.py)
+    — an LLM+web-search call per assessment, same reasoning as include_news_events.
+    The scheduled, holdings-only counterpart is earnings_watch.run_earnings_watch,
+    its own standalone daily job, never folded into Monitor's own re-check loop.
+    Also added to other_checks so a "flag" here gates opportunity.py the same way."""
     normalized = tickers.normalize(ticker)
     data = market_data.fetch_ticker_data(normalized)
 
@@ -156,6 +164,8 @@ def run_assessment(
         other_checks.append(news_events.check(normalized, conn))
     if include_insider_selling:
         other_checks.append(insider_selling.check(normalized))
+    if include_earnings_watch:
+        other_checks.append(earnings_deterioration.check(normalized, data, conn))
     results = [
         *other_checks,
         opportunity.check(data, other_checks, briefs_score, recent_return_3mo),

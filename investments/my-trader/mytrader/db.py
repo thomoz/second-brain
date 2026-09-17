@@ -149,6 +149,32 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 computed_at             TEXT NOT NULL,
                 UNIQUE(signal, direction, horizon_unit, horizon_value)
             );
+            CREATE TABLE IF NOT EXISTS earnings_estimate_history (
+                id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticker              TEXT NOT NULL,
+                date                TEXT NOT NULL,
+                eps_estimate_avg    REAL,
+                revenue_estimate_avg REAL,
+                revisions_up_30d    INTEGER,
+                revisions_down_30d  INTEGER,
+                recorded_at         TEXT NOT NULL,
+                UNIQUE(ticker, date)
+            );
+            CREATE TABLE IF NOT EXISTS earnings_watch_8k_seen (
+                ticker              TEXT NOT NULL,
+                accession_number    TEXT NOT NULL,
+                items               TEXT NOT NULL,
+                filing_date         TEXT NOT NULL,
+                summary             TEXT,
+                first_seen_at       TEXT NOT NULL,
+                PRIMARY KEY (ticker, accession_number)
+            );
+            CREATE TABLE IF NOT EXISTS earnings_guidance_cache (
+                ticker              TEXT PRIMARY KEY,
+                verdict             TEXT NOT NULL,
+                detail              TEXT NOT NULL,
+                fetched_at          TEXT NOT NULL
+            );
         """)
     _ensure_watchlist_return_columns(conn)
 
@@ -575,6 +601,81 @@ def get_portfolio_value_history(conn: sqlite3.Connection) -> list[sqlite3.Row]:
         """SELECT date, SUM(mkt_value) AS total_mkt_value
            FROM holdings_price_history GROUP BY date ORDER BY date"""
     ).fetchall()
+
+
+def record_estimate_snapshot(
+    conn: sqlite3.Connection, *, ticker: str, date: str,
+    eps_estimate_avg: float | None, revenue_estimate_avg: float | None,
+    revisions_up_30d: int | None, revisions_down_30d: int | None,
+) -> None:
+    """One row per (ticker, date) -- INSERT OR REPLACE so re-running the daily
+    Earnings Watch job multiple times same-day just overwrites with the latest
+    reading, mirroring record_price_snapshot's exact idiom."""
+    with conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO earnings_estimate_history
+               (ticker, date, eps_estimate_avg, revenue_estimate_avg,
+                revisions_up_30d, revisions_down_30d, recorded_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (ticker, date, eps_estimate_avg, revenue_estimate_avg,
+             revisions_up_30d, revisions_down_30d, _now()),
+        )
+
+
+def get_estimate_history(
+    conn: sqlite3.Connection, ticker: str, since: str | None = None
+) -> list[sqlite3.Row]:
+    if since is not None:
+        return conn.execute(
+            """SELECT * FROM earnings_estimate_history WHERE ticker = ? AND date >= ?
+               ORDER BY date""",
+            (ticker, since),
+        ).fetchall()
+    return conn.execute(
+        "SELECT * FROM earnings_estimate_history WHERE ticker = ? ORDER BY date", (ticker,)
+    ).fetchall()
+
+
+def get_cached_earnings_8k(
+    conn: sqlite3.Connection, ticker: str, accession_number: str
+) -> sqlite3.Row | None:
+    return conn.execute(
+        """SELECT * FROM earnings_watch_8k_seen WHERE ticker = ? AND accession_number = ?""",
+        (ticker, accession_number),
+    ).fetchone()
+
+
+def upsert_earnings_8k_seen(
+    conn: sqlite3.Connection, *, ticker: str, accession_number: str,
+    items: str, filing_date: str, summary: str | None,
+) -> None:
+    with conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO earnings_watch_8k_seen
+               (ticker, accession_number, items, filing_date, summary, first_seen_at)
+               VALUES (?, ?, ?, ?, ?, COALESCE(
+                   (SELECT first_seen_at FROM earnings_watch_8k_seen
+                    WHERE ticker = ? AND accession_number = ?), ?))""",
+            (ticker, accession_number, items, filing_date, summary,
+             ticker, accession_number, _now()),
+        )
+
+
+def get_cached_earnings_guidance(conn: sqlite3.Connection, ticker: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT * FROM earnings_guidance_cache WHERE ticker = ?", (ticker,)
+    ).fetchone()
+
+
+def upsert_earnings_guidance_cache(
+    conn: sqlite3.Connection, *, ticker: str, verdict: str, detail: str,
+) -> None:
+    with conn:
+        conn.execute(
+            """INSERT OR REPLACE INTO earnings_guidance_cache (ticker, verdict, detail, fetched_at)
+               VALUES (?, ?, ?, ?)""",
+            (ticker, verdict, detail, _now()),
+        )
 
 
 def touch_checked(

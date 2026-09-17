@@ -183,6 +183,38 @@ def _no_real_asx200_fetch(monkeypatch):
     restores the real function for its own direct tests (test_market_data.py:16 idiom)."""
     monkeypatch.setattr("mytrader.asx200_universe.fetch_asx200_constituents", lambda: None)
 
+@pytest.fixture(autouse=True)
+def _no_real_earnings_estimate_fetch(monkeypatch):
+    """earnings_watch.run_earnings_watch()/checks/earnings_deterioration.py's
+    compute_estimate_trend path can call earnings_watch.fetch_estimate_snapshot(),
+    a real yfinance network call -- global/autouse for the same reason as the
+    fixtures above."""
+    monkeypatch.setattr("mytrader.earnings_watch.fetch_estimate_snapshot", lambda ticker: None)
+
+
+@pytest.fixture(autouse=True)
+def _no_real_earnings_8k_fetch(monkeypatch):
+    """earnings_watch.run_earnings_watch()/checks/earnings_deterioration.check()
+    call earnings_watch.fetch_new_earnings_8ks(), which does real SEC EDGAR HTTP +
+    LLM calls when conn is not None -- global/autouse for the same reason as
+    _no_real_sec_filing_fetch above."""
+    monkeypatch.setattr(
+        "mytrader.earnings_watch.fetch_new_earnings_8ks",
+        lambda ticker, conn, *, since: None,
+    )
+
+
+@pytest.fixture(autouse=True)
+def _no_real_earnings_guidance_search(monkeypatch):
+    """earnings_watch.run_earnings_watch()/checks/earnings_deterioration.check()
+    call news_search.get_earnings_guidance_for_ticker(), a real sdk_compat
+    WebSearch+LLM call when conn is not None -- global/autouse for the same reason
+    as _no_real_news_events_search above."""
+    monkeypatch.setattr(
+        "mytrader.news_search.get_earnings_guidance_for_ticker", lambda ticker, conn: None
+    )
+
+
 # NOTE: deliberately NO global stub for market_data.fetch_cash_flow_statement -- the
 # scan path only reaches it from compute_cash_value_metrics when a ticker's .info
 # lacks operatingCashflow/freeCashflow, which the run_scan tests never construct, and
