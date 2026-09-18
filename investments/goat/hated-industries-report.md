@@ -10,10 +10,10 @@ Hated since: 2026-09-17
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -26.3% | -22.7% | -27.1pp | -35.7pp | -39.6% |
+| -20.7% | -18.1% | -23.9pp | -34.0pp | -37.3% |
 
-**Narrative:** The dominant negative narrative is policy and subsidy uncertainty: expiring/curtailed U.S. solar tax credits, FEOC supply-chain eligibility rules, tariffs/import restrictions, and White House executive-order risk have made investors discount solar earnings despite strong installation demand. A secondary thread is competitive/supply-chain pressure from new domestic manufacturing capacity, including Tesla/SpaceX-related fears for module makers.
-**Systemic read:** industry-wide -- The evidence points to a broad selloff across residential solar, utility-scale suppliers, trackers, module makers, and international suppliers, not a single scandal or one-name drag. The impact is uneven by business model, with some domestic manufacturers potentially benefiting, but the core uncertainty applies across much of the TAN exposure.
+**Narrative:** The dominant negative narrative is policy and financing uncertainty: U.S. solar subsidies/tax credits are being phased down or tightened, tariff/FEOC rules remain unsettled, and high rates continue to pressure financed residential/project demand. A secondary concern is competitive/oversupply pressure in modules, including fears of new U.S. capacity from Tesla/SpaceX and global Chinese-driven supply glut.
+**Systemic read:** industry-wide -- The selloff is described across a broad cross-section of solar equipment, module, inverter, installer, and developer names, not as a single scandal or one-company failure. The impact is not uniform by segment, with residential solar hit hardest and utility-scale/manufacturing names facing different tariff/credit/capacity risks, but the market narrative is sector-wide rather than concentrated in one or two constituents.
 
 **Fundamentals-divergence read:** fundamentals still growing despite the price decline
 
@@ -22,32 +22,10 @@ Representative constituents (read-only — not staged as candidates):
 | Ticker | Name | Revenue growth | Earnings growth | Read |
 |--------|------|-----------------|-------------------|------|
 | FSLR | First Solar, Inc. | -3.7% | +23.3% | growing |
-| NXT | Nextpower, Inc. | +8.2% | +2.9% | growing |
-| ENLT.TA | Enlight Renewable Energy Ltd | +43.0% | +1900.2% | growing |
+| NXT | Nextpower Inc. | +8.2% | +2.9% | growing |
+| ENLT | Enlight Renewable Energy Ltd | +43.0% | +1900.2% | growing |
 | ENPH | Enphase Energy, Inc. | -19.6% | -3.5% | declining |
 | HASI | HA Sustainable Infrastructure Capital, Inc. | +804.4% | +24.5% | growing |
-
-## Utilities - Renewable (ICLN)
-
-Hated since: 2026-09-17
-
-| 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
-|------------|------------|--------------|--------------|---------------------|
-| -16.8% | -7.4% | -17.6pp | -20.4pp | -26.9% |
-
-**Narrative:** The dominant negative narrative is that renewable/clean-energy equities remain exposed to a hostile cost-of-capital and policy backdrop: high/rising rates make project financing harder, while subsidy/tax-credit uncertainty and China-led clean-investment slowdown/solar overcapacity pressure margins and investor confidence.
-**Systemic read:** industry-wide -- This looks more like a broad sector derating than one constituent scandal: ICLN's largest weights span fuel cells, solar modules, hydro utilities, solar trackers, and inverters, and recent weakness is tied to financing, policy, and investment-cycle concerns that affect many clean-energy business models. The impact is not literally uniform, since hydro utilities and AI-power-exposed names are less exposed than solar equipment makers, but the evidence does not point to one or two names dragging the ETF alone.
-
-**Fundamentals-divergence read:** fundamentals still growing despite the price decline
-
-Representative constituents (read-only — not staged as candidates):
-
-| Ticker | Name | Revenue growth | Earnings growth | Read |
-|--------|------|-----------------|-------------------|------|
-| BE | Bloom Energy Class A | +165.5% | — | growing |
-| FSLR | First Solar | -3.7% | +23.3% | growing |
-| NXT | Nextpower Inc | +8.2% | +2.9% | growing |
-| ENPH | Enphase Energy | -19.6% | -3.5% | declining |
 
 
 Last auto-generated: 2026-09-17.
