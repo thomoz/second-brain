@@ -224,7 +224,10 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
                     signal_detail=signal_detail, source="goat_dma_breakout_scan",
                     company_name=c["company"], exchange=exchange_name,
                 )
-                new_candidates.append({"ticker": ticker, "sector_label": label, "detail": signal_detail})
+                new_candidates.append({
+                    "ticker": ticker, "sector_label": label, "detail": signal_detail,
+                    "company": c["company"],
+                })
             except Exception as e:
                 print(f"[goat-dma-breakout-scan] error checking {ticker}: {e}")
 

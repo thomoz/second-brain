@@ -202,7 +202,11 @@ def maybe_notify(
             for a in result["new_alerts"]
         ]
     if candidates:
-        lines += [f"- {c['ticker']} ({c['sector_label']}): {c['detail']}" for c in candidates]
+        lines += [
+            f"- {c['ticker']}" + (f" ({c['company']})" if c.get("company") else "")
+            + f" ({c['sector_label']}): {c['detail']}"
+            for c in candidates
+        ]
     send_whatsapp_notification("\n".join(lines))
 
 
