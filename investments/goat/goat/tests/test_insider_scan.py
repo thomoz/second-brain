@@ -494,13 +494,19 @@ def test_maybe_notify_price_flags_sends_whatsapp_with_ticker_and_note(monkeypatc
     monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
 
     insider_scan.maybe_notify_price_flags(
-        [{"ticker": "ACME", "price_note": "+25.0% since trade \U0001F6A9 confirms signal"}]
+        [{
+            "ticker": "ACME", "price_note": "+25.0% since trade \U0001F6A9 confirms signal",
+            "trade_date": "2026-08-20", "days_since": 18, "company_name": "Acme Corporation",
+        }]
     )
     assert len(toast_calls) == 1
     assert len(whatsapp_calls) == 1
     (message,), _kwargs = whatsapp_calls[0]
     assert "ACME" in message
+    assert "Acme Corporation" in message
     assert "+25.0% since trade" in message
+    assert "18d ago" in message
+    assert "2026-08-20" in message
 
 
 def test_threshold_for_days_boundaries():

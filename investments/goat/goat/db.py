@@ -148,6 +148,16 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
             conn.execute("ALTER TABLE goat_pending_candidates ADD COLUMN exchange TEXT")
         except sqlite3.OperationalError:
             pass
+    # Migration for DBs created before company_name existed on
+    # goat_insider_filings_seen (added 2026-09-19 -- ticker alone doesn't tell
+    # Shaun which company a filing was on, and some tickers are shared by very
+    # different companies). NULL for filings seen before this existed, same
+    # nullability posture as title.
+    with conn:
+        try:
+            conn.execute("ALTER TABLE goat_insider_filings_seen ADD COLUMN company_name TEXT")
+        except sqlite3.OperationalError:
+            pass
 
 
 def get_open_goat_alert(
@@ -261,6 +271,7 @@ def insert_goat_insider_filing_seen(
     conn: sqlite3.Connection, *, dedup_key: str, ticker: str, filing_date: str,
     trade_date: str, insider_name: str, trade_type: str, value: float, kind: str,
     pct_owned_change: float | None = None, title: str = "",
+    company_name: str | None = None,
 ) -> bool:
     """Returns True if this filing was newly seen (inserted), False if it's a
     duplicate of a filing already alerted/staged in a prior run. Every sale
@@ -270,9 +281,9 @@ def insert_goat_insider_filing_seen(
     with conn:
         cur = conn.execute(
             """INSERT OR IGNORE INTO goat_insider_filings_seen
-               (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, seen_at, pct_owned_change, title)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, _now(), pct_owned_change, title),
+               (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, seen_at, pct_owned_change, title, company_name)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, _now(), pct_owned_change, title, company_name),
         )
         return cur.rowcount == 1
 

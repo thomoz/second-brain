@@ -122,7 +122,7 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
             filing_date=row.get("filing_date", ""), trade_date=row.get("trade_date", ""),
             insider_name=row.get("insider_name", ""), trade_type=row["trade_type_code"],
             value=row["value"], kind="holdings_watch", pct_owned_change=row.get("pct_owned_change"),
-            title=row.get("title", ""),
+            title=row.get("title", ""), company_name=row.get("company_name"),
         )
         if not newly_seen:
             continue
@@ -159,7 +159,9 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
             f"{action} ${row['value']:,.0f} of {row['ticker']}{_pct_owned_change_clause(row)} "
             f"on {row.get('trade_date', 'unknown date')}{reason_clause}"
         )
-        new_alerts.append({"ticker": row["ticker"], "message": detail})
+        new_alerts.append({
+            "ticker": row["ticker"], "message": detail, "company": row.get("company_name"),
+        })
 
     return {
         "checked_holdings": len(held_tickers),
@@ -198,6 +200,7 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
             filing_date=row.get("filing_date", ""), trade_date=row.get("trade_date", ""),
             insider_name=row.get("insider_name", ""), trade_type=row["trade_type_code"],
             value=row["value"], kind="discovery", title=row.get("title", ""),
+            company_name=row.get("company_name"),
         )
         if not newly_seen:
             continue
@@ -210,9 +213,12 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         db.insert_goat_pending_candidate(
             conn, ticker=ticker, sector_label="Insider Buy",
             signal_detail=signal_detail, source="goat_insider_discovery",
-            trade_date=row.get("trade_date"),
+            trade_date=row.get("trade_date"), company_name=row.get("company_name"),
         )
-        new_candidates.append({"ticker": ticker, "sector_label": "Insider Buy", "detail": signal_detail})
+        new_candidates.append({
+            "ticker": ticker, "sector_label": "Insider Buy", "detail": signal_detail,
+            "company": row.get("company_name"),
+        })
 
     return {
         "new_candidates": new_candidates,
@@ -412,6 +418,7 @@ def compute_discovery_price_performance(
             continue
         row["price_note"] = _price_note(move["pct_change"], move["days_since"], "P")
         row["pct_change"] = move["pct_change"]
+        row["days_since"] = move["days_since"]
         flagged = _confirms_signal("P", move["pct_change"], move["days_since"])
         row["newly_flagged"] = flagged and not row.get("price_flag_notified")
         if row["newly_flagged"]:
@@ -437,6 +444,7 @@ def compute_holdings_watch_price_performance(
             continue
         row["price_note"] = _price_note(move["pct_change"], move["days_since"], trade_type)
         row["pct_change"] = move["pct_change"]
+        row["days_since"] = move["days_since"]
         flagged = _confirms_signal(trade_type, move["pct_change"], move["days_since"])
         row["newly_flagged"] = flagged and not row.get("price_flag_notified")
         if row["newly_flagged"]:
@@ -463,7 +471,11 @@ def maybe_notify_price_flags(newly_flagged: list[dict[str, Any]]) -> None:
     send_toast_notification("Goat Insider Scan", summary + " -- check investments/goat/insider-scan-report.md")
 
     lines = [f"Goat Insider Scan: {summary}."] + [
-        f"- {row['ticker']}: {row['price_note']}" for row in newly_flagged
+        f"- {row['ticker']}" + (f" ({row['company_name']})" if row.get("company_name") else "")
+        + f": {row['price_note']} (traded "
+        + (f"{row['days_since']}d ago, " if row.get("days_since") is not None else "")
+        + f"{row.get('trade_date', 'date unknown')})"
+        for row in newly_flagged
     ]
     send_whatsapp_notification("\n".join(lines))
 

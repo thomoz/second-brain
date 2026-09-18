@@ -198,7 +198,8 @@ def maybe_notify(
     lines = [f"Goat Monitor: {summary}."]
     if n_alerts:
         lines += [
-            f"- {a['ticker']}" + (f" ({a['source_table']})" if a.get("source_table") else "") + f": {a['message']}"
+            f"- {a['ticker']}" + (f" ({a['company']})" if a.get("company") else "")
+            + (f" ({a['source_table']})" if a.get("source_table") else "") + f": {a['message']}"
             for a in result["new_alerts"]
         ]
     if candidates:
