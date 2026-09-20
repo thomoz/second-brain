@@ -12,8 +12,8 @@ Hated since: 2026-09-17
 |------------|------------|--------------|--------------|---------------------|
 | -24.6% | -19.8% | -26.9pp | -36.2pp | -38.2% |
 
-**Narrative:** The dominant negative narrative is federal policy whiplash: expiring/uncertain solar tax-credit eligibility, FEOC rules, tariffs/import price floors, and new equipment-security restrictions are making solar earnings and project finance hard to model despite strong installation demand. A secondary pressure is fear of new domestic manufacturing capacity, including Tesla/SpaceX, increasing competition for module makers.
-**Systemic read:** industry-wide -- The evidence points to a broad sector overhang rather than one scandal or one constituent dragging TAN: multiple solar suppliers, residential names, panel makers, and balance-of-system companies have sold off while analysts and executives cite policy uncertainty across the supply chain. It is not perfectly uniform because some actions may help inverter makers or domestic manufacturers, but the market narrative is being applied industry-wide enough to treat it as systemic.
+**Narrative:** Solar/TAN underperformance is being driven mainly by policy and financing uncertainty: expiring or narrowed U.S. clean-energy tax credits, FEOC/tariff rules, import price floors, and elevated rates raising project cost of capital. A secondary pressure is competitive/oversupply fear in modules, including concern about large new domestic capacity from Tesla/SpaceX.
+**Systemic read:** industry-wide -- The evidence points to a broad sector de-rating across equipment makers, residential solar, developers and financiers, not just one scandal at a single constituent; several major TAN names have fallen sharply despite mixed or decent operating results. The impact is not perfectly uniform, but the dominant fears affect demand, margins, supply-chain eligibility, and financing across much of the solar value chain.
 
 **Fundamentals-divergence read:** fundamentals still growing despite the price decline
 
@@ -23,7 +23,6 @@ Representative constituents (read-only — not staged as candidates):
 |--------|------|-----------------|-------------------|------|
 | FSLR | First Solar, Inc. | -3.7% | +23.3% | growing |
 | NXT | Nextpower Inc. | +8.2% | +2.9% | growing |
-| ENLT | Enlight Renewable Energy Ltd. | +43.0% | +1900.2% | growing |
 | ENPH | Enphase Energy, Inc. | -19.6% | -3.5% | declining |
 | HASI | HA Sustainable Infrastructure Capital, Inc. | +804.4% | +24.5% | growing |
 
@@ -35,8 +34,8 @@ Hated since: 2026-09-19
 |------------|------------|--------------|--------------|---------------------|
 | -12.8% | -13.7% | -15.1pp | -30.1pp | -32.6% |
 
-**Narrative:** The dominant negative narrative is a sector-wide unwind of the AI/data-center nuclear power trade, compounded by uranium equity skepticism despite resilient uranium term prices: investors are questioning valuation, financing needs, execution risk, and how quickly higher contract prices translate into earnings. Recent selling is being framed as rotation out of nuclear/uranium names rather than a broad market move.
-**Systemic read:** industry-wide -- The evidence points to broad theme-level pressure across miners, developers, reactor/SMR names, and enrichers, not a single scandal or isolated constituent issue; Cameco's large weight can amplify URA moves, but peers with different business models have also sold off together. The narrative does not apply identically to every holding, especially physical uranium exposure, but the market is currently treating the group as one high-beta nuclear/uranium trade.
+**Narrative:** The dominant negative narrative is that the nuclear/uranium equity trade is de-rating after a big AI-data-center-driven enthusiasm cycle: investors are questioning SMR developer timelines, customer commitments, cash burn, dilution risk, and rich valuations, while broader risk-off/high-yield pressure is amplifying the selloff. This is not primarily a uranium commodity glut story; recent reports still describe uranium pricing and long-term contracting fundamentals as firm.
+**Systemic read:** concentrated in one/two names -- The bearish evidence is concentrated in advanced nuclear/SMR-linked names such as NuScale, Oklo, X-Energy and Holtec IPO sentiment, while URA’s largest exposures include Cameco, Sprott Physical Uranium Trust, NexGen and Uranium Energy, whose fundamentals are more tied to uranium supply-demand and contracting. Because the ETF mixes uranium miners/physical uranium with high-beta reactor developers, the market appears to be generalizing SMR financing/valuation fears across the broader basket rather than applying one uniform industry-wide impairment.
 
 **Fundamentals-divergence read:** insufficient constituent data to read a divergence signal
 
@@ -48,8 +47,8 @@ Hated since: 2026-09-18
 |------------|------------|--------------|--------------|---------------------|
 | -16.8% | -6.1% | -19.0pp | -22.4pp | -25.9% |
 
-**Narrative:** The dominant live bear story is policy and cost-of-capital uncertainty: expiring/altered U.S. clean-energy tax credits, tariff/FEOC rules, and higher rates are making investors distrust renewable project economics despite solid underlying electricity demand.
-**Systemic read:** industry-wide -- The evidence points to a broad sector overhang across solar developers, equipment makers, and capital-intensive renewables rather than a single scandal dragging the ETF; however, the pressure is uneven, with U.S. solar names hit harder than hydro/utilities or fuel-cell exposure.
+**Narrative:** The dominant current negative narrative is policy and financing uncertainty: investors are marking down clean-energy/renewables because expiring or changeable tax-credit rules, FEOC supply-chain restrictions, and higher rates threaten project economics and visibility despite still-strong electricity demand. A secondary but visible drag is Bloom Energy-specific short-seller/supply-chain controversy, which matters because BE is ICLN's largest holding.
+**Systemic read:** unclear whether industry-wide or concentrated -- The evidence points to a broad overhang across solar suppliers and capital-intensive renewables, not merely one scandal, but it does not apply uniformly across ICLN's mix of fuel cells, solar manufacturers, hydro/electric utilities, wind equipment, and global issuers. BE's company-specific issue is important but not sufficient to explain the whole ETF move by itself.
 
 **Fundamentals-divergence read:** fundamentals still growing despite the price decline
 
@@ -57,10 +56,10 @@ Representative constituents (read-only — not staged as candidates):
 
 | Ticker | Name | Revenue growth | Earnings growth | Read |
 |--------|------|-----------------|-------------------|------|
-| BE | Bloom Energy Corporation | +165.5% | — | growing |
-| FSLR | First Solar, Inc. | -3.7% | +23.3% | growing |
-| NXT | Nextpower Inc. | +8.2% | +2.9% | growing |
-| ENPH | Enphase Energy, Inc. | -19.6% | -3.5% | declining |
+| BE | Bloom Energy Class A | +165.5% | — | growing |
+| FSLR | First Solar | -3.7% | +23.3% | growing |
+| NXT | Nextpower Inc | +8.2% | +2.9% | growing |
+| ENPH | Enphase Energy | -19.6% | -3.5% | declining |
 
 
 Last auto-generated: 2026-09-20.
