@@ -201,16 +201,21 @@ GOAT_US_MARKET_CLOSE = (16, 0)   # 4:00pm US Eastern
 # no trailing-year self-percentile anchor anywhere.
 GOAT_HEARTBEAT_HISTORY_LOOKBACK_DAYS = 500  # calendar days (~343 trading days from
     # yfinance). The check itself only strictly needs GOAT_HEARTBEAT_MIN_DURATION_DAYS
-    # (63) trading days since the 2026-09-20 redesigns dropped both the moving-average
-    # gates and the breakout requirement -- 500 calendar days is generous headroom,
-    # kept unchanged rather than shrunk, same margin philosophy as
-    # GOLD_MA_HISTORY_LOOKBACK_DAYS (500 for a 200-day MA in mytrader/config.py).
-GOAT_HEARTBEAT_MIN_DURATION_DAYS = 63  # ~3 calendar months of trading days -- the length
-    # of the tight-base ("heartbeat") measurement window, the closes ending the day
-    # before the most recent 50-day-MA cross. Matches the webinar's own "3 months
-    # minimum" and this codebase's existing GOAT_SECTOR_RANK_WINDOW_TRADING_DAYS
-    # precedent for that exact figure. (Same value as the old pre-cross squeeze window
-    # -- clearer meaning.)
+    # (126) trading days -- 500 calendar days is generous headroom, kept unchanged
+    # rather than shrunk, same margin philosophy as GOLD_MA_HISTORY_LOOKBACK_DAYS
+    # (500 for a 200-day MA in mytrader/config.py).
+GOAT_HEARTBEAT_MIN_DURATION_DAYS = 126  # ~6 calendar months of trading days -- the
+    # length of the tight-base ("heartbeat") measurement window. Raised from 63
+    # (~3 months, the webinar's own stated minimum) to 126 on 2026-09-20 after a
+    # real false positive: BAC and CAH each rallied hard then reversed sharply
+    # within a 3-month window, and because the range/smoothness metrics measure
+    # dispersion from the window's OWN mean, that whole round-trip still read as a
+    # tight, 100%-smooth base (12-13% range) at 63 days. Re-run at 126 days, both
+    # tickers failed decisively (30%+ range, well under 80% smoothness) -- a
+    # longer window can't be fooled by a rally-and-reversal that only spans half
+    # of it. Confirmed with Shaun 2026-09-20 ("I think 6 months ... is far
+    # enough"). v1/tunable -- not a literature-sourced number, just long enough
+    # to have caught this specific failure mode.
 
 # Tight-base ("heartbeat") consolidation leg -- redesigned 2026-08-26 per
 # .agent/plans/goat-heartbeat-quiet-redesign.md, then redesigned twice more on
@@ -240,6 +245,36 @@ GOAT_HEARTBEAT_BASE_SMOOTHNESS_MIN_FRACTION = 0.8  # >= this fraction of base-wi
     # GOAT_HEARTBEAT_SQUEEZE_MIN_FRACTION (same 0.8 value) -- the webinar describes
     # "smooth up-down-up-down", not a dead-flat line, so a strict 100%-of-days test
     # would misfire on ordinary noise. v1/tunable.
+GOAT_HEARTBEAT_BREAKDOWN_RECENT_DAYS = 10  # added 2026-09-20, Shaun: reject a
+    # candidate if the current price has fallen below the heartbeat range. Compares
+    # the low of the most recent N closes against the low of the rest (older part)
+    # of the base -- deliberately not "is today the single lowest close in the
+    # window": in a genuinely quiet, choppy base some day is always going to be the
+    # low by chance, and that alone shouldn't disqualify it. Own constant, not a
+    # reuse of GOAT_SECTOR_CROSS_RECENCY_DAYS (same value, unrelated meaning --
+    # that one is about a 50DMA cross's freshness for the sector scanner). v1/tunable.
+
+# Swing-rhythm gate -- added 2026-09-20 after Shaun shared real "great heartbeat"
+# examples (XLE, SMH, XBI charts). The common thread across all three wasn't just
+# a narrow range -- it was several distinct, repeated up-down swings within that
+# range over many months, an actual rhythm (like an EKG trace), not a single
+# smooth drift that happens to stay tight. See heartbeat.py's _count_swings
+# (ZigZag-style: a swing confirms only once price reverses from its running
+# extreme by >= the threshold below -- deliberately not shape-matching, no
+# grading on how round/even/symmetric a swing looks, so real-world messy charts
+# aren't penalized for not looking like a textbook example).
+GOAT_HEARTBEAT_SWING_MIN_REVERSAL_PCT = 3.0  # minimum % reversal from the running
+    # extreme to confirm a new swing. Smaller moves are noise, absorbed into the
+    # current swing rather than counted as their own. Chosen so several swings of
+    # this size comfortably fit inside the 15% GOAT_HEARTBEAT_BASE_RANGE_MAX_PCT
+    # ceiling (swings overlap/bounce within the same envelope, they don't each
+    # need to span the full range) while staying above typical single-day noise
+    # for a liquid large-cap. v1/tunable, not literature-sourced.
+GOAT_HEARTBEAT_MIN_SWINGS = 3  # minimum confirmed swings required within the base.
+    # XLE's example showed ~4-5 visible up-down cycles over ~6 months; set lower
+    # (3) deliberately so a genuinely good but less-active base isn't rejected for
+    # having "only" 3-4 cycles instead of 5 -- a floor proving real rhythm exists,
+    # not a ceiling matching the best example seen. v1/tunable.
 
 # Fundamentals survival context, per HANDOFF.md's debt -> cash runway -> margins ->
 # revenue growth -> cash generation priority order. Informational on every candidate,
