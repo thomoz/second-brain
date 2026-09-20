@@ -137,4 +137,12 @@ Major AI-boom names with real moats (chip/foundry monopoly, hyperscaler platform
 | SNDK | SanDisk | stock | ai_postcrash | — | +3663% | Major U.S.-listed NAND flash provider for AI long-term memory with sold-out enterprise inventory, rising margins, strong data center revenue growth, and a hard-to-replicate Kioxia manufacturing partnership. |
 | TSM | Taiwan Semiconductor Manufacturing Company Limited | stock | ai_postcrash | 2.93% | +1713% | Named as one of the companies powering AI that has been crushing it, fitting the report's AI chip supply-chain thesis. |
 
+## Stocks and ETFs to Avoid (Complex Tax Forms)
+
+Issue a K-1 or other non-standard tax form (commodity-pool ETFs, MLPs) instead of a normal 1099 — a standing do-not-buy list, not candidates under reconsideration.
+
+| Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |
+|--------|------|------|--------|----------|------------|--------|
+| CORN | Teucrium Corn Fund | etf | tax_complex | — | — | Commodity pool structured as a trust - issues a K-1 not a 1099 |
+
 Last auto-generated: 2026-09-20.
