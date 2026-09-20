@@ -68,6 +68,13 @@ def test_none_data_returns_safe_defaults():
     assert "no fundamentals data available" in result["summary"]
 
 
+def test_etf_quote_type_returns_not_applicable_summary():
+    data = _data({"quoteType": "ETF"})
+    result = fundamentals_context.compute_survival_context("TEST", data)
+    assert result["summary"] == "not applicable — fund"
+    assert result["insolvency_risk"] is False
+
+
 def test_falls_back_to_balance_sheet_financials_when_debt_to_equity_missing(monkeypatch):
     data = _data({"totalCash": 50_000_000, "freeCashflow": -100_000_000, "operatingCashflow": -80_000_000})
     monkeypatch.setattr(

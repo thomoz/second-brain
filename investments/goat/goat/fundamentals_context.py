@@ -32,6 +32,15 @@ def compute_survival_context(ticker: str, data) -> dict:
 
     info = data.info
 
+    if info.get("quoteType") == "ETF":
+        return {
+            "debt_to_equity": None, "cash_runway_years": None,
+            "gross_margin": None, "operating_margin": None,
+            "revenue_growth": None, "cash_generating": None,
+            "insolvency_risk": False,
+            "summary": "not applicable — fund",
+        }
+
     debt_to_equity = info.get("debtToEquity")
     if debt_to_equity is None:
         computed = market_data.fetch_balance_sheet_financials(data.ticker)
