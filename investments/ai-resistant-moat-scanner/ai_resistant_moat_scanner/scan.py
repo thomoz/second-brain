@@ -111,6 +111,7 @@ def run_scan(conn: sqlite3.Connection) -> dict[str, Any]:
                     )
                     new_candidates.append({
                         "ticker": ticker,
+                        "company": row["company"],
                         "industry": row["industry"],
                         "moat_score": row["moat_score"],
                         "thesis": row["thesis"],

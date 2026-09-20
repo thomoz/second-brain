@@ -1,6 +1,6 @@
 ## Where we are up to:
 
-execute: O:\AI\Dynamous\Courses\second-brain-workshop\.agent\plans\reflection-tighten-and-memory-cleanup.md to help keep bloat down
+execute: O:\AI\Dynamous\Courses\second-brain-workshop\.agent\plans\reflection-tighten-and-memory-cleanup.md to help keep bloat d
 
 From Rahul:
 

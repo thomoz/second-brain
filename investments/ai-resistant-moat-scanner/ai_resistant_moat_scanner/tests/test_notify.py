@@ -26,10 +26,20 @@ def test_maybe_notify_noop_on_empty(_fake_notifications):
 
 def test_maybe_notify_sends_titled_alert(_fake_notifications):
     notify.maybe_notify([
-        {"ticker": "NOW", "industry": "Software - Application", "moat_score": 88.4,
-         "thesis": "Workflow system of record."},
+        {"ticker": "NOW", "company": "ServiceNow, Inc.", "industry": "Software - Application",
+         "moat_score": 88.4, "thesis": "Workflow system of record."},
     ])
     assert _fake_notifications["toast"][0][0] == "AI-Resistant Moat Alert"
     body = _fake_notifications["whatsapp"][0]
     assert body.startswith("AI-Resistant Moat Alert:")
     assert "NOW" in body and "88.4" in body
+    assert "ServiceNow, Inc." in body
+
+
+def test_maybe_notify_falls_back_to_ticker_only_without_company(_fake_notifications):
+    notify.maybe_notify([
+        {"ticker": "NOW", "industry": "Software - Application", "moat_score": 88.4,
+         "thesis": "Workflow system of record."},
+    ])
+    body = _fake_notifications["whatsapp"][0]
+    assert "NOW (Software" in body

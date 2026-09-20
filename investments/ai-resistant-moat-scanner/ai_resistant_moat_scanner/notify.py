@@ -35,5 +35,7 @@ def maybe_notify(new_candidates: list[dict[str, Any]]) -> None:
     for c in new_candidates:
         moat = c.get("moat_score")
         moat_str = f" moat {moat:.1f}" if isinstance(moat, (int, float)) else ""
-        lines.append(f"- {c['ticker']} ({c.get('industry', '')}){moat_str}: {c.get('thesis', '')}")
+        company = c.get("company") or ""
+        name_str = f"{c['ticker']} — {company}" if company else c["ticker"]
+        lines.append(f"- {name_str} ({c.get('industry', '')}){moat_str}: {c.get('thesis', '')}")
     send_whatsapp_notification("\n".join(lines))
