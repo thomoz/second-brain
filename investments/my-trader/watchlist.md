@@ -10,6 +10,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
+| CV | unassigned | EPS miss + margin pressure Q2 2026, H2 guided higher - monitor next print |
 | KAR.AX | unassigned | Keep an eye on (Shaun request 2026-09-16) |
 | MTA | unassigned | Not yet discussed -- flagged to watch. |
 | NFLX | unassigned | Keep an eye on (Shaun request 2026-09-01) |
@@ -29,6 +30,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | COUR | Coursera Inc | stock | unassigned | — | — | Added from Cash Value Report (2026-08-26) |
 | CPRT | Copart Inc | stock | 1 | — | — | Vehicle salvage/insurance auction near-duopoly (land-bank moat). Fair-price-today case, not a crash-timing trade: PE 17.4, clean balance sheet (D/E 1.1), ROE 17.6%, opportunity check fired 2 signals on a -15.8% 3mo dip. Crash-resilience check shows it amplifies broad-market crashes ~1.3x (COVID -43.8% vs S&P -33.9%, 2022 -35.4% vs S&P -25.4%) -- moat protects market position, not stock price, so doesn't fit the AI-postcrash 'wait for a bubble to deflate' framing either. |
 | CRAK | VanEck Oil Refiners ETF | etf | unassigned | — | — | Tracks the MVIS Global Oil Refiners Index (~30 global refiners; top holdings Marathon Petroleum, Valero, Reliance Industries). Expense ratio 0.59%, AUM grew from ~$38M to ~$172-251M in 2026 on fresh inflows. Up ~40% YTD 2026 (vs XLE's 29%), driven by the 3-2-1 crack spread hitting a record ~$55.78/bbl in March 2026 (2-3x its historical $10-20 norm) -- permanent refining-capacity cuts (~4.5M bpd off globally from closures + war damage) outpacing demand growth. PE 13.5 (reasonable), but dividend down -50.9% vs prior 12mo (flagged) and 99% concentrated in Energy -- a cyclical commodity-margin play riding currently-extreme crack spreads, not a moat/pricing-power business by Shaun's usual Bucket 1 criteria. Left unassigned pending discussion on which bucket (if any) fits, given the margin-spike thesis could reverse as capacity comes back online. |
+| CV | CapsoVision | stock | unassigned | — | — | Q2 2026 EPS miss, gross margin fell to 51 pct from 55 pct on competitive pricing/tariff pressure; revenue and unit growth still positive, H2 guided higher |
 | DG | Dollar General | stock | 1 | 1.86% | +55% | Not yet discussed. Dollar-store category |
 | DLTR | Dollar Tree | stock | 1 | — | +32% | Not yet discussed. Dollar-store category |
 | DOLLARAMA | Dollarama Inc | stock | 1 | — | — | Not yet discussed. Dollar-store category — "taking over reject shop" |
@@ -135,4 +137,4 @@ Major AI-boom names with real moats (chip/foundry monopoly, hyperscaler platform
 | SNDK | SanDisk | stock | ai_postcrash | — | +3663% | Major U.S.-listed NAND flash provider for AI long-term memory with sold-out enterprise inventory, rising margins, strong data center revenue growth, and a hard-to-replicate Kioxia manufacturing partnership. |
 | TSM | Taiwan Semiconductor Manufacturing Company Limited | stock | ai_postcrash | 2.93% | +1713% | Named as one of the companies powering AI that has been crushing it, fitting the report's AI chip supply-chain thesis. |
 
-Last auto-generated: 2026-09-19.
+Last auto-generated: 2026-09-20.
