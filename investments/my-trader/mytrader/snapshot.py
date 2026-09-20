@@ -107,9 +107,12 @@ def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
     rows = db.get_all_watchlist(conn)
     postcrash = [r for r in rows if r["bucket"] == config.AI_POSTCRASH_BUCKET]
     crash_discount = [r for r in rows if r["bucket"] == config.CRASH_DISCOUNT_BUCKET]
+    tax_complex = [r for r in rows if r["bucket"] == config.TAX_COMPLEX_BUCKET]
     main_rows = [
         r for r in rows
-        if r["bucket"] not in (config.AI_POSTCRASH_BUCKET, config.CRASH_DISCOUNT_BUCKET)
+        if r["bucket"] not in (
+            config.AI_POSTCRASH_BUCKET, config.CRASH_DISCOUNT_BUCKET, config.TAX_COMPLEX_BUCKET,
+        )
     ]
 
     lines = [
@@ -166,6 +169,16 @@ def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
         "",
     ]
     lines += _watchlist_table(postcrash)
+    lines += [
+        "",
+        "## Stocks and ETFs to Avoid (Complex Tax Forms)",
+        "",
+        "Issue a K-1 or other non-standard tax form (commodity-pool ETFs, MLPs) "
+        "instead of a normal 1099 — a standing do-not-buy list, not candidates under "
+        "reconsideration.",
+        "",
+    ]
+    lines += _watchlist_table(tax_complex)
     lines.append("")
     lines.append(f"Last auto-generated: {date.today().isoformat()}.")
     config.WATCHLIST_MD_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")

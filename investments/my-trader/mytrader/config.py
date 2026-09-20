@@ -28,6 +28,14 @@ CRASH_DISCOUNT_BUCKET = "4"  # Bucket 4, added 2026-07-25: great, durable compan
                               # actually bought, migrates to Bucket 1. Rendered as its
                               # own section in watchlist.md by snapshot.py.
 
+TAX_COMPLEX_BUCKET = "tax_complex"  # watchlist bucket for tickers Shaun has decided
+                                     # to avoid outright because they issue a K-1 or
+                                     # other complex tax form (commodity-pool ETFs,
+                                     # MLPs) rather than a normal 1099 — a standing
+                                     # do-not-buy reminder, not a candidate under
+                                     # reconsideration like ai_postcrash. Rendered as
+                                     # its own section in watchlist.md by snapshot.py.
+
 # Bucket code -> plain-English framing, added 2026-08-13 for monitor.py's Holdings
 # report (Shaun rated the report 35/100 for trader decision-usefulness -- a raw
 # bucket code like "1" doesn't tell you a -20% dip is expected/acceptable there,
@@ -44,6 +52,7 @@ BUCKET_LABELS = {
     "3b": "Gold tactical — timed sleeve, evaluate against your entry thesis",
     CRASH_DISCOUNT_BUCKET: "Crash-discount buy — watching to add more at a crash-driven discount",
     AI_POSTCRASH_BUCKET: "Post-Crash AI Watch — deliberately not buying at today's valuation",
+    TAX_COMPLEX_BUCKET: "Avoid — complex tax form (K-1 etc.), not a normal 1099",
     "unassigned": "No strategic bucket assigned yet",
 }
 

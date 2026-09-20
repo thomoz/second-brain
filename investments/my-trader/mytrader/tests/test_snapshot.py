@@ -161,6 +161,27 @@ def test_regenerate_watchlist_md_splits_bucket_4_section(db_conn, monkeypatch, t
     assert "KO" in rest
 
 
+def test_regenerate_watchlist_md_splits_tax_complex_section(db_conn, monkeypatch, tmp_path):
+    _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
+
+    db.upsert_watchlist_row(
+        db_conn, ticker="VRTX", name="Vertex Pharmaceuticals Inc", asset_type="stock", bucket="1",
+        status="discussed", notes="Good candidate",
+    )
+    db.upsert_watchlist_row(
+        db_conn, ticker="CORN", name="Teucrium Corn Fund", asset_type="etf", bucket="tax_complex",
+        status="raw", notes="Issues a K-1",
+    )
+    snapshot.regenerate_watchlist_md(db_conn)
+
+    content = watchlist_path.read_text(encoding="utf-8")
+    assert "## Stocks and ETFs to Avoid (Complex Tax Forms)" in content
+    watchlist_section, rest = content.split("## Stocks and ETFs to Avoid (Complex Tax Forms)")
+    assert "VRTX" in watchlist_section
+    assert "CORN" not in watchlist_section
+    assert "CORN" in rest
+
+
 def test_regenerate_watchlist_md_bucket_4_shows_rank_column_sorted_desc(db_conn, monkeypatch, tmp_path):
     _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
 
