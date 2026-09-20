@@ -12,6 +12,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 |--------|-----------|-----|
 | CV | unassigned | EPS miss + margin pressure Q2 2026, H2 guided higher - monitor next print |
 | KAR.AX | unassigned | Keep an eye on (Shaun request 2026-09-16) |
+| KMI | unassigned | Energy sector - keep an eye on |
 | MTA | unassigned | Not yet discussed -- flagged to watch. |
 | NEWP | unassigned | Buy at cheaper entry level |
 | NEXG.V | unassigned | Buy at cheaper entry level |
