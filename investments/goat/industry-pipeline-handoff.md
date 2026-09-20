@@ -216,6 +216,43 @@ ship the sign-flip model first and add short-window as a fast follow.
 
 ---
 
+## Addendum (2026-09-20) — Extend to ASX + ETF Candidates
+
+Confirmed with Shaun: fold in alongside Parts A/B, before `/plan-feature`. As
+written above, neither the sector-level heartbeat scan nor this handoff's
+industry-level plan can ever flag an ASX-listed stock or an ETF as a
+*candidate* — `sp500_universe`/Finviz's `geo_usa` filter are US-stock-only, and
+sector/industry ETFs only ever serve as the breakout **gate**, never a staged
+candidate themselves.
+
+Mirror the approach `dma_breakout_scan.py` already validated 2026-09-19/20 for
+its own (looser, unrelated) breakout signal: `asx200_universe` (Wikipedia
+scrape, no DB cache) for ASX stocks, and a curated ticker→label ETF dict
+(`GOAT_DMA_BREAKOUT_ETF_UNIVERSE` — `GOAT_SECTOR_ETFS` + `GOAT_INDUSTRY_ETFS` +
+a small broad-market/commodity list) for ETFs-as-candidates, gated on AUM
+(`totalAssets`) rather than market cap since yfinance reports no market cap for
+funds. `fundamentals_context.compute_survival_context` already short-circuits
+cleanly for `quoteType == "ETF"` (added same session) — reusable as-is.
+
+Open questions to resolve during `/plan-feature`:
+- Does `check_heartbeat_breakout`'s "position of strength" logic (reclaim of
+  the 50DMA from below, held near the 150DMA) even make sense unmodified for an
+  ETF, which by construction is smoother/less "story-driven" than a single
+  stock? May want a separate, looser threshold set for ETF candidates rather
+  than reusing the stock thresholds verbatim.
+- ASX constituent source for the *industry* level (Part B-2) — Finviz's
+  screener is US-only, so ASX industry constituents need a different source
+  (ASX's own GICS mapping, or a hand-curated list per the existing
+  `GOAT_SECTOR_ETFS`/`GOAT_INDUSTRY_ETFS` pattern). At the *sector* level
+  (today's existing `heartbeat_scan.py`), an ASX leg is cheaper to add —
+  `asx200_universe` already scrapes each constituent's GICS sector field, no
+  new taxonomy needed.
+- Does the ETF universe get gated by the same rising-sector/industry filter
+  applied to stocks, or scanned unconditionally (an ETF has no GICS sector
+  membership of its own to gate on the way a stock does)?
+
+---
+
 ## Suggested phase order for the plan
 
 1. **Part A** — rotation snapshots + Rotation Flow (+ decide short-window flow).

@@ -141,11 +141,12 @@ def test_render_heartbeat_candidates_report_lists_pending_rows():
     result = {
         "scanned": 42, "rising_sectors": ["Technology"],
         "pending_candidates": [
-            {"ticker": "AAPL", "sector_label": "Technology", "signal_detail": "heartbeat signal",
-             "flagged_at": "2026-08-17T00:00:00+00:00"},
+            {"ticker": "AAPL", "company_name": "Apple Inc.", "sector_label": "Technology",
+             "signal_detail": "heartbeat signal", "flagged_at": "2026-08-17T00:00:00+00:00"},
         ],
     }
     report = heartbeat_scan.render_heartbeat_candidates_report(result)
     assert "AAPL" in report
+    assert "Apple Inc." in report
     assert "heartbeat signal" in report
     assert "42" in report

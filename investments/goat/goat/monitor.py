@@ -203,9 +203,15 @@ def maybe_notify(
             for a in result["new_alerts"]
         ]
     if candidates:
+        # notify_detail is an optional short WhatsApp-only summary a caller can set
+        # instead of the full report-length "detail" -- added 2026-09-20 after the
+        # heartbeat scan's full per-candidate detail (range/smoothness stats +
+        # survival context) pushed a 46-candidate alert over GREEN-API's ~20,000
+        # character sendMessage limit. Falls back to "detail" for every other
+        # caller (sector rotation, insider scan, DMA breakout) unchanged.
         lines += [
             f"- {c['ticker']}" + (f" ({c['company']})" if c.get("company") else "")
-            + f" ({c['sector_label']}): {c['detail']}"
+            + f" ({c['sector_label']}): {c.get('notify_detail') or c['detail']}"
             for c in candidates
         ]
     send_whatsapp_notification("\n".join(lines))
