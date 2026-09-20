@@ -149,3 +149,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 - (Sep 17) Earnings Watch needs estimate-history table and 8-K support in sec_filings.py.
 - (Sep 17) Planned Earnings Watch CLI is scan-earnings-watch with report and systemd timer.
 - (Sep 17) Oroco/OCO.V insider scan needs SEDI, not US Form 4/OpenInsider.
+
+## 2026-09-20 Reflection
+- (Sep 20) NEXG should use TSXV ticker NEXG.V, not bare NEXG.

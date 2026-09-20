@@ -81,3 +81,6 @@ _(not yet populated)_
 
 ## 2026-08-29 Update
 - (Aug 29) Avoid long-term holds in clean-energy names without pricing power
+
+## 2026-09-20 Update
+- (Sep 20) Added NEWP and NEXG.V to watchlist; both are buy at cheaper entry level.
