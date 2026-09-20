@@ -36,7 +36,10 @@ that same qualified string consistently through price history, fundamentals,
 dedup, and staging -- unlike mytrader.cash_value_scan, which deliberately keeps
 a separate bare `ticker` (report display) vs `yf_ticker` (yfinance calls) split
 for its own report-only, no-dedup purpose. Using the bare code here would make
-an already-held/watchlisted ASX ticker dedup-match fail and re-stage it.
+an already-held/watchlisted ASX ticker dedup-match fail and re-stage it. ETF
+universe rows (market="ETF") are the one exception -- their keys in
+config.GOAT_DMA_BREAKOUT_ETF_UNIVERSE are already fully-qualified literal
+tickers (e.g. "PMGOLD.AX"), not bare codes needing tickers.asx_variant.
 """
 
 from __future__ import annotations
@@ -48,6 +51,7 @@ from typing import Any
 
 import pandas as pd
 from mytrader import asx200_universe, db as mt_db, market_data, tickers
+from mytrader import config as mytrader_config
 from mytrader.checks import CheckResult
 from scripts.ethical_filter import check_ticker as ethical_check
 
@@ -55,11 +59,14 @@ from . import config, db, fundamentals_context, price_history, sp500_universe
 
 
 def fetch_universe_constituents(conn: sqlite3.Connection) -> list[dict[str, Any]]:
-    """Combined S&P 500 + ASX 200 universe, each row already ticker-qualified (see
-    module GOTCHA) and ethical-filtered. US tickers come from the cached
-    goat_sp500_constituents table; ASX tickers are re-scraped from Wikipedia every
-    run (asx200_universe has no DB cache) and returned as [] (not None/crash) on a
-    scrape failure -- see run_dma_breakout_scan's asx-unavailable handling."""
+    """Combined S&P 500 + ASX 200 + curated ETF universe, each row already
+    ticker-qualified (see module GOTCHA) and ethical-filtered. US tickers come from
+    the cached goat_sp500_constituents table; ASX tickers are re-scraped from
+    Wikipedia every run (asx200_universe has no DB cache) and returned as [] (not
+    None/crash) on a scrape failure -- see run_dma_breakout_scan's asx-unavailable
+    handling. ETF rows are NOT passed through ethical_check (ticker-string-only,
+    checks individual stock tickers -- doesn't apply meaningfully to a fund ticker);
+    a label-based defense-theme review flag is the substitute, see below."""
     rows: list[dict[str, Any]] = []
 
     for c in sp500_universe.get_or_refresh_sp500_constituents(conn):
@@ -81,6 +88,15 @@ def fetch_universe_constituents(conn: sqlite3.Connection) -> list[dict[str, Any]
         rows.append({
             "ticker": tickers.asx_variant(bare), "label": c["sector"] or "ASX (sector unavailable)",
             "market": "ASX", "review_reason": review_reason, "company": c["company"] or "",
+        })
+
+    for ticker, label in config.GOAT_DMA_BREAKOUT_ETF_UNIVERSE.items():
+        if ticker in config.GOAT_BANNED_TICKERS:
+            continue
+        review_reason = "REVIEW: defense-themed ETF" if label == "Aerospace & Defense" else None
+        rows.append({
+            "ticker": ticker, "label": label, "market": "ETF",
+            "review_reason": review_reason, "company": "",
         })
 
     return rows
@@ -155,19 +171,31 @@ def passes_liquidity_floor(market: str, data) -> bool:
     """`data` is a mytrader.market_data.TickerData | None. Returns False (fails the
     floor) when data or the required .info fields are missing -- an unusable ticker
     is never staged, matching cash_value_scan.compute_cash_value_metrics's
-    None-on-missing-data posture."""
+    None-on-missing-data posture. ETF rows (market="ETF") gate on AUM (totalAssets)
+    instead of marketCap, which yfinance reports as None for every ETF -- confirmed
+    live against SPY/GLD/ITA/PMGOLD.AX, see investments/dma-breakout-etf-universe-
+    handoff.md. Reuses my-trader's own ETF_AUM_FLAG_USD ($50M closure-risk floor,
+    same one etf_mechanics.py already gates on) rather than a new DMA-Breakout-
+    specific number, confirmed with Shaun 2026-09-19 -- no currency conversion is
+    applied (same simplification etf_mechanics.py already makes for AUD-denominated
+    funds like PMGOLD.AX)."""
     if data is None:
         return False
     info = data.info
-    market_cap = info.get("marketCap")
     avg_volume = info.get("averageVolume")
-    if market_cap is None or avg_volume is None:
+    if avg_volume is None or avg_volume < config.GOAT_DMA_BREAKOUT_MIN_AVG_VOLUME:
+        return False
+    if market == "ETF":
+        total_assets = info.get("totalAssets")
+        return total_assets is not None and total_assets >= mytrader_config.ETF_AUM_FLAG_USD
+    market_cap = info.get("marketCap")
+    if market_cap is None:
         return False
     floor = (
         config.GOAT_DMA_BREAKOUT_MIN_MARKET_CAP_USD if market == "US"
         else config.GOAT_DMA_BREAKOUT_MIN_MARKET_CAP_AUD
     )
-    return market_cap >= floor and avg_volume >= config.GOAT_DMA_BREAKOUT_MIN_AVG_VOLUME
+    return market_cap >= floor
 
 
 def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
@@ -197,6 +225,9 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
                 if not interesting:
                     continue
 
+                if ticker in config.GOAT_BANNED_TICKERS:
+                    continue
+
                 if mt_db.get_holding_row(conn, ticker) is not None:
                     continue
                 if mt_db.get_watchlist_row(conn, ticker) is not None:
@@ -219,14 +250,15 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
                     signal_detail += f"; {c['review_reason']}"
                 signal_detail += f"; survival context: {context['summary']}"
 
+                company_name = c["company"] or data.info.get("longName") or ""
                 db.insert_goat_pending_candidate(
                     conn, ticker=ticker, sector_label=label,
                     signal_detail=signal_detail, source="goat_dma_breakout_scan",
-                    company_name=c["company"], exchange=exchange_name,
+                    company_name=company_name, exchange=exchange_name,
                 )
                 new_candidates.append({
                     "ticker": ticker, "sector_label": label, "detail": signal_detail,
-                    "company": c["company"],
+                    "company": company_name,
                 })
             except Exception as e:
                 print(f"[goat-dma-breakout-scan] error checking {ticker}: {e}")
@@ -262,8 +294,8 @@ def render_dma_breakout_candidates_report(result: dict[str, Any]) -> str:
     lines = [
         "# DMA Breakout Candidates — Pending Review",
         "",
-        "Auto-generated by Goat's daily DMA breakout scan -- a stock across the "
-        "S&P 500 + ASX 200 universe whose close just crossed ABOVE its 150-day or "
+        "Auto-generated by Goat's daily DMA breakout scan -- a stock or ETF across "
+        "the S&P 500 + ASX 200 + curated ETF universe whose close just crossed ABOVE its 150-day or "
         "200-day moving average (checked independently; a name can fire on one, "
         "the other, or both), with fundamentals survival context attached for you "
         "to judge yourself. Sorted newest first (freshest 150/200DMA cross at the "

@@ -192,6 +192,7 @@ def test_fetch_universe_constituents_drops_ethical_filter_excluded(db_conn, monk
         lambda conn: [{"ticker": "AAPL", "security": "Apple Inc.", "gics_sector": "Information Technology"}],
     )
     monkeypatch.setattr("goat.dma_breakout_scan.asx200_universe.fetch_asx200_constituents", lambda: None)
+    monkeypatch.setattr("goat.config.GOAT_DMA_BREAKOUT_ETF_UNIVERSE", {})
     monkeypatch.setattr(
         "goat.dma_breakout_scan.ethical_check", lambda bare: (True, "Primary defense/military contractor")
     )
@@ -205,8 +206,51 @@ def test_fetch_universe_constituents_asx_scrape_failure_yields_us_only(db_conn, 
         lambda conn: [{"ticker": "AAPL", "security": "Apple Inc.", "gics_sector": "Information Technology"}],
     )
     monkeypatch.setattr("goat.dma_breakout_scan.asx200_universe.fetch_asx200_constituents", lambda: None)
+    monkeypatch.setattr("goat.config.GOAT_DMA_BREAKOUT_ETF_UNIVERSE", {})
     rows = dma_breakout_scan.fetch_universe_constituents(db_conn)  # must not crash
     assert [r["ticker"] for r in rows] == ["AAPL"]
+
+
+def test_fetch_universe_constituents_adds_etf_bucket(db_conn, monkeypatch):
+    monkeypatch.setattr(
+        "goat.dma_breakout_scan.sp500_universe.get_or_refresh_sp500_constituents",
+        lambda conn: [],
+    )
+    monkeypatch.setattr("goat.dma_breakout_scan.asx200_universe.fetch_asx200_constituents", lambda: None)
+    fake_etfs = {"SPY": "Broad Market", "XLI": "Industrials", "ITA": "Aerospace & Defense"}
+    monkeypatch.setattr("goat.config.GOAT_DMA_BREAKOUT_ETF_UNIVERSE", fake_etfs)
+    rows = dma_breakout_scan.fetch_universe_constituents(db_conn)
+    by_ticker = {r["ticker"]: r for r in rows}
+
+    assert by_ticker["SPY"]["market"] == "ETF"
+    assert by_ticker["SPY"]["company"] == ""
+    assert by_ticker["SPY"]["review_reason"] is None
+
+    assert "XLI" not in by_ticker  # banned everywhere else in goat, must be excluded here too
+
+    assert by_ticker["ITA"]["review_reason"] == "REVIEW: defense-themed ETF"
+
+
+# --- passes_liquidity_floor (ETF branch) ------------------------------------
+
+def test_passes_liquidity_floor_etf_below_aum_fails():
+    data = TickerData(ticker="X", info={"totalAssets": 10_000_000.0, "averageVolume": 500_000}, dividends=None)
+    assert dma_breakout_scan.passes_liquidity_floor("ETF", data) is False
+
+
+def test_passes_liquidity_floor_etf_above_aum_passes():
+    data = TickerData(ticker="X", info={"totalAssets": 100_000_000.0, "averageVolume": 500_000}, dividends=None)
+    assert dma_breakout_scan.passes_liquidity_floor("ETF", data) is True
+
+
+def test_passes_liquidity_floor_etf_missing_total_assets_fails():
+    data = TickerData(ticker="X", info={"averageVolume": 500_000}, dividends=None)
+    assert dma_breakout_scan.passes_liquidity_floor("ETF", data) is False
+
+
+def test_passes_liquidity_floor_etf_below_avg_volume_fails():
+    data = TickerData(ticker="X", info={"totalAssets": 100_000_000.0, "averageVolume": 100}, dividends=None)
+    assert dma_breakout_scan.passes_liquidity_floor("ETF", data) is False
 
 
 # --- run_dma_breakout_scan --------------------------------------------------
@@ -219,13 +263,20 @@ def _interesting_close() -> pd.Series:
 
 
 def _patch_common(
-    monkeypatch, constituents=None, fetch_close=None, ticker_data=None,
+    monkeypatch, constituents=None, fetch_close=None, ticker_data=None, etf_universe=None,
 ):
     monkeypatch.setattr(
         "goat.dma_breakout_scan.sp500_universe.get_or_refresh_sp500_constituents",
         lambda conn: constituents if constituents is not None else _US_CONSTITUENTS,
     )
     monkeypatch.setattr("goat.dma_breakout_scan.asx200_universe.fetch_asx200_constituents", lambda: None)
+    # ETF universe left empty by default -- keeps every pre-existing US/ASX-only test
+    # isolated from the real 57-ticker GOAT_DMA_BREAKOUT_ETF_UNIVERSE; tests exercising
+    # the ETF bucket monkeypatch it explicitly before calling _patch_common.
+    if etf_universe is not None:
+        monkeypatch.setattr("goat.dma_breakout_scan.config.GOAT_DMA_BREAKOUT_ETF_UNIVERSE", etf_universe)
+    else:
+        monkeypatch.setattr("goat.dma_breakout_scan.config.GOAT_DMA_BREAKOUT_ETF_UNIVERSE", {})
     monkeypatch.setattr(
         "goat.dma_breakout_scan.price_history.fetch_close_history",
         fetch_close if fetch_close is not None else (lambda ticker, lookback_days: _interesting_close()),
@@ -317,6 +368,41 @@ def test_run_dma_breakout_scan_stays_quiet_on_repeat_run(db_conn, monkeypatch):
     result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
     assert result["new_candidates"] == []
     assert len(result["pending_candidates"]) == 1
+
+
+def _etf_ticker_data(ticker: str) -> TickerData:
+    return TickerData(
+        ticker=ticker,
+        info={
+            "totalAssets": 100_000_000.0, "averageVolume": 500_000,
+            "longName": "Test Fund", "quoteType": "ETF",
+            "fullExchangeName": "NYSEArca",
+        },
+        dividends=None,
+    )
+
+
+def test_run_dma_breakout_scan_stages_etf_candidate_with_longname_fallback(db_conn, monkeypatch):
+    _patch_common(
+        monkeypatch, constituents=[], ticker_data=lambda ticker: _etf_ticker_data(ticker),
+        etf_universe={"SPY": "Broad Market"},
+    )
+    result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
+    assert len(result["new_candidates"]) == 1
+    assert result["new_candidates"][0]["ticker"] == "SPY"
+    assert result["new_candidates"][0]["company"] == "Test Fund"
+    row = goat_db.get_goat_pending_candidate(db_conn, "SPY")
+    assert row["company_name"] == "Test Fund"
+
+
+def test_run_dma_breakout_scan_never_stages_banned_etf_ticker(db_conn, monkeypatch):
+    _patch_common(
+        monkeypatch, constituents=[], ticker_data=lambda ticker: _etf_ticker_data(ticker),
+        etf_universe={"XLI": "Industrials"},
+    )
+    result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
+    assert result["new_candidates"] == []
+    assert goat_db.get_goat_pending_candidate(db_conn, "XLI") is None
 
 
 # --- render_dma_breakout_candidates_report ----------------------------------

@@ -468,6 +468,29 @@ GOAT_DMA_BREAKOUT_MIN_AVG_VOLUME = 100_000  # shares/day -- matches Finviz's own
     # S&P 500 / ASX 200 constituent lists, not a Finviz screen.
 GOAT_DMA_BREAKOUT_CANDIDATES_MD_PATH = GOAT_DIR / "dma-breakout-candidates-pending-review.md"
 
+# DMA Breakout Scanner -- ETF universe extension, per
+# investments/dma-breakout-etf-universe-handoff.md and Shaun's confirmation 2026-09-19
+# ("a very broad range of ETFs in a broad range of sectors and industries"). Breadth
+# comes from combining the two curated ticker->label dicts already in this codebase
+# (GOAT_SECTOR_ETFS, GOAT_INDUSTRY_ETFS -- together already span virtually every GICS
+# sector and 39 Finviz industries with zero new research) with a small new curated list
+# for broad-market/commodity funds neither of those covers.
+GOAT_DMA_BREAKOUT_BROAD_ETFS: dict[str, str] = {
+    "SPY": "Broad Market", "QQQ": "Broad Market", "IWM": "Broad Market",
+    "GLD": "Commodity - Gold", "SLV": "Commodity - Silver",
+    "PMGOLD.AX": "Commodity - Gold", "URNM.AX": "Commodity - Uranium",
+}  # broad-market + commodity funds Shaun already holds (PMGOLD.AX, URNM.AX) or would
+   # plausibly want a breakout alert on -- neither GOAT_SECTOR_ETFS nor
+   # GOAT_INDUSTRY_ETFS is themed broadly/commodity enough to cover these.
+   # PMGOLD.AX/URNM.AX are already .AX-suffixed literal keys (not bare codes needing
+   # tickers.asx_variant) -- matches exactly how holdings.md stores them. v1/tunable --
+   # add more broad-market/commodity names here directly if this list proves too narrow.
+
+GOAT_DMA_BREAKOUT_ETF_UNIVERSE: dict[str, str] = {
+    **GOAT_SECTOR_ETFS, **GOAT_INDUSTRY_ETFS, **GOAT_DMA_BREAKOUT_BROAD_ETFS,
+}  # 57 tickers total (11 + 39 + 7), no overlaps -- the third fetch_universe_constituents
+   # bucket (market="ETF"), see dma_breakout_scan.py.
+
 # Hated Industries Scanner, per investments/hated-industries-scanner-handoff.md and
 # .agent/plans/hated-industries-scanner.md -- contrarian counterpart to
 # industry_rotation.py: finds industries suffering severe, still-live
