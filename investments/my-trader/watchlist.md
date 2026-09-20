@@ -17,6 +17,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | NOK | 4 | Keep an eye on (Shaun request 2026-09-16) |
 | PRS.OL | unassigned | Rebel Capitalist recommendation |
 | ROSY.TO | unassigned | New TSX macro fund, too new for data - watching for price history/AUM to build up |
+| SNAP | unassigned | Keep an eye on |
 | STNG | unassigned | George Gammon long trade |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
 | VLGEA | unassigned | Felix watching -- waiting for a break above recent highs. |
@@ -58,6 +59,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | PRS.OL | Prosafe SE | stock | unassigned | — | — | Rebel Capitalist recommendation. Offshore accommodation rigs, post-recap (July 2025 debt-for-equity, USD 193M equitised for 90% of shares). Deep dive 2026-09-16: PE ~0.2, D/E 221.5 flagged (likely transitional), Petrobras 4yr contract raised dayrate from Sep 2026, principles fit avg 26/100. |
 | ROSY.TO | Corton Rosenberg Global Macro Fund | etf | unassigned | — | — | Newly launched TSX macro fund ETF, Sept 2026 - too new for price history/expense ratio data yet |
 | SCHD | Schwab US Dividend Equity ETF | etf | 1 | 3.30% | +223% | Candidate — dividend aristocrats-style ETF; not yet deeply discussed (no mechanics/overlap review done) |
+| SNAP | Snap Inc | stock | unassigned | — | — | Added to watchlist |
 | SPY | SPDR S&P 500 ETF Trust | etf | 1 | — | — | Core S&P 500 index ETF. Expense ratio 0.0945% (vs IVV's 0.03% -- IVV is cheaper for the same S&P 500 exposure, matches VOO/VTI already in bucket 1). PE 26.9, no valuation/balance-sheet flags. Crash resilience roughly tracks the broad market by construction (2008 -55.2%, 2022 -24.5%) since it IS the broad market. Principles fit avg 34/100 -- expected and not meaningful for a diversified index fund (Buffett/Graham/Lynch/Fisher frameworks are built to grade single operating businesses, not baskets). |
 | STNG | Scorpio Tankers | stock | unassigned | — | — | George Gammon long trade |
 | TBIL | US Treasury 3 Month Bill ETF | etf | unassigned | — | — | Crash hedge - buy once price is lower. Ultra-short-duration T-bill ETF, added for capital preservation during a drawdown, not a growth position. |
