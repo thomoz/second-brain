@@ -1,11 +1,29 @@
 """Deterministic pd.Series inputs, no network, no DB -- check_heartbeat_breakout
-is pure compute. Every base-leg gate gets a dedicated case where that gate is the
-one being proven, with the breakout leg still passing, so a regression that
-weakens (or removes) a gate fails exactly one clearly-named test.
+is pure compute. Redesigned 2026-09-20 (five times, same day): drop every
+moving-average-relative gate; drop the breakout requirement entirely; extend
+the base window 63 -> 126 trading days (a real false positive -- BAC/CAH each
+rallied then reversed sharply within a 3-month window and still read as a
+tight, 100%-smooth base); reject a base that has broken down; and require a
+real swing rhythm, not a single directional move (prompted by real "great
+heartbeat" chart examples Shaun shared -- XLE/SMH/XBI -- whose common thread
+was several repeated up-down swings, not just a narrow overall range).
 
-test_wide_base_does_not_fire is the load-bearing one: the original bug was a
-consolidation leg that could never PASS; the subtler future bug is a leg that
-never FAILS. It proves the leg actually gates (handoff Q7)."""
+Fixtures that expect "interesting" now use a bigger oscillation amplitude
+(3.0, not the original 0.9) so they clear GOAT_HEARTBEAT_SWING_MIN_REVERSAL_PCT
+and register enough swings -- range/smoothness still pass comfortably at this
+amplitude (well under the 15%/8% ceilings).
+
+Whether a breakout (above the base) has happened is neither required nor
+excluded, so there is no "already broken out" negative-case test below -- that
+would be testing a gate the check deliberately does not have. Breaking DOWN
+below the base and lacking swing rhythm ARE gates -- see
+test_recent_breakdown_below_settled_base_does_not_fire and
+test_single_arc_lacks_enough_swings_does_not_fire.
+
+test_wide_base_does_not_fire and test_spiky_base_does_not_fire are the
+load-bearing ones: each base-tightness gate gets a dedicated case where that
+gate is the one being proven, so a regression that weakens (or removes) a gate
+fails exactly one clearly-named test."""
 
 from __future__ import annotations
 
@@ -15,13 +33,7 @@ import pandas as pd
 
 from goat import config, heartbeat
 
-_BASE_WINDOW = config.GOAT_HEARTBEAT_MIN_DURATION_DAYS  # 63
-_MIN_LEN = (
-    config.GOAT_MA_LONG_DAYS
-    + _BASE_WINDOW
-    + config.GOAT_HEARTBEAT_MA_LONG_SLOPE_LOOKBACK_DAYS
-    + config.GOAT_SECTOR_CROSS_RECENCY_DAYS
-)  # 243
+_BASE_WINDOW = config.GOAT_HEARTBEAT_MIN_DURATION_DAYS  # 126
 
 
 def _dates(n: int, start: str = "2024-01-01") -> pd.DatetimeIndex:
@@ -32,147 +44,133 @@ def _series(prices: list[float]) -> pd.Series:
     return pd.Series(prices, index=_dates(len(prices)))
 
 
-def _ramp(n: int, start: float, end: float) -> list[float]:
-    return [start + (end - start) * i / (n - 1) for i in range(n)]
+def _osc_base(n: int, level: float, amp: float) -> list[float]:
+    """A flat base with a sine oscillation on top -- the webinar's own 'smooth
+    up-down-up-down' shape, narrow and smooth by construction. amp=3.0 (the
+    default call site value used below) clears the 3% swing-reversal threshold
+    with margin while staying well inside the 15%/8% range/smoothness ceilings."""
+    return [level + amp * math.sin(i / 3.0) for i in range(n)]
 
 
-def _osc_base(n: int, start: float, end: float, amp: float) -> list[float]:
-    """A base that drifts linearly start -> end with a small sine oscillation on
-    top. A gentle downward drift keeps the closes below the lagging 50-day MA
-    through the back half of the window, so the only fresh 50DMA cross is the
-    breakout tail (a purely centered oscillation chops across the flat MA and
-    produces spurious mid-base crosses)."""
-    return [start + (end - start) * i / (n - 1) + amp * math.sin(i / 3.0) for i in range(n)]
-
-
-def _breakout_tail(n: int, level: float, jump: float, step: float = 1.4) -> list[float]:
-    return [level + jump + i * step for i in range(n)]
-
-
-def _drop_tail(n: int, level: float, drop: float, step: float = 1.4) -> list[float]:
-    return [level - drop - i * step for i in range(n)]
-
-
-def _valid_heartbeat(
-    *,
-    lead_start: float = 74.0,
-    lead_end: float = 107.0,
-    base_start: float = 101.0,
-    base_end: float = 98.5,
-    base_amp: float = 0.9,
-    tail_n: int = 6,
-    tail_jump: float = 4.0,
-) -> pd.Series:
-    """~215-day rising lead-in (150-day MA slopes up, ends below the base) ->
-    ~63-day tight base drifting gently down and sitting on/above a flat-to-rising
-    150-day MA while below the elevated 50-day MA -> short steep breakout tail
-    that crosses back above the 50-day MA. Every `data` metric of this series
-    sits comfortably mid-gate; each negative case below perturbs exactly one
-    input."""
-    lead = _ramp(215, lead_start, lead_end)
-    base = _osc_base(_BASE_WINDOW + 1, base_start, base_end, base_amp)
-    tail = _breakout_tail(tail_n, base[-1], tail_jump)
-    return _series(lead + base + tail)
-
-
-def test_fires_on_tight_base_then_fresh_breakout():
-    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", _valid_heartbeat())
+def test_fires_on_tight_smooth_base():
+    close = _series(_osc_base(_BASE_WINDOW, 100.0, 3.0))
+    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
     assert result.verdict == "interesting"
-    assert result.data["crossed_above"] is True
-    assert result.data["slope_up"] is True
-    assert result.data["ma150_slope_up"] is True
     assert result.data["base_range_pct"] <= config.GOAT_HEARTBEAT_BASE_RANGE_MAX_PCT
     assert result.data["base_smoothness_fraction"] >= config.GOAT_HEARTBEAT_BASE_SMOOTHNESS_MIN_FRACTION
-    assert result.data["base_below_ma50_fraction"] >= config.GOAT_HEARTBEAT_BASE_BELOW_MA50_MIN_FRACTION
-    assert result.data["max_dip_below_ma150_pct"] <= config.GOAT_HEARTBEAT_MA_LONG_TOLERANCE_PCT
+    assert result.data["broke_down"] is False
+    assert result.data["swing_count"] >= config.GOAT_HEARTBEAT_MIN_SWINGS
 
 
 def test_wide_base_does_not_fire():
-    """Gating-proof regression test (handoff Q7). The breakout leg still passes;
-    the base's high-low close range blows past the tightness ceiling, so the
-    verdict must stay 'ok'."""
-    close = _valid_heartbeat(base_start=108.0, base_end=92.0, base_amp=2.0, tail_jump=7.0)
+    """The base's high-low close range blows past the tightness ceiling."""
+    base = ([100.0, 120.0] * (_BASE_WINDOW // 2 + 1))[:_BASE_WINDOW]
+    close = _series(base)
     result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
     assert result.verdict == "ok"
-    assert result.data["crossed_above"] is True
-    assert result.data["slope_up"] is True
     assert result.data["base_range_pct"] > config.GOAT_HEARTBEAT_BASE_RANGE_MAX_PCT
 
 
 def test_spiky_base_does_not_fire():
     """Base range stays under the ceiling, but the base is flat for weeks then
     takes one big step up and back -- fewer than the required fraction of days
-    sit inside the smooth inner band, so it is not a heartbeat."""
+    sit inside the smooth inner band, so it is not a heartbeat. Spike width is
+    proportional to the base window (1/4 of it), matching the original 16-of-63
+    ratio the old 63-day fixture used."""
+    spike_days = _BASE_WINDOW // 4
     flat = [100.0] * _BASE_WINDOW
-    for i in range(24, 40):
+    for i in range(_BASE_WINDOW // 4, _BASE_WINDOW // 4 + spike_days):
         flat[i] = 112.0
-    base = flat + [flat[-1]]
-    close = _series(_ramp(215, 78.0, 100.0) + base + _breakout_tail(6, base[-1], 4.0))
+    close = _series(flat)
     result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
     assert result.verdict == "ok"
-    assert result.data["crossed_above"] is True
     assert result.data["base_range_pct"] <= config.GOAT_HEARTBEAT_BASE_RANGE_MAX_PCT
     assert result.data["base_smoothness_fraction"] < config.GOAT_HEARTBEAT_BASE_SMOOTHNESS_MIN_FRACTION
 
 
-def test_price_below_150dma_during_base_does_not_fire():
-    """Tight base, but a descending lead-in leaves the base sitting well below
-    its 150-day MA -- the worst dip is past the tolerance."""
-    close = _valid_heartbeat(lead_start=130.0, lead_end=101.0)
-    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
-    assert result.verdict == "ok"
-    assert result.data["crossed_above"] is True
-    assert result.data["max_dip_below_ma150_pct"] > config.GOAT_HEARTBEAT_MA_LONG_TOLERANCE_PCT
-
-
-def test_falling_150dma_does_not_fire():
-    """Tight base, but the lead-in rose to a peak and has been falling since, so
-    the 150-day MA is still sloping down at the breakout."""
-    lead = _ramp(120, 74.0, 118.0) + _ramp(95, 118.0, 106.0)
-    base = _osc_base(_BASE_WINDOW + 1, 101.0, 98.5, 0.9)
-    close = _series(lead + base + _breakout_tail(6, base[-1], 4.0))
-    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
-    assert result.verdict == "ok"
-    assert result.data["crossed_above"] is True
-    assert result.data["ma150_slope_up"] is False
-
-
-def test_base_spent_above_ma50_does_not_fire():
-    """Tight base near/above a rising 150-day MA, but a low lead-in leaves price
-    sitting mostly ABOVE the 50-day MA through the base (only a final dip crosses
-    down), so the tail's cross-up is not a genuine reclaim of the 50."""
-    n_flat = _BASE_WINDOW + 1 - 7
-    base = [100.0 + 0.4 * math.sin(i / 3.0) for i in range(n_flat)]
-    base += [100.0 - 0.9 * (j + 1) for j in range(7)]
-    close = _series(_ramp(215, 78.0, 94.0) + base + _breakout_tail(6, base[-1], 5.0))
-    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
-    assert result.verdict == "ok"
-    assert result.data["crossed_above"] is True
-    assert result.data["base_below_ma50_fraction"] < config.GOAT_HEARTBEAT_BASE_BELOW_MA50_MIN_FRACTION
-
-
 def test_insufficient_history_is_unknown():
-    close = _series([100.0] * (_MIN_LEN - 1))
+    close = _series([100.0] * (_BASE_WINDOW - 1))
     result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
     assert result.verdict == "unknown"
 
 
-def test_stale_cross_does_not_fire():
-    close = _valid_heartbeat(tail_n=config.GOAT_SECTOR_CROSS_RECENCY_DAYS + 12)
+def test_reports_distance_below_base_high_when_not_yet_at_it():
+    """The settled (older) part of the base oscillates between ~97 and ~103;
+    the most recent GOAT_HEARTBEAT_BREAKDOWN_RECENT_DAYS sit flat at 99.5 --
+    below the base's own top (so a breakout is correctly reported as not
+    having happened yet) but still above the settled floor (so this is NOT a
+    breakdown and the check still fires)."""
+    recent_days = config.GOAT_HEARTBEAT_BREAKDOWN_RECENT_DAYS
+    settled = _osc_base(_BASE_WINDOW - recent_days, 100.0, 3.0)
+    recent = [99.5] * recent_days
+    close = _series(settled + recent)
+    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
+    assert result.verdict == "interesting"
+    assert result.data["broke_down"] is False
+    base_high = max(settled + recent)
+    assert result.data["pct_below_base_high"] == round((base_high - 99.5) / base_high * 100, 2)
+    assert result.data["pct_below_base_high"] > 0
+
+
+def test_fires_even_when_price_is_already_at_its_own_base_high():
+    """Proves the check does not exclude a name that has already moved to (or
+    through) the top of its base -- a breakout is neither required nor
+    disqualifying, only ever not evaluated. The base itself still needs real
+    swing rhythm to fire, so this oscillates like the other positive cases,
+    with one final day set as a fresh high."""
+    settled = _osc_base(_BASE_WINDOW - 1, 100.0, 3.0)
+    final_high = max(settled) + 0.5
+    close = _series(settled + [final_high])
+    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
+    assert result.verdict == "interesting"
+    assert result.data["pct_below_base_high"] <= 0
+    assert result.data["broke_down"] is False
+
+
+def test_recent_breakdown_below_settled_base_does_not_fire():
+    """The settled (older) part of the base is a tight, smooth, swinging
+    oscillation -- on its own this would fire. But the most recent
+    GOAT_HEARTBEAT_BREAKDOWN_RECENT_DAYS have dropped to 97, below that settled
+    floor: a real breakdown, not a heartbeat, regardless of the overall range/
+    smoothness/swing stats still technically passing."""
+    recent_days = config.GOAT_HEARTBEAT_BREAKDOWN_RECENT_DAYS
+    settled = _osc_base(_BASE_WINDOW - recent_days, 100.0, 3.0)
+    recent = [96.0] * recent_days
+    close = _series(settled + recent)
     result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
     assert result.verdict == "ok"
-    assert result.data["trading_days_since_cross"] > config.GOAT_SECTOR_CROSS_RECENCY_DAYS
+    assert result.data["broke_down"] is True
+    assert "breakdown" in result.detail
 
 
-def test_no_cross_in_history_is_ok():
-    close = _series([100.0] * (_MIN_LEN + 25))
+def test_single_arc_lacks_enough_swings_does_not_fire():
+    """A clean, single up-move then single down-move (no repeated rhythm) --
+    narrow (6% range), 100% smooth, and not broken down (ends back at its
+    starting level), so the older gates alone would pass this. This is
+    exactly the BAC/CAH failure mode in miniature: one directional round-trip
+    that stays inside tolerance is not a heartbeat, and only the swing-count
+    gate catches it."""
+    n = _BASE_WINDOW // 2
+    up = [97.0 + 6.0 * i / (n - 1) for i in range(n)]
+    down = [103.0 - 6.0 * i / (n - 1) for i in range(n)]
+    close = _series(up + down)
     result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
     assert result.verdict == "ok"
+    assert result.data["base_range_pct"] <= config.GOAT_HEARTBEAT_BASE_RANGE_MAX_PCT
+    assert result.data["base_smoothness_fraction"] >= config.GOAT_HEARTBEAT_BASE_SMOOTHNESS_MIN_FRACTION
+    assert result.data["broke_down"] is False
+    assert result.data["swing_count"] < config.GOAT_HEARTBEAT_MIN_SWINGS
+    assert "rhythm" in result.detail
 
 
-def test_downside_cross_does_not_fire():
-    base = _osc_base(_BASE_WINDOW + 1, 101.0, 100.0, 0.8)
-    close = _series(_ramp(215, 80.0, 101.0) + base + _drop_tail(6, base[-1], 5.0))
-    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
-    assert result.verdict == "ok"
-    assert result.data["crossed_above"] is False
+def test_count_swings_ignores_noise_below_threshold():
+    """Day-to-day wiggles smaller than the reversal threshold (here ~0.5%,
+    well under the 3% default) must never register as their own swings."""
+    noisy_flat = _series([100.0 + (0.5 if i % 2 == 0 else -0.5) for i in range(40)])
+    assert heartbeat._count_swings(noisy_flat, config.GOAT_HEARTBEAT_SWING_MIN_REVERSAL_PCT) == 0
+
+
+def test_count_swings_counts_genuine_reversals():
+    """Three clear legs (up 10%, down 10%, up 10%) -- two confirmed reversals."""
+    close = _series([100.0, 110.0, 99.0, 108.9])
+    assert heartbeat._count_swings(close, config.GOAT_HEARTBEAT_SWING_MIN_REVERSAL_PCT) == 2
