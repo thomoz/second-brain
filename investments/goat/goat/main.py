@@ -30,6 +30,7 @@ def cmd_monitor(args) -> None:
         write_sector_candidates_report,
         write_sector_ranking_report,
     )
+    from .staleness_check import check_stale_reports, maybe_notify_stale_reports
 
     conn = _open_conn()
     result = run_monitor(conn)
@@ -42,9 +43,14 @@ def cmd_monitor(args) -> None:
     write_sector_candidates_report(sector_result)
     write_industry_ranking_report(industry_result)
     maybe_notify(result, new_candidates=sector_result["new_candidates"])
+
+    stale_warnings = check_stale_reports()
+    maybe_notify_stale_reports(stale_warnings)
+
     print(
         f"Goat Monitor complete: {len(result['new_alerts'])} new exit alert(s), "
-        f"{len(sector_result['new_candidates'])} new sector candidate(s). "
+        f"{len(sector_result['new_candidates'])} new sector candidate(s), "
+        f"{len(stale_warnings)} stale report(s). "
         f"See investments/goat/goat-report.md"
     )
 

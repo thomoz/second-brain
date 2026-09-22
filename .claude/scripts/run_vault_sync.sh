@@ -39,10 +39,38 @@ if ! git diff --quiet --cached -- "${SYNC_PATHS[@]}"; then
     git commit -m "vault sync $(date '+%Y-%m-%d %H:%M')" -- "${SYNC_PATHS[@]}" >> "$LOG" 2>&1
 fi
 
-# Pull remote changes; note which Memory/ files changed
+# Pull remote changes; note which Memory/ files changed.
+#
+# Stash-wrap the pull -- added 2026-09-22 after a real ~30-hour outage: a deploy
+# from the dev machine writes changed .py files straight onto the VPS filesystem
+# (it does not commit them there), which leaves those files locally modified in
+# the VPS's git tree. The next vault-sync cycle's plain `git pull` then refused
+# to merge ("local changes would be overwritten"), and because that line had no
+# `|| true` guard, `set -e` above killed the whole script right there -- every
+# cycle, silently, before it ever reached the git push at the bottom. Commits
+# kept piling up locally on the VPS for a day and a half with nothing ever
+# reaching GitHub, and nothing logged an error anyone would notice. Stashing any
+# leftover modified-tracked-file state before the pull (and restoring it after)
+# means a same-cycle deploy collision self-heals automatically in the common
+# case (the stashed content and the incoming commit are the same change) instead
+# of wedging the whole sync pipeline.
+STASH_OUT=$(git stash push -m "vault-sync-autostash $(date '+%Y-%m-%d %H:%M')" 2>&1) || true
+echo "$STASH_OUT" >> "$LOG"
+STASHED=0
+if [[ "$STASH_OUT" != *"No local changes to save"* ]]; then
+    STASHED=1
+fi
+
 BEFORE=$(git rev-parse HEAD)
-git pull --no-rebase >> "$LOG" 2>&1
+git pull --no-rebase >> "$LOG" 2>&1 || echo "pull failed (non-fatal) -- see error above" >> "$LOG"
 AFTER=$(git rev-parse HEAD)
+
+if [ "$STASHED" = "1" ]; then
+    if ! git stash pop >> "$LOG" 2>&1; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] stash pop conflict after pull -- needs manual" \
+             "resolution (git status / git stash list on the VPS)" >> "$LOG"
+    fi
+fi
 
 # Re-index only if Memory/ changed in the pull
 if [ "$BEFORE" != "$AFTER" ]; then
