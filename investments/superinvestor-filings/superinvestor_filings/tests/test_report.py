@@ -48,6 +48,31 @@ def test_recent_filings_table_shows_source_column():
     assert "SAST Reg 29(2)" in md
 
 
+# --- _issuer_cell -------------------------------------------------------------
+
+
+def test_issuer_cell_combines_name_and_ticker_when_both_known():
+    row = {"issuer": "LEN", "issuer_ticker": "LEN", "issuer_name": "Lennar Corp"}
+    assert report._issuer_cell(row) == "Lennar Corp (LEN)"
+
+
+def test_issuer_cell_falls_back_to_issuer_when_no_name():
+    row = {"issuer": "LEN", "issuer_ticker": "LEN", "issuer_name": None}
+    assert report._issuer_cell(row) == "LEN"
+
+
+def test_issuer_cell_sast_row_with_no_ticker_shows_full_name_unchanged():
+    # India/SAST rows never resolve a ticker -- `issuer` is already the full
+    # company name (SLONGNAME) in that case, see sast_monitor.scan_india.
+    row = {"issuer": "Rain Industries Ltd", "issuer_ticker": None, "issuer_name": None}
+    assert report._issuer_cell(row) == "Rain Industries Ltd"
+
+
+def test_issuer_cell_skips_duplicate_parens_when_name_equals_ticker():
+    row = {"issuer": "unknown issuer", "issuer_ticker": None, "issuer_name": "unknown issuer"}
+    assert report._issuer_cell(row) == "unknown issuer"
+
+
 def test_render_how_to_read_caveat_present():
     md = report.render_report({"new_filings": [], "recent_filings": [], "first_seed": False})
     assert "still waits for the quarterly cycle" in md

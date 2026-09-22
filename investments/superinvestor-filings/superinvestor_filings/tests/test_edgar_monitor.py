@@ -58,6 +58,14 @@ def test_new_form4_appears_in_new_filings_and_seen_log(db_conn, monkeypatch):
     assert "sold 40,000 sh" in alert["summary"]
     assert "[>10% owner]" in alert["summary"]
     assert db.count_seen(db_conn) == 1
+    # Company name must ride along with the ticker in the summary -- a bare
+    # ticker isn't always recognizable (Shaun, 2026-09-22: "LEN" with no idea
+    # which company that was; same class of gap as this fixture's "AMR").
+    assert "Alpha Metallurgical Resources, Inc. (AMR)" in alert["summary"]
+    assert alert["issuer_name"] == "Alpha Metallurgical Resources, Inc."
+    assert alert["issuer"] == "AMR"  # dedup/tracking identity stays ticker-only, unchanged
+    seen_row = db.get_recent_superinvestor_filings_seen(db_conn)[0]
+    assert seen_row["issuer_name"] == "Alpha Metallurgical Resources, Inc."
 
 
 def test_same_filing_is_quiet_on_repeat_run(db_conn, monkeypatch):

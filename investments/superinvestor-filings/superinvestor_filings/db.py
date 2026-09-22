@@ -40,10 +40,17 @@ def init_superinvestor_tables(conn: sqlite3.Connection) -> None:
                 first_seen_at     TEXT NOT NULL
             );
         """)
-    # Idempotent column-migration hook for any future column -- SQLite has no
-    # "ADD COLUMN IF NOT EXISTS" so a duplicate-column error is caught and ignored
-    # (mirrors goat/db.py:71-115). No columns to migrate yet; keep the pattern ready.
-    _MIGRATIONS: tuple[str, ...] = ()
+    # Idempotent column-migration hook -- SQLite has no "ADD COLUMN IF NOT EXISTS" so
+    # a duplicate-column error is caught and ignored (mirrors goat/db.py:71-115).
+    _MIGRATIONS: tuple[str, ...] = (
+        # issuer_name added 2026-09-22 -- the display label (report/WhatsApp summary
+        # lines) was ticker-only whenever a ticker resolved, e.g. "Form 4 on LEN" with
+        # no indication that's Lennar Corp. `issuer` itself stays ticker-preferred
+        # (it's the dedup-key/get_last_pct_owned identity, changing it would break
+        # continuity with filings already recorded) -- this is a separate, purely
+        # display column. NULL for every row recorded before this migration.
+        "ALTER TABLE superinvestor_filings_seen ADD COLUMN issuer_name TEXT",
+    )
     with conn:
         for stmt in _MIGRATIONS:
             try:
@@ -61,6 +68,7 @@ def insert_superinvestor_filing_seen(
     filer_display: str,
     form_type: str,
     issuer: str,
+    issuer_name: str | None = None,
     issuer_ticker: str | None = None,
     accession: str | None = None,
     event_date: str | None = None,
@@ -78,11 +86,11 @@ def insert_superinvestor_filing_seen(
     with conn:
         cur = conn.execute(
             """INSERT OR IGNORE INTO superinvestor_filings_seen
-               (dedup_key, source, filer_key, filer_display, form_type, issuer,
+               (dedup_key, source, filer_key, filer_display, form_type, issuer, issuer_name,
                 issuer_ticker, accession, event_date, filed_date, shares, pct_owned,
                 pct_owned_change, material_crossing, transaction_code, raw_url, first_seen_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (dedup_key, source, filer_key, filer_display, form_type, issuer,
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (dedup_key, source, filer_key, filer_display, form_type, issuer, issuer_name,
              issuer_ticker, accession, event_date, filed_date, shares, pct_owned,
              pct_owned_change, material_crossing, transaction_code, raw_url, _now()),
         )

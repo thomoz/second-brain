@@ -379,15 +379,18 @@ def run_earnings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
                     verdict=guidance["verdict"] if guidance is not None else "unknown",
                     detail=guidance["detail"] if guidance is not None else "Guidance search unavailable this run",
                 )
-                new_alerts.extend(
-                    monitor.reconcile_flag_alerts(ticker, "holdings", [trend_check, guidance_check], conn)
+                row_alerts = monitor.reconcile_flag_alerts(
+                    ticker, "holdings", [trend_check, guidance_check], conn
                 )
+                for a in row_alerts:
+                    a["company"] = row["name"]
+                new_alerts.extend(row_alerts)
 
                 for f in (eight_ks or []):
                     if f["new_this_run"]:
                         new_alerts.append({
                             "ticker": ticker, "source_table": "holdings",
-                            "check_name": "earnings_watch_8k",
+                            "check_name": "earnings_watch_8k", "company": row["name"],
                             "message": f"New earnings-relevant 8-K (Item {f['items']}) filed "
                                        f"{f['filing_date']}: {f['summary'] or 'summary unavailable'}",
                         })
@@ -487,7 +490,8 @@ def render_earnings_watch_report(result: dict[str, Any]) -> str:
     lines += ["", "### New Alerts This Run"]
     if result["new_alerts"]:
         for a in result["new_alerts"]:
-            lines.append(f"- **{a['ticker']}** ({a['source_table']}) -- {a['check_name']}: {a['message']}")
+            company = f" ({a['company']})" if a.get("company") else ""
+            lines.append(f"- **{a['ticker']}**{company} ({a['source_table']}) -- {a['check_name']}: {a['message']}")
     else:
         lines.append("No new material changes.")
 
@@ -510,6 +514,8 @@ def maybe_notify(result: dict[str, Any]) -> None:
     send_toast_notification("Earnings Deterioration Watch", summary)
 
     lines = [f"Earnings Deterioration Watch: {n} item(s) flagged."] + [
-        f"- {a['ticker']}: {a['check_name']} -- {a['message']}" for a in result["new_alerts"]
+        f"- {a['ticker']}" + (f" ({a['company']})" if a.get("company") else "")
+        + f": {a['check_name']} -- {a['message']}"
+        for a in result["new_alerts"]
     ]
     send_whatsapp_notification("\n".join(lines))

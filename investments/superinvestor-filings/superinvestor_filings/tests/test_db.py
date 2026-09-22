@@ -41,3 +41,15 @@ def test_get_recent_filters_by_source(db_conn):
     _insert(db_conn, dedup_key="s1", source="sast")
     assert len(db.get_recent_superinvestor_filings_seen(db_conn, source="edgar")) == 1
     assert len(db.get_recent_superinvestor_filings_seen(db_conn)) == 2
+
+
+def test_issuer_name_persisted_and_readable(db_conn):
+    _insert(db_conn, issuer_name="Rain Industries Ltd")
+    row = db.get_recent_superinvestor_filings_seen(db_conn)[0]
+    assert row["issuer_name"] == "Rain Industries Ltd"
+
+
+def test_issuer_name_defaults_to_none(db_conn):
+    _insert(db_conn)
+    row = db.get_recent_superinvestor_filings_seen(db_conn)[0]
+    assert row["issuer_name"] is None

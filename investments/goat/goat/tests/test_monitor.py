@@ -51,6 +51,9 @@ def test_run_monitor_creates_new_alert_for_first_flag(db_conn, monkeypatch):
     assert len(result["new_alerts"]) == 1
     assert len(goat_db.get_open_goat_alerts(db_conn)) == 1
     assert result["checked_holdings"] == 1
+    # Company name must ride along with every alert -- a bare ticker in the
+    # WhatsApp alert isn't always recognizable (Shaun, 2026-09-22).
+    assert result["new_alerts"][0]["company"] == "Vertex Pharmaceuticals"
 
 
 def test_run_monitor_stays_quiet_on_repeat_flag(db_conn, monkeypatch):
@@ -106,6 +109,7 @@ def test_run_monitor_creates_new_alert_for_raw_watchlist_ticker(db_conn, monkeyp
     assert len(result["new_alerts"]) == 1
     assert result["new_alerts"][0]["ticker"] == "MCD"
     assert result["new_alerts"][0]["source_table"] == "watchlist"
+    assert result["new_alerts"][0]["company"] == "McDonald's Corp"
     assert result["checked_watchlist"] == 1
     assert result["checked_holdings"] == 0
 

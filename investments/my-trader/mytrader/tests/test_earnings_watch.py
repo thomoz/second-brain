@@ -286,10 +286,25 @@ def test_render_report_shows_full_signal_detail_for_a_real_holding():
             "industry_context": None,
         }],
         "new_alerts": [{"ticker": "KO", "source_table": "holdings", "check_name": "earnings_watch_trend",
-                         "message": "EPS estimate down 5.0%"}],
+                         "message": "EPS estimate down 5.0%", "company": "Coca-Cola"}],
     }
     report = earnings_watch.render_earnings_watch_report(result)
     assert "Estimate trend: EPS estimate down 5.0%" in report
     assert "NEW" in report
     assert "New Alerts This Run" in report
     assert "earnings_watch_trend" in report
+    # Company name must ride along with the ticker -- a bare ticker isn't always
+    # recognizable (Shaun, 2026-09-22).
+    assert "**KO** (Coca-Cola)" in report
+
+
+def test_render_report_alert_without_company_key_omits_parens():
+    """new_alerts entries without a 'company' key (e.g. an older/unmigrated caller)
+    must render fine, not crash on a missing key."""
+    result = {
+        "checked_holdings": 0, "holdings_results": [],
+        "new_alerts": [{"ticker": "KO", "source_table": "holdings", "check_name": "earnings_watch_trend",
+                         "message": "EPS estimate down 5.0%"}],
+    }
+    report = earnings_watch.render_earnings_watch_report(result)
+    assert "**KO** (holdings) -- earnings_watch_trend" in report

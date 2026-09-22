@@ -62,7 +62,10 @@ def run_live_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
                     continue
                 close = _completed_closes_only(close, tz_name)
                 check = exit_check.check_150dma_exit_live(ticker, close, live_price)
-                new_alerts.extend(reconcile_alerts(ticker, [check], conn))
+                row_alerts = reconcile_alerts(ticker, [check], conn)
+                for a in row_alerts:
+                    a["company"] = row["name"]
+                new_alerts.extend(row_alerts)
                 checked += 1
             except Exception as e:
                 print(f"[goat-live-monitor] error checking {ticker}: {e}")

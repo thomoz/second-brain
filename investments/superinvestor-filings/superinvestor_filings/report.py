@@ -46,6 +46,21 @@ _RECENT_HEADER = [
 _SOURCE_LABEL = {"edgar": "US EDGAR", "sast": "IN BSE SAST"}
 
 
+def _issuer_cell(r: dict[str, Any]) -> str:
+    """'Company Name (TICKER)' when both are known and differ, else whatever single
+    identity is available -- `issuer` alone is frequently just a ticker (see
+    edgar_monitor._format_issuer_display's docstring for the incident that prompted
+    this: an alert for "LEN" with no indication that's Lennar Corp). `issuer_name`
+    is NULL for filings recorded before this column existed (2026-09-22) and for
+    the India/SAST leg, which never resolves a ticker -- both fall back to `issuer`
+    unchanged, which for SAST rows is already the full company name."""
+    name = r.get("issuer_name")
+    ticker = r.get("issuer_ticker") or r.get("issuer", "")
+    if name and ticker and name != ticker:
+        return f"{name} ({ticker})"
+    return r.get("issuer", "")
+
+
 def _recent_row(r: dict[str, Any]) -> str:
     pct = f"{r['pct_owned']:.1f}%" if r.get("pct_owned") is not None else ""
     shares = f"{r['shares']:,.0f}" if r.get("shares") is not None else ""
@@ -53,7 +68,7 @@ def _recent_row(r: dict[str, Any]) -> str:
     src = _SOURCE_LABEL.get(r.get("source", ""), r.get("source", "") or "-")
     return (
         f"| {src} | {r.get('filer_display', '')} | {r.get('form_type', '')} "
-        f"| {r.get('issuer', '')} | {size} | {r.get('material_crossing') or '-'} "
+        f"| {_issuer_cell(r)} | {size} | {r.get('material_crossing') or '-'} "
         f"| {r.get('filed_date') or '-'} |"
     )
 

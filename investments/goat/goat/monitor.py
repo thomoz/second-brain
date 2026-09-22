@@ -80,7 +80,10 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
                 print(f"[goat-monitor] no price history for {ticker}, skipping")
                 continue
             check = exit_check.check_150dma_exit(ticker, close)
-            new_alerts.extend(reconcile_alerts(ticker, [check], conn, source_table=SOURCE_TABLE))
+            row_alerts = reconcile_alerts(ticker, [check], conn, source_table=SOURCE_TABLE)
+            for a in row_alerts:
+                a["company"] = row["name"]
+            new_alerts.extend(row_alerts)
             checked_holdings += 1
         except Exception as e:
             print(f"[goat-monitor] error checking {ticker}: {e}")
@@ -94,7 +97,10 @@ def run_monitor(conn: sqlite3.Connection) -> dict[str, Any]:
                 print(f"[goat-monitor] no price history for watchlist {ticker}, skipping")
                 continue
             check = exit_check.check_150dma_exit(ticker, close)
-            new_alerts.extend(reconcile_alerts(ticker, [check], conn, source_table=WATCHLIST_SOURCE_TABLE))
+            row_alerts = reconcile_alerts(ticker, [check], conn, source_table=WATCHLIST_SOURCE_TABLE)
+            for a in row_alerts:
+                a["company"] = row["name"]
+            new_alerts.extend(row_alerts)
             checked_watchlist += 1
         except Exception as e:
             print(f"[goat-monitor] error checking watchlist {ticker}: {e}")
@@ -127,8 +133,9 @@ def render_report(result: dict[str, Any]) -> str:
     ]
     if result["new_alerts"]:
         for a in result["new_alerts"]:
+            company = f" ({a['company']})" if a.get("company") else ""
             label = f" ({a['source_table']})" if a.get("source_table") else ""
-            lines.append(f"- **{a['ticker']}**{label} -- {a['message']}")
+            lines.append(f"- **{a['ticker']}**{company}{label} -- {a['message']}")
     else:
         lines.append("No new material changes.")
     lines += ["", "### All Open Alerts"]

@@ -60,6 +60,7 @@ def test_run_live_monitor_creates_new_alert_on_flag(db_conn, monkeypatch):
     result = live_monitor.run_live_monitor(db_conn)
     assert len(result["new_alerts"]) == 1
     assert len(goat_db.get_open_goat_alerts(db_conn)) == 1
+    assert result["new_alerts"][0]["company"] == "Vertex Pharmaceuticals"
 
 
 def test_run_live_monitor_skips_ticker_with_no_live_price(db_conn, monkeypatch):

@@ -35,6 +35,19 @@ def build_dedup_key(source: str, filer_key: str, form_type: str, issuer: str, ac
     return "|".join([source, filer_key, form_type, issuer or "", accession or ""])
 
 
+def _format_issuer_display(issuer_name: str | None, issuer_ticker: str | None, issuer_label: str) -> str:
+    """Human-readable 'Company Name (TICKER)' for the summary line/report -- ticker
+    alone is frequently not recognizable (Shaun, 2026-09-22: got a Form 3/4 alert for
+    "LEN" with no idea which of several possible companies that was; it's Lennar
+    Corp). `issuer_label` (ticker-preferred, falls back to name) stays the identity
+    used for the dedup key / DB `issuer` column / get_last_pct_owned lookups --
+    changing that would break continuity with filings already recorded under the
+    old ticker-only label. This is purely a display-string change."""
+    if issuer_name and issuer_ticker and issuer_name != issuer_ticker:
+        return f"{issuer_name} ({issuer_ticker})"
+    return issuer_label
+
+
 def _same_cik(a: str | None, b: str | None) -> bool:
     """CIKs compare equal ignoring zero-padding ("0001067983" == "1067983")."""
     try:
@@ -133,6 +146,7 @@ def _process_ownership(
         parsed.get("issuer_ticker") if parsed else None,
     )
     issuer_label = issuer_ticker or issuer_name or "unknown issuer"
+    issuer_display = _format_issuer_display(issuer_name, issuer_ticker, issuer_label)
 
     summary_body, txn_codes, event_date = ("filing details unavailable", None, None)
     is_ten_pct = False
@@ -146,15 +160,15 @@ def _process_ownership(
     newly_seen = db.insert_superinvestor_filing_seen(
         conn, dedup_key=dedup_key, source="edgar", filer_key=filer_key,
         filer_display=filer_display, form_type=f"Form {form_type}", issuer=issuer_label,
-        issuer_ticker=issuer_ticker, accession=accession, event_date=event_date,
-        filed_date=filed_date, shares=None, pct_owned=None, pct_owned_change=None,
-        material_crossing=material_crossing, transaction_code=txn_codes,
+        issuer_name=issuer_name, issuer_ticker=issuer_ticker, accession=accession,
+        event_date=event_date, filed_date=filed_date, shares=None, pct_owned=None,
+        pct_owned_change=None, material_crossing=material_crossing, transaction_code=txn_codes,
         raw_url=_archive_url(cik, accession, filing["primary_document"]),
     )
     if not newly_seen:
         return None
 
-    line = f"Form {form_type} on {issuer_label} ({summary_body}"
+    line = f"Form {form_type} on {issuer_display} ({summary_body}"
     if event_date:
         line += f", txn {event_date}"
     line += f", filed {filed_date})"
@@ -162,7 +176,7 @@ def _process_ownership(
         line += " [>10% owner]"
     return {
         "filer_key": filer_key, "filer_display": filer_display,
-        "form_type": f"Form {form_type}", "issuer": issuer_label,
+        "form_type": f"Form {form_type}", "issuer": issuer_label, "issuer_name": issuer_name,
         "issuer_ticker": issuer_ticker, "filed_date": filed_date, "event_date": event_date,
         "material_crossing": material_crossing, "summary": line,
         "raw_url": _archive_url(cik, accession, filing["primary_document"]),
@@ -182,6 +196,7 @@ def _process_schedule(
     issuer_cik = parsed.get("issuer_cik") if parsed else None
     issuer_ticker = issuer_lookup.resolve_ticker(conn, issuer_cik, None)
     issuer_label = issuer_ticker or issuer_name or "unknown issuer"
+    issuer_display = _format_issuer_display(issuer_name, issuer_ticker, issuer_label)
 
     pct_owned = parsed.get("pct_owned") if parsed else None
     shares = parsed.get("shares") if parsed else None
@@ -194,8 +209,8 @@ def _process_schedule(
     newly_seen = db.insert_superinvestor_filing_seen(
         conn, dedup_key=dedup_key, source="edgar", filer_key=filer_key,
         filer_display=filer_display, form_type=form_type, issuer=issuer_label,
-        issuer_ticker=issuer_ticker, accession=accession, event_date=None,
-        filed_date=filed_date, shares=shares, pct_owned=pct_owned,
+        issuer_name=issuer_name, issuer_ticker=issuer_ticker, accession=accession,
+        event_date=None, filed_date=filed_date, shares=shares, pct_owned=pct_owned,
         pct_owned_change=pct_change, material_crossing=material_crossing,
         transaction_code=None,
         raw_url=_archive_url(cik, accession, filing["primary_document"]),
@@ -209,13 +224,13 @@ def _process_schedule(
     if shares is not None:
         bits.append(f"{shares:,.0f} sh")
     detail = ", ".join(bits) if bits else "details in filing"
-    line = f"{form_type} on {issuer_label} ({detail}, filed {filed_date})"
+    line = f"{form_type} on {issuer_display} ({detail}, filed {filed_date})"
     if material_crossing:
         line += f" [{material_crossing}]"
     return {
         "filer_key": filer_key, "filer_display": filer_display,
-        "form_type": form_type, "issuer": issuer_label, "issuer_ticker": issuer_ticker,
-        "filed_date": filed_date, "event_date": None,
+        "form_type": form_type, "issuer": issuer_label, "issuer_name": issuer_name,
+        "issuer_ticker": issuer_ticker, "filed_date": filed_date, "event_date": None,
         "material_crossing": material_crossing, "summary": line,
         "raw_url": _archive_url(cik, accession, filing["primary_document"]),
     }
