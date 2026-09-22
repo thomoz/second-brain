@@ -153,4 +153,4 @@ Issue a K-1 or other non-standard tax form (commodity-pool ETFs, MLPs) instead o
 |--------|------|------|--------|----------|------------|--------|
 | CORN | Teucrium Corn Fund | etf | tax_complex | — | — | Commodity pool structured as a trust - issues a K-1 not a 1099 |
 
-Last auto-generated: 2026-09-20.
+Last auto-generated: 2026-09-22.
