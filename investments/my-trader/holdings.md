@@ -4,20 +4,19 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 
 | Ticker | Name | Qty | Mkt Value | Avg Price | Unrealized P&L | Bucket |
 |--------|------|-----|-----------|-----------|-----------------|--------|
-| AG |  | 40.0264 | $813.34 | $20.98 | $-26.41 | unassigned |
+| AG |  | 40.0264 | — | $20.98 | — | unassigned |
 | BMS |  | 250.0 | — | $2.32 | — | unassigned |
-| CHD |  | 9.0 | $865.08 | $95.65 | +$4.26 | unassigned |
-| CYL.AX |  | 200.0 | $1,227.00 | $5.86 | +$55.95 | unassigned |
-| GOLD.AX |  | 20.0 | $1,118.20 | $59.31 | $-68.05 | unassigned |
-| GXLD.AX |  | 25.0 | $1,523.00 | $61.82 | $-22.56 | unassigned |
-| LLY | Eli Lilly & Co | 0.0001 | $0.12 | $1,148.00 | +$0.00 | 1 |
-| LULU | lululemon athletica inc. | 22.0 | $2,282.06 | $113.22 | $-208.67 | 1 |
-| LYV | Live Nation Entertainment Inc | 0.4 | $67.94 | $167.29 | +$1.02 | 1 |
-| PDD |  | 10.0 | $803.50 | $92.53 | $-121.84 | unassigned |
-| PMGOLD.AX |  | 50.0 | $897.00 | $62.06 | $-2,206.18 | 3b |
-| SILJ |  | 25.0 | $777.25 | $32.27 | $-29.59 | unassigned |
-| SOFI |  | 50.0 | $858.00 | $19.01 | $-92.33 | unassigned |
-| UBER |  | 10.0 | $698.90 | $79.08 | $-91.86 | unassigned |
-| V | Visa Inc (Class A) | 0.1002 | $36.28 | $318.47 | +$4.37 | 1 |
+| CYL.AX |  | 200.0 | — | $5.86 | — | unassigned |
+| GOLD.AX |  | 20.0 | — | $59.31 | — | unassigned |
+| GXLD.AX |  | 25.0 | — | $61.82 | — | unassigned |
+| LLY | Eli Lilly & Co | 0.0001 | — | $1,148.00 | — | 1 |
+| LULU | lululemon athletica inc. | 22.0 | — | $113.22 | — | 1 |
+| LYV | Live Nation Entertainment Inc | 0.4 | — | $167.29 | — | 1 |
+| PDD |  | 10.0 | — | $92.53 | — | unassigned |
+| PMGOLD.AX |  | 50.0 | — | $62.06 | — | 3b |
+| SILJ |  | 25.0 | — | $32.27 | — | unassigned |
+| SOFI |  | 50.0 | — | $19.01 | — | unassigned |
+| UBER |  | 10.0 | — | $79.08 | — | unassigned |
+| V | Visa Inc (Class A) | 0.1002 | — | $318.47 | — | 1 |
 
 Last auto-generated: 2026-09-23.
