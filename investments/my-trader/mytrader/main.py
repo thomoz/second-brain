@@ -494,9 +494,10 @@ def main() -> None:
     )
     p_sync_ibkr.add_argument(
         "--apply", action="store_true",
-        help="Commit qty/avg-price corrections for matched tickers and add new IBKR "
+        help="Commit qty/avg-price corrections for matched tickers, add new IBKR "
              "positions straight to holdings (bucket 'unassigned' until you re-bucket "
-             "them yourself) (default: dry run, prints the diff only)",
+             "them yourself), and remove holdings IBKR no longer reports (fully sold) "
+             "(default: dry run, prints the diff only)",
     )
 
     args = parser.parse_args()

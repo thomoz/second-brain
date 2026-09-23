@@ -16,6 +16,22 @@ a manual bucket-assignment step gating it. Re-bucketing later is a plain
 (staged into a separate ibkr_pending_positions table, requiring `ibkr-assign-bucket`
 before it showed up anywhere) -- removed entirely, not just bypassed.
 
+A tracked holding IBKR no longer reports (`missing_from_ibkr`) is fully removed on
+`--apply` -- Shaun's 2026-09-23 call, after discovering a sync had left 4 fully-sold
+positions (URNM.AX, NVDA, ETPMAG.AX, OOO.AX) sitting in holdings.md because the
+original design only ever reported these, never removed them, deliberately mirroring
+[[feedback_no_auto_delete_watchlist]]'s "never auto-remove as a side effect of a
+check" rule. That rule is about Monitor/Find silently dropping a row during an
+*assessment* -- this is different: `sync-ibkr` exists specifically to make holdings.md
+match Shaun's real IBKR account, so a position IBKR stops reporting (a real sale) is
+exactly the signal this sync is supposed to act on, not just narrate. Uses the same
+qty-to-zero + delete_holding_if_zero idiom holdings_ops.py's own sell path already
+uses, not a raw DELETE. Whole portfolio lives in this one IBKR account today (every
+row in holdings.md was seeded from, or has since been reconciled against, IBKR sync)
+-- if that ever stops being true (a position held at a different broker), a plain
+`--apply` run would incorrectly remove it; re-add via `holding-buy` if that ever
+happens.
+
 Also commits + pushes holdings.md/watchlist.md immediately when regenerate_all()
 touches them, instead of waiting on second-brain-vaultsync.timer's own 2-minute
 cycle -- ibkr_remote_write.push_positions_remote's local caller does a `git pull`
@@ -57,7 +73,7 @@ _NEW_POSITION_BUCKET = "unassigned"  # matches the placeholder already used for
 
 
 def main() -> None:
-    from .db import get_all_holdings, get_holding_row, upsert_holding
+    from .db import delete_holding_if_zero, get_all_holdings, get_holding_row, upsert_holding
     from .ibkr_sync import compute_diff
     from .main import _open_conn
     from .snapshot import regenerate_all
@@ -101,13 +117,16 @@ def main() -> None:
     print(f"\nTracked but missing from IBKR ({len(diff['missing_from_ibkr'])}):")
     for row in diff["missing_from_ibkr"]:
         print(
-            f"  {row['ticker']} (bucket {row['bucket']}): qty {row['qty']} — sold outside "
-            "this tool, or run holding-sell if confirmed"
+            f"  {row['ticker']} (bucket {row['bucket']}): qty {row['qty']} — no longer reported "
+            f"by IBKR, {'removing' if apply else 'would be removed with --apply'}"
         )
 
     if not apply:
         conn.close()
-        print("\nDry run only — no writes made. Re-run with --apply to commit corrections and add new positions.")
+        print(
+            "\nDry run only — no writes made. Re-run with --apply to commit corrections, "
+            "add new positions, and remove positions IBKR no longer reports."
+        )
         return
 
     corrected = 0
@@ -129,14 +148,25 @@ def main() -> None:
         )
         added += 1
 
-    if corrected or added:
+    removed = 0
+    for row in diff["missing_from_ibkr"]:
+        existing = get_holding_row(conn, row["ticker"], row["bucket"])
+        upsert_holding(
+            conn, ticker=row["ticker"], name=existing["name"], asset_type=existing["asset_type"],
+            bucket=row["bucket"], qty=0.0, avg_price=existing["avg_price"],
+            currency=existing["currency"], last_expense_ratio=existing["last_expense_ratio"],
+        )
+        delete_holding_if_zero(conn, row["ticker"], row["bucket"])
+        removed += 1
+
+    if corrected or added or removed:
         regenerate_all(conn)
         _commit_and_push_holdings_files()
     conn.close()
     print(
         f"\nApplied: {corrected} correction(s), {added} new position(s) added "
         f"(bucket '{_NEW_POSITION_BUCKET}' — re-bucket them yourself when convenient), "
-        f"{len(diff['missing_from_ibkr'])} missing (reported only)."
+        f"{removed} position(s) removed (no longer reported by IBKR)."
     )
 
 
