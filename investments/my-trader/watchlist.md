@@ -10,6 +10,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
+| ADBE | unassigned | Feels oversold/hated-on - watching for a good entry, not convinced it wont drop further |
 | CV | unassigned | EPS miss + margin pressure Q2 2026, H2 guided higher - monitor next print |
 | KAR.AX | unassigned | Keep an eye on (Shaun request 2026-09-16) |
 | KMI | unassigned | Energy sector - keep an eye on |
@@ -30,6 +31,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 |--------|------|------|--------|----------|------------|--------|
 | 1211.HK | BYD Company Limited | stock | unassigned | — | — | Added at Shaun's request 2026-08-19 |
 | 3750.HK | Contemporary Amperex Technology Co., Limited (CATL) | stock | unassigned | — | — | Not yet discussed. HK-listed (HKD). World's largest EV battery maker. |
+| ADBE | Adobe Inc. | stock | unassigned | — | — | Oversold/hated narrative watch, 2026-09-23 - not convinced it wont drop more, watching for a good entry point. |
 | CEG | Constellation Energy Corp | stock | unassigned | — | — | Nuclear power generation — largest US carbon-free/nuclear generator |
 | COUR | Coursera Inc | stock | unassigned | — | — | Added from Cash Value Report (2026-08-26) |
 | CPRT | Copart Inc | stock | 1 | — | — | Vehicle salvage/insurance auction near-duopoly (land-bank moat). Fair-price-today case, not a crash-timing trade: PE 17.4, clean balance sheet (D/E 1.1), ROE 17.6%, opportunity check fired 2 signals on a -15.8% 3mo dip. Crash-resilience check shows it amplifies broad-market crashes ~1.3x (COVID -43.8% vs S&P -33.9%, 2022 -35.4% vs S&P -25.4%) -- moat protects market position, not stock price, so doesn't fit the AI-postcrash 'wait for a bubble to deflate' framing either. |
