@@ -14,6 +14,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | CV | unassigned | EPS miss + margin pressure Q2 2026, H2 guided higher - monitor next print |
 | GOOG | unassigned | Keep an eye on (Shaun request 2026-09-24) |
 | ICLN | unassigned | Clean energy ETF |
+| IHI | unassigned | Medical devices ETF |
 | KAR.AX | unassigned | Keep an eye on (Shaun request 2026-09-16) |
 | KMI | unassigned | Energy sector - keep an eye on |
 | MTA | unassigned | Not yet discussed -- flagged to watch. |
@@ -52,6 +53,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | GOOG | Alphabet Inc (Class C) | stock | unassigned | — | — | Class C, no voting rights - distinct from GOOGL already on watchlist |
 | GRID | First Trust NASDAQ Clean Edge Smart Grid ETF | etf | unassigned | 0.75% | +441% | Not yet discussed. Sector/thematic |
 | ICLN | iShares Global Clean Energy ETF | etf | unassigned | — | — | Clean energy ETF, added 2026-09-24. |
+| IHI | iShares U.S. Medical Devices ETF | etf | unassigned | — | — | Medical devices ETF |
 | IVV | iShares Core S&P 500 ETF | etf | 1 | — | — | Core S&P 500 index ETF. Expense ratio 0.03% -- cheaper than SPY's 0.0945% for identical index exposure, matches VOO/VTI already in bucket 1. PE 26.9, no valuation/balance-sheet flags. Crash resilience roughly tracks the broad market by construction (2008 -55.2%, 2022 -24.5%) since it IS the broad market. Principles fit avg 35/100 -- expected and not meaningful for a diversified index fund (Buffett/Graham/Lynch/Fisher frameworks are built to grade single operating businesses, not baskets). |
 | IXI.AX | iShares Global Consumer Staples ETF | etf | 1 | 1.78% | +84% | Not yet discussed. Fee 0.41% |
 | KAR.AX | Karoon Energy Ltd | stock | unassigned | — | — | Not yet discussed. |
