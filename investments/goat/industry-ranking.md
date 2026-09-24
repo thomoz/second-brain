@@ -47,8 +47,8 @@ All 39 covered industries.
 | 18 | KIE | Insurance - Diversified | +10.5% | Yes |
 | 19 | ESPO | Electronic Gaming & Multimedia | +8.3% | Yes |
 | 20 | IBUY | Internet Retail | +6.6% | Yes |
-| 21 | PAVE | Engineering & Construction | +6.5% | Yes |
-| 22 | INDS | REIT - Industrial | +6.4% | Yes |
+| 21 | INDS | REIT - Industrial | +6.6% | Yes |
+| 22 | PAVE | Engineering & Construction | +6.5% | Yes |
 | 23 | XOP | Oil & Gas E&P | +5.4% | Yes |
 | 24 | MOO | Agricultural Inputs | +4.6% | Yes |
 | 25 | IYZ | Telecom Services | +4.4% | Yes |
