@@ -152,3 +152,10 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-09-20 Reflection
 - (Sep 20) NEXG should use TSXV ticker NEXG.V, not bare NEXG.
+
+## 2026-09-24 Reflection
+- (Sep 24) DMA breakout ETF universe added and deployed.
+- (Sep 24) IBKR sync auto-removal fixed and deployed.
+- (Sep 24) WhatsApp alerts now include company name beside ticker.
+- (Sep 24) VPS deploy included vault-sync resilience and staleness-alert fixes.
+- (Sep 24) my-trader quote fetch 404s for BMS/BMS.AX fundamentals and some metals ETFs.
