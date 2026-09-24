@@ -12,6 +12,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 |--------|-----------|-----|
 | ADBE | unassigned | Feels oversold/hated-on - watching for a good entry, not convinced it wont drop further |
 | CV | unassigned | EPS miss + margin pressure Q2 2026, H2 guided higher - monitor next print |
+| GOOG | unassigned | Keep an eye on (Shaun request 2026-09-24) |
 | ICLN | unassigned | Clean energy ETF |
 | KAR.AX | unassigned | Keep an eye on (Shaun request 2026-09-16) |
 | KMI | unassigned | Energy sector - keep an eye on |
@@ -48,6 +49,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | FPI | Farmland Partners Inc | reit | 2 | 2.75% | +28% | Not yet discussed. Farmland REIT — has a 2018 governance flag on record |
 | GDX | VanEck Gold Miners ETF | etf | 2 | 0.84% | +162% | Not yet discussed. Gold miners — separate product from gold itself (PMGOLD), higher volatility |
 | GOLD | Barrick Gold Corp | stock | 2 | 2.07% | +534% | Not yet discussed. Individual gold miner |
+| GOOG | Alphabet Inc (Class C) | stock | unassigned | — | — | Class C, no voting rights - distinct from GOOGL already on watchlist |
 | GRID | First Trust NASDAQ Clean Edge Smart Grid ETF | etf | unassigned | 0.75% | +441% | Not yet discussed. Sector/thematic |
 | ICLN | iShares Global Clean Energy ETF | etf | unassigned | — | — | Clean energy ETF, added 2026-09-24. |
 | IVV | iShares Core S&P 500 ETF | etf | 1 | — | — | Core S&P 500 index ETF. Expense ratio 0.03% -- cheaper than SPY's 0.0945% for identical index exposure, matches VOO/VTI already in bucket 1. PE 26.9, no valuation/balance-sheet flags. Crash resilience roughly tracks the broad market by construction (2008 -55.2%, 2022 -24.5%) since it IS the broad market. Principles fit avg 35/100 -- expected and not meaningful for a diversified index fund (Buffett/Graham/Lynch/Fisher frameworks are built to grade single operating businesses, not baskets). |
