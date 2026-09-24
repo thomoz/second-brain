@@ -109,6 +109,32 @@ def test_set_watch_note_returns_zero_when_ticker_not_on_watchlist(db_conn):
     assert db.set_watch_note(db_conn, "NOPE", "x") == 0
 
 
+def test_set_watch_group_moves_a_flagged_ticker_into_a_named_sub_block(db_conn):
+    db.upsert_watchlist_row(db_conn, ticker="KARS", name="KraneShares EV Future Mobility ETF", asset_type="etf", bucket="unassigned")
+    db.upsert_watchlist_row(db_conn, ticker="WES", name="Wesfarmers", asset_type="stock", bucket="4")
+    db.set_watch_note(db_conn, "KARS", "35% allocation")
+    db.set_watch_note(db_conn, "WES", "FY26 results")
+    db.set_watch_group(db_conn, "KARS", "Alternative Energy Transport")
+
+    default_block = db.get_watched(db_conn)
+    assert [w["ticker"] for w in default_block] == ["WES"]
+
+    group_block = db.get_watched(db_conn, group="Alternative Energy Transport")
+    assert [w["ticker"] for w in group_block] == ["KARS"]
+
+    assert db.get_watch_groups(db_conn) == ["Alternative Energy Transport"]
+
+
+def test_set_watch_group_none_moves_a_ticker_back_to_the_default_block(db_conn):
+    db.upsert_watchlist_row(db_conn, ticker="KARS", name="KraneShares EV Future Mobility ETF", asset_type="etf", bucket="unassigned")
+    db.set_watch_note(db_conn, "KARS", "35% allocation")
+    db.set_watch_group(db_conn, "KARS", "Alternative Energy Transport")
+    db.set_watch_group(db_conn, "KARS", None)
+
+    assert [w["ticker"] for w in db.get_watched(db_conn)] == ["KARS"]
+    assert db.get_watch_groups(db_conn) == []
+
+
 def test_set_crash_discount_rank_sets_and_reads_back(db_conn):
     db.upsert_watchlist_row(db_conn, ticker="NOK", name="Nokia Oyj", asset_type="stock", bucket="4")
     n = db.set_crash_discount_rank(db_conn, "NOK", "4", 8)

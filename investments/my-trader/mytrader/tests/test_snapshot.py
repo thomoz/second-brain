@@ -118,6 +118,29 @@ def test_regenerate_watchlist_md_renders_keep_an_eye_block_at_top(db_conn, monke
     assert "| WES | Wesfarmers | stock | 4 |" in rest  # normal row still present
 
 
+def test_regenerate_watchlist_md_renders_named_keep_an_eye_sub_block(db_conn, monkeypatch, tmp_path):
+    _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
+    db.upsert_watchlist_row(db_conn, ticker="KARS", name="KraneShares EV Future Mobility ETF",
+                            asset_type="etf", bucket="unassigned")
+    db.upsert_watchlist_row(db_conn, ticker="WES", name="Wesfarmers", asset_type="stock", bucket="4",
+                            status="discussed", notes="Crash-discount candidate")
+    db.set_watch_note(db_conn, "KARS", "35% allocation")
+    db.set_watch_group(db_conn, "KARS", "Alternative Energy Transport")
+    db.set_watch_note(db_conn, "WES", "FY26 results 27 Aug 2026")
+    snapshot.regenerate_watchlist_md(db_conn)
+
+    content = watchlist_path.read_text(encoding="utf-8")
+    assert "### 👁 Keep an eye on" in content
+    assert "### 👁 Alternative Energy Transport" in content
+    default_block, group_block = content.split("### 👁 Alternative Energy Transport")
+    # KARS's own note only shows in its named sub-block, not the default block
+    assert "| KARS | unassigned | 35% allocation |" not in default_block
+    assert "| KARS | unassigned | 35% allocation |" in group_block
+    assert "| WES | 4 | FY26 results 27 Aug 2026 |" in default_block
+    # named sub-block sits below the default block, above the main table
+    assert group_block.index("| KARS | unassigned | 35% allocation |") < group_block.index("| Ticker | Name |")
+
+
 def test_regenerate_watchlist_md_splits_post_crash_ai_section(db_conn, monkeypatch, tmp_path):
     _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
 

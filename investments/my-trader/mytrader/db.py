@@ -26,6 +26,12 @@ def _ensure_watchlist_return_columns(conn: sqlite3.Connection) -> None:
             # NULL = not flagged; a non-empty string = "keep an eye on this", and the
             # string is the reason, surfaced at the top of watchlist.md.
             conn.execute("ALTER TABLE watchlist ADD COLUMN watch_note TEXT")
+        if "watch_group" not in cols:
+            # NULL = the flagged row renders in the default "Keep an eye on" block;
+            # a non-empty string names a themed sub-block rendered below it in the
+            # same table style (e.g. "Alternative Energy Transport"). Only meaningful
+            # alongside a non-null watch_note.
+            conn.execute("ALTER TABLE watchlist ADD COLUMN watch_group TEXT")
         if "crash_discount_rank" not in cols:
             # 0-10 (10 = must-buy), meaningful only for Bucket 4 rows -- sorts the
             # "Crash Discount Buys" table in watchlist.md. NULL = not yet ranked.
@@ -365,15 +371,48 @@ def set_crash_discount_rank(
         return cur.rowcount
 
 
-def get_watched(conn: sqlite3.Connection) -> list[sqlite3.Row]:
-    """One row per flagged ticker (buckets joined if it's in several), for the
-    top-of-watchlist summary block."""
+def set_watch_group(conn: sqlite3.Connection, ticker: str, group: str | None) -> int:
+    """Move a flagged ticker into (group set) or out of (group=None) a named
+    keep-an-eye-on sub-block. Applies to every bucket the ticker sits in, same scope
+    as set_watch_note. Returns rows touched."""
+    with conn:
+        cur = conn.execute(
+            "UPDATE watchlist SET watch_group = ?, updated_at = ? WHERE ticker = ?",
+            (group or None, _now(), ticker),
+        )
+        return cur.rowcount
+
+
+def get_watched(conn: sqlite3.Connection, group: str | None = None) -> list[sqlite3.Row]:
+    """One row per flagged ticker (buckets joined if it's in several). group=None
+    (default) returns the default "Keep an eye on" block's rows (watch_group IS
+    NULL/empty); pass a group name to get that named sub-block's rows instead."""
+    if group is None:
+        return conn.execute(
+            """SELECT ticker, GROUP_CONCAT(bucket, ', ') AS buckets, watch_note
+               FROM watchlist
+               WHERE watch_note IS NOT NULL AND watch_note != ''
+                 AND (watch_group IS NULL OR watch_group = '')
+               GROUP BY ticker, watch_note ORDER BY ticker"""
+        ).fetchall()
     return conn.execute(
         """SELECT ticker, GROUP_CONCAT(bucket, ', ') AS buckets, watch_note
            FROM watchlist
-           WHERE watch_note IS NOT NULL AND watch_note != ''
-           GROUP BY ticker, watch_note ORDER BY ticker"""
+           WHERE watch_note IS NOT NULL AND watch_note != '' AND watch_group = ?
+           GROUP BY ticker, watch_note ORDER BY ticker""",
+        (group,),
     ).fetchall()
+
+
+def get_watch_groups(conn: sqlite3.Connection) -> list[str]:
+    """Distinct named keep-an-eye-on sub-groups currently in use, alphabetical."""
+    rows = conn.execute(
+        """SELECT DISTINCT watch_group FROM watchlist
+           WHERE watch_note IS NOT NULL AND watch_note != ''
+             AND watch_group IS NOT NULL AND watch_group != ''
+           ORDER BY watch_group"""
+    ).fetchall()
+    return [r["watch_group"] for r in rows]
 
 
 def get_open_alert(

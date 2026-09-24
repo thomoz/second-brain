@@ -145,6 +145,24 @@ def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
             lines.append(f"| {w['ticker']} | {w['buckets']} | {note} |")
         lines.append("")
 
+    for group in db.get_watch_groups(conn):
+        group_rows = db.get_watched(conn, group=group)
+        if not group_rows:
+            continue
+        lines += [
+            f"### 👁 {group}",
+            "",
+            "Flagged via `watchlist-watch --group` — these still appear in their "
+            "normal bucket table below; this is a themed keep-an-eye-on sub-block.",
+            "",
+            "| Ticker | Bucket(s) | Why |",
+            "|--------|-----------|-----|",
+        ]
+        for w in group_rows:
+            note = (w["watch_note"] or "").replace("|", "/").replace("\n", " ")
+            lines.append(f"| {w['ticker']} | {w['buckets']} | {note} |")
+        lines.append("")
+
     lines += _watchlist_table(main_rows)
     lines += [
         "",
