@@ -11,15 +11,11 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
 | ADBE | unassigned | Feels oversold/hated-on - watching for a good entry, not convinced it wont drop further |
-| BATT | unassigned | Alternative Energy Transport theme, 5% allocation |
 | CV | unassigned | EPS miss + margin pressure Q2 2026, H2 guided higher - monitor next print |
-| DTG.DE | unassigned | Alternative Energy Transport theme, 15% allocation |
 | GOOG | unassigned | Keep an eye on (Shaun request 2026-09-24) |
-| HAIL | unassigned | Alternative Energy Transport theme, 30% allocation |
 | ICLN | unassigned | Clean energy ETF |
 | IHI | unassigned | Medical devices ETF |
 | KAR.AX | unassigned | Keep an eye on (Shaun request 2026-09-16) |
-| KARS | unassigned | Alternative Energy Transport theme, 35% allocation |
 | KMI | unassigned | Energy sector - keep an eye on |
 | MTA | unassigned | Not yet discussed -- flagged to watch. |
 | NEM | unassigned | Precious metals |
@@ -33,9 +29,20 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | STNG | unassigned | George Gammon long trade |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
 | VLGEA | unassigned | Felix watching -- waiting for a break above recent highs. |
-| VOLV-B.ST | 4 | Alternative Energy Transport theme, 15% allocation (also Bucket 4 crash-discount) |
 | WPM | unassigned | Precious metals |
 | XRO.AX | unassigned | Watching next few results for US/Melio payments traction; PE 42 rich (deep dive 2026-09-01) |
+
+### 👁 Alternative Energy Transport
+
+Flagged via `watchlist-watch --group` — these still appear in their normal bucket table below; this is a themed keep-an-eye-on sub-block.
+
+| Ticker | Bucket(s) | Why |
+|--------|-----------|-----|
+| BATT | unassigned | Alternative Energy Transport theme, 5% allocation |
+| DTG.DE | unassigned | Alternative Energy Transport theme, 15% allocation |
+| HAIL | unassigned | Alternative Energy Transport theme, 30% allocation |
+| KARS | unassigned | Alternative Energy Transport theme, 35% allocation |
+| VOLV-B.ST | 4 | Alternative Energy Transport theme, 15% allocation (also Bucket 4 crash-discount) |
 
 | Ticker | Name | Type | Bucket | Dividend | 10Y Return | Status |
 |--------|------|------|--------|----------|------------|--------|
