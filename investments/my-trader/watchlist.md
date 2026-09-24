@@ -11,11 +11,15 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
 | ADBE | unassigned | Feels oversold/hated-on - watching for a good entry, not convinced it wont drop further |
+| BATT | unassigned | Alternative Energy Transport theme, 5% allocation |
 | CV | unassigned | EPS miss + margin pressure Q2 2026, H2 guided higher - monitor next print |
+| DTG.DE | unassigned | Alternative Energy Transport theme, 15% allocation |
 | GOOG | unassigned | Keep an eye on (Shaun request 2026-09-24) |
+| HAIL | unassigned | Alternative Energy Transport theme, 30% allocation |
 | ICLN | unassigned | Clean energy ETF |
 | IHI | unassigned | Medical devices ETF |
 | KAR.AX | unassigned | Keep an eye on (Shaun request 2026-09-16) |
+| KARS | unassigned | Alternative Energy Transport theme, 35% allocation |
 | KMI | unassigned | Energy sector - keep an eye on |
 | MTA | unassigned | Not yet discussed -- flagged to watch. |
 | NEM | unassigned | Precious metals |
@@ -29,6 +33,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | STNG | unassigned | George Gammon long trade |
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
 | VLGEA | unassigned | Felix watching -- waiting for a break above recent highs. |
+| VOLV-B.ST | 4 | Alternative Energy Transport theme, 15% allocation (also Bucket 4 crash-discount) |
 | WPM | unassigned | Precious metals |
 | XRO.AX | unassigned | Watching next few results for US/Melio payments traction; PE 42 rich (deep dive 2026-09-01) |
 
@@ -37,6 +42,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | 1211.HK | BYD Company Limited | stock | unassigned | — | — | Added at Shaun's request 2026-08-19 |
 | 3750.HK | Contemporary Amperex Technology Co., Limited (CATL) | stock | unassigned | — | — | Not yet discussed. HK-listed (HKD). World's largest EV battery maker. |
 | ADBE | Adobe Inc. | stock | unassigned | — | — | Oversold/hated narrative watch, 2026-09-23 - not convinced it wont drop more, watching for a good entry point. |
+| BATT | Amplify Lithium & Battery Technology ETF | etf | unassigned | — | — | Alternative Energy Transport theme, 5% allocation |
 | CEG | Constellation Energy Corp | stock | unassigned | — | — | Nuclear power generation — largest US carbon-free/nuclear generator |
 | COUR | Coursera Inc | stock | unassigned | — | — | Added from Cash Value Report (2026-08-26) |
 | CPRT | Copart Inc | stock | 1 | — | — | Vehicle salvage/insurance auction near-duopoly (land-bank moat). Fair-price-today case, not a crash-timing trade: PE 17.4, clean balance sheet (D/E 1.1), ROE 17.6%, opportunity check fired 2 signals on a -15.8% 3mo dip. Crash-resilience check shows it amplifies broad-market crashes ~1.3x (COVID -43.8% vs S&P -33.9%, 2022 -35.4% vs S&P -25.4%) -- moat protects market position, not stock price, so doesn't fit the AI-postcrash 'wait for a bubble to deflate' framing either. |
@@ -45,6 +51,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | DG | Dollar General | stock | 1 | 1.86% | +55% | Not yet discussed. Dollar-store category |
 | DLTR | Dollar Tree | stock | 1 | — | +32% | Not yet discussed. Dollar-store category |
 | DOLLARAMA | Dollarama Inc | stock | 1 | — | — | Not yet discussed. Dollar-store category — "taking over reject shop" |
+| DTG.DE | Daimler Truck Holding AG | stock | unassigned | — | — | Alternative Energy Transport theme, 15% allocation |
 | EQT | EQT Corporation | stock | unassigned | — | — | Rick Rule holds this. PE 12.0 (cheap), dividend growing +4.4%, low leverage -- but current ratio 0.67 flags a real liquidity strain. Opportunity signal suppressed by that flag per tool's own gating rule. |
 | FIVE | Five Below | stock | 1 | — | +306% | Not yet discussed. Dollar-store category |
 | FPI | Farmland Partners Inc | reit | 2 | 2.75% | +28% | Not yet discussed. Farmland REIT — has a 2018 governance flag on record |
@@ -52,11 +59,13 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | GOLD | Barrick Gold Corp | stock | 2 | 2.07% | +534% | Not yet discussed. Individual gold miner |
 | GOOG | Alphabet Inc (Class C) | stock | unassigned | — | — | Class C, no voting rights - distinct from GOOGL already on watchlist |
 | GRID | First Trust NASDAQ Clean Edge Smart Grid ETF | etf | unassigned | 0.75% | +441% | Not yet discussed. Sector/thematic |
+| HAIL | SmartETFs Smart Transportation and Technology ETF | etf | unassigned | — | — | Alternative Energy Transport theme, 30% allocation |
 | ICLN | iShares Global Clean Energy ETF | etf | unassigned | — | — | Clean energy ETF, added 2026-09-24. |
 | IHI | iShares U.S. Medical Devices ETF | etf | unassigned | — | — | Medical devices ETF |
 | IVV | iShares Core S&P 500 ETF | etf | 1 | — | — | Core S&P 500 index ETF. Expense ratio 0.03% -- cheaper than SPY's 0.0945% for identical index exposure, matches VOO/VTI already in bucket 1. PE 26.9, no valuation/balance-sheet flags. Crash resilience roughly tracks the broad market by construction (2008 -55.2%, 2022 -24.5%) since it IS the broad market. Principles fit avg 35/100 -- expected and not meaningful for a diversified index fund (Buffett/Graham/Lynch/Fisher frameworks are built to grade single operating businesses, not baskets). |
 | IXI.AX | iShares Global Consumer Staples ETF | etf | 1 | 1.78% | +84% | Not yet discussed. Fee 0.41% |
 | KAR.AX | Karoon Energy Ltd | stock | unassigned | — | — | Not yet discussed. |
+| KARS | KraneShares Electric Vehicles and Future Mobility ETF | etf | unassigned | — | — | Alternative Energy Transport theme, 35% allocation |
 | KMI | Kinder Morgan | stock | unassigned | — | — | Energy midstream/pipeline - keep an eye on |
 | LAND | Gladstone Land Corp | reit | 2 | 6.26% | +16% | Not yet discussed. Farmland REIT |
 | MCD | McDonald's Corp | stock | 1 | 2.65% | +175% | Not yet discussed. Flagged "defensive?" |
