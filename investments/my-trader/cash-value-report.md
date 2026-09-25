@@ -1,3 +1,5 @@
+> DEGRADED - Yahoo Finance rate-limited the fundamentals pass (only 0/200 ASX names returned data) (2026-09-25) - showing the last good run below.
+
 # Cash-Value Scan
 
 **Last run: 2026-09-25** - scanned 542 US + 200 ASX names (598 returned balance-sheet data), 12 qualify at net cash >= 50% of market cap.
