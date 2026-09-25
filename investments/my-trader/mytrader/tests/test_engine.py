@@ -12,11 +12,11 @@ def test_run_assessment_includes_all_ten_checks(db_conn, monkeypatch):
     )
     result = engine.run_assessment("VRTX", db_conn)
     assert result["ticker"] == "VRTX"
-    assert len(result["checks"]) == 12
+    assert len(result["checks"]) == 13
     assert {c.name for c in result["checks"]} == {
         "company_profile", "dividend", "valuation", "balance_sheet", "fx", "concentration",
         "sector_risk", "etf_mechanics", "opportunity", "price_action",
-        "crash_resilience", "technical_levels",
+        "crash_resilience", "technical_levels", "matt_damon_price_volitility_volume_check",
     }
     assert result["excluded"] is False
     assert result["data_available"] is True
@@ -205,7 +205,7 @@ def test_run_assessment_excludes_principles_fit_by_default(db_conn, monkeypatch)
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
     result = engine.run_assessment("VRTX", db_conn)
     assert "principles_fit" not in {c.name for c in result["checks"]}
-    assert len(result["checks"]) == 12
+    assert len(result["checks"]) == 13
 
 
 def test_run_assessment_includes_principles_fit_when_opted_in(db_conn, monkeypatch):
@@ -219,7 +219,7 @@ def test_run_assessment_includes_principles_fit_when_opted_in(db_conn, monkeypat
     )
     result = engine.run_assessment("VRTX", db_conn, include_principles_fit=True)
     assert "principles_fit" in {c.name for c in result["checks"]}
-    assert len(result["checks"]) == 13
+    assert len(result["checks"]) == 14
 
 
 def test_run_assessment_includes_news_events_when_opted_in(db_conn, monkeypatch):
@@ -233,7 +233,7 @@ def test_run_assessment_includes_news_events_when_opted_in(db_conn, monkeypatch)
     )
     result = engine.run_assessment("VRTX", db_conn, include_news_events=True)
     assert "news_events" in {c.name for c in result["checks"]}
-    assert len(result["checks"]) == 13
+    assert len(result["checks"]) == 14
 
 
 def test_run_assessment_includes_insider_selling_when_opted_in(db_conn, monkeypatch):
@@ -247,7 +247,7 @@ def test_run_assessment_includes_insider_selling_when_opted_in(db_conn, monkeypa
     )
     result = engine.run_assessment("VRTX", db_conn, include_insider_selling=True)
     assert "insider_selling" in {c.name for c in result["checks"]}
-    assert len(result["checks"]) == 13
+    assert len(result["checks"]) == 14
 
 
 def test_run_assessment_includes_earnings_watch_when_opted_in(db_conn, monkeypatch):
@@ -261,7 +261,7 @@ def test_run_assessment_includes_earnings_watch_when_opted_in(db_conn, monkeypat
     )
     result = engine.run_assessment("VRTX", db_conn, include_earnings_watch=True)
     assert "earnings_deterioration" in {c.name for c in result["checks"]}
-    assert len(result["checks"]) == 13
+    assert len(result["checks"]) == 14
 
 
 def test_insider_selling_flag_suppresses_opportunity(db_conn, monkeypatch):

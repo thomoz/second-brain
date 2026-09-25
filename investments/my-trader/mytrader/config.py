@@ -532,6 +532,39 @@ COT_EXTREME_LONG_PCT = 90.0  # COT Index >= this -- large speculators near their
                                 # contrarian-watch level (Williams' own convention).
 COT_EXTREME_SHORT_PCT = 10.0  # symmetric "crowded short" level.
 
+# Added 2026-09-25 -- Matt Damon Price/Volatility/Volume Check, see
+# .agent/plans/matt-damon-price-volitility-volume-check.md and
+# investments/roc-triple-signal-handoff.md. Windows/lookbacks are this plan's own
+# methodology choices -- confirmed with Shaun (10-day short / 25-day long),
+# best-guess defaults on the rest, ship and revisit per the backtest step.
+
+MATT_DAMON_SHORT_WINDOW_DAYS = 10  # trading days -- "is this accelerating right
+                                     # now".
+MATT_DAMON_LONG_WINDOW_DAYS = 25  # trading days -- "is this an established move".
+MATT_DAMON_VOLATILITY_WINDOW_DAYS = 20  # rolling std-dev-of-returns window that
+                                     # itself gets ROC'd -- 20 is a textbook
+                                     # default (same window Bollinger Bands and
+                                     # GOLD_TA_BOLLINGER_PERIOD_DAYS use), cheap
+                                     # warm-up (21 closes to first reading).
+MATT_DAMON_VOLUME_SMOOTHING_DAYS = 10  # rolling mean of daily volume before
+                                     # computing its ROC -- avoids a single
+                                     # outlier-volume day (news, index rebalance,
+                                     # options expiry) dominating the reading,
+                                     # matches the long ROC window for consistency.
+MATT_DAMON_HISTORY_PERIOD = "1y"  # yfinance period string for the live check --
+                                     # comfortably covers the longest warm-up need
+                                     # (long window 25 + volatility window 20 +
+                                     # volume smoothing 10 = 55 trading days, well
+                                     # under a year's ~252).
+MATT_DAMON_BACKTEST_HISTORY_PERIOD = "2y"  # longer pull for the one-off backtest
+                                     # script only -- more sample per ticker,
+                                     # still cheap.
+MATT_DAMON_BACKTEST_FORWARD_HORIZON_TRADING_DAYS = 10  # confirmed with Shaun --
+                                     # compare mean 10-trading-day-forward return
+                                     # following an "aligned" reading vs. baseline
+                                     # vs. price-ROC-alone, over the same
+                                     # tickers/history.
+
 # Added 2026-08-11 -- IBKR Holdings Sync (see investments/my-trader/ibkr-sync-handoff.md
 # and .agent/plans/ibkr-holdings-sync.md). Local-only, read-only, on-demand -- never
 # wired into monitor.py or any systemd unit. Live account confirmed with Shaun

@@ -337,6 +337,15 @@ def cmd_gold_backtest(args) -> None:
     print_stats(results)
 
 
+def cmd_matt_damon_backtest(args) -> None:
+    from .matt_damon_price_volitility_volume_check_backtest import print_comparison, run_backtest
+
+    conn = _open_conn()
+    results = run_backtest(conn)
+    conn.close()
+    print_comparison(results)
+
+
 def cmd_cash_value_scan(args) -> None:
     from .cash_value_scan import run_scan, write_report
     from .config import CASH_VALUE_RATIO_THRESHOLD
@@ -474,6 +483,12 @@ def main() -> None:
         help="Force a fresh backtest of gold's macro signals + technical indicators (slow, on-demand)",
     )
     subparsers.add_parser(
+        "matt-damon-backtest",
+        help="One-off backtest: does the Matt Damon Price/Volatility/Volume Check "
+             "confluence reading beat price-ROC-alone/baseline for holdings + "
+             "discussed watchlist tickers (research only, not CI)",
+    )
+    subparsers.add_parser(
         "cash-value-scan",
         help="Screen US + ASX for companies with net cash >= 0.8x market cap and "
              "positive cash flow (writes cash-value-report.md)",
@@ -528,6 +543,7 @@ def main() -> None:
         "monitor": cmd_monitor,
         "sync-candidates": cmd_sync_candidates,
         "gold-backtest": cmd_gold_backtest,
+        "matt-damon-backtest": cmd_matt_damon_backtest,
         "cash-value-scan": cmd_cash_value_scan,
         "scan-earnings-watch": cmd_scan_earnings_watch,
         "promote-candidate": cmd_promote_candidate,

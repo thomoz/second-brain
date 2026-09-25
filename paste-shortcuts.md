@@ -7,6 +7,26 @@ Sep 2 made: investments/goat/industry-pipeline-handoff.md
 
 claude --dangerously-skip-permissions
 
+go ahead and create the structured plan, asking me questions if you need to, for the handoff file 
+
+
+ready for execution:
+
+adds etfs to breakouts:
+
+
+## Market Hours:
+
+US Market Hours in Sydney Time
+
+Standard Time (AEST): Opens at 11:30 PM / Closes at 6:00 AM
+Daylight Saving Time (AEDT): Opens at 1:30 AM / Closes at 8:00 AM
+
+Transition Dates:
+
+October 4, 2026: NSW starts daylight saving (+1 hour), shifting the US open to 1:30 AM AEDT.
+November 1, 2026: US ends daylight saving (-1 hour), shifting the open back to 11:30 PM AEST.
+
 ---
 
 ## Formatting:
