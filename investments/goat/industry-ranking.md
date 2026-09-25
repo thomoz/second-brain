@@ -47,7 +47,7 @@ All 39 covered industries.
 | 18 | SIL | Silver | +9.1% | Yes |
 | 19 | IBUY | Internet Retail | +7.3% | Yes |
 | 20 | GDX | Gold | +7.0% | Yes |
-| 21 | INDS | REIT - Industrial | +5.9% | Yes |
+| 21 | INDS | REIT - Industrial | +6.4% | Yes |
 | 22 | PAVE | Engineering & Construction | +4.3% | Yes |
 | 23 | IYZ | Telecom Services | +3.4% | Yes |
 | 24 | XOP | Oil & Gas E&P | +3.0% | Yes |
