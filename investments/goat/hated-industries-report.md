@@ -10,10 +10,10 @@ Hated since: 2026-09-17
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -25.3% | -21.6% | -30.0pp | -39.0pp | -41.2% |
+| -22.5% | -20.2% | -28.6pp | -40.4pp | -40.4% |
 
-**Narrative:** The dominant negative narrative is a broad U.S. policy and financing overhang: accelerated tax-credit phaseouts, FEOC/domestic-content uncertainty, tariffs/trade restrictions, permitting/executive-order risk, and still-sensitive project economics have made investors question solar demand and margins despite continued installation activity. This is being compounded by residential solar weakness and module/inverter supply-chain uncertainty rather than a single scandal.
-**Systemic read:** industry-wide -- The evidence points to a sector-wide de-rating: recent reporting describes a broad cross-section of solar suppliers selling off even after decent earnings, while filings from major constituents cite the same tax-credit, FEOC, tariff, and demand risks. The impact is not uniform, because some domestic or non-China-exposed suppliers may benefit from parts of the policy mix, but the market narrative is not concentrated in only one or two TAN constituents.
+**Narrative:** The dominant negative narrative is broad policy and subsidy uncertainty: accelerated solar tax-credit phaseouts, FEOC eligibility rules, tariffs/import restrictions, and other U.S. federal actions have made solar earnings and project economics look less predictable, while higher-for-longer rates and China-linked oversupply add pressure. This is being framed as a sector risk rather than a single-company blowup.
+**Systemic read:** industry-wide -- The selloff has hit multiple business models and constituents, including equipment suppliers, residential solar/storage names, and module makers; the impact is uneven, with some domestic manufacturers potentially benefiting from tariffs, but the market overhang is sector-wide policy/cost-of-capital uncertainty rather than one or two company-specific scandals.
 
 **Fundamentals-divergence read:** fundamentals still growing despite the price decline
 
@@ -26,27 +26,6 @@ Representative constituents (read-only — not staged as candidates):
 | ENLT | Enlight Renewable Energy Ltd | +43.0% | +1900.2% | growing |
 | ENPH | Enphase Energy, Inc. | -19.6% | -3.5% | declining |
 | HASI | HA Sustainable Infrastructure Capital, Inc. | +804.4% | +24.5% | growing |
-
-## Utilities - Renewable (ICLN)
-
-Hated since: 2026-09-23
-
-| 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
-|------------|------------|--------------|--------------|---------------------|
-| -17.1% | -7.1% | -21.9pp | -24.5pp | -28.4% |
-
-**Narrative:** The dominant negative narrative is policy-and-financing pressure: U.S. renewable tax-credit rollbacks/phaseouts, hostile permitting/regulatory actions, higher-for-longer cost of capital, ETF outflows and short crowding have hit solar and wind equities hard despite continued power-demand growth.
-**Systemic read:** industry-wide -- The evidence points to a broad sector factor rather than one scandal or one constituent: recent weakness is discussed across solar equipment, wind, developers, and tax-credit-sensitive renewable names, while ICLN’s holdings are diversified enough that no single company explains the drawdown. It is not perfectly uniform because hydro, fuel-cell/data-center power, and some non-U.S. utilities have different exposures, but the selloff narrative is sector-wide rather than concentrated in one or two names.
-
-**Fundamentals-divergence read:** fundamentals still growing despite the price decline
-
-Representative constituents (read-only — not staged as candidates):
-
-| Ticker | Name | Revenue growth | Earnings growth | Read |
-|--------|------|-----------------|-------------------|------|
-| BE | Bloom Energy Class A | +165.5% | — | growing |
-| FSLR | First Solar | -3.7% | +23.3% | growing |
-| NXT | Nextpower Inc | +8.2% | +2.9% | growing |
 
 
 Last auto-generated: 2026-09-25.
