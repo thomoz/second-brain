@@ -18,7 +18,6 @@ from .checks import (
     etf_mechanics,
     fx,
     insider_selling,
-    matt_damon_price_volitility_volume_check,
     news_events,
     opportunity,
     price_action,
@@ -173,7 +172,6 @@ def run_assessment(
         price_action.check(recent_return_1mo, recent_return_3mo),
         crash_resilience.check(data),
         technical_levels.check(data),
-        matt_damon_price_volitility_volume_check.check(data),
     ]
     if include_principles_fit:
         results.append(

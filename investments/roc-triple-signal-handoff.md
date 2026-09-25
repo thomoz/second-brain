@@ -11,8 +11,14 @@ rather than needing the separate-timer treatment Earnings Watch or Cash-Value Sc
 needed (those were separate timers specifically because of LLM cost / market-wide
 screen scope, neither of which applies here).
 
-## Status: NOT BUILT — drafted 2026-09-25 from Shaun's request. Awaiting Shaun's
-manual `/plan-feature` run against this doc before any implementation.
+## Status: BUILT, BACKTESTED, AND REMOVED — drafted 2026-09-25, built the same day
+as "Matt Damon Price/Volatility/Volume Check" (`.agent/plans/matt-damon-price-
+volitility-volume-check.md`), backtested against real holdings/watchlist data
+(see Backtest Result below), then torn back out the same day once Shaun reviewed
+the result and judged it not worth keeping even as a report-only line — see
+"Removed" section below. Kept here as a closed research record; do not rebuild
+without a genuinely different angle (see the Backtest Result's own note on the
+bullish/bearish asymmetry).
 
 ## What This Is
 
@@ -274,6 +280,61 @@ volume+contracting volatility (should compute cleanly, whatever the eventual
 alignment label logic says); a ticker with insufficient history for the chosen ROC
 window (`verdict="unknown"`, graceful); a ticker where volume data is missing/zero
 (shouldn't crash the whole check); an ASX ticker routing through the `.AX` fallback.
+
+## Backtest Result (2026-09-25)
+
+Ran via `matt_damon_price_volitility_volume_check_backtest.py` (see
+`.agent/plans/matt-damon-price-volitility-volume-check.md`), on the VPS against
+83 of 86 holdings + "discussed" watchlist tickers (3 skipped as genuinely
+delisted/not-found on Yahoo — `BMS`, `MOUS`, `ROSY.TO` — unrelated to the check
+itself; a first attempt earlier the same day hit a Yahoo Finance rate limit and
+was discarded, not counted here). ~2yr history each, state-conditioned on the
+10-trading-day short window, compared against 10-trading-day forward returns,
+raw per-occurrence returns pooled across all tickers before computing stats.
+
+| State | N | Mean | Median | Win-rate | Best | Worst |
+|---|---|---|---|---|---|---|
+| Confluence `aligned_bullish` | 4,274 | +1.22% | +0.77% | 58.7% | +73.14% | -33.48% |
+| Confluence `aligned_bearish` | 4,991 | +0.94% | +0.58% | 54.6% | +57.84% | -63.28% |
+| Price-ROC-only "up" | 22,083 | +0.82% | +0.40% | 54.9% | +152.98% | -56.05% |
+| Price-ROC-only "down" | 17,383 | +1.08% | +0.70% | 55.2% | +129.87% | -63.28% |
+| Unconditioned baseline | 40,416 | +0.94% | +0.55% | 55.2% | +152.98% | -63.28% |
+
+**Reading:**
+
+- `aligned_bullish` shows a modest, consistent edge over both comparators it
+  needs to beat: +0.40pp mean / +3.8pt win-rate over price-ROC-only "up", and
+  +0.28pp mean / +3.5pt win-rate over the unconditioned baseline. N=4,274 is
+  large enough that this isn't noise, but the effect size is small relative to
+  the return distribution's own spread (worst-case outcomes remain deeply
+  negative under every state, including this one).
+- `aligned_bearish` shows essentially **zero** edge — its mean (+0.94%) is
+  identical to the unconditioned baseline (+0.94%), and it actually
+  underperforms price-ROC-only "down" on both mean and win-rate. The label is
+  meant to flag bearish continuation, but the forward return following it is
+  indistinguishable from random.
+
+**Verdict: no change — stays `verdict="info"`, no live gate.** Per the plan's
+confirmed bar ("clearly beat both comparators, on a sample size large enough to
+matter"), the result is mixed, not a clear edge: a small, real-looking effect on
+the bullish side only, no effect at all on the bearish side — an asymmetry the
+confluence concept as defined doesn't explain. Not strong enough to justify a
+`verdict="interesting"` gate. If revisited later, that bullish-only asymmetry
+(rather than the check's current three-way "aligned" definition) is the natural
+thing to dig into first — not something to build now.
+
+## Removed (2026-09-25)
+
+Shaun's call after reviewing the backtest result above: the effect is real but
+too small to be worth trading on (aligned_bullish beats baseline by ~0.3
+percentage points of 10-day forward return), and the bearish side has no
+predictive value at all. Not worth keeping even as a passive report-only line —
+extra reading with no real payoff. The check module, its backtest script, its
+tests, its `engine.py`/`config.py`/`main.py` wiring, and the `matt-damon-
+backtest` CLI subcommand were all deleted the same day they were built. This
+handoff and its Backtest Result stay as the record of what was tried and why it
+didn't stick, per this codebase's convention of never losing a research finding
+even when the thing it justified gets torn back out.
 
 ## Sources consulted (2026-09-25)
 
