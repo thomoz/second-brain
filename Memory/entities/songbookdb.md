@@ -16,3 +16,4 @@
 - (Sep 01) Xero Ignite plan price increase email received; review SongbookDB cost impact
 - (Sep 02) PHP upgrade target path is 7.4 to 8.5
 - (Sep 13) songbookdb.com renewal notice from Crazy Domains needs action to avoid interruption.
+- (Sep 25) Facebook user data deletion request received, likely needs compliance action.

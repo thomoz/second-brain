@@ -159,3 +159,10 @@ Skip drafts for: Newsletters, automated notifications, spam
 - (Sep 24) WhatsApp alerts now include company name beside ticker.
 - (Sep 24) VPS deploy included vault-sync resilience and staleness-alert fixes.
 - (Sep 24) my-trader quote fetch 404s for BMS/BMS.AX fundamentals and some metals ETFs.
+
+## 2026-09-25 Reflection
+- (Sep 25) ROC triple signal handoff written at `investments/roc-triple-signal-handoff.md`; not built.
+- (Sep 25) ROC triple v1 should be report-only until backtested against price ROC alone.
+- (Sep 25) Cash-Value Scan gates are net cash >=50% market cap and positive TTM OCF.
+- (Sep 25) Cash-Value Scan excludes financials/REIT-like sectors and defense hits.
+- (Sep 25) Matt Damon check uses config prefix `MATT_DAMON_*`.

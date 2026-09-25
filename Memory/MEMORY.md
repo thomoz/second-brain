@@ -57,6 +57,7 @@ _Time-sensitive, unresolved, or needs follow-up. Reflection promotes items here;
 - Ask before pushing second-brain-workshop changes to origin.
 - For DMA scanner work, do not run live scans locally against investments.db; VPS-only.
 - ASX holdings/watchlist use .AX suffix; dedup must preserve qualified tickers.
+- Preserve misspelling `volitility` in Matt Damon price/volume/volitility check names.
 ---
 
 _Resolve `[[name]]` → Memory/entities/name.md or Memory/topics/name.md or Memory/decisions/name.md_
