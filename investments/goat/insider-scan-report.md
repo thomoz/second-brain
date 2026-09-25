@@ -1737,4 +1737,4 @@ Filings where the price has fallen since the trade, biggest drop first.
 | V | Sold | $6,650,860 | 2026-08-21 | -0.8% since trade |
 | LLY | Sold | $1,175 | 2026-08-17 | -0.1% since trade |
 
-Last auto-generated: 2026-09-25 14:39 AEST.
+Last auto-generated: 2026-09-25 15:52 AEST.

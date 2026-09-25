@@ -41,7 +41,7 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow | ok | No hot-watchlist tickers with a resolvable cash-flow statement this run. |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-08-01, +37.2% YoY vs 2025-08-01 |
 | 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 175 filing(s) in the trailing 30d vs 298 in the same window a year ago (0.59x); 424B4 (priced IPO): 25 filing(s) in the trailing 30d vs 51 in the same window a year ago (0.49x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.55 (z=-0.35 vs trailing 37d mean 0.57) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.55 (z=-0.35 vs trailing 38d mean 0.57) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (AAPL) | flag | AAPL: $115,275,099 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (AVGO) | flag | AVGO: $619,303,491 sold vs $698,699 bought, trailing 365 days |
 | 8 | Insider selling (BRK-B) | ok | BRK-B: $0 sold vs $500,617 bought, trailing 365 days |
