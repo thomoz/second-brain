@@ -12,8 +12,8 @@ Hated since: 2026-09-17
 |------------|------------|--------------|--------------|---------------------|
 | -22.5% | -20.2% | -28.6pp | -40.4pp | -40.4% |
 
-**Narrative:** The dominant negative narrative is broad policy and subsidy uncertainty: accelerated solar tax-credit phaseouts, FEOC eligibility rules, tariffs/import restrictions, and other U.S. federal actions have made solar earnings and project economics look less predictable, while higher-for-longer rates and China-linked oversupply add pressure. This is being framed as a sector risk rather than a single-company blowup.
-**Systemic read:** industry-wide -- The selloff has hit multiple business models and constituents, including equipment suppliers, residential solar/storage names, and module makers; the impact is uneven, with some domestic manufacturers potentially benefiting from tariffs, but the market overhang is sector-wide policy/cost-of-capital uncertainty rather than one or two company-specific scandals.
+**Narrative:** The dominant negative narrative is that solar project economics have become less predictable because of high borrowing costs plus abrupt U.S. policy changes: tax-credit phaseouts/FEOC restrictions, tariffs, import price floors, and permitting/regulatory uncertainty. This has overwhelmed otherwise decent demand and, in some cases, decent earnings/backlogs.
+**Systemic read:** industry-wide -- The evidence points to a broad sector derating across installers, inverter makers, module makers, and balance-of-system suppliers rather than a single scandal or one constituent dragging TAN. The impact is not perfectly uniform, since some domestic manufacturers or inverter suppliers may benefit from parts of the policy mix, but the uncertainty and cost-of-capital pressure plausibly apply across much of the industry.
 
 **Fundamentals-divergence read:** fundamentals still growing despite the price decline
 
@@ -23,7 +23,6 @@ Representative constituents (read-only — not staged as candidates):
 |--------|------|-----------------|-------------------|------|
 | NXT | Nextpower Inc. | +8.2% | +2.9% | growing |
 | FSLR | First Solar, Inc. | -3.7% | +23.3% | growing |
-| ENLT | Enlight Renewable Energy Ltd | +43.0% | +1900.2% | growing |
 | ENPH | Enphase Energy, Inc. | -19.6% | -3.5% | declining |
 | HASI | HA Sustainable Infrastructure Capital, Inc. | +804.4% | +24.5% | growing |
 
