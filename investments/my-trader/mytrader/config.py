@@ -36,6 +36,13 @@ TAX_COMPLEX_BUCKET = "tax_complex"  # watchlist bucket for tickers Shaun has dec
                                      # reconsideration like ai_postcrash. Rendered as
                                      # its own section in watchlist.md by snapshot.py.
 
+SUPER_HOT_WATCH_GROUP = "Super Hot!"  # a `watchlist-watch --group` name (Shaun
+    # 2026-09-26), not a bucket — same "still appears in its normal bucket table
+    # too" mechanism as any other named watch group (e.g. "Alternative Energy
+    # Transport"), just rendered by snapshot.py above the plain "Keep an eye on"
+    # block instead of alphabetically among the other groups, since these are the
+    # names Shaun wants to see first.
+
 # Bucket code -> plain-English framing, added 2026-08-13 for monitor.py's Holdings
 # report (Shaun rated the report 35/100 for trader decision-usefulness -- a raw
 # bucket code like "1" doesn't tell you a -20% dip is expected/acceptable there,

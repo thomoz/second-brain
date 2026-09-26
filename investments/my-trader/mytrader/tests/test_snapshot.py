@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from mytrader import db, snapshot
+from mytrader import config, db, snapshot
 from mytrader.market_data import TickerData
 
 
@@ -116,6 +116,29 @@ def test_regenerate_watchlist_md_renders_keep_an_eye_block_at_top(db_conn, monke
     main_table_start = rest.index("| Ticker | Name |")
     assert rest.index("| WES | 4 | FY26 results 27 Aug 2026 |") < main_table_start
     assert "| WES | Wesfarmers | stock | 4 |" in rest  # normal row still present
+
+
+def test_regenerate_watchlist_md_renders_super_hot_above_keep_an_eye_on(db_conn, monkeypatch, tmp_path):
+    _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
+    db.upsert_watchlist_row(db_conn, ticker="MX", name="MagnaChip Semiconductor Corp",
+                            asset_type="stock", bucket="unassigned")
+    db.upsert_watchlist_row(db_conn, ticker="WES", name="Wesfarmers", asset_type="stock", bucket="4",
+                            status="discussed", notes="Crash-discount candidate")
+    db.set_watch_note(db_conn, "MX", "Shaun request 2026-09-26")
+    db.set_watch_group(db_conn, "MX", config.SUPER_HOT_WATCH_GROUP)
+    db.set_watch_note(db_conn, "WES", "FY26 results 27 Aug 2026")
+    snapshot.regenerate_watchlist_md(db_conn)
+
+    content = watchlist_path.read_text(encoding="utf-8")
+    assert "### 👁 Super Hot!" in content
+    assert "### 👁 Keep an eye on" in content
+    # Super Hot! sits above the plain Keep an eye on block, not sorted
+    # alphabetically among the other named groups
+    assert content.index("### 👁 Super Hot!") < content.index("### 👁 Keep an eye on")
+    super_hot_block, rest = content.split("### 👁 Keep an eye on")
+    assert "| MX | unassigned | Shaun request 2026-09-26 |" in super_hot_block
+    assert "| MX | unassigned | Shaun request 2026-09-26 |" not in rest
+    assert "| WES | 4 | FY26 results 27 Aug 2026 |" in rest
 
 
 def test_regenerate_watchlist_md_renders_named_keep_an_eye_sub_block(db_conn, monkeypatch, tmp_path):

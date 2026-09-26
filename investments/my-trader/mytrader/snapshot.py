@@ -129,39 +129,45 @@ def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
         "",
     ]
 
-    watched = db.get_watched(conn)
-    if watched:
-        lines += [
-            "### 👁 Keep an eye on",
+    def _append_watch_block(heading: str, rows: list, group_flagged: bool) -> None:
+        source = "`watchlist-watch --group`" if group_flagged else "`watchlist-watch`"
+        block = "a themed keep-an-eye-on sub-block" if group_flagged else (
+            "just a shortcut to what's live right now"
+        )
+        lines.extend([
+            f"### 👁 {heading}",
             "",
-            "Flagged via `watchlist-watch` — these still appear in their normal "
-            "bucket table below; this is just a shortcut to what's live right now.",
+            f"Flagged via {source} — these still appear in their normal bucket "
+            f"table below; this is {block}.",
             "",
             "| Ticker | Bucket(s) | Why |",
             "|--------|-----------|-----|",
-        ]
-        for w in watched:
+        ])
+        for w in rows:
             note = (w["watch_note"] or "").replace("|", "/").replace("\n", " ")
             lines.append(f"| {w['ticker']} | {w['buckets']} | {note} |")
         lines.append("")
 
-    for group in db.get_watch_groups(conn):
+    groups = db.get_watch_groups(conn)
+    # Super Hot! renders above the plain "Keep an eye on" block, ahead of every
+    # other named group (config.SUPER_HOT_WATCH_GROUP) — everything else keeps
+    # its normal alphabetical order below.
+    if config.SUPER_HOT_WATCH_GROUP in groups:
+        super_hot_rows = db.get_watched(conn, group=config.SUPER_HOT_WATCH_GROUP)
+        if super_hot_rows:
+            _append_watch_block(config.SUPER_HOT_WATCH_GROUP, super_hot_rows, group_flagged=True)
+
+    watched = db.get_watched(conn)
+    if watched:
+        _append_watch_block("Keep an eye on", watched, group_flagged=False)
+
+    for group in groups:
+        if group == config.SUPER_HOT_WATCH_GROUP:
+            continue
         group_rows = db.get_watched(conn, group=group)
         if not group_rows:
             continue
-        lines += [
-            f"### 👁 {group}",
-            "",
-            "Flagged via `watchlist-watch --group` — these still appear in their "
-            "normal bucket table below; this is a themed keep-an-eye-on sub-block.",
-            "",
-            "| Ticker | Bucket(s) | Why |",
-            "|--------|-----------|-----|",
-        ]
-        for w in group_rows:
-            note = (w["watch_note"] or "").replace("|", "/").replace("\n", " ")
-            lines.append(f"| {w['ticker']} | {w['buckets']} | {note} |")
-        lines.append("")
+        _append_watch_block(group, group_rows, group_flagged=True)
 
     lines += _watchlist_table(main_rows)
     lines += [
