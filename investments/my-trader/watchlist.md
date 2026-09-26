@@ -80,6 +80,7 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 | MLPX | Global X MLP & Energy Infrastructure ETF | etf | unassigned | — | — | Fund (not an MLP itself, no K-1/UBTI issue) holding MLPs + midstream corporations (TC Energy, Enbridge, Williams). Expense ratio 0.45%, AUM 3.64B, dividend +7.7%. Watching for a better entry point -- no active flags at deep-dive 2026-08-12, PE 21.2 (good), amplifies crashes ~2x (COVID -62.3%). |
 | MOUS | Mous | private | unassigned | — | — | Private UK phone-case company (Airo Shock material), not publicly traded -- no ticker, no yfinance data, no SEC filings. Opened pre-registration for an investment round; terms/valuation not yet known. Inert placeholder: Find/Monitor cannot check this (no market data source exists for a private company), so this row will never populate price/PE/dividend fields or receive automated re-checks -- requires manual follow-up when pre-registration details firm up. |
 | MTA | Metalla Royalty & Streaming Ltd. | stock | unassigned | — | — | Not yet discussed. |
+| MX | MagnaChip Semiconductor Corp | stock | unassigned | — | — | Super Hot (Shaun request 2026-09-26) |
 | NEM | Newmont Corp | stock | unassigned | — | — | Precious metals, added 2026-09-24. |
 | NEWP | New Pacific Metals Corp | stock | unassigned | — | — | Silver/gold exploration in Bolivia - buy at cheaper entry level |
 | NEXG.V | NexGold Mining Corp | stock | unassigned | — | — | Gold exploration/development - buy at cheaper entry level |
