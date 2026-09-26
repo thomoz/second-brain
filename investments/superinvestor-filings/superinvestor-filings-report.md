@@ -36,4 +36,4 @@ No new fast-disclosure filings since the last run.
 
 For a passive concentrated filer like Pabrai the high-value events are **threshold crossings** (5%, 10%, exit) and **Form 4s on any name where they're already > 10%**. Ordinary position sizing inside 5-10% mostly still waits for the quarterly cycle -- set expectations accordingly so the alert isn't oversold. Deadlines: 13D = 5 business days after crossing 5%; 13G (passive) = 5 business days after crossing 5%; Form 4 = 2 business days for any trade once a > 10% owner; SEBI SAST Reg 29 = 2 working days for a 5% crossing or any >= 2% change past 5%.
 
-Last auto-generated: 2026-09-26 12:00 AEST.
+Last auto-generated: 2026-09-26 12:10 AEST.
