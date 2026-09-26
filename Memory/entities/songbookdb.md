@@ -17,3 +17,4 @@
 - (Sep 02) PHP upgrade target path is 7.4 to 8.5
 - (Sep 13) songbookdb.com renewal notice from Crazy Domains needs action to avoid interruption.
 - (Sep 25) Facebook user data deletion request received, likely needs compliance action.
+- (Sep 26) Requests Hoster mobile app uses poll-failure error 2042, not 3123.

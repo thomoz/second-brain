@@ -44,3 +44,6 @@ _(not yet populated)_
 
 - Drinks 2 to 3 cups of black coffee a day
 - Takes omega-3 fish oil, creatine, and Centrum Silver 50+ multivitamin daily
+
+## 2026-09-26 Update
+- (Sep 26) Evening habits check-in showed all 5 pillars unchecked.
