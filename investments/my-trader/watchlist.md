@@ -17,6 +17,7 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | IHI | unassigned | Medical devices ETF |
 | KAR.AX | unassigned | Keep an eye on (Shaun request 2026-09-16) |
 | KMI | unassigned | Energy sector - keep an eye on |
+| MCD | 1 | Looking for a 42 entry |
 | MTA | unassigned | Not yet discussed -- flagged to watch. |
 | NEM | unassigned | Precious metals |
 | NEWP | unassigned | Buy at cheaper entry level |
@@ -181,4 +182,4 @@ Issue a K-1 or other non-standard tax form (commodity-pool ETFs, MLPs) instead o
 |--------|------|------|--------|----------|------------|--------|
 | CORN | Teucrium Corn Fund | etf | tax_complex | — | — | Commodity pool structured as a trust - issues a K-1 not a 1099 |
 
-Last auto-generated: 2026-09-25.
+Last auto-generated: 2026-09-26.
