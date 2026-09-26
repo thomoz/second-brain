@@ -94,3 +94,19 @@ def test_build_chart_note_combines_trend_and_score(monkeypatch):
 def test_build_chart_note_empty_on_fetch_miss(monkeypatch):
     monkeypatch.setattr(css, "fetch_close", lambda ticker, lookback_days=None: None)
     assert css.build_chart_note("ACME", date.today().isoformat()) == ""
+
+
+def test_build_chart_note_from_close_takes_a_pre_fetched_series_no_network(monkeypatch):
+    """The whole point of this variant: it must not call fetch_close at all --
+    a caller who already fetched the series (to share it with their own
+    price-move calc) shouldn't trigger a second network call."""
+    series = _rising_setup_series()
+    trade_date = (date.today() - timedelta(days=45)).isoformat()
+
+    def _boom(*a, **k):
+        raise AssertionError("fetch_close should not be called")
+
+    monkeypatch.setattr(css, "fetch_close", _boom)
+    note = css.build_chart_note_from_close(series, trade_date)
+    assert "DMA" in note
+    assert "chart setup score" in note

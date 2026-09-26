@@ -260,11 +260,25 @@ def run_discovery_sell_tracking(conn: sqlite3.Connection) -> dict[str, Any]:
     return {"tracked": tracked}
 
 
-def _price_move_since(ticker: str, trade_date_str: str) -> dict[str, Any] | None:
+def _price_move_since(
+    ticker: str, trade_date_str: str, close: pd.Series | None = None
+) -> dict[str, Any] | None:
     """% price move from the close on/after trade_date_str to the latest close,
     plus days elapsed. Returns None on unparsable date, a future date, or a
     price-fetch miss (delisted/no data) -- callers must treat that as "unknown",
-    not zero."""
+    not zero.
+
+    `close` can be a pre-fetched series -- compute_discovery_price_performance
+    and compute_holdings_watch_price_performance pass in the same 500-day
+    series they already fetched via mytrader.chart_setup_score for the chart
+    setup score, rather than this function fetching its own separate short
+    window (added 2026-09-26: the first production run after the chart setup
+    score shipped doubled this job's yfinance call count -- one fetch per row
+    for the price move, a separate one for the chart note -- and coincided
+    with a Yahoo rate-limit outage on the VPS; not proven causally, but
+    doubling an already-heavy daily job's external call count on the day it
+    first ran was worth removing regardless). When omitted, fetches its own
+    short window as before -- kept for standalone callers/tests."""
     try:
         trade_date_obj = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
     except (ValueError, TypeError):
@@ -273,9 +287,10 @@ def _price_move_since(ticker: str, trade_date_str: str) -> dict[str, Any] | None
     if days_since < 0:
         return None
 
-    # +10 days of slack so the fetch window still includes the trade date itself
-    # even if it landed right at the start of a weekend/holiday run.
-    close = price_history.fetch_close_history(ticker, days_since + 10)
+    if close is None:
+        # +10 days of slack so the fetch window still includes the trade date
+        # itself even if it landed right at the start of a weekend/holiday run.
+        close = price_history.fetch_close_history(ticker, days_since + 10)
     if close is None or close.empty:
         return None
     on_or_after = close[close.index >= pd.Timestamp(trade_date_obj)]
@@ -387,15 +402,6 @@ def _confirms_signal(trade_type_code: str, pct_change: float, days_since: int) -
     return False
 
 
-def _build_chart_note(ticker: str, trade_date_str: str) -> str:
-    """Thin wrapper over mytrader.chart_setup_score.build_chart_note -- the
-    trend-vs-MA read + 0-100 chart setup score used to live here as goat-local
-    code, moved to mytrader 2026-09-26 when Shaun asked to also wire it into
-    superinvestor_filings (which depends on my-trader but not on goat). See
-    mytrader/chart_setup_score.py for the full scoring rationale."""
-    return css.build_chart_note(ticker, trade_date_str)
-
-
 def _price_note(pct_change: float, days_since: int, trade_type_code: str, chart_note: str = "") -> str:
     flag = " \U0001F6A9 confirms signal" if _confirms_signal(
         trade_type_code, pct_change, days_since
@@ -418,16 +424,21 @@ def compute_discovery_price_performance(
     Also sets 'newly_flagged' and persists price_flag_notified the first time
     a ticker's move crosses the confirms-signal threshold (Shaun 2026-08-18:
     a report-only flag was easy to miss for days) -- guarded by the DB column
-    so the WhatsApp ping fires once per ticker, not every run it stays up."""
+    so the WhatsApp ping fires once per ticker, not every run it stays up.
+
+    One fetch per row, not two: the same close series feeds both the price-
+    move calc and the chart setup score (see _price_move_since's docstring
+    for why this was split out 2026-09-26)."""
     for row in pending_candidates:
         trade_date = row.get("trade_date")
-        move = _price_move_since(row["ticker"], trade_date) if trade_date else None
+        close = css.fetch_close(row["ticker"]) if trade_date else None
+        move = _price_move_since(row["ticker"], trade_date, close=close) if trade_date else None
         if move is None:
             row["price_note"] = "price unavailable"
             row["pct_change"] = None
             row["newly_flagged"] = False
             continue
-        chart_note = _build_chart_note(row["ticker"], trade_date)
+        chart_note = css.build_chart_note_from_close(close, trade_date)
         row["price_note"] = _price_note(move["pct_change"], move["days_since"], "P", chart_note)
         row["pct_change"] = move["pct_change"]
         row["days_since"] = move["days_since"]
@@ -444,17 +455,20 @@ def compute_holdings_watch_price_performance(
     """Same as compute_discovery_price_performance but direction-aware per
     row's own trade_type (P or S), since Holdings Watch filings mix buys and
     sells, and guarded per-filing (dedup_key) rather than per-ticker, since a
-    ticker can have multiple tracked filings."""
+    ticker can have multiple tracked filings. Same one-fetch-per-row sharing
+    as compute_discovery_price_performance -- see _price_move_since's
+    docstring."""
     for row in recent_filings:
         trade_date = row.get("trade_date")
         trade_type = row.get("trade_type", "")
-        move = _price_move_since(row["ticker"], trade_date) if trade_date else None
+        close = css.fetch_close(row["ticker"]) if trade_date else None
+        move = _price_move_since(row["ticker"], trade_date, close=close) if trade_date else None
         if move is None:
             row["price_note"] = "price unavailable"
             row["pct_change"] = None
             row["newly_flagged"] = False
             continue
-        chart_note = _build_chart_note(row["ticker"], trade_date)
+        chart_note = css.build_chart_note_from_close(close, trade_date)
         row["price_note"] = _price_note(move["pct_change"], move["days_since"], trade_type, chart_note)
         row["pct_change"] = move["pct_change"]
         row["days_since"] = move["days_since"]

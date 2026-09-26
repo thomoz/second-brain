@@ -385,39 +385,30 @@ def _price_series(days_ago: int, start_price: float, end_price: float) -> tuple[
     return trade_date.isoformat(), pd.Series(prices, index=idx)
 
 
-def _flat_series(days: int, price: float) -> pd.Series:
-    idx = pd.date_range(end=date.today(), periods=days, freq="D")
-    return pd.Series([price] * days, index=idx)
-
-
-def test_build_chart_note_delegates_to_mytrader_chart_setup_score(monkeypatch):
-    """The trend-vs-MA read + 0-100 scoring logic itself now lives in
-    mytrader.chart_setup_score (moved 2026-09-26 so superinvestor_filings can
-    share it) and is exhaustively unit-tested there -- this just confirms
-    goat.insider_scan._build_chart_note is a correct thin wrapper."""
-    monkeypatch.setattr(
-        "goat.insider_scan.css.build_chart_note",
-        lambda ticker, trade_date_str: f"stub note for {ticker}/{trade_date_str}",
-    )
-    assert insider_scan._build_chart_note("ACME", "2026-08-01") == "stub note for ACME/2026-08-01"
-
-
 def test_compute_discovery_price_performance_includes_chart_note_in_price_note(db_conn, monkeypatch):
-    trade_date, move_series = _price_series(days_ago=10, start_price=100.0, end_price=117.4)
-    trend_series = _flat_series(260, 100.0)
-    trend_series.iloc[-1] = 117.4  # latest close clearly above the flat 100.0 MAs
+    """One shared fetch now feeds both the price-move calc and the chart
+    note (2026-09-26, see _price_move_since's docstring) -- a single series,
+    flat at 100.0 except a clearly-higher latest close, gives a deterministic
+    +% move (from the flat trade-date price to that latest close) *and* a
+    deterministic 'above its MAs' trend read from the same data."""
+    idx = pd.date_range(end=date.today(), periods=260, freq="D")
+    prices = [100.0] * 260
+    prices[-1] = 117.4  # latest close, clearly above the flat 100.0 MAs
+    series = pd.Series(prices, index=idx)
+    trade_date = (date.today() - timedelta(days=10)).isoformat()
 
-    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: move_series)
-    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda t, lookback_days=None: trend_series)
+    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda t, lookback_days=None: series)
     candidates = [{"ticker": "THM", "trade_date": trade_date, "price_flag_notified": 0}]
     result = insider_scan.compute_discovery_price_performance(db_conn, candidates)
+    assert "+17.4%" in result[0]["price_note"]
     assert "above 150DMA" in result[0]["price_note"]
     assert "above 200DMA" in result[0]["price_note"]
+    assert "chart setup score" in result[0]["price_note"]
 
 
 def test_compute_discovery_price_performance_flags_buy_that_rose_past_threshold(db_conn, monkeypatch):
     trade_date, series = _price_series(days_ago=30, start_price=100.0, end_price=125.0)
-    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda t, lookback_days=None: series)
     candidates = [{"ticker": "ACME", "trade_date": trade_date, "price_flag_notified": 0}]
     result = insider_scan.compute_discovery_price_performance(db_conn, candidates)
     assert "+25.0%" in result[0]["price_note"]
@@ -426,7 +417,7 @@ def test_compute_discovery_price_performance_flags_buy_that_rose_past_threshold(
 
 def test_compute_discovery_price_performance_does_not_flag_below_threshold(db_conn, monkeypatch):
     trade_date, series = _price_series(days_ago=30, start_price=100.0, end_price=105.0)
-    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda t, lookback_days=None: series)
     candidates = [{"ticker": "ACME", "trade_date": trade_date, "price_flag_notified": 0}]
     result = insider_scan.compute_discovery_price_performance(db_conn, candidates)
     assert "confirms signal" not in result[0]["price_note"]
@@ -434,7 +425,7 @@ def test_compute_discovery_price_performance_does_not_flag_below_threshold(db_co
 
 def test_compute_discovery_price_performance_notes_staleness_past_90_days(db_conn, monkeypatch):
     trade_date, series = _price_series(days_ago=95, start_price=100.0, end_price=130.0)
-    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda t, lookback_days=None: series)
     candidates = [{"ticker": "ACME", "trade_date": trade_date, "price_flag_notified": 0}]
     result = insider_scan.compute_discovery_price_performance(db_conn, candidates)
     assert "may not reflect the insider signal anymore" in result[0]["price_note"]
@@ -447,7 +438,7 @@ def test_compute_discovery_price_performance_unavailable_without_trade_date(db_c
 
 
 def test_compute_discovery_price_performance_unavailable_on_fetch_miss(db_conn, monkeypatch):
-    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: None)
+    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda t, lookback_days=None: None)
     candidates = [{"ticker": "ACME", "trade_date": date.today().isoformat(), "price_flag_notified": 0}]
     result = insider_scan.compute_discovery_price_performance(db_conn, candidates)
     assert result[0]["price_note"] == "price unavailable"
@@ -462,7 +453,7 @@ def test_compute_discovery_price_performance_marks_newly_flagged_once(db_conn, m
         db_conn, ticker="ACME", sector_label="Insider Buy", signal_detail="d",
         source="goat_insider_discovery", trade_date=trade_date,
     )
-    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda t, lookback_days=None: series)
 
     row = dict(goat_db.get_goat_pending_candidate(db_conn, "ACME"))
     result = insider_scan.compute_discovery_price_performance(db_conn, [row])
@@ -476,7 +467,7 @@ def test_compute_discovery_price_performance_marks_newly_flagged_once(db_conn, m
 
 def test_compute_holdings_watch_price_performance_flags_sale_that_fell(db_conn, monkeypatch):
     trade_date, series = _price_series(days_ago=20, start_price=100.0, end_price=80.0)
-    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda t, lookback_days=None: series)
     filings = [{"ticker": "VRTX", "trade_date": trade_date, "trade_type": "S",
                 "dedup_key": "key-1", "price_flag_notified": 0}]
     result = insider_scan.compute_holdings_watch_price_performance(db_conn, filings)
@@ -489,7 +480,7 @@ def test_compute_holdings_watch_price_performance_ignores_contrarian_direction(d
     # A sale followed by a big price RISE is the contrarian case -- Shaun
     # 2026-08-18 wants only the confirming direction flagged (sale -> fall).
     trade_date, series = _price_series(days_ago=20, start_price=100.0, end_price=130.0)
-    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda t, lookback_days=None: series)
     filings = [{"ticker": "VRTX", "trade_date": trade_date, "trade_type": "S",
                 "dedup_key": "key-2", "price_flag_notified": 0}]
     result = insider_scan.compute_holdings_watch_price_performance(db_conn, filings)
@@ -499,7 +490,7 @@ def test_compute_holdings_watch_price_performance_ignores_contrarian_direction(d
 
 def test_compute_holdings_watch_price_performance_does_not_reflag_already_notified(db_conn, monkeypatch):
     trade_date, series = _price_series(days_ago=20, start_price=100.0, end_price=80.0)
-    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)
+    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda t, lookback_days=None: series)
     filings = [{"ticker": "VRTX", "trade_date": trade_date, "trade_type": "S",
                 "dedup_key": "key-3", "price_flag_notified": 1}]
     result = insider_scan.compute_holdings_watch_price_performance(db_conn, filings)

@@ -179,12 +179,15 @@ def chart_setup_score(close: pd.Series | None, trade_date_str: str) -> dict[str,
     return {"score": total, "breakdown": "; ".join(breakdown)}
 
 
-def build_chart_note(ticker: str, trade_date_str: str) -> str:
-    """The single bracketed note callers append to a price-since-trade line --
-    combines the raw trend-vs-MA read with the 0-100 chart setup score off one
-    shared close-history fetch. Returns "" when neither half has anything to
-    say (no history, or an unparsable/missing trade date)."""
-    close = fetch_close(ticker)
+def build_chart_note_from_close(close: pd.Series | None, trade_date_str: str) -> str:
+    """Same as build_chart_note, for a caller that already has the close
+    series (e.g. also needs it for its own price-move-since-trade calc) --
+    avoids a second network fetch. Split out 2026-09-26 after the first
+    production run doubled goat.insider_scan's yfinance call volume (one
+    fetch for the price move, a separate one for this note) and coincided
+    with a Yahoo rate-limit outage on the VPS -- not proven causally, but
+    doubling an already-heavy daily job's external call count on the day it
+    first ran was worth removing regardless."""
     parts = []
     trend = trend_context(close)
     if trend:
@@ -193,3 +196,13 @@ def build_chart_note(ticker: str, trade_date_str: str) -> str:
     if setup:
         parts.append(f"chart setup score {setup['score']}/100 ({setup['breakdown']})")
     return " | ".join(parts)
+
+
+def build_chart_note(ticker: str, trade_date_str: str) -> str:
+    """The single bracketed note callers append to a price-since-trade line --
+    combines the raw trend-vs-MA read with the 0-100 chart setup score off one
+    shared close-history fetch. Returns "" when neither half has anything to
+    say (no history, or an unparsable/missing trade date). Callers who already
+    have (or also need) the close series for their own purposes should use
+    build_chart_note_from_close directly instead, to share the fetch."""
+    return build_chart_note_from_close(fetch_close(ticker), trade_date_str)

@@ -435,8 +435,12 @@ GOAT_INSIDER_PRICE_STALE_DAYS = 90  # matches GOAT_INSIDER_SALE_LOOKBACK_DAYS's 
 # built 2026-09-26, moved out to mytrader.chart_setup_score / mytrader.config's
 # "Chart Setup Score" block the same day when Shaun asked to also wire it into
 # superinvestor_filings (which depends on my-trader but not on goat). See that
-# module for the constants and the full scoring rationale; goat.insider_scan's
-# _build_chart_note is now a thin wrapper over mytrader.chart_setup_score.build_chart_note.
+# module for the constants and the full scoring rationale. goat.insider_scan's
+# compute_discovery_price_performance/compute_holdings_watch_price_performance
+# call mytrader.chart_setup_score.fetch_close once per row and reuse that same
+# series for both the price-move-since-trade calc and this note (a same-day
+# fix, after the first production run doubled this job's yfinance call count
+# by fetching twice per row -- see _price_move_since's docstring).
 
 # Strait of Hormuz war-risk tracking, per Shaun's 2026-08-18 request -- two free/
 # scrapeable proxies since neither the Baltic Exchange's TD3C index nor JWC's
