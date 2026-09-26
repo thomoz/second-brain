@@ -4,6 +4,14 @@ Not currently owned — see `holdings.md` for what's actually held. Auto-generat
 
 ## Watchlist
 
+### 👁 Super Hot!
+
+Flagged via `watchlist-watch --group` — these still appear in their normal bucket table below; this is a themed keep-an-eye-on sub-block.
+
+| Ticker | Bucket(s) | Why |
+|--------|-----------|-----|
+| MX | unassigned | Shaun request 2026-09-26 |
+
 ### 👁 Keep an eye on
 
 Flagged via `watchlist-watch` — these still appear in their normal bucket table below; this is just a shortcut to what's live right now.
