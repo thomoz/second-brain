@@ -10,6 +10,7 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
+| LEN | unassigned | Berkshire bought more (Shaun request 2026-09-26) |
 | MX | unassigned | Shaun request 2026-09-26 |
 
 ### 👁 Keep an eye on
@@ -84,6 +85,7 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 | KARS | KraneShares Electric Vehicles and Future Mobility ETF | etf | unassigned | — | — | Alternative Energy Transport theme, 35% allocation |
 | KMI | Kinder Morgan | stock | unassigned | — | — | Energy midstream/pipeline - keep an eye on |
 | LAND | Gladstone Land Corp | reit | 2 | 6.26% | +16% | Not yet discussed. Farmland REIT |
+| LEN | Lennar Corporation | stock | unassigned | — | — | Berkshire bought more (Shaun request 2026-09-26) |
 | MCD | McDonalds Corp | stock | 1 | 2.65% | +175% | Deep dive 2026-09-25: 2 active flags -- US traffic/value-execution earnings deterioration (Q2 US comps only +0.8% vs +2.5% YoY, guest counts negative, Bloomberg Sept 18 reports July/Aug US sales declines on card data, 50k-restaurant target pushed to 2028) and a leadership change (Skye Anderson replacing Joe Erlinger as President of McDonalds USA, Aug 4). Opportunity signal suppressed by the gate. PE 19.5 (7/10 good), dividend +5.1%, current ratio 1.08 flagged thin (within threshold). Down -11.0% 1mo / -11.4% 3mo, price below 50/150/200DMA. Was flagged defensive? -- mixed answer: mild in 2008 (-21.4%) and 2022 (-4.8%), but hit hard in COVID (-36.6%, dine-in shutdowns), not pure ballast. Principles fit avg 66/100 (Buffett 82, Fisher/Munger 78) but Graham only 35/100 (no margin of safety, negative book equity, heavy leverage). No Briefs Finance score history yet. |
 | MLPX | Global X MLP & Energy Infrastructure ETF | etf | unassigned | — | — | Fund (not an MLP itself, no K-1/UBTI issue) holding MLPs + midstream corporations (TC Energy, Enbridge, Williams). Expense ratio 0.45%, AUM 3.64B, dividend +7.7%. Watching for a better entry point -- no active flags at deep-dive 2026-08-12, PE 21.2 (good), amplifies crashes ~2x (COVID -62.3%). |
 | MOUS | Mous | private | unassigned | — | — | Private UK phone-case company (Airo Shock material), not publicly traded -- no ticker, no yfinance data, no SEC filings. Opened pre-registration for an investment round; terms/valuation not yet known. Inert placeholder: Find/Monitor cannot check this (no market data source exists for a private company), so this row will never populate price/PE/dividend fields or receive automated re-checks -- requires manual follow-up when pre-registration details firm up. |
