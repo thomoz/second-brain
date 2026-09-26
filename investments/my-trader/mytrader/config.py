@@ -468,6 +468,45 @@ GOLD_TA_LEVEL_LOOKBACK_DAYS = 20  # trading days (~1 month) for the recent
                                      # swing high/low support/resistance proxy.
 GOLD_TA_VOLUME_AVG_DAYS = 20
 
+# Chart Setup Score (0-100) -- added 2026-09-26 for goat.insider_scan, then
+# shared with superinvestor_filings the same day (Shaun: "can we connect this
+# score part of the tool to the super-investor-filings-report"). Lives in
+# mytrader, not goat, because superinvestor_filings already depends on
+# my-trader but not on goat -- see mytrader/chart_setup_score.py for the
+# scoring logic itself and its docstring for the full "why a score, and why
+# these specific boundaries" rationale (explicitly overrides the
+# OPPORTUNITY_*-style "no invented thresholds" precedent, at Shaun's own
+# request, on condition every boundary stays traceable and shown, not a black
+# box). RSI scoring reuses GOLD_TA_RSI_* above verbatim rather than new
+# thresholds.
+CHART_SETUP_TREND_MA_WINDOWS: tuple[int, ...] = (50, 150, 200)  # same trio as
+    # checks/technical_levels.py's own _WINDOWS.
+CHART_SETUP_LOOKBACK_DAYS = 500  # calendar days -- comfortably covers a
+    # 200-trading-day MA plus a slope-comparison buffer, including holiday/
+    # weekend gaps (same margin goat.config's GOAT_DMA_BREAKOUT_HISTORY_
+    # LOOKBACK_DAYS budgets for the same reason).
+CHART_SETUP_SLOPE_LOOKBACK_DAYS = 5  # today vs. N trading days ago, for
+    # judging whether a moving average is rising -- same idiom goat's
+    # sector_rotation.py/dma_breakout_scan.py already use for their own MA
+    # slope checks (GOAT_SECTOR_SLOPE_LOOKBACK_DAYS).
+CHART_SETUP_RANGE_LOOKBACK_DAYS = 90  # trailing window used to judge where a
+    # trade-day close sat in its own range (bought a dip vs. chased a high).
+CHART_SETUP_SCORE_TREND_MAX = 40  # trend confirmation vs the 150/200-day MAs
+    # (Weinstein Stage Analysis' Stage 2, already referenced elsewhere in this
+    # codebase's ETPMAG exit rule) -- weighted highest since it was the single
+    # biggest factor in the THM walkthrough that prompted this feature.
+CHART_SETUP_SCORE_ENTRY_MAX = 25  # did the trade land in the bottom third of
+    # its own trailing CHART_SETUP_RANGE_LOOKBACK_DAYS range (bought weakness)
+    # or the top third (chased strength) -- second-biggest factor in that
+    # walkthrough.
+CHART_SETUP_SCORE_MOMENTUM_MAX = 20  # RSI(14) right now, against GOLD_TA_RSI_*.
+CHART_SETUP_SCORE_EXTENSION_MAX = 15  # chase-risk read: how far price has
+    # already run above its nearest long-term MA.
+CHART_SETUP_EXTENSION_TIERS: list[tuple[float, int]] = [
+    (10.0, CHART_SETUP_SCORE_EXTENSION_MAX), (25.0, 8),
+]  # (max_pct_above_nearest_long_term_MA, points) -- below 10% above is "still
+    # near the breakout level", 10-25% is "getting extended", past that is 0.
+
 GOLD_BACKTEST_HISTORY_START = date(2000, 1, 1)  # comfortably before every
                                      # signal's earliest data (GC=F/SI=F
                                      # 2000-08-30, VIX 1990-01-02, DFII10

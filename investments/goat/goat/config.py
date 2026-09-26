@@ -430,6 +430,14 @@ GOAT_INSIDER_PRICE_STALE_DAYS = 90  # matches GOAT_INSIDER_SALE_LOOKBACK_DAYS's 
     # past this many days since the trade, a price move is more likely broad market
     # drift than a reaction to the insider signal, so it's annotated, not hidden
 
+# Trend-context + chart setup score (the bracketed "[above 150DMA...; chart
+# setup score N/100 (...)]" note on every insider price-since-trade line) --
+# built 2026-09-26, moved out to mytrader.chart_setup_score / mytrader.config's
+# "Chart Setup Score" block the same day when Shaun asked to also wire it into
+# superinvestor_filings (which depends on my-trader but not on goat). See that
+# module for the constants and the full scoring rationale; goat.insider_scan's
+# _build_chart_note is now a thin wrapper over mytrader.chart_setup_score.build_chart_note.
+
 # Strait of Hormuz war-risk tracking, per Shaun's 2026-08-18 request -- two free/
 # scrapeable proxies since neither the Baltic Exchange's TD3C index nor JWC's
 # lloydswordings.com circular archive offer a free API (confirmed via research

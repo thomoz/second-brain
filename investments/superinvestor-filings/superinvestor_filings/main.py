@@ -34,7 +34,7 @@ def _open_conn():
 
 
 def cmd_scan(args) -> None:
-    from . import config, db, notify, report
+    from . import chart_scoring, config, db, notify, report
     from .edgar_monitor import scan_edgar
     from .sast_monitor import scan_india
 
@@ -58,6 +58,10 @@ def cmd_scan(args) -> None:
         dict(r) for r in db.get_recent_superinvestor_filings_seen(conn, limit=200)
     ]
     conn.close()
+
+    # Chart setup score, new_filings only -- see chart_scoring.py's docstring
+    # for why this doesn't also run over the full recent_filings log.
+    chart_scoring.annotate_chart_notes(result["new_filings"])
 
     report.write_report(result)
     notify.send_digest(result["new_filings"])

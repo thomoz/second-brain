@@ -29,6 +29,23 @@ def test_render_groups_by_investor_and_lists_filings():
     assert "All Recent Filings" in md
 
 
+def test_render_shows_chart_note_when_present():
+    result = {
+        "new_filings": [_alert(chart_note="above 150DMA (+3.2%) | chart setup score 78/100 (trend 40/40 ...)")],
+        "recent_filings": [],
+        "first_seed": False,
+    }
+    md = report.render_report(result)
+    assert "Chart: above 150DMA" in md
+    assert "chart setup score 78/100" in md
+
+
+def test_render_omits_chart_line_when_note_empty():
+    result = {"new_filings": [_alert(chart_note="")], "recent_filings": [], "first_seed": False}
+    md = report.render_report(result)
+    assert "Chart:" not in md
+
+
 def test_recent_filings_table_shows_source_column():
     result = {
         "new_filings": [],

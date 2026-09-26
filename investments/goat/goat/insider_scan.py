@@ -14,6 +14,7 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 import pandas as pd
+from mytrader import chart_setup_score as css
 from mytrader import db as mt_db
 from mytrader import openinsider
 
@@ -386,7 +387,16 @@ def _confirms_signal(trade_type_code: str, pct_change: float, days_since: int) -
     return False
 
 
-def _price_note(pct_change: float, days_since: int, trade_type_code: str) -> str:
+def _build_chart_note(ticker: str, trade_date_str: str) -> str:
+    """Thin wrapper over mytrader.chart_setup_score.build_chart_note -- the
+    trend-vs-MA read + 0-100 chart setup score used to live here as goat-local
+    code, moved to mytrader 2026-09-26 when Shaun asked to also wire it into
+    superinvestor_filings (which depends on my-trader but not on goat). See
+    mytrader/chart_setup_score.py for the full scoring rationale."""
+    return css.build_chart_note(ticker, trade_date_str)
+
+
+def _price_note(pct_change: float, days_since: int, trade_type_code: str, chart_note: str = "") -> str:
     flag = " \U0001F6A9 confirms signal" if _confirms_signal(
         trade_type_code, pct_change, days_since
     ) else ""
@@ -394,7 +404,8 @@ def _price_note(pct_change: float, days_since: int, trade_type_code: str) -> str
         f"; {days_since}d -- may not reflect the insider signal anymore"
         if days_since > config.GOAT_INSIDER_PRICE_STALE_DAYS else ""
     )
-    return f"{pct_change:+.1f}% since trade{flag}{stale}"
+    note = f" [{chart_note}]" if chart_note else ""
+    return f"{pct_change:+.1f}% since trade{flag}{stale}{note}"
 
 
 def compute_discovery_price_performance(
@@ -416,7 +427,8 @@ def compute_discovery_price_performance(
             row["pct_change"] = None
             row["newly_flagged"] = False
             continue
-        row["price_note"] = _price_note(move["pct_change"], move["days_since"], "P")
+        chart_note = _build_chart_note(row["ticker"], trade_date)
+        row["price_note"] = _price_note(move["pct_change"], move["days_since"], "P", chart_note)
         row["pct_change"] = move["pct_change"]
         row["days_since"] = move["days_since"]
         flagged = _confirms_signal("P", move["pct_change"], move["days_since"])
@@ -442,7 +454,8 @@ def compute_holdings_watch_price_performance(
             row["pct_change"] = None
             row["newly_flagged"] = False
             continue
-        row["price_note"] = _price_note(move["pct_change"], move["days_since"], trade_type)
+        chart_note = _build_chart_note(row["ticker"], trade_date)
+        row["price_note"] = _price_note(move["pct_change"], move["days_since"], trade_type, chart_note)
         row["pct_change"] = move["pct_change"]
         row["days_since"] = move["days_since"]
         flagged = _confirms_signal(trade_type, move["pct_change"], move["days_since"])
@@ -548,7 +561,14 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
         "Market-wide $25k+ open-market insider purchases, staged for explicit review. "
         "Review each one and either `promote-candidate` (writes it into my-trader's "
         "real watchlist, labeled Goat-approved) or `dismiss-candidate` (discards it). "
-        "Edits here are overwritten on the next `scan-insiders` run.",
+        "Edits here are overwritten on the next `scan-insiders` run. The bracketed "
+        "`[...]` tag on Price Since Trade shows where price sits vs its 50/150/200-day "
+        "MAs right now, so a raw % move never has to be judged alone -- a name up 17% "
+        "since the trade that just reclaimed its 150/200DMA reads very differently "
+        "than one up 17% and already far extended above them -- plus, where enough "
+        "history exists, a 0-100 chart setup score with its full breakdown shown "
+        "inline (trend confirmation, entry quality, momentum, extension -- see "
+        "goat.insider_scan._chart_setup_score for the full rationale on each).",
         "",
     ] + _DISCOVERY_HEADER
     candidates = discovery_result["pending_candidates"]

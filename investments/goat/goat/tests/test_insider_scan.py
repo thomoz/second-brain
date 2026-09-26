@@ -385,6 +385,36 @@ def _price_series(days_ago: int, start_price: float, end_price: float) -> tuple[
     return trade_date.isoformat(), pd.Series(prices, index=idx)
 
 
+def _flat_series(days: int, price: float) -> pd.Series:
+    idx = pd.date_range(end=date.today(), periods=days, freq="D")
+    return pd.Series([price] * days, index=idx)
+
+
+def test_build_chart_note_delegates_to_mytrader_chart_setup_score(monkeypatch):
+    """The trend-vs-MA read + 0-100 scoring logic itself now lives in
+    mytrader.chart_setup_score (moved 2026-09-26 so superinvestor_filings can
+    share it) and is exhaustively unit-tested there -- this just confirms
+    goat.insider_scan._build_chart_note is a correct thin wrapper."""
+    monkeypatch.setattr(
+        "goat.insider_scan.css.build_chart_note",
+        lambda ticker, trade_date_str: f"stub note for {ticker}/{trade_date_str}",
+    )
+    assert insider_scan._build_chart_note("ACME", "2026-08-01") == "stub note for ACME/2026-08-01"
+
+
+def test_compute_discovery_price_performance_includes_chart_note_in_price_note(db_conn, monkeypatch):
+    trade_date, move_series = _price_series(days_ago=10, start_price=100.0, end_price=117.4)
+    trend_series = _flat_series(260, 100.0)
+    trend_series.iloc[-1] = 117.4  # latest close clearly above the flat 100.0 MAs
+
+    monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: move_series)
+    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda t, lookback_days=None: trend_series)
+    candidates = [{"ticker": "THM", "trade_date": trade_date, "price_flag_notified": 0}]
+    result = insider_scan.compute_discovery_price_performance(db_conn, candidates)
+    assert "above 150DMA" in result[0]["price_note"]
+    assert "above 200DMA" in result[0]["price_note"]
+
+
 def test_compute_discovery_price_performance_flags_buy_that_rose_past_threshold(db_conn, monkeypatch):
     trade_date, series = _price_series(days_ago=30, start_price=100.0, end_price=125.0)
     monkeypatch.setattr("goat.insider_scan.price_history.fetch_close_history", lambda t, lb: series)

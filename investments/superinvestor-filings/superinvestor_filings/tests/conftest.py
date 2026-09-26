@@ -58,3 +58,8 @@ def _no_real_network(monkeypatch):
     monkeypatch.setattr(
         "mytrader.sec_filings.edgar_fulltext_search_hits", lambda *a, **k: None
     )
+    # Chart setup score's own fetch (chart_scoring.py, added 2026-09-26) --
+    # separate network entrypoint from the SEC/NSE ones above, easy to miss.
+    monkeypatch.setattr(
+        "mytrader.chart_setup_score.fetch_close", lambda ticker, lookback_days=None: None
+    )

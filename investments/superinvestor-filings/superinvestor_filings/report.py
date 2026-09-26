@@ -104,7 +104,17 @@ def render_report(result: dict[str, Any]) -> str:
             "",
         ]
 
-    lines += ["## New Since Last Run", ""]
+    lines += [
+        "## New Since Last Run",
+        "",
+        "Where a US ticker resolved and enough price history exists, each entry also "
+        "carries a chart setup line -- the same 0-100 chart setup score goat.insider_scan "
+        "attaches to its own discovery candidates (trend confirmation, entry quality, "
+        "momentum, extension -- see mytrader/chart_setup_score.py). Never computed for "
+        "the India/SAST leg (no US-resolvable ticker) or for the older All Recent "
+        "Filings log below (cost-bounded to filings newly surfaced this run).",
+        "",
+    ]
     if new_filings:
         for investor, items in _group_by_investor(new_filings).items():
             lines.append(f"### {investor} -- {len(items)} new")
@@ -112,6 +122,8 @@ def render_report(result: dict[str, Any]) -> str:
                 lines.append(f"- {a['summary']}")
                 if a.get("raw_url"):
                     lines.append(f"  {a['raw_url']}")
+                if a.get("chart_note"):
+                    lines.append(f"  Chart: {a['chart_note']}")
             lines.append("")
     else:
         lines += ["No new fast-disclosure filings since the last run.", ""]

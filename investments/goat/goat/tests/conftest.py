@@ -61,3 +61,7 @@ def _no_real_price_history_fetch(monkeypatch):
     pattern defends against). Individual tests override with monkeypatch as
     needed."""
     monkeypatch.setattr("goat.price_history.fetch_close_history", lambda ticker, lookback_days: None)
+    # Same stub for mytrader.chart_setup_score's own fetch, added 2026-09-26
+    # when goat.insider_scan._build_chart_note started delegating to it (a
+    # separate module/fetch path from goat.price_history above, easy to miss).
+    monkeypatch.setattr("mytrader.chart_setup_score.fetch_close", lambda ticker, lookback_days=None: None)
