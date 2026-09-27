@@ -113,4 +113,4 @@ Scanned 742 ticker(s) across the combined universe.
 | MOS | Mosaic Company (The) | n/a | Materials | MOS (Materials): crossed above its 150-day MA 9 trading day(s) ago, now +7.0% above it (MA currently falling) -- DMA breakout discovery signal; MOS (Materials): crossed above its 200-day MA 9 trading day(s) ago, now +5.5% above it (MA currently rising) -- DMA breakout discovery signal; survival context: debt/equity 52.2 (below flag threshold), cash runway 0.4 years (cash-burning), gross margin 11.2%, operating margin -0.1%, revenue growth -6.0% YoY, cash-generating | 2026-09-16 |
 | DBI.AX | Dalrymple Bay Infrastructure | n/a | Industrials | DBI.AX (Industrials): crossed above its 150-day MA 10 trading day(s) ago, now +0.1% above it (MA currently rising) -- DMA breakout discovery signal; survival context: debt/equity 210.6 (at/above flag threshold), cash runway 1.6 years (cash-burning), gross margin 16.7%, operating margin 38.1%, revenue growth +5.6% YoY, cash-generating | 2026-09-16 |
 
-Last auto-generated: 2026-09-26.
+Last auto-generated: 2026-09-27.
