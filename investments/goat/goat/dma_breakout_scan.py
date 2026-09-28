@@ -46,7 +46,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 import pandas as pd
@@ -199,6 +199,14 @@ def passes_liquidity_floor(market: str, data) -> bool:
 
 
 def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
+    cutoff = (
+        datetime.now(timezone.utc) - timedelta(days=config.GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS)
+    ).isoformat()
+    expired = db.delete_stale_pending_candidates(conn, "goat_dma_breakout_scan", cutoff)
+    if expired:
+        print(f"[goat-dma-breakout-scan] expired {expired} never-reviewed candidate(s) "
+              f"older than {config.GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS} days")
+
     constituents = fetch_universe_constituents(conn)
     asx_unavailable = not any(c["market"] == "ASX" for c in constituents)
 

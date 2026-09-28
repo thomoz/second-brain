@@ -78,6 +78,43 @@ def test_delete_goat_pending_candidate_removes_it(db_conn):
     assert db.get_goat_pending_candidate(db_conn, "XLK") is None
 
 
+def test_delete_stale_pending_candidates_removes_old_rows_for_matching_source(db_conn):
+    db.insert_goat_pending_candidate(
+        db_conn, ticker="OLD", sector_label="Technology", signal_detail="d",
+        source="goat_dma_breakout_scan",
+    )
+    with db_conn:
+        db_conn.execute(
+            "UPDATE goat_pending_candidates SET flagged_at = '2020-01-01T00:00:00+00:00' WHERE ticker = 'OLD'"
+        )
+    db.insert_goat_pending_candidate(
+        db_conn, ticker="NEW", sector_label="Technology", signal_detail="d",
+        source="goat_dma_breakout_scan",
+    )
+
+    count = db.delete_stale_pending_candidates(db_conn, "goat_dma_breakout_scan", "2025-01-01T00:00:00+00:00")
+
+    assert count == 1
+    assert db.get_goat_pending_candidate(db_conn, "OLD") is None
+    assert db.get_goat_pending_candidate(db_conn, "NEW") is not None
+
+
+def test_delete_stale_pending_candidates_does_not_touch_other_sources(db_conn):
+    db.insert_goat_pending_candidate(
+        db_conn, ticker="OTHER", sector_label="Technology", signal_detail="d",
+        source="goat_sector_rotation",
+    )
+    with db_conn:
+        db_conn.execute(
+            "UPDATE goat_pending_candidates SET flagged_at = '2020-01-01T00:00:00+00:00' WHERE ticker = 'OTHER'"
+        )
+
+    count = db.delete_stale_pending_candidates(db_conn, "goat_dma_breakout_scan", "2025-01-01T00:00:00+00:00")
+
+    assert count == 0
+    assert db.get_goat_pending_candidate(db_conn, "OTHER") is not None
+
+
 def test_get_all_goat_pending_candidates_lists_ticker_sorted(db_conn):
     db.insert_goat_pending_candidate(db_conn, ticker="XLV", sector_label="Health Care", signal_detail="d")
     db.insert_goat_pending_candidate(db_conn, ticker="XLK", sector_label="Technology", signal_detail="d")

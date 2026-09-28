@@ -241,6 +241,23 @@ def delete_goat_pending_candidate(conn: sqlite3.Connection, ticker: str) -> int:
         return cur.rowcount
 
 
+def delete_stale_pending_candidates(conn: sqlite3.Connection, source: str, older_than: str) -> int:
+    """Removes never-reviewed candidates from a single source once they're older
+    than `older_than` (an ISO timestamp, compared lexicographically against
+    flagged_at -- both are datetime.now(timezone.utc).isoformat() strings, which
+    sort correctly as text). Scoped to `source` since goat_pending_candidates is
+    shared across every Goat scan (heartbeat, sector rotation, insiders, DMA
+    breakout) -- a blanket age-based delete here would wipe another scan's
+    candidates too. See GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS for the first
+    caller/rationale."""
+    with conn:
+        cur = conn.execute(
+            "DELETE FROM goat_pending_candidates WHERE source = ? AND flagged_at < ?",
+            (source, older_than),
+        )
+        return cur.rowcount
+
+
 def get_sp500_constituents_fetched_at(conn: sqlite3.Connection) -> str | None:
     """The whole table is refreshed atomically (replace_sp500_constituents), so
     every row shares the same fetched_at -- MAX is just "the" value, not really

@@ -300,6 +300,36 @@ def test_run_dma_breakout_scan_stages_new_candidate(db_conn, monkeypatch):
     assert row["exchange"] == "NasdaqGS"
 
 
+def test_run_dma_breakout_scan_expires_stale_never_reviewed_candidate(db_conn, monkeypatch):
+    """Real gap caught 2026-09-28: never-reviewed DMA breakout candidates piled up
+    with no expiry -- 100+ rows going back 12 days, none dismissed/promoted. A
+    candidate older than GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS should be wiped
+    automatically, scoped to this source only (other Goat scans' pending
+    candidates are untouched)."""
+    goat_db.insert_goat_pending_candidate(
+        db_conn, ticker="STALE", sector_label="Technology", signal_detail="old",
+        source="goat_dma_breakout_scan",
+    )
+    with db_conn:
+        db_conn.execute(
+            "UPDATE goat_pending_candidates SET flagged_at = '2020-01-01T00:00:00+00:00' WHERE ticker = 'STALE'"
+        )
+    goat_db.insert_goat_pending_candidate(
+        db_conn, ticker="OTHERSCAN", sector_label="Technology", signal_detail="old",
+        source="goat_sector_rotation",
+    )
+    with db_conn:
+        db_conn.execute(
+            "UPDATE goat_pending_candidates SET flagged_at = '2020-01-01T00:00:00+00:00' WHERE ticker = 'OTHERSCAN'"
+        )
+    _patch_common(monkeypatch, constituents=[])
+
+    dma_breakout_scan.run_dma_breakout_scan(db_conn)
+
+    assert goat_db.get_goat_pending_candidate(db_conn, "STALE") is None
+    assert goat_db.get_goat_pending_candidate(db_conn, "OTHERSCAN") is not None
+
+
 def test_run_dma_breakout_scan_skips_ticker_already_a_holding_ax_suffixed(db_conn, monkeypatch):
     _patch_common(
         monkeypatch,
