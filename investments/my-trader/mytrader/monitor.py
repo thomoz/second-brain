@@ -359,6 +359,12 @@ def write_report(result: dict[str, Any]) -> None:
 
 
 def maybe_notify(result: dict[str, Any]) -> None:
+    """send_toast_notification is a Windows desktop popup -- harmlessly falls back to
+    a console print on the VPS (see notifications.py), which nobody ever sees there.
+    send_whatsapp_notification is the channel that actually reaches Shaun since
+    Monitor's schedule moved to the VPS 2026-09-28 (see investments/TOOLS.md's
+    "schedule mismatch" note) -- mirrors earnings_watch.py's maybe_notify, the
+    existing VPS-native notify pattern in this same package."""
     if not result["new_alerts"]:
         return
     import sys
@@ -366,10 +372,13 @@ def maybe_notify(result: dict[str, Any]) -> None:
 
     _scripts_dir = Path(__file__).resolve().parent.parent.parent.parent / ".claude" / "scripts"
     sys.path.insert(0, str(_scripts_dir))
-    from notifications import send_toast_notification
+    from notifications import send_toast_notification, send_whatsapp_notification
 
     n = len(result["new_alerts"])
-    send_toast_notification(
-        "my-trader Monitor",
-        f"{n} item(s) flagged — check investments/my-trader/my-trader-report.md",
-    )
+    summary = f"{n} item(s) flagged — check investments/my-trader/my-trader-report.md"
+    send_toast_notification("my-trader Monitor", summary)
+
+    lines = [f"my-trader Monitor: {n} item(s) flagged."] + [
+        f"- {a['ticker']}: {a['check_name']} — {a['message']}" for a in result["new_alerts"]
+    ]
+    send_whatsapp_notification("\n".join(lines))

@@ -639,6 +639,7 @@ def test_maybe_notify_calls_toast_when_new_alerts_present(monkeypatch):
     calls = []
     fake_module = types.ModuleType("notifications")
     fake_module.send_toast_notification = lambda *a, **k: calls.append((a, k))
+    fake_module.send_whatsapp_notification = lambda *a, **k: None
     monkeypatch.setitem(sys.modules, "notifications", fake_module)
 
     monitor.maybe_notify({"new_alerts": [{"ticker": "VRTX", "source_table": "holdings",
@@ -646,3 +647,27 @@ def test_maybe_notify_calls_toast_when_new_alerts_present(monkeypatch):
     assert len(calls) == 1
     args, kwargs = calls[0]
     assert any("1" in str(a) for a in args)
+
+
+def test_maybe_notify_calls_whatsapp_when_new_alerts_present(monkeypatch):
+    """Real gap caught 2026-09-28: maybe_notify only ever called send_toast_notification
+    (a Windows desktop popup), which was fine when Monitor ran locally but went silent
+    once Monitor's schedule moved to the VPS -- send_toast_notification falls back to a
+    console print nobody sees there. send_whatsapp_notification is what actually reaches
+    Shaun; must be called with a per-alert summary, mirroring earnings_watch.py."""
+    calls = []
+    fake_module = types.ModuleType("notifications")
+    fake_module.send_toast_notification = lambda *a, **k: None
+    fake_module.send_whatsapp_notification = lambda *a, **k: calls.append((a, k))
+    monkeypatch.setitem(sys.modules, "notifications", fake_module)
+
+    monitor.maybe_notify({"new_alerts": [
+        {"ticker": "VRTX", "source_table": "holdings", "check_name": "dividend", "message": "Dividend cut"},
+        {"ticker": "AAPL", "source_table": "watchlist", "check_name": "valuation", "message": "PE rich"},
+    ]})
+
+    assert len(calls) == 1
+    (message,), kwargs = calls[0]
+    assert "2 item(s) flagged" in message
+    assert "VRTX: dividend — Dividend cut" in message
+    assert "AAPL: valuation — PE rich" in message
