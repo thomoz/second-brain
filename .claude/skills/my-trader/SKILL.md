@@ -44,7 +44,8 @@ below). Every command runs via the SSH wrapper:
 .\scripts\invoke_investments.ps1 -Package my-trader -Command "seed"
 
 # Scheduled re-check of all holdings + vetted watchlist (also runs automatically —
-# see scripts/setup_scheduler_windows.ps1 / scripts/systemd/second-brain-mytrader-monitor.timer)
+# see scripts/systemd/second-brain-mytrader-monitor.timer; migrated off Windows Task
+# Scheduler 2026-09-28, that local task kept missing its 7:30am trigger)
 .\scripts\invoke_investments.ps1 -Package my-trader -Command "monitor"
 
 # Pull new Briefs Finance recommendations into synced-candidates-pending-review.md

@@ -45,15 +45,11 @@ Register-ScheduledTask -TaskName "SecondBrain-VaultSync" -Action $vsAction `
     -Trigger $vsTrigger -RunLevel Limited -Force
 Write-Output "Registered: SecondBrain-VaultSync"
 
-# my-trader Monitor — daily at 07:30 (after US markets close, before Shaun's day starts)
-$mtPython = Join-Path $ProjectPath "investments\.venv\Scripts\python.exe"
-$mtAction = New-ScheduledTaskAction -Execute $mtPython `
-    -Argument "-m mytrader.main monitor" `
-    -WorkingDirectory (Join-Path $ProjectPath "investments\my-trader")
-$mtTrigger = New-ScheduledTaskTrigger -Daily -At "07:30"
-Register-ScheduledTask -TaskName "SecondBrain-MyTraderMonitor" -Action $mtAction `
-    -Trigger $mtTrigger -RunLevel Limited -Force
-Write-Output "Registered: SecondBrain-MyTraderMonitor"
+# my-trader Monitor — migrated to the VPS 2026-09-28 (scripts/systemd/
+# second-brain-mytrader-monitor.timer). The local Windows task repeatedly missed its
+# 7:30am trigger (laptop asleep/on battery/off at that hour) and was disabled. Do NOT
+# re-register "SecondBrain-MyTraderMonitor" here — it would double-run against the VPS
+# timer and duplicate WhatsApp alerts.
 
 # Handoff check — every hour, deterministic toast alert on new VPS Handoff Inbox
 # entries (Memory/HEARTBEAT.md). Separate from Heartbeat: no LLM in the loop, and

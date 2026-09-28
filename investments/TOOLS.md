@@ -39,8 +39,8 @@ alerts/discoveries as they fire — these files are for batch review, not discov
 
 | Tool | What it does | Where it runs | Schedule | Output |
 |------|--------------|----------------|----------|--------|
-| <a id="holdings-md"></a>[↑](#daily-read) **Holdings tracking** (`holdings.md`) | Markdown snapshot of your current holdings (qty, avg price, market value, unrealized P&L, bucket). Fully regenerated — not merged — on every holdings change: my-trader Monitor's daily run, any buy/sell, watchlist ops, or an IBKR sync. To pull it fresh from your real Interactive Brokers account instead of updating it by hand, see the simple steps in [ibkr-setup-guide.md](my-trader/ibkr-setup-guide.md#quick-steps-super-simple-version). | Windows Task Scheduler (`SecondBrain-MyTraderMonitor`), this dev machine + on-demand | Daily, 7:30am Sydney local (also refreshes on any holdings write) | `investments/my-trader/holdings.md` |
-| <a id="mytrader-monitor"></a>[↑](#daily-read) **my-trader Monitor** | Re-checks all holdings + vetted watchlist rows | Windows Task Scheduler (`SecondBrain-MyTraderMonitor`), this dev machine | Daily, 7:30am Sydney local | `investments/my-trader/my-trader-report.md`, refreshes `gold-outlook.md` |
+| <a id="holdings-md"></a>[↑](#daily-read) **Holdings tracking** (`holdings.md`) | Markdown snapshot of your current holdings (qty, avg price, market value, unrealized P&L, bucket). Fully regenerated — not merged — on every holdings change: my-trader Monitor's daily run, any buy/sell, watchlist ops, or an IBKR sync. To pull it fresh from your real Interactive Brokers account instead of updating it by hand, see the simple steps in [ibkr-setup-guide.md](my-trader/ibkr-setup-guide.md#quick-steps-super-simple-version). | VPS systemd (`second-brain-mytrader-monitor.timer`) + on-demand | Daily, 21:30 UTC (07:30 AEST / 08:30 AEDT) (also refreshes on any holdings write) | `investments/my-trader/holdings.md` |
+| <a id="mytrader-monitor"></a>[↑](#daily-read) **my-trader Monitor** | Re-checks all holdings + vetted watchlist rows | VPS systemd (`second-brain-mytrader-monitor.timer`) | Daily, 21:30 UTC (07:30 AEST / 08:30 AEDT) | `investments/my-trader/my-trader-report.md`, refreshes `gold-outlook.md` |
 | [↑](#daily-read) **Cash-Value Scan** ([details + tuning ↓](#cashvalue-scan)) | Screens US (Finviz) + ASX 200 (Wikipedia) for net cash ≥ 50% of market cap + positive operating cash flow; ranked advisor-notes list, no staging/alerts | VPS systemd (`second-brain-mytrader-cashvalue-scan.timer`) | Daily, 22:30 UTC | `investments/my-trader/cash-value-report.md` |
 | <a id="goat-monitor"></a>[↑](#daily-read) **Goat Monitor** (150DMA exit check + sector rotation scan) | Flags holdings AND every watchlist ticker closing below their 150-day MA; ranks the 11 SPDR sector ETFs and stages fresh breakout candidates; also refreshes the industry rotation ranking | VPS systemd (`second-brain-goat-monitor.timer`) | Daily, 21:35 UTC (07:35 AEST / 08:35 AEDT) | `investments/goat/goat-report.md`, `sector-ranking.md`, `sector-candidates-pending-review.md`, `industry-ranking.md` |
 | **Goat Intraday Live-Check** | Live-price 150DMA check against currently-open-market holdings | VPS systemd (`second-brain-goat-live-check.timer`) | Every 10 min around the clock (no-ops outside ASX/US session hours) | WhatsApp alert only if breached — no standalone report file |
@@ -222,11 +222,15 @@ cross-package row into my-trader's watchlist.
 | `MOAT_SEC_REQUEST_DELAY_SECONDS` / `_RETRY_BACKOFF_SECONDS` | `0.7` / `8.0` | Pause before every SEC EDGAR request + the extra wait before one retry on a throttled (None) response. Raised from `0.2` after the first run got ~35/46 names throttled to "no 10-K". |
 | `RUBRIC_VERSION` | `"2026-09b"` | Bump when the rubric prompt changes — invalidates every cached qualitative sub-score. |
 
-## Notes on the schedule mismatch
+## Notes on the schedule mismatch (resolved 2026-09-28)
 
-my-trader's own Monitor timer exists on the VPS (`second-brain-mytrader-monitor.timer`)
-but is deliberately left **disabled** there — my-trader Monitor still runs on this
-Windows machine via Task Scheduler instead, to avoid double-running the same check
-from two places. If my-trader Monitor is ever migrated to the VPS, disable
-`SecondBrain-MyTraderMonitor` on Windows first, the same way Heartbeat/Reflection/
-WhatsAppBot were disabled after the VPS went live (see root `CLAUDE.md`).
+my-trader Monitor used to run on this Windows machine via Task Scheduler
+(`SecondBrain-MyTraderMonitor`) instead of the VPS's own matching timer, to
+avoid double-running the same check from two places. That local task
+repeatedly missed its 7:30am trigger (laptop asleep/on battery/off at that
+hour), silently going days without a fresh `my-trader-report.md`/`gold-
+outlook.md` or a WhatsApp alert for anything that crossed a threshold that
+day. Migrated to the VPS: `second-brain-mytrader-monitor.timer` is now
+enabled there (was previously deliberately disabled) and
+`SecondBrain-MyTraderMonitor` is disabled on Windows. `deploy.ps1`'s timer
+stop/start list includes it now too.
