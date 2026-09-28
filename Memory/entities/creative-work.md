@@ -24,3 +24,4 @@ On hold — income stabilisation takes priority in short-medium term
 - (Aug 12) APRA AMCOS Professional Development Awards open until Sep 23 2026.
 - (Aug 19) APRA AMCOS royalty payment email arrived; check payment details
 - (Sep 14) finntwist.com renewal notice arrived from Crazy Domains.
+- (Mon 28) finntwist.com renewed successfully; receipt received.
