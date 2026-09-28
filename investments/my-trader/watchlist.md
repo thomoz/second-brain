@@ -40,7 +40,6 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
 | VLGEA | unassigned | Felix watching -- waiting for a break above recent highs. |
 | WPM | unassigned | Precious metals |
-| XRO.AX | unassigned | Watching next few results for US/Melio payments traction; PE 42 rich (deep dive 2026-09-01) |
 
 ### 👁 Alternative Energy Transport
 
@@ -193,4 +192,4 @@ Issue a K-1 or other non-standard tax form (commodity-pool ETFs, MLPs) instead o
 |--------|------|------|--------|----------|------------|--------|
 | CORN | Teucrium Corn Fund | etf | tax_complex | — | — | Commodity pool structured as a trust - issues a K-1 not a 1099 |
 
-Last auto-generated: 2026-09-26.
+Last auto-generated: 2026-09-28.
