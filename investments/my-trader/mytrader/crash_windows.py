@@ -13,7 +13,7 @@ it into a reusable check rather than a one-off script.
 
 from __future__ import annotations
 
-from . import tickers
+from . import tickers, yf_retry
 
 CRASH_WINDOWS: list[tuple[str, str, str]] = [
     ("2008 financial crisis", "2007-10-01", "2009-03-09"),
@@ -49,7 +49,7 @@ def _fetch_close_series(ticker: str):
 
     for candidate in (tickers.normalize(ticker), tickers.asx_variant(ticker)):
         try:
-            hist = yf.Ticker(candidate).history(start="2007-01-01", auto_adjust=True)
+            hist = yf_retry.call(lambda c=candidate: yf.Ticker(c).history(start="2007-01-01", auto_adjust=True))
         except Exception:
             continue
         if hist.empty:

@@ -16,7 +16,7 @@ judgment on what it means.
 
 from __future__ import annotations
 
-from .. import tickers
+from .. import tickers, yf_retry
 from . import CheckResult
 
 _WINDOWS = (50, 150, 200)
@@ -30,7 +30,7 @@ def _fetch_close_series(ticker: str):
 
     for candidate in (tickers.normalize(ticker), tickers.asx_variant(ticker)):
         try:
-            hist = yf.Ticker(candidate).history(period="1y", auto_adjust=True)
+            hist = yf_retry.call(lambda c=candidate: yf.Ticker(c).history(period="1y", auto_adjust=True))
         except Exception:
             continue
         if hist.empty:

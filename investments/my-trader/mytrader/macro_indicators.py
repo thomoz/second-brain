@@ -63,7 +63,7 @@ from datetime import date, timedelta
 
 from scripts.macro import fred_observation_on, fred_value_on
 
-from . import abs_cpi, config, market_data, ons_cpi
+from . import abs_cpi, config, market_data, ons_cpi, yf_retry
 from .checks import CheckResult
 
 
@@ -71,7 +71,7 @@ def _yfinance_latest_close(ticker: str) -> float | None:
     import yfinance as yf
 
     try:
-        hist = yf.Ticker(ticker).history(period="5d")
+        hist = yf_retry.call(lambda: yf.Ticker(ticker).history(period="5d"))
         if hist.empty:
             return None
         return float(hist["Close"].iloc[-1])
@@ -405,7 +405,7 @@ def _yfinance_history_close(ticker: str, lookback_days: int):
 
     try:
         start = (date.today() - timedelta(days=lookback_days)).isoformat()
-        hist = yf.Ticker(ticker).history(start=start, auto_adjust=True)
+        hist = yf_retry.call(lambda: yf.Ticker(ticker).history(start=start, auto_adjust=True))
         if hist.empty:
             return None
         close = hist["Close"]

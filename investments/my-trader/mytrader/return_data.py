@@ -13,7 +13,7 @@ dividend-reinvestment calculation, but is close enough for a glanceable snapshot
 
 from __future__ import annotations
 
-from . import db, market_data, tickers
+from . import db, market_data, tickers, yf_retry
 
 # No real sustainable equity/ETF dividend yield gets anywhere near this — observed in
 # practice that yfinance's info['dividendYield'] occasionally returns garbage for a
@@ -62,7 +62,7 @@ def _fetch_cumulative_return_pct(ticker: str, period: str) -> float | None:
 
     for candidate in (tickers.normalize(ticker), tickers.asx_variant(ticker)):
         try:
-            hist = yf.Ticker(candidate).history(period=period, auto_adjust=True)
+            hist = yf_retry.call(lambda c=candidate: yf.Ticker(c).history(period=period, auto_adjust=True))
         except Exception:
             continue
         if hist.empty:

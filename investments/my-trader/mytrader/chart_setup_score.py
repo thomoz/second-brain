@@ -34,7 +34,7 @@ from typing import Any
 
 import pandas as pd
 
-from . import config, gold_technicals, tickers
+from . import config, gold_technicals, tickers, yf_retry
 
 
 def fetch_close(ticker: str, lookback_days: int = config.CHART_SETUP_LOOKBACK_DAYS) -> pd.Series | None:
@@ -48,7 +48,7 @@ def fetch_close(ticker: str, lookback_days: int = config.CHART_SETUP_LOOKBACK_DA
     start = (date.today() - timedelta(days=lookback_days)).isoformat()
     for candidate in (tickers.normalize(ticker), tickers.asx_variant(ticker)):
         try:
-            hist = yf.Ticker(candidate).history(start=start, auto_adjust=True)
+            hist = yf_retry.call(lambda c=candidate: yf.Ticker(c).history(start=start, auto_adjust=True))
         except Exception:
             continue
         if hist.empty:

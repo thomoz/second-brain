@@ -27,7 +27,7 @@ from dateutil.relativedelta import relativedelta
 from scripts.macro import fred_series_range
 from scripts.prices import compute_return_pct
 
-from . import config
+from . import config, yf_retry
 from .gold_technicals import (
     _fetch_ohlcv, macd_series, moving_average_series, rsi_series, stochastic_series,
 )
@@ -42,9 +42,9 @@ class Episode(NamedTuple):
 def _yfinance_full_history_close(ticker: str) -> pd.Series | None:
     import yfinance as yf
     try:
-        hist = yf.Ticker(ticker).history(
+        hist = yf_retry.call(lambda: yf.Ticker(ticker).history(
             start=config.GOLD_BACKTEST_HISTORY_START.isoformat(), auto_adjust=True
-        )
+        ))
         if hist.empty:
             return None
         close = hist["Close"]

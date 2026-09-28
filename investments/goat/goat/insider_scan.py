@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
+import time
 from datetime import date, datetime, timedelta
 from typing import Any
 
@@ -432,6 +433,8 @@ def compute_discovery_price_performance(
     for row in pending_candidates:
         trade_date = row.get("trade_date")
         close = css.fetch_close(row["ticker"]) if trade_date else None
+        if trade_date:
+            time.sleep(config.GOAT_INSIDER_PRICE_FETCH_DELAY_SECONDS)
         move = _price_move_since(row["ticker"], trade_date, close=close) if trade_date else None
         if move is None:
             row["price_note"] = "price unavailable"
@@ -462,6 +465,8 @@ def compute_holdings_watch_price_performance(
         trade_date = row.get("trade_date")
         trade_type = row.get("trade_type", "")
         close = css.fetch_close(row["ticker"]) if trade_date else None
+        if trade_date:
+            time.sleep(config.GOAT_INSIDER_PRICE_FETCH_DELAY_SECONDS)
         move = _price_move_since(row["ticker"], trade_date, close=close) if trade_date else None
         if move is None:
             row["price_note"] = "price unavailable"

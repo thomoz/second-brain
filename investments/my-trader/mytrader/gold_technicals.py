@@ -16,13 +16,13 @@ from datetime import date
 
 import pandas as pd
 
-from . import config
+from . import config, yf_retry
 
 
 def _fetch_ohlcv(ticker: str, start: date) -> pd.DataFrame | None:
     import yfinance as yf
     try:
-        hist = yf.Ticker(ticker).history(start=start.isoformat(), auto_adjust=True)
+        hist = yf_retry.call(lambda: yf.Ticker(ticker).history(start=start.isoformat(), auto_adjust=True))
         if hist.empty:
             return None
         if getattr(hist.index, "tz", None) is not None:

@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Any
 
-from . import tickers
+from . import tickers, yf_retry
 
 
 @dataclass
@@ -54,15 +54,15 @@ def _fetch_one(ticker: str) -> TickerData | None:
 
     try:
         t = yf.Ticker(ticker)
-        info = t.info or {}
+        info = yf_retry.call(lambda: t.info) or {}
         if not _looks_valid(info):
             return None
         return TickerData(
             ticker=ticker,
             info=info,
-            dividends=t.dividends,
-            news=t.news or [],
-            calendar=t.calendar or {},
+            dividends=yf_retry.call(lambda: t.dividends),
+            news=yf_retry.call(lambda: t.news) or [],
+            calendar=yf_retry.call(lambda: t.calendar) or {},
         )
     except Exception:
         return None
@@ -99,7 +99,7 @@ def fetch_fx_change_pct(base: str, quote: str = "AUD", period: str = "3mo") -> f
     import yfinance as yf
 
     try:
-        hist = yf.Ticker(f"{quote}{base}=X").history(period=period)
+        hist = yf_retry.call(lambda: yf.Ticker(f"{quote}{base}=X").history(period=period))
         if hist.empty:
             return None
         start = float(hist["Close"].iloc[0])
@@ -133,7 +133,7 @@ def fetch_balance_sheet_financials(ticker: str) -> dict[str, float] | None:
 
     try:
         t = yf.Ticker(ticker)
-        bs = t.balance_sheet
+        bs = yf_retry.call(lambda: t.balance_sheet)
         if bs is None or bs.empty:
             return None
         equity = bs.loc["Stockholders Equity"].iloc[0] if "Stockholders Equity" in bs.index else None
@@ -146,7 +146,7 @@ def fetch_balance_sheet_financials(ticker: str) -> dict[str, float] | None:
             if total_debt is not None:
                 result["debtToEquity"] = round(float(total_debt) / float(equity) * 100, 2)
 
-        fin = t.financials
+        fin = yf_retry.call(lambda: t.financials)
         if fin is not None and not fin.empty and "Net Income" in fin.index:
             net_income = fin.loc["Net Income"].iloc[0]
             if net_income is not None:
@@ -170,7 +170,7 @@ def fetch_income_statement_history(ticker: str) -> list[float] | None:
 
     try:
         t = yf.Ticker(ticker)
-        stmt = t.income_stmt
+        stmt = yf_retry.call(lambda: t.income_stmt)
         if stmt is None or stmt.empty or "Total Revenue" not in stmt.index:
             return None
         row = stmt.loc["Total Revenue"]
@@ -200,7 +200,7 @@ def fetch_cash_flow_statement(ticker: str) -> dict[str, float] | None:
 
     try:
         t = yf.Ticker(ticker)
-        cf = t.cashflow
+        cf = yf_retry.call(lambda: t.cashflow)
         if cf is None or cf.empty:
             return None
         latest_col = cf.columns[0]  # most recent annual period, leftmost column

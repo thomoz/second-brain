@@ -22,6 +22,7 @@ import sqlite3
 from datetime import date, timedelta
 from typing import Any
 
+from mytrader import yf_retry
 from mytrader.checks import CheckResult
 
 from . import config, db, lma_jwc
@@ -44,7 +45,7 @@ def _yfinance_history_close(ticker: str, lookback_days: int):
 
     try:
         start = (date.today() - timedelta(days=lookback_days)).isoformat()
-        hist = yf.Ticker(ticker).history(start=start, auto_adjust=True)
+        hist = yf_retry.call(lambda: yf.Ticker(ticker).history(start=start, auto_adjust=True))
         if hist.empty:
             return None
         close = hist["Close"].dropna()

@@ -18,7 +18,7 @@ instead.
 
 from __future__ import annotations
 
-from .. import config
+from .. import config, yf_retry
 from . import CheckResult
 from .scale import format_scale
 
@@ -32,7 +32,7 @@ def _fetch_funds_data(ticker: str):
     import yfinance as yf
 
     try:
-        return yf.Ticker(ticker).funds_data
+        return yf_retry.call(lambda: yf.Ticker(ticker).funds_data)
     except Exception:
         return None
 

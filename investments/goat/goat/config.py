@@ -442,6 +442,16 @@ GOAT_INSIDER_PRICE_STALE_DAYS = 90  # matches GOAT_INSIDER_SALE_LOOKBACK_DAYS's 
 # fix, after the first production run doubled this job's yfinance call count
 # by fetching twice per row -- see _price_move_since's docstring).
 
+GOAT_INSIDER_PRICE_FETCH_DELAY_SECONDS = 0.5  # added 2026-09-28 after every one
+    # of ~310 Discovery candidates came back "price unavailable" in one run --
+    # confirmed live to be a Yahoo Finance rate limit (see mytrader.yf_retry),
+    # not a bug. This loop is this codebase's single largest sequential
+    # yfinance-call burst (one fetch_close per pending candidate, easily 300+
+    # in a run) -- retry-with-backoff (yf_retry) handles a transient limit, but
+    # spacing calls out reduces how often the burst triggers one at all. 0.5s
+    # adds ~2.5 minutes to a 300-row run -- a low fixed cost for a daily batch
+    # job, not worth tuning finer without evidence it's still too aggressive.
+
 # Strait of Hormuz war-risk tracking, per Shaun's 2026-08-18 request -- two free/
 # scrapeable proxies since neither the Baltic Exchange's TD3C index nor JWC's
 # lloydswordings.com circular archive offer a free API (confirmed via research

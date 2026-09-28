@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 
 import pandas as pd
-from mytrader import tickers
+from mytrader import tickers, yf_retry
 
 
 def fetch_close_history(ticker: str, lookback_days: int) -> pd.Series | None:
@@ -20,7 +20,7 @@ def fetch_close_history(ticker: str, lookback_days: int) -> pd.Series | None:
     start = (date.today() - timedelta(days=lookback_days)).isoformat()
     for candidate in (tickers.normalize(ticker), tickers.asx_variant(ticker)):
         try:
-            hist = yf.Ticker(candidate).history(start=start, auto_adjust=True)
+            hist = yf_retry.call(lambda c=candidate: yf.Ticker(c).history(start=start, auto_adjust=True))
         except Exception:
             continue
         if hist.empty:

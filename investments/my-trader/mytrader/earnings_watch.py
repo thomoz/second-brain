@@ -62,7 +62,7 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from . import config, db, market_data, mlp_filter, monitor, news_search, sec_filings, tickers
+from . import config, db, market_data, mlp_filter, monitor, news_search, sec_filings, tickers, yf_retry
 from .checks import CheckResult
 
 _SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent.parent / ".claude" / "scripts"
@@ -89,24 +89,24 @@ def fetch_estimate_snapshot(ticker: str) -> dict[str, float | int | None] | None
 
     try:
         t = yf.Ticker(ticker)
-        eps_trend = t.eps_trend
+        eps_trend = yf_retry.call(lambda: t.eps_trend)
         if eps_trend is None or eps_trend.empty or "0y" not in eps_trend.index:
             return None
 
         eps_estimate_avg = None
-        earnings_estimate = t.earnings_estimate
+        earnings_estimate = yf_retry.call(lambda: t.earnings_estimate)
         if earnings_estimate is not None and not earnings_estimate.empty and "0y" in earnings_estimate.index:
             val = earnings_estimate.loc["0y"].get("avg")
             eps_estimate_avg = float(val) if val is not None else None
 
         revenue_estimate_avg = None
-        revenue_estimate = t.revenue_estimate
+        revenue_estimate = yf_retry.call(lambda: t.revenue_estimate)
         if revenue_estimate is not None and not revenue_estimate.empty and "0y" in revenue_estimate.index:
             val = revenue_estimate.loc["0y"].get("avg")
             revenue_estimate_avg = float(val) if val is not None else None
 
         revisions_up_30d = revisions_down_30d = None
-        eps_revisions = t.eps_revisions
+        eps_revisions = yf_retry.call(lambda: t.eps_revisions)
         if eps_revisions is not None and not eps_revisions.empty and "0y" in eps_revisions.index:
             row = eps_revisions.loc["0y"]
             # GOTCHA (real, confirmed live 2026-09-17): columns are
@@ -290,7 +290,7 @@ def _fetch_close_history(ticker: str, lookback_days: int):
     start = (date.today() - timedelta(days=lookback_days)).isoformat()
     for candidate in (tickers.normalize(ticker), tickers.asx_variant(ticker)):
         try:
-            hist = yf.Ticker(candidate).history(start=start, auto_adjust=True)
+            hist = yf_retry.call(lambda c=candidate: yf.Ticker(c).history(start=start, auto_adjust=True))
         except Exception:
             continue
         if hist.empty:
