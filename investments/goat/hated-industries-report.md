@@ -10,10 +10,10 @@ Hated since: 2026-09-28
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -22.5% | -20.2% | -28.6pp | -40.4pp | -40.4% |
+| -25.3% | -21.1% | -28.9pp | -42.5pp | -41.8% |
 
-**Narrative:** The dominant negative narrative is macro/policy-driven: solar equities are being marked down on U.S. subsidy/tax-credit rollbacks, tariff and FEOC supply-chain uncertainty, high financing costs, and continuing China-led oversupply/price pressure despite still-growing solar installations.
-**Systemic read:** industry-wide -- This is not mainly a single-constituent scandal: recent coverage describes valuation pressure across a broad cross-section of solar equipment suppliers, installers, manufacturers, and developers, although the exact pain differs by segment. Residential names are hit more by tax-credit/rate pressure, while manufacturers face oversupply and trade-policy risk, so it is broad but not perfectly uniform.
+**Narrative:** Solar/TAN is being hit by a broad policy-and-financing uncertainty narrative: accelerated phase-out/eligibility risk for U.S. tax credits, tariffs/FEOC supply-chain rules, and high borrowing costs are making future solar demand, margins, and project economics less predictable. Recent coverage frames the selloff as sector-wide despite continued installations and some companies beating estimates.
+**Systemic read:** industry-wide -- The pressure is not just one scandal or one constituent dragging the ETF: reports cite broad declines across First Solar, Enphase, SolarEdge, Sunrun, Array, JinkoSolar, Canadian Solar and others. That said, the impact is uneven by business model: residential solar is more exposed to homeowner-credit and financing pressure, while utility-scale/domestic manufacturing names may be less harmed or even selectively helped by tariffs.
 
 **Fundamentals-divergence read:** fundamentals still growing despite the price decline
 
@@ -24,6 +24,28 @@ Representative constituents (read-only — not staged as candidates):
 | NXT | Nextpower Inc. | +8.2% | +2.9% | growing |
 | FSLR | First Solar, Inc. | -3.7% | +23.3% | growing |
 | ENPH | Enphase Energy, Inc. | -19.6% | -3.5% | declining |
+| HASI | HA Sustainable Infrastructure Capital, Inc. | +804.4% | +24.5% | growing |
+
+## Utilities - Renewable (ICLN)
+
+Hated since: 2026-09-28
+
+| 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
+|------------|------------|--------------|--------------|---------------------|
+| -15.4% | -5.6% | -19.0pp | -26.9pp | -29.0% |
+
+**Narrative:** The dominant negative narrative is that clean-energy economics are being squeezed by renewed higher-for-longer rate fears plus U.S. policy/tax-credit uncertainty under Trump, with recent solar weakness amplified by tariff/subsidy headlines. The live ICLN drawdown also has a large-constituent overlay from Bloom Energy, where AI data-center execution, Oracle Project Jupiter, valuation, and litigation concerns are hitting the ETF's biggest weight.
+**Systemic read:** unclear whether industry-wide or concentrated -- The rate/policy narrative plausibly affects much of wind, solar, hydrogen and project-finance-linked clean energy, but it does not map uniformly to ICLN's whole basket, which includes hydro and regulated utility exposures. Evidence also shows meaningful concentration in large names and subsectors, especially Bloom Energy plus U.S. solar-related holdings such as First Solar, Nextpower, Enphase and SolarEdge, so the cleanest call is mixed rather than confidently systemic or purely one-name-specific.
+
+**Fundamentals-divergence read:** fundamentals still growing despite the price decline
+
+Representative constituents (read-only — not staged as candidates):
+
+| Ticker | Name | Revenue growth | Earnings growth | Read |
+|--------|------|-----------------|-------------------|------|
+| BE | Bloom Energy Class A | +165.5% | — | growing |
+| FSLR | First Solar | -3.7% | +23.3% | growing |
+| NXT | Nextpower Inc | +8.2% | +2.9% | growing |
 
 
 Last auto-generated: 2026-09-28.
