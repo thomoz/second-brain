@@ -1,6 +1,6 @@
 # Cash-Value Scan
 
-**Last run: 2026-09-29** - scanned 546 US + 200 ASX names (604 returned balance-sheet data), 11 qualify at net cash >= 50% of market cap.
+**Last run: 2026-09-30** - scanned 546 US + 200 ASX names (605 returned balance-sheet data), 11 qualify at net cash >= 50% of market cap.
 
 What this is: companies whose net cash (cash minus all debt) is at least 50% of their market cap AND that generate positive operating cash flow - the market is pricing the whole operating business at a steep discount and handing you the balance-sheet cash on top. Classic Graham / deep-value screen. Free cash flow is shown and tagged when negative, but is not a filter (positive OCF with negative FCF is usually growth capex, not burn).
 
@@ -10,16 +10,16 @@ Auto-generated daily - overwritten every run. Advisor notes only; no trade actio
 
 | Ticker | Company | Mkt | Net cash / mcap (more = cheaper) | Biz / mcap (less = cheaper) | Market cap | OCF (TTM) | FCF | FCF yld on biz | Net cash (more = bigger cushion) | Rev growth YoY | Sector | Tags | Read |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| FBIO | Fortress Biotech Inc | US | 198% | -98% (below net cash) | 72.4M USD | 125.9M USD | -17.1M USD | n/a | 143.3M USD | +14% | Healthcare | negative FCF | 143.3M USD net cash, 72.4M USD mcap, -17.1M USD FCF - the market is paying less than the cash pile (-98% of mcap for the business). |
-| QVCG | QVC Group Inc | US | 113% | -13% (below net cash) | 707.0M USD | 191.0M USD | -525.8M USD | n/a | 800.0M USD | -11% | Consumer Cyclical | shrinking revenue, negative FCF | 800.0M USD net cash, 707.0M USD mcap, -525.8M USD FCF - the market is paying less than the cash pile (-13% of mcap for the business). |
-| MED | Medifast Inc | US | 109% | -9% (below net cash) | 130.9M USD | 8.8M USD | 11.4M USD | n/a | 142.2M USD | -28% | Consumer Cyclical | shrinking revenue | 142.2M USD net cash, 130.9M USD mcap, 11.4M USD FCF - the market is paying less than the cash pile (-9% of mcap for the business). |
-| CVV | CVD Equipment Corp | US | 79% | 21% | 29.7M USD | 477K USD | 4.0M USD | 64.5% | 23.5M USD | -43% | Industrials | micro, shrinking revenue | 23.5M USD net cash, 29.7M USD mcap, 4.0M USD FCF - paying ~6.2M USD for the operating business. |
-| MTRX | Matrix Service Co | US | 75% | 25% | 272.5M USD | 6.9M USD | -1.5M USD | -2.1% | 203.5M USD | +13% | Industrials | negative FCF | 203.5M USD net cash, 272.5M USD mcap, -1.5M USD FCF - paying ~68.9M USD for the operating business. |
-| COUR | Coursera Inc | US | 73% | 27% | 1.33B USD | 34.5M USD | 366.2M USD | 102.8% | 972.5M USD | +60% | Consumer Defensive | watchlist | 972.5M USD net cash, 1.33B USD mcap, 366.2M USD FCF - paying ~356.2M USD for the operating business. |
-| SPRO | Spero Therapeutics Inc | US | 70% | 30% | 69.3M USD | 19.6M USD | 28.8M USD | 140.3% | 48.7M USD | n/a | Healthcare | - | 48.7M USD net cash, 69.3M USD mcap, 28.8M USD FCF - paying ~20.6M USD for the operating business. |
-| USNA | Usana Health Sciences Inc | US | 62% | 38% | 273.8M USD | 27.7M USD | 49.1M USD | 46.7% | 168.6M USD | -5% | Consumer Defensive | shrinking revenue | 168.6M USD net cash, 273.8M USD mcap, 49.1M USD FCF - paying ~105.3M USD for the operating business. |
-| TRS | Trimas Corp | US | 57% | 43% | 1.41B USD | 20.1M USD | 293.6M USD | 48.2% | 804.7M USD | +2% | Consumer Cyclical | - | 804.7M USD net cash, 1.41B USD mcap, 293.6M USD FCF - paying ~609.1M USD for the operating business. |
-| ACTG | Acacia Research Corp | US | 55% | 45% | 419.6M USD | 30.0M USD | -16.4M USD | -8.7% | 230.5M USD | +124% | Industrials | negative FCF | 230.5M USD net cash, 419.6M USD mcap, -16.4M USD FCF - paying ~189.1M USD for the operating business. |
-| TUA | Tuas | ASX | 53% | 47% | 935.0M SGD | 91.3M SGD | 52.0M SGD | 11.9% | 498.3M SGD | +22% | Communication Services | - | 498.3M SGD net cash, 935.0M SGD mcap, 52.0M SGD FCF - paying ~436.7M SGD for the operating business. |
+| FBIO | Fortress Biotech Inc | US | 195% | -95% (below net cash) | 73.4M USD | 125.9M USD | -17.1M USD | n/a | 143.3M USD | +14% | Healthcare | negative FCF | 143.3M USD net cash, 73.4M USD mcap, -17.1M USD FCF - the market is paying less than the cash pile (-95% of mcap for the business). |
+| QVCG | QVC Group Inc | US | 112% | -12% (below net cash) | 716.0M USD | 191.0M USD | -525.8M USD | n/a | 800.0M USD | -11% | Consumer Cyclical | shrinking revenue, negative FCF | 800.0M USD net cash, 716.0M USD mcap, -525.8M USD FCF - the market is paying less than the cash pile (-12% of mcap for the business). |
+| MED | Medifast Inc | US | 110% | -10% (below net cash) | 129.8M USD | 8.8M USD | 11.4M USD | n/a | 142.2M USD | -28% | Consumer Cyclical | shrinking revenue | 142.2M USD net cash, 129.8M USD mcap, 11.4M USD FCF - the market is paying less than the cash pile (-10% of mcap for the business). |
+| CVV | CVD Equipment Corp | US | 81% | 19% | 28.9M USD | 477K USD | 4.0M USD | 73.6% | 23.5M USD | -43% | Industrials | micro, shrinking revenue | 23.5M USD net cash, 28.9M USD mcap, 4.0M USD FCF - paying ~5.4M USD for the operating business. |
+| MTRX | Matrix Service Co | US | 76% | 24% | 267.9M USD | 6.9M USD | -1.5M USD | -2.3% | 203.5M USD | +13% | Industrials | negative FCF | 203.5M USD net cash, 267.9M USD mcap, -1.5M USD FCF - paying ~64.4M USD for the operating business. |
+| COUR | Coursera Inc | US | 73% | 27% | 1.34B USD | 34.5M USD | 366.2M USD | 100.4% | 972.5M USD | +60% | Consumer Defensive | watchlist | 972.5M USD net cash, 1.34B USD mcap, 366.2M USD FCF - paying ~364.8M USD for the operating business. |
+| SPRO | Spero Therapeutics Inc | US | 70% | 30% | 69.9M USD | 19.6M USD | 28.8M USD | 136.4% | 48.7M USD | n/a | Healthcare | - | 48.7M USD net cash, 69.9M USD mcap, 28.8M USD FCF - paying ~21.2M USD for the operating business. |
+| USNA | Usana Health Sciences Inc | US | 62% | 38% | 271.6M USD | 27.7M USD | 49.1M USD | 47.7% | 168.6M USD | -5% | Consumer Defensive | shrinking revenue | 168.6M USD net cash, 271.6M USD mcap, 49.1M USD FCF - paying ~103.0M USD for the operating business. |
+| TRS | Trimas Corp | US | 57% | 43% | 1.41B USD | 20.1M USD | 293.6M USD | 48.5% | 804.7M USD | +2% | Consumer Cyclical | - | 804.7M USD net cash, 1.41B USD mcap, 293.6M USD FCF - paying ~605.1M USD for the operating business. |
+| ACTG | Acacia Research Corp | US | 55% | 45% | 422.6M USD | 30.0M USD | -16.4M USD | -8.6% | 230.5M USD | +124% | Industrials | negative FCF | 230.5M USD net cash, 422.6M USD mcap, -16.4M USD FCF - paying ~192.0M USD for the operating business. |
+| TUA | Tuas | ASX | 52% | 48% | 954.2M SGD | 91.3M SGD | 52.0M SGD | 11.4% | 498.3M SGD | +22% | Communication Services | - | 498.3M SGD net cash, 954.2M SGD mcap, 52.0M SGD FCF - paying ~455.9M SGD for the operating business. |
 
 Tag key: `held` / `watchlist` = already tracked in my-trader; `micro` = market cap under US$50M / A$75M (thinner liquidity, higher risk); `shrinking revenue` = negative YoY revenue growth; `negative FCF` = free cash flow negative (heavy capex or cash burn - check which); `REVIEW:` = borderline ethical-filter flag.
