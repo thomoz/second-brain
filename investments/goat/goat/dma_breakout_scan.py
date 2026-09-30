@@ -46,8 +46,9 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from mytrader import asx200_universe, db as mt_db, market_data, tickers
@@ -56,6 +57,19 @@ from mytrader.checks import CheckResult
 from scripts.ethical_filter import check_ticker as ethical_check
 
 from . import config, db, fundamentals_context, price_history, sp500_universe
+
+_SYDNEY_TZ = ZoneInfo("Australia/Sydney")
+
+
+def _today_sydney() -> str:
+    """Report date label -- always Sydney local, regardless of host clock/timezone
+    (Goat runs on the VPS, whose system clock is UTC). Real bug caught 2026-09-29:
+    naive date.today() prints YESTERDAY's date for any run after ~10am Sydney but
+    before UTC midnight -- exactly this scan's actual 22:55 UTC schedule -- even
+    though the report genuinely ran today. Mirrors monitor.py's own
+    _today_sydney() (module-private copy, not cross-imported, per this
+    codebase's convention)."""
+    return datetime.now(_SYDNEY_TZ).date().isoformat()
 
 
 def fetch_universe_constituents(conn: sqlite3.Connection) -> list[dict[str, Any]]:
@@ -340,7 +354,7 @@ def render_dma_breakout_candidates_report(result: dict[str, Any]) -> str:
             f"| {row['ticker']} | {company} | {exchange} | {row['sector_label']} | {row['signal_detail']} "
             f"| {row['flagged_at'][:10]} |"
         )
-    lines += ["", f"Last auto-generated: {date.today().isoformat()}."]
+    lines += ["", f"Last auto-generated: {_today_sydney()}."]
     return "\n".join(lines) + "\n"
 
 

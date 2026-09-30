@@ -19,13 +19,28 @@ mytrader/macro_indicators.py's check_gold_trend()."""
 from __future__ import annotations
 
 import sqlite3
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from mytrader import yf_retry
 from mytrader.checks import CheckResult
 
 from . import config, db, lma_jwc
+
+_SYDNEY_TZ = ZoneInfo("Australia/Sydney")
+
+
+def _today_sydney() -> str:
+    """Report date label -- always Sydney local, regardless of host clock/timezone
+    (Goat runs on the VPS, whose system clock is UTC). Real bug caught 2026-09-29:
+    naive date.today() prints YESTERDAY's date whenever this manual-only tool is
+    run after ~10am Sydney but before UTC midnight. Mirrors monitor.py's own
+    _today_sydney() (module-private copy, not cross-imported, per this
+    codebase's convention). Does not affect the lookback-window date.today() call
+    elsewhere in this module -- a multi-year window is immaterial to a one-day
+    offset."""
+    return datetime.now(_SYDNEY_TZ).date().isoformat()
 
 _MACRO_STATE_JWLA_KEY = "hormuz_jwla_number"
 _SOURCE_TABLE = "hormuz_risk"
@@ -173,7 +188,7 @@ def render_hormuz_report(result: dict[str, Any]) -> str:
         excerpt = check.data.get("section_excerpt")
         if excerpt:
             lines += ["<details><summary>Listed Areas section excerpt</summary>", "", excerpt, "", "</details>", ""]
-    lines.append(f"Last auto-generated: {date.today().isoformat()}.")
+    lines.append(f"Last auto-generated: {_today_sydney()}.")
     return "\n".join(lines) + "\n"
 
 

@@ -9,13 +9,27 @@ exactly."""
 from __future__ import annotations
 
 import sqlite3
-from datetime import date
+from datetime import datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from mytrader import db as mt_db
 from mytrader import market_data
 
 from . import config, db, fundamentals_context, heartbeat, price_history, sector_rotation, sp500_universe
+
+_SYDNEY_TZ = ZoneInfo("Australia/Sydney")
+
+
+def _today_sydney() -> str:
+    """Report date label -- always Sydney local, regardless of host clock/timezone
+    (Goat runs on the VPS, whose system clock is UTC). Real bug caught 2026-09-29:
+    naive date.today() prints YESTERDAY's date for any run after ~10am Sydney but
+    before UTC midnight -- exactly this scan's actual 22:45 UTC schedule -- even
+    though the report genuinely ran today. Mirrors monitor.py's own
+    _today_sydney() (module-private copy, not cross-imported, per this
+    codebase's convention)."""
+    return datetime.now(_SYDNEY_TZ).date().isoformat()
 
 
 def run_heartbeat_scan(conn: sqlite3.Connection) -> dict[str, Any]:
@@ -124,7 +138,7 @@ def render_heartbeat_candidates_report(result: dict[str, Any]) -> str:
             f"| {row['ticker']} | {row['company_name'] or ''} | {row['sector_label']} "
             f"| {row['signal_detail']} | {row['flagged_at'][:10]} |"
         )
-    lines += ["", f"Last auto-generated: {date.today().isoformat()}."]
+    lines += ["", f"Last auto-generated: {_today_sydney()}."]
     return "\n".join(lines) + "\n"
 
 

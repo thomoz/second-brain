@@ -4,10 +4,24 @@ seller_financing.py). Rows are sorted 1-14 by marker number for readability."""
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from . import config
+
+_SYDNEY_TZ = ZoneInfo("Australia/Sydney")
+
+
+def _today_sydney() -> str:
+    """Report date label -- always Sydney local, regardless of host clock/timezone
+    (this scan runs on the VPS, whose system clock is UTC -- confirmed live
+    2026-09-29). Deliberately separate from this package's own db._today()/
+    date.today() calls, which key internal per-day signal rows and are
+    intentionally UTC-consistent across the package (see db.py's own docstring,
+    fixed 2026-08-19 for a different reason) -- this only affects the printed
+    '## Run:' line below, not any stored/queried date."""
+    return datetime.now(_SYDNEY_TZ).date().isoformat()
 
 
 def render_signals_report(
@@ -37,7 +51,7 @@ def render_signals_report(
         "action is ever suggested here (see SOUL.md). Per-marker source: "
         "investments/my-trader/14-signals-crash-warning-handoff.md.",
         "",
-        f"## Run: {date.today().isoformat()}",
+        f"## Run: {_today_sydney()}",
         "",
         "## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)",
         "Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 "

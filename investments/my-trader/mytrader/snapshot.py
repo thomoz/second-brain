@@ -16,9 +16,25 @@ next) rather than only ever seeing today's snapshot.
 from __future__ import annotations
 
 import sqlite3
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from . import config, db, market_data
+
+SYDNEY_TZ = ZoneInfo("Australia/Sydney")
+
+
+def _today_sydney() -> str:
+    """Report date label -- always Sydney local, regardless of host clock/timezone
+    (Monitor's schedule moved to the VPS 2026-09-28, whose system clock is UTC).
+    Real bug caught 2026-09-29: naive date.today() prints YESTERDAY's date for any
+    run after ~10am Sydney but before UTC midnight -- exactly Monitor's actual
+    21:30 UTC schedule -- even though the file genuinely regenerated today. Also
+    used for record_price_snapshot's date key, so a portfolio-value history row
+    reflects the Sydney trading day it was captured on, not a UTC artifact.
+    Mirrors monitor.py's own _today_sydney() (module-private copy, not
+    cross-imported, per this codebase's convention)."""
+    return datetime.now(SYDNEY_TZ).date().isoformat()
 
 
 def regenerate_holdings_md(conn: sqlite3.Connection) -> None:
@@ -32,7 +48,7 @@ def regenerate_holdings_md(conn: sqlite3.Connection) -> None:
         "| Ticker | Name | Qty | Mkt Value | Avg Price | Unrealized P&L | Bucket |",
         "|--------|------|-----|-----------|-----------|-----------------|--------|",
     ]
-    today = date.today().isoformat()
+    today = _today_sydney()
     for row in rows:
         price = market_data.fetch_current_price(row["ticker"])
         cost_basis = row["qty"] * row["avg_price"]
@@ -53,7 +69,7 @@ def regenerate_holdings_md(conn: sqlite3.Connection) -> None:
             f"| ${row['avg_price']:,.2f} | {pnl_str} | {row['bucket']} |"
         )
     lines.append("")
-    lines.append(f"Last auto-generated: {date.today().isoformat()}.")
+    lines.append(f"Last auto-generated: {_today_sydney()}.")
     config.HOLDINGS_MD_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -204,7 +220,7 @@ def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
     ]
     lines += _watchlist_table(tax_complex)
     lines.append("")
-    lines.append(f"Last auto-generated: {date.today().isoformat()}.")
+    lines.append(f"Last auto-generated: {_today_sydney()}.")
     config.WATCHLIST_MD_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -229,7 +245,7 @@ def regenerate_pending_candidates_md(conn: sqlite3.Connection) -> None:
             f"| {row['synced_at'][:10]} |"
         )
     lines.append("")
-    lines.append(f"Last auto-generated: {date.today().isoformat()}.")
+    lines.append(f"Last auto-generated: {_today_sydney()}.")
     config.PENDING_CANDIDATES_MD_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

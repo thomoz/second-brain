@@ -4,7 +4,7 @@ run, advisor notes only. Copy style mirrors goat.insider_scan.render_insider_sca
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -29,6 +29,16 @@ _HOW_TO_READ = (
 
 def _now_sydney_str() -> str:
     return datetime.now(ZoneInfo(_SYDNEY_TZ)).strftime("%Y-%m-%d %H:%M %Z")
+
+
+def _today_sydney() -> str:
+    """Report date label -- always Sydney local, regardless of host clock/timezone
+    (this scan runs on the VPS, whose system clock is UTC). Real bug caught
+    2026-09-29: the '## Run:' line below used to read naive date.today() (UTC),
+    which prints YESTERDAY's date for any run after ~10am Sydney but before UTC
+    midnight -- exactly the timer's actual schedule -- even though the report
+    genuinely ran today."""
+    return datetime.now(ZoneInfo(_SYDNEY_TZ)).date().isoformat()
 
 
 def _group_by_investor(alerts: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
@@ -92,7 +102,7 @@ def render_report(result: dict[str, Any]) -> str:
         "insider scan from OpenInsider -- different table, different purpose, not "
         "cross-suppressed.",
         "",
-        f"## Run: {date.today().isoformat()}",
+        f"## Run: {_today_sydney()}",
         "",
     ]
 

@@ -32,15 +32,29 @@ import asyncio
 import json
 import sqlite3
 import sys
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from mytrader import market_data, tickers
 from scripts.ethical_filter import check_ticker as ethical_check
 
 from . import config, db, industry_rotation, price_history
+
+_SYDNEY_TZ = ZoneInfo("Australia/Sydney")
+
+
+def _today_sydney() -> str:
+    """Report date label -- always Sydney local, regardless of host clock/timezone
+    (Goat runs on the VPS, whose system clock is UTC). Real bug caught 2026-09-29:
+    naive date.today() prints YESTERDAY's date for any run after ~10am Sydney but
+    before UTC midnight -- exactly this scan's actual 23:50 UTC schedule -- even
+    though the report genuinely ran today. Mirrors monitor.py's own
+    _today_sydney() (module-private copy, not cross-imported, per this
+    codebase's convention)."""
+    return datetime.now(_SYDNEY_TZ).date().isoformat()
 
 _SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent.parent / ".claude" / "scripts"
 sys.path.insert(0, str(_SCRIPTS_DIR))
@@ -379,7 +393,7 @@ def render_hated_industries_report(result: dict[str, Any]) -> str:
         "stageable candidates. Advisor notes only; no trade action is ever "
         "suggested here (see SOUL.md).",
         "",
-        f"## Run: {date.today().isoformat()}",
+        f"## Run: {_today_sydney()}",
         "",
     ]
 
@@ -440,7 +454,7 @@ def render_hated_industries_report(result: dict[str, Any]) -> str:
                     lines.append(f"| {h['ticker']} | {h['name']} | {rg} | {eg} | {h['classification']} |")
             lines.append("")
 
-    lines += ["", f"Last auto-generated: {date.today().isoformat()}."]
+    lines += ["", f"Last auto-generated: {_today_sydney()}."]
     return "\n".join(lines) + "\n"
 
 
