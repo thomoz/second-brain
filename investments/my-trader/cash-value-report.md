@@ -1,6 +1,6 @@
 # Cash-Value Scan
 
-**Last run: 2026-09-30** - scanned 546 US + 200 ASX names (605 returned balance-sheet data), 11 qualify at net cash >= 50% of market cap.
+**Last run: 2026-09-30** - scanned 546 US + 200 ASX names (586 returned balance-sheet data), 11 qualify at net cash >= 50% of market cap.
 
 What this is: companies whose net cash (cash minus all debt) is at least 50% of their market cap AND that generate positive operating cash flow - the market is pricing the whole operating business at a steep discount and handing you the balance-sheet cash on top. Classic Graham / deep-value screen. Free cash flow is shown and tagged when negative, but is not a filter (positive OCF with negative FCF is usually growth capex, not burn).
 
@@ -18,8 +18,8 @@ Auto-generated daily - overwritten every run. Advisor notes only; no trade actio
 | COUR | Coursera Inc | US | 73% | 27% | 1.34B USD | 34.5M USD | 366.2M USD | 100.4% | 972.5M USD | +60% | Consumer Defensive | watchlist | 972.5M USD net cash, 1.34B USD mcap, 366.2M USD FCF - paying ~364.8M USD for the operating business. |
 | SPRO | Spero Therapeutics Inc | US | 70% | 30% | 69.9M USD | 19.6M USD | 28.8M USD | 136.4% | 48.7M USD | n/a | Healthcare | - | 48.7M USD net cash, 69.9M USD mcap, 28.8M USD FCF - paying ~21.2M USD for the operating business. |
 | USNA | Usana Health Sciences Inc | US | 62% | 38% | 271.6M USD | 27.7M USD | 49.1M USD | 47.7% | 168.6M USD | -5% | Consumer Defensive | shrinking revenue | 168.6M USD net cash, 271.6M USD mcap, 49.1M USD FCF - paying ~103.0M USD for the operating business. |
-| TRS | Trimas Corp | US | 57% | 43% | 1.41B USD | 20.1M USD | 293.6M USD | 48.5% | 804.7M USD | +2% | Consumer Cyclical | - | 804.7M USD net cash, 1.41B USD mcap, 293.6M USD FCF - paying ~605.1M USD for the operating business. |
+| TRS | Trimas Corp | US | 57% | 43% | 1.41B USD | 20.1M USD | 293.6M USD | 48.2% | 804.7M USD | +2% | Consumer Cyclical | - | 804.7M USD net cash, 1.41B USD mcap, 293.6M USD FCF - paying ~608.7M USD for the operating business. |
 | ACTG | Acacia Research Corp | US | 55% | 45% | 422.6M USD | 30.0M USD | -16.4M USD | -8.6% | 230.5M USD | +124% | Industrials | negative FCF | 230.5M USD net cash, 422.6M USD mcap, -16.4M USD FCF - paying ~192.0M USD for the operating business. |
-| TUA | Tuas | ASX | 52% | 48% | 954.2M SGD | 91.3M SGD | 52.0M SGD | 11.4% | 498.3M SGD | +22% | Communication Services | - | 498.3M SGD net cash, 954.2M SGD mcap, 52.0M SGD FCF - paying ~455.9M SGD for the operating business. |
+| TUA | Tuas | ASX | 53% | 47% | 937.8M SGD | 91.3M SGD | 52.0M SGD | 11.8% | 498.3M SGD | +22% | Communication Services | - | 498.3M SGD net cash, 937.8M SGD mcap, 52.0M SGD FCF - paying ~439.5M SGD for the operating business. |
 
 Tag key: `held` / `watchlist` = already tracked in my-trader; `micro` = market cap under US$50M / A$75M (thinner liquidity, higher risk); `shrinking revenue` = negative YoY revenue growth; `negative FCF` = free cash flow negative (heavy capex or cash burn - check which); `REVIEW:` = borderline ethical-filter flag.
