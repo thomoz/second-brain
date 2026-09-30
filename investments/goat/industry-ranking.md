@@ -47,7 +47,7 @@ All 39 covered industries.
 | 18 | ESPO | Electronic Gaming & Multimedia | +9.6% | Yes |
 | 19 | PAVE | Engineering & Construction | +7.8% | Yes |
 | 20 | IYZ | Telecom Services | +7.5% | Yes |
-| 21 | INDS | REIT - Industrial | +7.1% | Yes |
+| 21 | INDS | REIT - Industrial | +6.7% | Yes |
 | 22 | PHO | Utilities - Regulated Water | +4.5% | Yes |
 | 23 | SIL | Silver | +4.5% | Yes |
 | 24 | GDX | Gold | +3.8% | Yes |
