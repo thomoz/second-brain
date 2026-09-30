@@ -6,9 +6,9 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 |--------|------|-----|-----------|-----------|-----------------|--------|
 | AG |  | 40.0264 | $723.68 | $20.98 | $-116.07 | unassigned |
 | BMS |  | 250.0 | — | $2.32 | — | unassigned |
-| CYL.AX |  | 200.0 | $1,174.00 | $5.86 | +$2.95 | unassigned |
-| GOLD.AX |  | 20.0 | $1,083.40 | $59.31 | $-102.85 | unassigned |
-| GXLD.AX |  | 25.0 | $1,475.25 | $61.82 | $-70.31 | unassigned |
+| CYL.AX |  | 200.0 | $1,172.00 | $5.86 | +$0.95 | unassigned |
+| GOLD.AX |  | 20.0 | $1,095.00 | $59.31 | $-91.25 | unassigned |
+| GXLD.AX |  | 25.0 | $1,491.75 | $61.82 | $-53.81 | unassigned |
 | LLY | Eli Lilly & Co | 0.0001 | $0.12 | $1,148.00 | +$0.00 | 1 |
 | LULU | lululemon athletica inc. | 22.0 | $2,131.14 | $113.22 | $-359.59 | 1 |
 | LYV | Live Nation Entertainment Inc | 0.4 | $68.44 | $167.29 | +$1.52 | 1 |
@@ -19,4 +19,4 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 | UBER |  | 10.0 | $693.60 | $79.08 | $-97.16 | unassigned |
 | V | Visa Inc (Class A) | 0.1002 | $36.66 | $318.47 | +$4.75 | 1 |
 
-Last auto-generated: 2026-09-29.
+Last auto-generated: 2026-09-30.
