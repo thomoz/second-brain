@@ -374,6 +374,37 @@ def test_render_insider_scan_report_lists_alerts_and_pending_candidates():
     assert "No insider filings recorded yet for current holdings." in empty_report
 
 
+def test_render_discovery_rows_includes_trade_date_column():
+    """Real gap caught 2026-10-01: Discovery Candidates tables had no dedicated
+    Trade Date column -- the insider's actual trade date was only buried inside
+    the long Signal sentence, unlike the Holdings Filings tables which already
+    show it as its own column. Fixed by adding one, sourced from the same
+    trade_date DB column already used for sorting (by_date)."""
+    watch_result = {"checked_holdings": 0, "new_alerts": []}
+    discovery_result = {
+        "pending_candidates": [
+            {"ticker": "ACME", "sector_label": "Insider Buy",
+             "signal_detail": "John Smith (Director) bought $30,000 of ACME on 2026-08-17",
+             "flagged_at": "2026-08-17T00:00:00+00:00", "trade_date": "2026-08-17"},
+        ],
+    }
+    report = insider_scan.render_insider_scan_report(watch_result, discovery_result)
+    assert "| Ticker | Sector | Signal | Trade Date | Price Since Trade | Flagged |" in report
+    assert "| ACME | Insider Buy | John Smith (Director) bought $30,000 of ACME on 2026-08-17 | 2026-08-17 |" in report
+
+
+def test_render_discovery_rows_shows_na_when_trade_date_missing():
+    watch_result = {"checked_holdings": 0, "new_alerts": []}
+    discovery_result = {
+        "pending_candidates": [
+            {"ticker": "ACME", "sector_label": "Insider Buy", "signal_detail": "detail",
+             "flagged_at": "2026-08-17T00:00:00+00:00"},
+        ],
+    }
+    report = insider_scan.render_insider_scan_report(watch_result, discovery_result)
+    assert "| ACME | Insider Buy | detail | n/a |" in report
+
+
 def _price_series(days_ago: int, start_price: float, end_price: float) -> tuple[str, pd.Series]:
     """A close series that starts exactly on trade_date (days_ago days back)
     at start_price and sits at end_price for every day since, so

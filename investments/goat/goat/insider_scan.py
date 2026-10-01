@@ -541,7 +541,7 @@ def _parse_trade_value(signal_detail: str) -> float | None:
 def _render_discovery_rows(rows: list[dict[str, Any]]) -> list[str]:
     return [
         f"| {row['ticker']} | {row['sector_label']} | {row['signal_detail']} "
-        f"| {row.get('price_note', 'n/a')} | {row['flagged_at'][:10]} |"
+        f"| {row.get('trade_date') or 'n/a'} | {row.get('price_note', 'n/a')} | {row['flagged_at'][:10]} |"
         for row in rows
     ]
 
@@ -557,8 +557,8 @@ def _render_holdings_rows(rows: list[dict[str, Any]]) -> list[str]:
     return lines
 
 
-_DISCOVERY_HEADER = ["| Ticker | Sector | Signal | Price Since Trade | Flagged |",
-                      "|--------|--------|--------|--------------------|---------|"]
+_DISCOVERY_HEADER = ["| Ticker | Sector | Signal | Trade Date | Price Since Trade | Flagged |",
+                      "|--------|--------|--------|------------|--------------------|---------|"]
 _HOLDINGS_HEADER = ["| Ticker | Action | Value | Trade Date | Price Since Trade |",
                      "|--------|--------|-------|------------|--------------------|"]
 
