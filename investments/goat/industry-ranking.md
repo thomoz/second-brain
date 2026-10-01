@@ -41,11 +41,11 @@ All 39 covered industries.
 | 12 | COPX | Copper | +11.3% | Yes |
 | 13 | IAI | Capital Markets | +7.9% | Yes |
 | 14 | KRE | Banks - Regional | +7.8% | Yes |
-| 15 | KIE | Insurance - Diversified | +7.1% | Yes |
-| 16 | PICK | Other Industrial Metals & Mining | +6.8% | Yes |
-| 17 | IBUY | Internet Retail | +6.8% | Yes |
-| 18 | ESPO | Electronic Gaming & Multimedia | +6.6% | Yes |
-| 19 | INDS | REIT - Industrial | +5.9% | Yes |
+| 15 | INDS | REIT - Industrial | +7.4% | Yes |
+| 16 | KIE | Insurance - Diversified | +7.1% | Yes |
+| 17 | PICK | Other Industrial Metals & Mining | +6.8% | Yes |
+| 18 | IBUY | Internet Retail | +6.8% | Yes |
+| 19 | ESPO | Electronic Gaming & Multimedia | +6.6% | Yes |
 | 20 | IYZ | Telecom Services | +5.5% | Yes |
 | 21 | PAVE | Engineering & Construction | +3.5% | Yes |
 | 22 | PHO | Utilities - Regulated Water | +1.7% | Yes |
