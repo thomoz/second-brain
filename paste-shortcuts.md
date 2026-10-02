@@ -8,7 +8,7 @@ Sep 2 made: investments/goat/industry-pipeline-handoff.md
 claude --dangerously-skip-permissions
 
 go ahead and create the structured plan, asking me questions if you need to, for the handoff file 
-
+deep 
 
 ready for execution:
 
@@ -95,6 +95,9 @@ Stop = $55.00
 Limit = $55.30
 
 That means: once it hits $55, buy — but don't pay more than $55.30.
+
+
+
 
 
 

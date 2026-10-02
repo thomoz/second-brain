@@ -157,6 +157,35 @@ consume. Confirm via `getSettings`: `incomingWebhook` should read `yes`.
 check `getSettings().incomingWebhook` as a first-pass diagnostic alongside `getStateInstance`,
 before chasing account-link or lid-format theories.
 
+## Recurring deauthorization (pattern found 2026-10-01)
+
+The session has gone from `authorized` to `starting`/`notAuthorized` repeatedly since
+late August — not a one-off: 2026-08-26, 2026-09-07 (×2 same day), 2026-09-26,
+2026-09-28 (still down as of 2026-10-01, ~3 days). Checked the VPS's own uptime
+first to rule out the obvious suspect: **no reboots since 2026-08-17** (45+ days),
+so this is not caused by the server restarting or the deploy process.
+
+**Most likely cause: the Aldi SIM phone going offline for an extended stretch.**
+WhatsApp's documented behavior for linked/companion devices (which is what the
+GREEN-API connection is) is a force-logout of every linked device once the
+*primary phone* has been offline for roughly 14 days — Multi-Device normally lets
+the phone stay offline indefinitely, but only up to that limit. The ~2-3 week
+cadence of these disconnects fits this far better than any VPS- or code-side
+explanation, and every other known cause (VPS `.env` drift, wrong account link,
+`lid` migration, `incomingWebhook` disabled, deploy timer restarts) was checked
+and ruled out for this particular pattern.
+
+**Can't be confirmed with certainty** — there's no remote way to check the phone's
+own connectivity/battery/data history. But it's the only explanation consistent
+with: VPS never rebooting, config/instance ID never changing, and the
+roughly-every-2-to-3-weeks spacing.
+
+**Fix:** keep the Aldi SIM phone permanently connected to WiFi and charging,
+parked somewhere, rather than relying on periodically turning it on. A weekly
+check-in (turn it on, let it connect) would likely also stay under the ~14-day
+window, but is a maintenance task that's easy to forget — always-on removes the
+failure mode entirely rather than managing around it.
+
 ## Related
 
 - Setup guide: [`GREEN-API (30 min).txt`](./GREEN-API%20(30%20min).txt)
