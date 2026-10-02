@@ -46,9 +46,9 @@ All 39 covered industries.
 | 17 | IBUY | Internet Retail | +6.5% | Yes |
 | 18 | XOP | Oil & Gas E&P | +6.3% | Yes |
 | 19 | IYZ | Telecom Services | +6.2% | Yes |
-| 20 | PICK | Other Industrial Metals & Mining | +3.5% | Yes |
-| 21 | PAVE | Engineering & Construction | +2.8% | Yes |
-| 22 | INDS | REIT - Industrial | +1.8% | Yes |
+| 20 | INDS | REIT - Industrial | +3.9% | Yes |
+| 21 | PICK | Other Industrial Metals & Mining | +3.5% | Yes |
+| 22 | PAVE | Engineering & Construction | +2.8% | Yes |
 | 23 | PHO | Utilities - Regulated Water | +0.5% | Yes |
 | 24 | XHB | Building Products & Equipment | -1.8% | No |
 | 25 | EVX | Waste Management | -2.2% | No |
