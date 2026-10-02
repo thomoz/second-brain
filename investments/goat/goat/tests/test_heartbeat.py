@@ -174,3 +174,78 @@ def test_count_swings_counts_genuine_reversals():
     """Three clear legs (up 10%, down 10%, up 10%) -- two confirmed reversals."""
     close = _series([100.0, 110.0, 99.0, 108.9])
     assert heartbeat._count_swings(close, config.GOAT_HEARTBEAT_SWING_MIN_REVERSAL_PCT) == 2
+
+
+def _volume_series(n: int, values: list[float]) -> pd.Series:
+    return pd.Series(values, index=_dates(n))
+
+
+def test_reports_invalidation_resistance_and_reward_to_risk_fields():
+    close = _series(_osc_base(_BASE_WINDOW, 100.0, 3.0))
+    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
+    base_close = close.tail(_BASE_WINDOW)
+    recent_days = config.GOAT_HEARTBEAT_BREAKDOWN_RECENT_DAYS
+    expected_invalidation = float(base_close.iloc[:-recent_days].min())
+    expected_resistance = float(base_close.max())
+    expected_risk = float(close.iloc[-1]) - expected_invalidation
+    expected_reward = (expected_resistance - float(close.iloc[-1])) / expected_risk
+    assert result.data["invalidation_price"] == round(expected_invalidation, 2)
+    assert result.data["resistance_price"] == round(expected_resistance, 2)
+    assert result.data["risk_per_share"] == round(expected_risk, 2)
+    assert result.data["reward_to_risk_ratio"] == round(expected_reward, 2)
+    assert "invalidation" in result.detail
+    assert "resistance" in result.detail
+    assert "reward-to-risk ratio" in result.detail
+
+
+def test_reward_to_risk_ratio_is_none_when_price_already_below_invalidation():
+    """Mirrors test_recent_breakdown_below_settled_base_does_not_fire's fixture
+    -- when the recent stretch has broken down below the settled floor,
+    last_close can sit at/below invalidation_price, making risk_per_share
+    non-positive. The ratio must report None, not a negative/nonsensical
+    number or a ZeroDivisionError."""
+    recent_days = config.GOAT_HEARTBEAT_BREAKDOWN_RECENT_DAYS
+    settled = _osc_base(_BASE_WINDOW - recent_days, 100.0, 3.0)
+    recent = [96.0] * recent_days
+    close = _series(settled + recent)
+    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
+    assert result.data["risk_per_share"] <= 0
+    assert result.data["reward_to_risk_ratio"] is None
+
+
+def test_volume_declining_is_none_when_volume_not_provided():
+    close = _series(_osc_base(_BASE_WINDOW, 100.0, 3.0))
+    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close)
+    assert result.data["volume_declining"] is None
+    assert "not enough volume data" in result.detail
+
+
+def test_volume_declining_true_when_second_half_volume_lower():
+    close = _series(_osc_base(_BASE_WINDOW, 100.0, 3.0))
+    volume = _volume_series(_BASE_WINDOW, [2000.0] * (_BASE_WINDOW // 2) + [1000.0] * (_BASE_WINDOW - _BASE_WINDOW // 2))
+    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close, volume)
+    assert result.data["volume_declining"] is True
+    assert "declining (a possible compression" in result.detail
+
+
+def test_volume_declining_false_when_second_half_volume_higher():
+    close = _series(_osc_base(_BASE_WINDOW, 100.0, 3.0))
+    volume = _volume_series(_BASE_WINDOW, [1000.0] * (_BASE_WINDOW // 2) + [2000.0] * (_BASE_WINDOW - _BASE_WINDOW // 2))
+    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close, volume)
+    assert result.data["volume_declining"] is False
+
+
+def test_volume_declining_is_none_when_too_few_valid_volume_days():
+    close = _series(_osc_base(_BASE_WINDOW, 100.0, 3.0))
+    volume = _volume_series(_BASE_WINDOW, [float("nan")] * (_BASE_WINDOW - 10) + [1000.0] * 10)
+    result = heartbeat.check_heartbeat_breakout("AAPL", "Technology", close, volume)
+    assert result.data["volume_declining"] is None
+
+
+def test_count_volume_trend_declining_direct():
+    declining = pd.Series([2000.0] * 40 + [1000.0] * 40)
+    flat_or_rising = pd.Series([1000.0] * 40 + [2000.0] * 40)
+    assert heartbeat._volume_trend_declining(declining, min_valid_days=10) is True
+    assert heartbeat._volume_trend_declining(flat_or_rising, min_valid_days=10) is False
+    assert heartbeat._volume_trend_declining(None, min_valid_days=10) is None
+    assert heartbeat._volume_trend_declining(pd.Series([1000.0] * 5), min_valid_days=10) is None

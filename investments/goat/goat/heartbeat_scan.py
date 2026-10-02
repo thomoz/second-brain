@@ -71,13 +71,15 @@ def run_heartbeat_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         company_name = row["company"]
         sector_label = row["sector_label"]
         try:
-            close = price_history.fetch_close_history(ticker, config.GOAT_HEARTBEAT_HISTORY_LOOKBACK_DAYS)
-            if close is None:
+            frame = price_history.fetch_close_volume_history(ticker, config.GOAT_HEARTBEAT_HISTORY_LOOKBACK_DAYS)
+            if frame is None:
                 print(f"[goat-heartbeat-scan] no price history for {ticker}, skipping")
                 continue
             scanned += 1
+            close = frame["Close"]
+            volume = frame["Volume"]
 
-            check = heartbeat.check_heartbeat_breakout(ticker, sector_label, close)
+            check = heartbeat.check_heartbeat_breakout(ticker, sector_label, close, volume)
             if check.verdict != "interesting":
                 continue
 

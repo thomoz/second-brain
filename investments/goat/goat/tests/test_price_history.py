@@ -18,9 +18,17 @@ def _install_fake_yfinance(monkeypatch, history: pd.DataFrame):
         def history(self, start=None, auto_adjust=True):
             return history
 
+    class _FakeYFRateLimitError(Exception):
+        pass
+
+    fake_exceptions = types.ModuleType("yfinance.exceptions")
+    fake_exceptions.YFRateLimitError = _FakeYFRateLimitError
+
     fake_yf = types.ModuleType("yfinance")
     fake_yf.Ticker = _FakeTicker
+    fake_yf.exceptions = fake_exceptions
     monkeypatch.setitem(sys.modules, "yfinance", fake_yf)
+    monkeypatch.setitem(sys.modules, "yfinance.exceptions", fake_exceptions)
 
 
 def test_fetch_close_history_drops_trailing_nan_row(monkeypatch):
@@ -56,3 +64,40 @@ def test_fetch_close_history_returns_none_when_empty(monkeypatch):
     monkeypatch.setattr(price_history, "fetch_close_history", _real_fetch_close_history)
 
     assert price_history.fetch_close_history("XLK", lookback_days=30) is None
+
+
+_real_fetch_close_volume_history = price_history.fetch_close_volume_history
+
+
+def test_fetch_close_volume_history_drops_trailing_nan_close_row_keeps_volume(monkeypatch):
+    idx = pd.date_range("2026-08-10", periods=6, freq="D")
+    hist = pd.DataFrame(
+        {"Close": [186.3, 186.1, 188.9, 190.8, 190.0, float("nan")],
+         "Volume": [1000, 1100, 1200, 1300, 1400, 1500]},
+        index=idx,
+    )
+    _install_fake_yfinance(monkeypatch, hist)
+    monkeypatch.setattr(price_history, "fetch_close_volume_history", _real_fetch_close_volume_history)
+
+    frame = price_history.fetch_close_volume_history("XLK", lookback_days=30)
+
+    assert frame is not None
+    assert not frame["Close"].isna().any()
+    assert frame["Close"].iloc[-1] == 190.0
+    assert list(frame["Volume"]) == [1000, 1100, 1200, 1300, 1400]
+
+
+def test_fetch_close_volume_history_returns_none_when_all_close_nan(monkeypatch):
+    idx = pd.date_range("2026-08-10", periods=2, freq="D")
+    hist = pd.DataFrame({"Close": [float("nan"), float("nan")], "Volume": [100, 200]}, index=idx)
+    _install_fake_yfinance(monkeypatch, hist)
+    monkeypatch.setattr(price_history, "fetch_close_volume_history", _real_fetch_close_volume_history)
+
+    assert price_history.fetch_close_volume_history("XLK", lookback_days=30) is None
+
+
+def test_fetch_close_volume_history_returns_none_when_empty(monkeypatch):
+    _install_fake_yfinance(monkeypatch, pd.DataFrame())
+    monkeypatch.setattr(price_history, "fetch_close_volume_history", _real_fetch_close_volume_history)
+
+    assert price_history.fetch_close_volume_history("XLK", lookback_days=30) is None

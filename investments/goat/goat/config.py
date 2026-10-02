@@ -276,6 +276,22 @@ GOAT_HEARTBEAT_MIN_SWINGS = 3  # minimum confirmed swings required within the ba
     # having "only" 3-4 cycles instead of 5 -- a floor proving real rhythm exists,
     # not a ceiling matching the best example seen. v1/tunable.
 
+# Volume-declining report-only signal -- added 2026-10-02, see
+# .agent/plans/goat-heartbeat-pattern-quality.md and
+# investments/goat/heartbeat-pattern-quality-handoff.md. Report-only (shown
+# in the candidate report's detail text, via CheckResult.data) -- does NOT
+# gate the interesting/ok verdict. Promote to a real gate only after a
+# backtest, per this codebase's existing "ship info, validate before
+# gating" precedent (matt_damon_price_volitility_volume_check).
+GOAT_HEARTBEAT_VOLUME_MIN_VALID_DAYS = 63  # at least this many valid
+    # (non-NaN, > 0) volume days within the base window are required before
+    # a declining/not-declining read is reported at all -- half of
+    # GOAT_HEARTBEAT_MIN_DURATION_DAYS (126), so both the first-half and
+    # second-half volume averages being compared are each backed by a
+    # meaningful sample even if some days are missing/zero (illiquid
+    # names, some ETFs). Below this, volume_declining reports None rather
+    # than guessing off a thin sample.
+
 # Fundamentals survival context, per HANDOFF.md's debt -> cash runway -> margins ->
 # revenue growth -> cash generation priority order. Informational on every candidate,
 # NOT a pass/fail gate -- confirmed with Shaun 2026-08-17 (gating on all 5 would

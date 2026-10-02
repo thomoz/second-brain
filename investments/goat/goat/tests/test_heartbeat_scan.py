@@ -23,6 +23,13 @@ def _fake_close() -> pd.Series:
     return pd.Series([100.0, 101.0], index=pd.date_range("2026-01-01", periods=2))
 
 
+def _fake_price_volume_frame() -> pd.DataFrame:
+    return pd.DataFrame(
+        {"Close": [100.0, 101.0], "Volume": [1000.0, 1100.0]},
+        index=pd.date_range("2026-01-01", periods=2),
+    )
+
+
 def _healthy_ticker_data() -> TickerData:
     return TickerData(
         ticker="AAPL",
@@ -56,13 +63,13 @@ def _patch_common(
         lambda conn: lse_constituents if lse_constituents is not None else [],
     )
     monkeypatch.setattr(
-        "goat.heartbeat_scan.price_history.fetch_close_history",
-        fetch_close if fetch_close is not None else (lambda ticker, lookback_days: _fake_close()),
+        "goat.heartbeat_scan.price_history.fetch_close_volume_history",
+        fetch_close if fetch_close is not None else (lambda ticker, lookback_days: _fake_price_volume_frame()),
     )
     monkeypatch.setattr(
         "goat.heartbeat_scan.heartbeat.check_heartbeat_breakout",
         breakout_check if breakout_check is not None else (
-            lambda ticker, sector_label, close: CheckResult(
+            lambda ticker, sector_label, close, volume: CheckResult(
                 name="heartbeat_breakout", verdict="interesting", detail=f"{ticker} heartbeat signal",
             )
         ),
@@ -89,7 +96,7 @@ def test_run_heartbeat_scan_filters_non_rising_sector_before_any_fetch(db_conn, 
 
     def _tracking_fetch(ticker, lookback_days):
         calls.append(ticker)
-        return _fake_close()
+        return _fake_price_volume_frame()
 
     _patch_common(monkeypatch, fetch_close=_tracking_fetch)
     heartbeat_scan.run_heartbeat_scan(db_conn)
