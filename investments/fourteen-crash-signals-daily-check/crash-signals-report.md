@@ -53,7 +53,7 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (INTC) | flag | INTC: Free Cash Flow $-4.9B, Capital Expenditure $14.6B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-08-01, +37.2% YoY vs 2025-08-01 |
 | 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 171 filing(s) in the trailing 30d vs 312 in the same window a year ago (0.55x); 424B4 (priced IPO): 20 filing(s) in the trailing 30d vs 64 in the same window a year ago (0.31x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.57 (z=0.07 vs trailing 43d mean 0.56) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.57 (z=0.07 vs trailing 44d mean 0.56) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (NVDA) | flag | NVDA: $2,081,291,195 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (AAPL) | flag | AAPL: $118,138,037 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (GOOGL) | flag | GOOGL: $130,810,614 sold vs $0 bought, trailing 365 days |
