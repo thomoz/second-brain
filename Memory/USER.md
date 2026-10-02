@@ -174,3 +174,14 @@ Skip drafts for: Newsletters, automated notifications, spam
 - Insider scan WhatsApp pings only on new alerts/candidates or newly confirmed price flags.
 - price_flag_notified prevents repeat WhatsApp alerts for already-confirmed tickers.
 - Chart setup score is live and tested on THM, scoring 80/100.
+
+## 2026-10-02 Reflection
+- (Oct 02) Goat heartbeat plan file is `.agent/plans/goat-heartbeat-pattern-quality.md`.
+- (Oct 02) Add sibling `fetch_close_volume_history`; leave `fetch_close_history` untouched.
+- (Oct 02) Goat heartbeat needs invalidation, resistance, risk/share, R:R, volume_declining keys.
+- (Oct 02) Goat heartbeat needs no `goat_pending_candidates` schema or `db.py` change.
+- (Oct 02) Validate Goat heartbeat with targeted tests, full Goat suite, then VPS scan.
+- (Oct 02) `signal_detail` is free-form TEXT; appending detail is enough.
+- (Oct 02) HY OAS was 3.12pp on 2026-09-30, below Marker 14 watch threshold 3.2pp.
+- (Oct 02) Marker 14 flag threshold is 3.5pp and requires 21 trading days above it.
+- (Oct 02) Marker 14 tracks streak count, not credit-spread trend or rate of change.
