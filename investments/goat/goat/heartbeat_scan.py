@@ -1,9 +1,11 @@
-"""Orchestrator for the S&P 500 heartbeat scan -- Goat Phase 3. Filters the
-cached S&P 500 universe down to constituents of currently-rising sectors (per
-Phase 2's own ranking), runs the heartbeat+breakout check per ticker, attaches
-fundamentals survival context to any hit, and stages genuinely fresh candidates
-into the existing goat_pending_candidates table (source="goat_heartbeat_scan").
-Mirrors monitor.py's run_sector_scan/_stage_new_sector_candidates staging pattern
+"""Orchestrator for the heartbeat scan -- Goat Phase 3, extended by the LSE
+Heartbeat Universe (.agent/plans/lse-heartbeat-universe.md) to a combined
+S&P 500 + FTSE 100 universe. Filters the cached constituent lists down to
+constituents of currently-rising sectors (per Phase 2's own ranking), runs the
+heartbeat+breakout check per ticker, attaches fundamentals survival context to
+any hit, and stages genuinely fresh candidates into the existing
+goat_pending_candidates table (source="goat_heartbeat_scan"). Mirrors
+monitor.py's run_sector_scan/_stage_new_sector_candidates staging pattern
 exactly."""
 
 from __future__ import annotations
@@ -14,9 +16,9 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from mytrader import db as mt_db
-from mytrader import market_data
+from mytrader import market_data, tickers
 
-from . import config, db, fundamentals_context, heartbeat, price_history, sector_rotation, sp500_universe
+from . import config, db, fundamentals_context, ftse100_universe, heartbeat, price_history, sector_rotation, sp500_universe
 
 _SYDNEY_TZ = ZoneInfo("Australia/Sydney")
 
@@ -37,23 +39,37 @@ def run_heartbeat_scan(conn: sqlite3.Connection) -> dict[str, Any]:
     ranking = sector_rotation.rank_sectors(closes)
     rising_etf_labels = {row["sector_label"] for row in ranking if row["rising"]}
 
-    constituents = sp500_universe.get_or_refresh_sp500_constituents(conn)
+    us_constituents = sp500_universe.get_or_refresh_sp500_constituents(conn)
+    lse_constituents = ftse100_universe.get_or_refresh_ftse100_constituents(conn)
 
     filtered = []
-    for c in constituents:
+    for c in us_constituents:
         etf_label = config.GOAT_GICS_TO_ETF_SECTOR_LABEL.get(c["gics_sector"])
         if etf_label is None:
             print(f"[goat-heartbeat-scan] unmapped GICS sector {c['gics_sector']!r} for {c['ticker']}, skipping")
             continue
         if etf_label in rising_etf_labels:
-            filtered.append(c)
+            filtered.append({
+                "ticker": c["ticker"], "company": c["security"],
+                "sector_label": etf_label, "market": "US",
+            })
+    for c in lse_constituents:
+        etf_label = config.GOAT_ICB_TO_ETF_SECTOR_LABEL.get(c["icb_sector"])
+        if etf_label is None:
+            print(f"[goat-heartbeat-scan] unmapped ICB sector {c['icb_sector']!r} for {c['ticker']}, skipping")
+            continue
+        if etf_label in rising_etf_labels:
+            filtered.append({
+                "ticker": tickers.lse_variant(c["ticker"]), "company": c["company"],
+                "sector_label": etf_label, "market": "LSE",
+            })
 
     scanned = 0
     new_candidates: list[dict[str, Any]] = []
     for row in filtered:
         ticker = row["ticker"]
-        company_name = row["security"]
-        sector_label = config.GOAT_GICS_TO_ETF_SECTOR_LABEL[row["gics_sector"]]
+        company_name = row["company"]
+        sector_label = row["sector_label"]
         try:
             close = price_history.fetch_close_history(ticker, config.GOAT_HEARTBEAT_HISTORY_LOOKBACK_DAYS)
             if close is None:
@@ -78,11 +94,17 @@ def run_heartbeat_scan(conn: sqlite3.Connection) -> dict[str, Any]:
             if db.get_goat_pending_candidate(conn, ticker) is not None:
                 continue
 
+            # yfinance reports many LSE stocks' prices in pence (GBp), not pounds
+            # (GBP) -- a 100x unit surprise. Not a concern for anything computed
+            # here (heartbeat.py's checks and fundamentals_context are all
+            # ratio/percentage-based, no absolute price/market-cap threshold),
+            # flagged per the plan's Decision 5 for whoever adds one later.
+            exchange_name = data.info.get("fullExchangeName") or data.info.get("exchange")
             signal_detail = f"{check.detail}; survival context: {context['summary']}"
             db.insert_goat_pending_candidate(
                 conn, ticker=ticker, sector_label=sector_label,
                 signal_detail=signal_detail, source="goat_heartbeat_scan",
-                company_name=company_name,
+                company_name=company_name, exchange=exchange_name,
             )
             # Short WhatsApp-only summary -- Shaun (2026-09-20): don't want the
             # range/smoothness stats, the "heartbeat entry signal" boilerplate (the
@@ -115,27 +137,30 @@ def run_heartbeat_scan(conn: sqlite3.Connection) -> dict[str, Any]:
 
 def render_heartbeat_candidates_report(result: dict[str, Any]) -> str:
     lines = [
-        "# S&P 500 Heartbeat Candidates — Pending Review",
+        "# Heartbeat Candidates — Pending Review",
         "",
         "Auto-generated by Goat's daily heartbeat scan -- a stock inside a currently "
         "rising sector (per sector-ranking.md) currently sitting in a tight, smooth "
         "sideways base, with fundamentals survival context attached for you to judge "
-        "yourself. No moving average is consulted, and a breakout is neither required "
-        "nor excluded -- catching a name still quiet, before it moves, is the point "
-        "(redesigned 2026-09-20). Review each one and either `promote-candidate` (writes it into my-trader's "
-        "real watchlist, labeled Goat-approved) or `dismiss-candidate` (discards it). "
-        "Edits here are overwritten on the next `scan-heartbeat` run.",
+        "yourself. Scans the S&P 500 + FTSE 100 combined universe (LSE Heartbeat "
+        "Universe, added 2026-10-01). No moving average is consulted, and a breakout "
+        "is neither required nor excluded -- catching a name still quiet, before it "
+        "moves, is the point (redesigned 2026-09-20). Review each one and either "
+        "`promote-candidate` (writes it into my-trader's real watchlist, labeled "
+        "Goat-approved) or `dismiss-candidate` (discards it). Edits here are "
+        "overwritten on the next `scan-heartbeat` run.",
         "",
         f"Scanned {result['scanned']} ticker(s) across "
         f"{len(result['rising_sectors'])} rising sector(s): "
         f"{', '.join(result['rising_sectors']) if result['rising_sectors'] else 'none'}.",
         "",
-        "| Ticker | Company | Sector | Signal | Flagged |",
-        "|--------|---------|--------|--------|---------|",
+        "| Ticker | Company | Exchange | Sector | Signal | Flagged |",
+        "|--------|---------|----------|--------|--------|---------|",
     ]
     for row in result["pending_candidates"]:
+        exchange = (row.get("exchange") or "n/a").replace("|", "/")
         lines.append(
-            f"| {row['ticker']} | {row['company_name'] or ''} | {row['sector_label']} "
+            f"| {row['ticker']} | {row['company_name'] or ''} | {exchange} | {row['sector_label']} "
             f"| {row['signal_detail']} | {row['flagged_at'][:10]} |"
         )
     lines += ["", f"Last auto-generated: {_today_sydney()}."]

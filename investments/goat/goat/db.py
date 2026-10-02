@@ -40,6 +40,12 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
                 gics_sector TEXT NOT NULL,
                 fetched_at  TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS goat_ftse100_constituents (
+                ticker      TEXT PRIMARY KEY,
+                company     TEXT NOT NULL,
+                icb_sector  TEXT NOT NULL,
+                fetched_at  TEXT NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS goat_insider_filings_seen (
                 id              INTEGER PRIMARY KEY AUTOINCREMENT,
                 dedup_key       TEXT NOT NULL UNIQUE,
@@ -282,6 +288,32 @@ def replace_sp500_constituents(conn: sqlite3.Connection, rows: list[dict]) -> No
 
 def get_sp500_constituents(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return conn.execute("SELECT * FROM goat_sp500_constituents ORDER BY ticker").fetchall()
+
+
+def get_ftse100_constituents_fetched_at(conn: sqlite3.Connection) -> str | None:
+    """Mirrors get_sp500_constituents_fetched_at exactly -- the whole table is
+    refreshed atomically (replace_ftse100_constituents), so every row shares
+    the same fetched_at."""
+    row = conn.execute("SELECT MAX(fetched_at) AS fetched_at FROM goat_ftse100_constituents").fetchone()
+    return row["fetched_at"] if row is not None else None
+
+
+def replace_ftse100_constituents(conn: sqlite3.Connection, rows: list[dict]) -> None:
+    """Delete-all-then-insert-all, mirrors replace_sp500_constituents exactly --
+    the constituent list changes membership between refreshes, and a stale row
+    for a ticker that's dropped out of the index must not linger."""
+    now = _now()
+    with conn:
+        conn.execute("DELETE FROM goat_ftse100_constituents")
+        conn.executemany(
+            """INSERT INTO goat_ftse100_constituents (ticker, company, icb_sector, fetched_at)
+               VALUES (?, ?, ?, ?)""",
+            [(r["ticker"], r["company"], r["icb_sector"], now) for r in rows],
+        )
+
+
+def get_ftse100_constituents(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute("SELECT * FROM goat_ftse100_constituents ORDER BY ticker").fetchall()
 
 
 def insert_goat_insider_filing_seen(

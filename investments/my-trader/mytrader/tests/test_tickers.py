@@ -18,3 +18,8 @@ def test_normalize_maps_share_class():
 
 def test_asx_variant_appends_suffix():
     assert tickers.asx_variant("pmgold") == "PMGOLD.AX"
+
+
+def test_lse_variant_appends_suffix():
+    assert tickers.lse_variant("BMS") == "BMS.L"
+    assert tickers.lse_variant("bms") == "BMS.L"

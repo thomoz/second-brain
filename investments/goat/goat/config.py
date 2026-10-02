@@ -295,6 +295,15 @@ GOAT_SP500_CACHE_TTL_DAYS = 7  # S&P 500 membership changes only a handful of ti
                                   # (cadence moved weekly -> daily 2026-08-26).
 GOAT_SP500_USER_AGENT = "Mozilla/5.0 (compatible; SecondBrainGoat/1.0)"
 
+# LSE Heartbeat Universe, per .agent/plans/lse-heartbeat-universe.md -- a second,
+# FTSE 100-sourced leg for the heartbeat scan (Decision 1: FTSE 100, not FTSE
+# 350 -- smaller, more liquid, cleanest confirmed Wikipedia source). Mirrors
+# GOAT_SP500_WIKI_URL/_CACHE_TTL_DAYS/_USER_AGENT exactly -- same cache
+# philosophy, FTSE 100 membership also only changes a handful of times a year.
+GOAT_FTSE100_WIKI_URL = "https://en.wikipedia.org/wiki/FTSE_100_Index"
+GOAT_FTSE100_CACHE_TTL_DAYS = 7
+GOAT_FTSE100_USER_AGENT = "Mozilla/5.0 (compatible; SecondBrainGoat/1.0)"
+
 # GICS Sector (Wikipedia's own column values) -> GOAT_SECTOR_ETFS label mapping.
 # Only "Information Technology" actually differs from GOAT_SECTOR_ETFS's "Technology"
 # -- the rest are written out explicitly anyway so a future Wikipedia label change
@@ -311,6 +320,68 @@ GOAT_GICS_TO_ETF_SECTOR_LABEL: dict[str, str] = {
     "Utilities": "Utilities",
     "Real Estate": "Real Estate",
     "Communication Services": "Communication Services",
+}
+
+# ICB Sector (FTSE 100 Wikipedia page's own column values) -> GOAT_SECTOR_ETFS
+# label mapping, per .agent/plans/lse-heartbeat-universe.md Decision 2. Built
+# from a LIVE fetch of https://en.wikipedia.org/wiki/FTSE_100_Index on
+# 2026-10-01 (supersedes the plan's own 2026-09-21 snapshot -- the column had
+# already drifted: new supersector names like "Construction & Materials",
+# "Industrial Support services", "Personal Care Drug and Grocery Stores", plus
+# case-variant duplicates of existing ones like "Financial Services" vs
+# "Financial services"). Same "written out explicitly, no cleverness" posture
+# as GOAT_GICS_TO_ETF_SECTOR_LABEL -- every distinct string variant actually
+# seen gets its own key; an unmapped future variant fails safe (skip + print
+# in run_heartbeat_scan), it doesn't crash.
+GOAT_ICB_TO_ETF_SECTOR_LABEL: dict[str, str] = {
+    "Aerospace & defence": "Industrials",
+    "Banks": "Financials",
+    "Beverages": "Consumer Staples",
+    "Chemicals": "Materials",
+    "Construction & Materials": "Industrials",
+    "Electronic equipment & parts": "Technology",
+    "Electrical utilities & independent power producers": "Utilities",
+    "Financial Services": "Financials",
+    "Financial services": "Financials",
+    "Food & drug retailing": "Consumer Staples",
+    "Food & tobacco": "Consumer Staples",
+    "General industrials": "Industrials",
+    "General retailers": "Consumer Discretionary",
+    "Health care equipment & supplies": "Health Care",
+    "Household goods & home construction": "Consumer Discretionary",
+    "Industrial engineering": "Industrials",
+    "Industrial goods and services": "Industrials",
+    "Industrial Support services": "Industrials",
+    "Insurance": "Financials",
+    "Leisure Goods": "Consumer Discretionary",
+    "Life insurance": "Financials",
+    "Media": "Communication Services",
+    "Mining": "Materials",
+    "Mobile telecommunications": "Communication Services",
+    "Multiline utilities": "Utilities",
+    "Non-life Insurance": "Financials",
+    "Oil & Gas Producers": "Energy",
+    "Oil & gas producers": "Energy",
+    "Personal Care Drug and Grocery Stores": "Consumer Staples",
+    "Personal goods": "Consumer Discretionary",
+    "Pharmaceuticals & biotechnology": "Health Care",
+    "Real Estate": "Real Estate",
+    "Real estate investment trusts": "Real Estate",
+    "Retail hospitality": "Consumer Discretionary",
+    "Retailers": "Consumer Discretionary",
+    "Software & Computer Services": "Technology",
+    "Software & computer services": "Technology",
+    "Support services": "Industrials",
+    "Telecommunications services": "Communication Services",
+    "Travel & leisure": "Consumer Discretionary",
+    "Travel and Leisure": "Consumer Discretionary",
+    # Deliberately NOT mapped -- these are fund/trust vehicles, not operating
+    # companies in a GICS-style sector. Falls through to the same "unmapped ->
+    # print + skip" path an unrecognized GICS sector already takes in
+    # run_heartbeat_scan, same as GOAT_GICS_TO_ETF_SECTOR_LABEL's own docstring
+    # explains for a future label drift.
+    # "Investment Trusts": intentionally omitted
+    # "Collective investments": intentionally omitted
 }
 
 GOAT_HEARTBEAT_CANDIDATES_MD_PATH = GOAT_DIR / "heartbeat-candidates-pending-review.md"

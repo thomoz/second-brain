@@ -113,7 +113,7 @@ def cmd_scan_heartbeat(args) -> None:
     write_heartbeat_candidates_report(result)
     maybe_notify(
         {"new_alerts": []}, new_candidates=result["new_candidates"],
-        candidate_label="new S&P 500 heartbeat candidate(s)",
+        candidate_label="new heartbeat candidate(s)",
     )
     print(
         f"Heartbeat scan complete: scanned {result['scanned']} ticker(s) across "

@@ -12,3 +12,7 @@ def normalize(ticker: str) -> str:
 
 def asx_variant(ticker: str) -> str:
     return normalize(ticker) + ".AX"
+
+
+def lse_variant(ticker: str) -> str:
+    return normalize(ticker) + ".L"

@@ -14,6 +14,10 @@ _CONSTITUENTS = [
     {"ticker": "XOM", "security": "Exxon Mobil", "gics_sector": "Energy", "fetched_at": "x"},
 ]
 
+_LSE_CONSTITUENTS = [
+    {"ticker": "BMS", "company": "Braemar Plc", "icb_sector": "Software & computer services", "fetched_at": "x"},
+]
+
 
 def _fake_close() -> pd.Series:
     return pd.Series([100.0, 101.0], index=pd.date_range("2026-01-01", periods=2))
@@ -37,12 +41,19 @@ def _insolvent_ticker_data() -> TickerData:
     )
 
 
-def _patch_common(monkeypatch, constituents=None, fetch_close=None, breakout_check=None, ticker_data=None):
+def _patch_common(
+    monkeypatch, constituents=None, lse_constituents=None,
+    fetch_close=None, breakout_check=None, ticker_data=None,
+):
     monkeypatch.setattr("goat.heartbeat_scan.sector_rotation.fetch_all_sector_closes", lambda: {})
     monkeypatch.setattr("goat.heartbeat_scan.sector_rotation.rank_sectors", lambda closes: _RISING_RANKING)
     monkeypatch.setattr(
         "goat.heartbeat_scan.sp500_universe.get_or_refresh_sp500_constituents",
         lambda conn: constituents if constituents is not None else _CONSTITUENTS,
+    )
+    monkeypatch.setattr(
+        "goat.heartbeat_scan.ftse100_universe.get_or_refresh_ftse100_constituents",
+        lambda conn: lse_constituents if lse_constituents is not None else [],
     )
     monkeypatch.setattr(
         "goat.heartbeat_scan.price_history.fetch_close_history",
@@ -137,6 +148,46 @@ def test_run_heartbeat_scan_skips_unmapped_gics_sector(db_conn, monkeypatch):
     assert result["new_candidates"] == []
 
 
+def test_run_heartbeat_scan_skips_unmapped_icb_sector(db_conn, monkeypatch):
+    unmapped = [{"ticker": "XYZ", "company": "Mystery PLC", "icb_sector": "Not A Real Sector", "fetched_at": "x"}]
+    _patch_common(monkeypatch, constituents=[], lse_constituents=unmapped)
+    result = heartbeat_scan.run_heartbeat_scan(db_conn)  # must not crash
+    assert result["scanned"] == 0
+    assert result["new_candidates"] == []
+
+
+def test_run_heartbeat_scan_stages_candidates_from_both_us_and_lse_legs(db_conn, monkeypatch):
+    _patch_common(monkeypatch, lse_constituents=_LSE_CONSTITUENTS)
+    result = heartbeat_scan.run_heartbeat_scan(db_conn)
+    assert result["scanned"] == 2  # AAPL (US) + BMS.L (LSE) -- XOM filtered, non-rising sector
+    tickers_out = {c["ticker"] for c in result["new_candidates"]}
+    assert tickers_out == {"AAPL", "BMS.L"}
+
+
+def test_run_heartbeat_scan_qualifies_lse_ticker_with_l_suffix(db_conn, monkeypatch):
+    _patch_common(monkeypatch, constituents=[], lse_constituents=_LSE_CONSTITUENTS)
+    result = heartbeat_scan.run_heartbeat_scan(db_conn)
+    assert result["new_candidates"][0]["ticker"] == "BMS.L"
+    row = goat_db.get_goat_pending_candidate(db_conn, "BMS.L")
+    assert row is not None
+    assert row["company_name"] == "Braemar Plc"
+
+
+def test_run_heartbeat_scan_populates_exchange_from_ticker_data(db_conn, monkeypatch):
+    def _exchange_ticker_data(ticker):
+        data = _healthy_ticker_data()
+        data.info["fullExchangeName"] = "London Stock Exchange"
+        return data
+
+    _patch_common(
+        monkeypatch, constituents=[], lse_constituents=_LSE_CONSTITUENTS,
+        ticker_data=_exchange_ticker_data,
+    )
+    heartbeat_scan.run_heartbeat_scan(db_conn)
+    row = goat_db.get_goat_pending_candidate(db_conn, "BMS.L")
+    assert row["exchange"] == "London Stock Exchange"
+
+
 def test_render_heartbeat_candidates_report_lists_pending_rows():
     result = {
         "scanned": 42, "rising_sectors": ["Technology"],
@@ -150,3 +201,20 @@ def test_render_heartbeat_candidates_report_lists_pending_rows():
     assert "Apple Inc." in report
     assert "heartbeat signal" in report
     assert "42" in report
+
+
+def test_render_heartbeat_candidates_report_shows_exchange_column_and_na_when_missing():
+    result = {
+        "scanned": 2, "rising_sectors": ["Technology"],
+        "pending_candidates": [
+            {"ticker": "BMS.L", "company_name": "Braemar Plc", "sector_label": "Technology",
+             "signal_detail": "heartbeat signal", "flagged_at": "2026-10-01T00:00:00+00:00",
+             "exchange": "London Stock Exchange"},
+            {"ticker": "AAPL", "company_name": "Apple Inc.", "sector_label": "Technology",
+             "signal_detail": "heartbeat signal", "flagged_at": "2026-08-17T00:00:00+00:00"},
+        ],
+    }
+    report = heartbeat_scan.render_heartbeat_candidates_report(result)
+    assert "| Ticker | Company | Exchange | Sector | Signal | Flagged |" in report
+    assert "London Stock Exchange" in report
+    assert "| AAPL | Apple Inc. | n/a |" in report
