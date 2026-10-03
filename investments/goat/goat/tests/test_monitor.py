@@ -429,6 +429,63 @@ def test_dismiss_workflow_removes_pending_only_no_watchlist_write(db_conn):
     assert mt_db.get_watchlist_row(db_conn, "XLK") is None
 
 
+# --- Part A: rotation snapshot capture -----------------------------------------
+
+_SNAPSHOT_RANKING = [
+    {"ticker": "XLK", "sector_label": "Technology", "return_pct": 10.0, "rising": True,
+     "return_pct_1w": 2.0, "rising_1w": True, "rank": 1},
+]
+
+
+def test_capture_rotation_snapshot_first_run_has_no_prior_flow(db_conn):
+    result = monitor.capture_rotation_snapshot(
+        db_conn, scope="sector", ranking=_SNAPSHOT_RANKING, label_key="sector_label",
+    )
+    assert result["rotation_flow"] is None
+    assert result["short_window_flow"] is None
+    assert len(goat_db.get_rotation_snapshots_for_date(db_conn, "sector", monitor._today_sydney())) == 1
+
+
+def test_capture_rotation_snapshot_same_day_rerun_does_not_duplicate(db_conn):
+    monitor.capture_rotation_snapshot(
+        db_conn, scope="sector", ranking=_SNAPSHOT_RANKING, label_key="sector_label",
+    )
+    result = monitor.capture_rotation_snapshot(
+        db_conn, scope="sector", ranking=_SNAPSHOT_RANKING, label_key="sector_label",
+    )
+    # Same-day re-run still sees no PRIOR (earlier-dated) snapshot -- it isn't
+    # its own prior -- and must not duplicate the row (UNIQUE constraint + OR IGNORE).
+    assert result["rotation_flow"] is None
+    rows = goat_db.get_rotation_snapshots_for_date(db_conn, "sector", monitor._today_sydney())
+    assert len(rows) == 1
+
+
+def test_capture_rotation_snapshot_detects_transition_from_prior_day(db_conn):
+    goat_db.insert_rotation_snapshots(
+        db_conn, scope="sector", snapshot_date="2020-01-01",
+        rows=[{"ticker": "XLK", "sector_label": "Technology", "return_pct": -5.0,
+               "return_pct_1w": -1.0, "rank": 2}],
+        label_key="sector_label",
+    )
+    result = monitor.capture_rotation_snapshot(
+        db_conn, scope="sector", ranking=_SNAPSHOT_RANKING, label_key="sector_label",
+    )
+    assert result["rotation_flow"]["summary"]["falling_to_rising"] == 1
+    assert result["short_window_flow"]["summary"]["falling_to_rising"] == 1
+
+
+def test_render_sector_ranking_report_shows_no_section_when_flow_absent():
+    result = {"ranking": _SNAPSHOT_RANKING}
+    report = monitor.render_sector_ranking_report(result)
+    assert "Rotation Flow" not in report
+
+
+def test_render_sector_ranking_report_shows_no_prior_snapshot_message():
+    result = {"ranking": _SNAPSHOT_RANKING, "rotation_flow": None, "short_window_flow": None}
+    report = monitor.render_sector_ranking_report(result)
+    assert "No prior snapshot yet." in report
+
+
 # --- Industry rotation ranking -------------------------------------------------
 
 _FAKE_INDUSTRY_ETFS = {"ITA": "Aerospace & Defense", "JETS": "Airlines"}
@@ -444,7 +501,7 @@ def _patch_industry_universe(monkeypatch):
     monkeypatch.setattr(goat_config, "GOAT_FINVIZ_INDUSTRIES", _FAKE_FINVIZ_INDUSTRIES)
 
 
-def test_run_industry_scan_ranks_and_lists_not_covered(monkeypatch):
+def test_run_industry_scan_ranks_and_lists_not_covered(db_conn, monkeypatch):
     _patch_industry_universe(monkeypatch)
     window = goat_config.GOAT_INDUSTRY_RANK_WINDOW_TRADING_DAYS
 
@@ -455,23 +512,78 @@ def test_run_industry_scan_ranks_and_lists_not_covered(monkeypatch):
 
     monkeypatch.setattr("goat.industry_rotation.price_history.fetch_close_history", _fake_fetch)
 
-    result = monitor.run_industry_scan()
+    result = monitor.run_industry_scan(db_conn)
     assert [r["ticker"] for r in result["ranking"]] == ["ITA", "JETS"]
     assert result["not_covered"] == ["Coking Coal", "Gold"]
 
 
-def test_run_industry_scan_all_tickers_missing_data_still_renders(monkeypatch):
+def test_run_industry_scan_all_tickers_missing_data_still_renders(db_conn, monkeypatch):
     _patch_industry_universe(monkeypatch)
     monkeypatch.setattr(
         "goat.industry_rotation.price_history.fetch_close_history",
         lambda ticker, lookback_days: None,
     )
 
-    result = monitor.run_industry_scan()
+    result = monitor.run_industry_scan(db_conn)
     assert all(r["return_pct"] is None for r in result["ranking"])
     report = monitor.render_industry_ranking_report(result)
     assert "ITA" in report
     assert "Coking Coal" in report
+
+
+def _industry_breakout_series() -> pd.Series:
+    ma_days = goat_config.GOAT_SECTOR_MA_SHORT_DAYS
+    lead_in = ma_days + goat_config.GOAT_SECTOR_SLOPE_LOOKBACK_DAYS + 20
+    prices = [90.0] * lead_in + [130.0] * 2
+    return pd.Series(prices, index=_dates(len(prices)))
+
+
+def _quiet_industry_series() -> pd.Series:
+    n = goat_config.GOAT_SECTOR_MA_SHORT_DAYS + goat_config.GOAT_SECTOR_SLOPE_LOOKBACK_DAYS + 30
+    return pd.Series([100.0] * n, index=_dates(n))
+
+
+def _patch_industry_fetch(monkeypatch, breakout_ticker="ITA"):
+    def _fake_fetch(ticker, lookback_days):
+        return _industry_breakout_series() if ticker == breakout_ticker else _quiet_industry_series()
+
+    monkeypatch.setattr("goat.industry_rotation.price_history.fetch_close_history", _fake_fetch)
+
+
+def test_run_industry_scan_stages_new_candidate_on_fresh_breakout(db_conn, monkeypatch):
+    _patch_industry_universe(monkeypatch)
+    _patch_industry_fetch(monkeypatch)
+
+    result = monitor.run_industry_scan(db_conn)
+    assert len(result["new_candidates"]) == 1
+    assert result["new_candidates"][0]["ticker"] == "ITA"
+    row = goat_db.get_goat_pending_candidate(db_conn, "ITA")
+    assert row is not None
+    assert row["source"] == "goat_industry_rotation"
+    assert "ITA" in result["heartbeat_gate"]
+
+
+def test_run_industry_scan_stays_quiet_on_repeat_run(db_conn, monkeypatch):
+    _patch_industry_universe(monkeypatch)
+    _patch_industry_fetch(monkeypatch)
+
+    monitor.run_industry_scan(db_conn)
+    result = monitor.run_industry_scan(db_conn)
+    assert result["new_candidates"] == []
+    assert len(result["pending_candidates"]) == 1
+
+
+def test_run_industry_scan_skips_ticker_already_a_holding(db_conn, monkeypatch):
+    _patch_industry_universe(monkeypatch)
+    _patch_industry_fetch(monkeypatch)
+    mt_db.upsert_holding(
+        db_conn, ticker="ITA", name="iShares Aerospace & Defense ETF", asset_type="etf",
+        bucket="1", qty=1.0, avg_price=100.0,
+    )
+
+    result = monitor.run_industry_scan(db_conn)
+    assert result["new_candidates"] == []
+    assert goat_db.get_goat_pending_candidate(db_conn, "ITA") is None
 
 
 def test_render_industry_ranking_report_has_all_sections():

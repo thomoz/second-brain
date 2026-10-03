@@ -21,6 +21,8 @@ $TIMERS = @(
     "second-brain-goat-monitor.timer",
     "second-brain-goat-live-check.timer",
     "second-brain-goat-heartbeat-scan.timer",
+    "second-brain-goat-industry-heartbeat-scan.timer",
+    "second-brain-goat-etf-heartbeat-scan.timer",
     "second-brain-goat-dma-breakout-scan.timer",
     "second-brain-goat-hated-industries-scan.timer",
     "second-brain-goat-insider-scan.timer",

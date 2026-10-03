@@ -1,6 +1,8 @@
 # Industry-Granularity Pipeline + Rotation Trend Tracking — Combined Session Handoff
 
-## Status: NOT STARTED — combined handoff drafted 2026-09-02. Awaiting `/plan-feature` (Shaun's call to invoke, not automatic).
+## Status: NOT STARTED — combined handoff drafted 2026-09-02, Part A extended
+2026-10-03 with an on-demand visual-graph addendum (see Part A section below).
+Awaiting `/plan-feature` (Shaun's call to invoke, not automatic).
 
 Folds together two previously separate handoffs that touch the same files
 (`run_industry_scan`, `monitor.py`'s industry render, `main.py::cmd_monitor`,
@@ -21,7 +23,8 @@ Both originals now carry a "superseded by this file" note.
 
 Make Goat's **industry** layer a first-class part of the pick pipeline (not just a
 viewing report), and give both the sector and industry rotation rankings a memory
-of which way trends are heading.
+of which way trends are heading — in both a Markdown Rotation Flow table and an
+on-demand visual chart (added 2026-10-03, see Part A addendum below).
 
 The workflow Shaun wants to run end to end:
 
@@ -126,6 +129,74 @@ already fetched — no new data, no new fetch). This makes "flowed in this week 
 flowed out this week" a real signal rather than waiting weeks for the half-year
 number to change sign. Resolve during `/plan-feature`: add the short window now, or
 ship the sign-flip model first and add short-window as a fast follow.
+
+### Part A addendum — visual graph (NEW, raised 2026-10-03)
+
+Prompted by Shaun asking directly, while discussing a possible divergence between
+`sector-ranking.md` and `industry-ranking.md`, for "something that will show
+direction over time, so we can see where money is moving out of and into." The
+Rotation Flow table above answers that with text (FROM/TO + rollup), but Shaun also
+asked "will this display a dashboard with a graph or something?" — confirmed he
+wants an actual visual chart added to scope, not text-only.
+
+**Why this can't just be a new Markdown section like everything else Goat ships**:
+every existing Goat/my-trader report (`sector-ranking.md`, `gold-outlook.md`,
+`my-trader-report.md`, etc.) is plain text rendered to a `.md` file on the VPS via a
+scheduled job — there is no chart-image or chart-hosting infra anywhere in this
+codebase to reuse, and a cron job has no way to serve an interactive page. **An
+auto-generated static chart image is also not a good fit**: `goat_rotation_snapshots`
+(Part A's new table) will hold up to 11 sectors / 39 industries x up to 90 days —
+a single auto-rendered chart faces the same "39 lines on one chart is noise" problem
+either way, with no human in the loop at render time to pick a sensible default
+(which tickers, which window) the way an on-demand request naturally would.
+
+**Recommended shape: on-demand, not auto-rendered.** Shaun asks in a Claude Code
+session ("show me the sector rotation chart", "graph XLE vs XLK over the last 90
+days", "chart the industry flow since Sept"); Claude reads
+`goat_rotation_snapshots` (via a new read-only query path — see below) and
+publishes the chart as an Artifact (interactive HTML, using the `dataviz` skill for
+styling/palette), the same mechanism already used elsewhere in these sessions, not
+a new piece of infrastructure to build and run unattended. This keeps the VPS side
+exactly what Part A already specifies (table + Markdown Rotation Flow section,
+nothing else); the graph is a consumer of that data, built fresh per request.
+
+**New Part A deliverable this implies**: a read-only way to pull snapshot history
+out of the DB from a Windows/Claude Code session without a bespoke one-off query
+each time — e.g. a `query-rotation-history --scope sector|industry [--ticker X]
+[--days N]` subcommand (mirrors the existing `invoke_investments.ps1` pattern,
+read-only, prints JSON) that a session can call and then hand straight to the
+Artifact/dataviz pipeline. Without this, every chart request means writing a
+one-off SQL query against the VPS-only DB by hand.
+
+**Open questions (resolve during `/plan-feature`, alongside Part A's other open
+questions)**:
+1. **Chart type / default scope.** A single multi-line chart works for the 11
+   sectors; 39 industries on one chart is likely unreadable. Options: small-
+   multiples, a "top N movers" default (e.g. top 5 rising + bottom 5 falling,
+   matching `industry-ranking.md`'s own Top 5/Bottom 5 split), or always require
+   Shaun to name tickers/count for industry-scope requests. Recommend defaulting
+   to Top-5/Bottom-5 for industry scope (reuses an existing, already-understood
+   split) and all 11 for sector scope, with an explicit override.
+2. **What's plotted** — raw `return_pct` trajectory (matches the existing ranking
+   tables' own number) vs. `rank` over time (highlights relative rotation more than
+   absolute magnitude) vs. both as a toggle. Recommend `return_pct` as the
+   default/simplest, since that's what both existing ranking files already show.
+3. **Does the query subcommand ship in the same phase as Part A's snapshot table**,
+   or as a fast-follow once there's enough history to make a chart worth looking
+   at (Part A's own snapshot table starts empty at ship time — a chart has nothing
+   to show until several days/weeks of runs have accumulated). Recommend building
+   the query subcommand in the same phase (cheap, mechanical) but treating actually
+   *using* it as naturally gated on history existing.
+4. **Does this need the short-window flow (previous open question) to be resolved
+   first** — a chart of the long-window (63-/126-day) return will visually lag the
+   same way the text Rotation Flow does; if short-window flow ships, the chart
+   should plot that too (as a second line/toggle), not just the long window.
+
+**Explicitly not in this addendum's scope**: no auto-rendered chart on a schedule,
+no new always-on web dashboard/server, no chart embedded directly in
+`sector-ranking.md`/`industry-ranking.md` (Markdown has no native chart rendering)
+— the Markdown Rotation Flow section from Part A above remains the only thing the
+VPS scan itself produces; the graph is always a separate, on-demand artifact.
 
 ---
 
@@ -276,6 +347,8 @@ Open questions to resolve during `/plan-feature`:
 - No new alerting on trend *drift* (Part A is visibility, not automation).
 - No change to `rank_sectors` / `rank_industries` ranking maths.
 - No change to the sector-level pipeline's behaviour.
+- No auto-rendered chart on a schedule, no always-on web dashboard/server — the
+  visual graph addendum is on-demand only (see Part A addendum above).
 
 ## Validation (once built)
 

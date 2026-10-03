@@ -15,7 +15,7 @@ from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from mytrader import db as mt_db
+from mytrader import asx200_universe, db as mt_db
 from mytrader import market_data, tickers
 
 from . import config, db, fundamentals_context, ftse100_universe, heartbeat, price_history, sector_rotation, sp500_universe
@@ -62,6 +62,22 @@ def run_heartbeat_scan(conn: sqlite3.Connection) -> dict[str, Any]:
             filtered.append({
                 "ticker": tickers.lse_variant(c["ticker"]), "company": c["company"],
                 "sector_label": etf_label, "market": "LSE",
+            })
+
+    # ASX sector-level leg, per .agent/plans/goat-industry-pipeline.md Part C --
+    # no DB cache (asx200_universe has none, unlike sp500/ftse100 above) and
+    # returns None (not []) on a scrape failure, hence the `or []` guard, same
+    # as dma_breakout_scan.fetch_universe_constituents's own handling.
+    asx_constituents = asx200_universe.fetch_asx200_constituents() or []
+    for c in asx_constituents:
+        etf_label = config.GOAT_ASX_GICS_TO_ETF_SECTOR_LABEL.get(c["sector"])
+        if etf_label is None:
+            print(f"[goat-heartbeat-scan] unmapped ASX sector {c['sector']!r} for {c['ticker']}, skipping")
+            continue
+        if etf_label in rising_etf_labels:
+            filtered.append({
+                "ticker": tickers.asx_variant(c["ticker"]), "company": c["company"],
+                "sector_label": etf_label, "market": "ASX",
             })
 
     scanned = 0

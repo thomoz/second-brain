@@ -18,6 +18,10 @@ _LSE_CONSTITUENTS = [
     {"ticker": "BMS", "company": "Braemar Plc", "icb_sector": "Software & computer services", "fetched_at": "x"},
 ]
 
+_ASX_CONSTITUENTS = [
+    {"ticker": "XRO", "company": "Xero Limited", "sector": "Information Technology"},
+]
+
 
 def _fake_close() -> pd.Series:
     return pd.Series([100.0, 101.0], index=pd.date_range("2026-01-01", periods=2))
@@ -49,7 +53,7 @@ def _insolvent_ticker_data() -> TickerData:
 
 
 def _patch_common(
-    monkeypatch, constituents=None, lse_constituents=None,
+    monkeypatch, constituents=None, lse_constituents=None, asx_constituents=None,
     fetch_close=None, breakout_check=None, ticker_data=None,
 ):
     monkeypatch.setattr("goat.heartbeat_scan.sector_rotation.fetch_all_sector_closes", lambda: {})
@@ -61,6 +65,10 @@ def _patch_common(
     monkeypatch.setattr(
         "goat.heartbeat_scan.ftse100_universe.get_or_refresh_ftse100_constituents",
         lambda conn: lse_constituents if lse_constituents is not None else [],
+    )
+    monkeypatch.setattr(
+        "goat.heartbeat_scan.asx200_universe.fetch_asx200_constituents",
+        lambda: asx_constituents if asx_constituents is not None else [],
     )
     monkeypatch.setattr(
         "goat.heartbeat_scan.price_history.fetch_close_volume_history",
@@ -193,6 +201,23 @@ def test_run_heartbeat_scan_populates_exchange_from_ticker_data(db_conn, monkeyp
     heartbeat_scan.run_heartbeat_scan(db_conn)
     row = goat_db.get_goat_pending_candidate(db_conn, "BMS.L")
     assert row["exchange"] == "London Stock Exchange"
+
+
+def test_run_heartbeat_scan_qualifies_asx_ticker_in_rising_sector_and_stages_with_market_asx(db_conn, monkeypatch):
+    _patch_common(monkeypatch, constituents=[], asx_constituents=_ASX_CONSTITUENTS)
+    result = heartbeat_scan.run_heartbeat_scan(db_conn)
+    assert result["new_candidates"][0]["ticker"] == "XRO.AX"
+    row = goat_db.get_goat_pending_candidate(db_conn, "XRO.AX")
+    assert row is not None
+    assert row["company_name"] == "Xero Limited"
+
+
+def test_run_heartbeat_scan_skips_unmapped_asx_sector_without_crashing(db_conn, monkeypatch):
+    unmapped = [{"ticker": "XYZ", "company": "Mystery Ltd", "sector": "Not A Real Sector"}]
+    _patch_common(monkeypatch, constituents=[], asx_constituents=unmapped)
+    result = heartbeat_scan.run_heartbeat_scan(db_conn)  # must not crash
+    assert result["scanned"] == 0
+    assert result["new_candidates"] == []
 
 
 def test_render_heartbeat_candidates_report_lists_pending_rows():

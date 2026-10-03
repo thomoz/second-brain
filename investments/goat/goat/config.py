@@ -155,6 +155,171 @@ from mytrader.config import (  # noqa: F401  (re-exported for goat callers, move
 
 GOAT_INDUSTRY_RANKING_MD_PATH = GOAT_DIR / "industry-ranking.md"
 
+# Rotation snapshot history, per .agent/plans/goat-industry-pipeline.md Part A --
+# a daily snapshot of both the sector- and industry-level rankings so
+# sector-ranking.md/industry-ranking.md can show which way each ticker trended
+# since the prior day's monitor run, not just today's static number. Shared
+# schema across both scopes (see db.goat_rotation_snapshots) -- scope is
+# "sector" or "industry".
+GOAT_ROTATION_SNAPSHOT_RETENTION_DAYS = 90  # same precedent as
+    # GOAT_INSIDER_SALE_LOOKBACK_DAYS / GOAT_INSIDER_PRICE_STALE_DAYS (both 90) --
+    # a daily-cadence history table doesn't need to grow unbounded.
+GOAT_INDUSTRY_CANDIDATES_MD_PATH = GOAT_DIR / "industry-candidates-pending-review.md"
+GOAT_INDUSTRY_HEARTBEAT_CANDIDATES_MD_PATH = GOAT_DIR / "industry-heartbeat-candidates-pending-review.md"
+GOAT_ETF_HEARTBEAT_CANDIDATES_MD_PATH = GOAT_DIR / "etf-heartbeat-candidates-pending-review.md"
+
+GOAT_ROTATION_SHORT_WINDOW_TRADING_DAYS = 5  # 1 trading week -- a second, faster
+    # "this week" rising/falling read alongside the existing long-window
+    # (GOAT_SECTOR_RANK_WINDOW_TRADING_DAYS / GOAT_INDUSTRY_RANK_WINDOW_TRADING_DAYS)
+    # sign, added 2026-10-03 per Shaun's own worry that a slow half-year number
+    # can mask money already flowing out this week. Pure diff over closes already
+    # fetched for the long-window ranking -- no new fetch.
+
+# Industry constituent universe -- Part B-2 of .agent/plans/goat-industry-pipeline.md.
+# Feeds industry_heartbeat_scan.py's stock-level gate. US side comes from a
+# per-industry Finviz screen; ASX side is a hand-curated dict (no Finviz/
+# yfinance industry field exists for ASX names at this granularity).
+GOAT_INDUSTRY_CONSTITUENTS_CACHE_TTL_DAYS = 7  # mirrors GOAT_SP500_CACHE_TTL_DAYS --
+    # same reasoning (a per-industry constituent list changes membership only a
+    # handful of times a year, so a week-old cache stays plenty fresh).
+
+# Finviz's industry-filter f=ind_<slug> screener codes for the 39 GOAT_INDUSTRY_ETFS
+# labels only (not all 143 -- the industry-heartbeat gate only ever selects from
+# these 39, since gating requires an ETF to exist to breakout-check in the first
+# place). Built from the systematic rule Finviz's own filter UI follows (lowercase,
+# strip spaces/ampersands/hyphens/commas/periods) and LIVE-VERIFIED 2026-10-03 for 5
+# representative slugs covering the trickiest punctuation cases (semiconductors,
+# oilgasequipmentservices, banksdiversified, reitmortgage, autotruckdealerships --
+# each returned real, on-theme results against finviz.com/screener.ashx?f=ind_<slug>).
+# EVERY OTHER TOKEN HERE FOLLOWS THE SAME VERIFIED RULE BUT WAS NOT INDIVIDUALLY
+# LIVE-CHECKED -- same "best guess, verified live during the build" posture as
+# MOAT_FINVIZ_SECTOR_SCREENS. A wrong/stale slug just yields an empty screen for
+# that one industry (fail-safe-empty, not a crash) -- the --industries manual
+# override on scan-industry-heartbeat is the practical workaround for any drift.
+GOAT_FINVIZ_INDUSTRY_SLUGS: dict[str, str] = {
+    "Aerospace & Defense": "ind_aerospacedefense",
+    "Airlines": "ind_airlines",
+    "Auto Manufacturers": "ind_automanufacturers",
+    "Banks - Diversified": "ind_banksdiversified",  # live-verified 2026-10-03
+    "Banks - Regional": "ind_banksregional",
+    "Biotechnology": "ind_biotechnology",
+    "Building Products & Equipment": "ind_buildingproductsequipment",
+    "Capital Markets": "ind_capitalmarkets",
+    "Copper": "ind_copper",
+    "Electronic Gaming & Multimedia": "ind_electronicgamingmultimedia",
+    "Engineering & Construction": "ind_engineeringconstruction",
+    "Gambling": "ind_gambling",
+    "Gold": "ind_gold",
+    "Healthcare Plans": "ind_healthcareplans",
+    "Insurance - Diversified": "ind_insurancediversified",
+    "Internet Content & Information": "ind_internetcontentinformation",
+    "Internet Retail": "ind_internetretail",
+    "Lumber & Wood Production": "ind_lumberwoodproduction",
+    "Marine Shipping": "ind_marineshipping",
+    "Medical Devices": "ind_medicaldevices",
+    "Oil & Gas E&P": "ind_oilgasep",
+    "Oil & Gas Equipment & Services": "ind_oilgasequipmentservices",  # live-verified 2026-10-03
+    "Oil & Gas Refining & Marketing": "ind_oilgasrefiningmarketing",
+    "Other Industrial Metals & Mining": "ind_otherindustrialmetalsmining",
+    "REIT - Industrial": "ind_reitindustrial",
+    "REIT - Mortgage": "ind_reitmortgage",  # live-verified 2026-10-03
+    "Residential Construction": "ind_residentialconstruction",
+    "Restaurants": "ind_restaurants",
+    "Semiconductors": "ind_semiconductors",  # live-verified 2026-10-03
+    "Silver": "ind_silver",
+    "Software - Application": "ind_softwareapplication",
+    "Solar": "ind_solar",
+    "Steel": "ind_steel",
+    "Telecom Services": "ind_telecomservices",
+    "Uranium": "ind_uranium",
+    "Utilities - Regulated Water": "ind_utilitiesregulatedwater",
+    "Utilities - Renewable": "ind_utilitiesrenewable",
+    "Agricultural Inputs": "ind_agriculturalinputs",
+    "Waste Management": "ind_wastemanagement",
+    "Auto & Truck Dealerships": "ind_autotruckdealerships",  # live-verified 2026-10-03,
+                                                                # not itself one of the 39
+                                                                # GOAT_INDUSTRY_ETFS labels
+                                                                # (kept for slug-pattern
+                                                                # verification coverage only)
+}
+
+# Hand-curated ASX ticker -> Finviz industry-label mapping, per Decision 20
+# (2026-10-03, Shaun: build this now, do not defer). Covers a useful slice --
+# large/liquid ASX names in industries most likely to actually clear the
+# breakout gate (Materials/Mining, Financials, Health Care, Energy) -- not an
+# exhaustive ASX 200 pass. Same "ship a useful slice, extend later" posture as
+# GOAT_INDUSTRY_ETFS itself (39 of 143). An ASX ticker not listed here simply
+# never appears as an industry constituent -- never silently substituted with a
+# looser match, same "Not Covered" discipline industry-ranking.md already uses.
+# Researched 2026-10-03 by cross-referencing each company's actual listed
+# business against Finviz's taxonomy (not ASX's own broader GICS sector, which
+# is too coarse for this purpose -- see asx200_universe.py's own sector-only field).
+GOAT_ASX_INDUSTRY_CONSTITUENTS: dict[str, str] = {
+    # Gold
+    "NST": "Gold", "EVN": "Gold", "RRL": "Gold", "RMS": "Gold", "GOR": "Gold",
+    "DEG": "Gold", "CMM": "Gold", "WGX": "Gold",
+    # Copper
+    "SFR": "Copper", "29M": "Copper", "AIS": "Copper",
+    # Other Industrial Metals & Mining
+    "S32": "Other Industrial Metals & Mining", "ILU": "Other Industrial Metals & Mining",
+    "LYC": "Other Industrial Metals & Mining", "IGO": "Other Industrial Metals & Mining",
+    "MIN": "Other Industrial Metals & Mining", "PLS": "Other Industrial Metals & Mining",
+    "LTR": "Other Industrial Metals & Mining",
+    # Steel
+    "BSL": "Steel",
+    # Uranium
+    "PDN": "Uranium", "BOE": "Uranium", "DYL": "Uranium",
+    # Banks - Diversified (the Big 4)
+    "CBA": "Banks - Diversified", "WBC": "Banks - Diversified",
+    "ANZ": "Banks - Diversified", "NAB": "Banks - Diversified",
+    # Banks - Regional
+    "BOQ": "Banks - Regional", "BEN": "Banks - Regional",
+    # Insurance - Diversified
+    "QBE": "Insurance - Diversified", "SUN": "Insurance - Diversified",
+    "IAG": "Insurance - Diversified",
+    # Capital Markets
+    "MQG": "Capital Markets", "ASX": "Capital Markets", "CGF": "Capital Markets",
+    "PPT": "Capital Markets", "MFG": "Capital Markets",
+    # Healthcare Plans
+    "NHF": "Healthcare Plans", "MPL": "Healthcare Plans",
+    # Medical Devices
+    "COH": "Medical Devices", "RMD": "Medical Devices", "FPH": "Medical Devices",
+    # Biotechnology
+    "CSL": "Biotechnology", "IMM": "Biotechnology", "MSB": "Biotechnology",
+    # Engineering & Construction
+    "CIM": "Engineering & Construction", "MND": "Engineering & Construction",
+    "WOR": "Engineering & Construction",
+    # Oil & Gas E&P
+    "WDS": "Oil & Gas E&P", "STO": "Oil & Gas E&P", "BPT": "Oil & Gas E&P",
+    "KAR": "Oil & Gas E&P",
+    # Gambling
+    "TLC": "Gambling", "SGR": "Gambling",
+    # Electronic Gaming & Multimedia
+    "ALL": "Electronic Gaming & Multimedia",
+    # Telecom Services
+    "TLS": "Telecom Services", "TPG": "Telecom Services",
+    # Internet Content & Information
+    "CAR": "Internet Content & Information", "REA": "Internet Content & Information",
+    "SEK": "Internet Content & Information",
+    # Internet Retail
+    "KGN": "Internet Retail",
+    # Software - Application
+    "XRO": "Software - Application", "WTC": "Software - Application",
+    "TNE": "Software - Application",
+    # Restaurants
+    "CKF": "Restaurants", "DMP": "Restaurants",
+    # Airlines
+    "QAN": "Airlines",
+    # Building Products & Equipment
+    "JHX": "Building Products & Equipment", "BLD": "Building Products & Equipment",
+    # Waste Management
+    "CWY": "Waste Management",
+    # REIT - Industrial
+    "GMG": "REIT - Industrial", "CIP": "REIT - Industrial",
+    # Agricultural Inputs
+    "IPL": "Agricultural Inputs", "NUF": "Agricultural Inputs",
+}
+
 # Intraday 150DMA live-check polling, per investments/goat/HANDOFF.md's
 # "Intraday 150DMA Alerting" section (raised 2026-08-16) -- Shaun wants a
 # WhatsApp alert as soon as a holding's LIVE price crosses below its 150DMA
@@ -401,6 +566,30 @@ GOAT_ICB_TO_ETF_SECTOR_LABEL: dict[str, str] = {
 }
 
 GOAT_HEARTBEAT_CANDIDATES_MD_PATH = GOAT_DIR / "heartbeat-candidates-pending-review.md"
+
+# ASX sector-level extension to the heartbeat scan's existing US+LSE universe,
+# per .agent/plans/goat-industry-pipeline.md Part C. LIVE-CHECKED 2026-10-03
+# against the current S&P/ASX 200 Wikipedia "Constituent companies" table's
+# sector column -- 11 distinct values, matching the US Wikipedia table's own
+# GICS names almost verbatim EXCEPT "Healthcare" (one word, no space) where the
+# US table says "Health Care" -- confirmed by direct fetch, not assumed. Do not
+# "fix" this key to "Health Care" without re-checking live; a wrong key here
+# just means Health Care ASX names silently fall through to the unmapped-sector
+# skip+print path (fail-safe, not a crash), same posture as every other
+# unmapped-sector case in this codebase.
+GOAT_ASX_GICS_TO_ETF_SECTOR_LABEL: dict[str, str] = {
+    "Information Technology": "Technology",
+    "Financials": "Financials",
+    "Energy": "Energy",
+    "Healthcare": "Health Care",
+    "Consumer Discretionary": "Consumer Discretionary",
+    "Consumer Staples": "Consumer Staples",
+    "Industrials": "Industrials",
+    "Materials": "Materials",
+    "Utilities": "Utilities",
+    "Real Estate": "Real Estate",
+    "Communication Services": "Communication Services",
+}
 
 # Insider trading scanner (OpenInsider), per investments/insider-trading-scanner-handoff.md
 # and Shaun's 2026-08-17 clarification: he's after large open-market sells (potential

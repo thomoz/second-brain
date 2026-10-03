@@ -51,6 +51,23 @@ def _isolate_goat_report_path(monkeypatch, tmp_path):
     monkeypatch.setattr(
         goat_config, "GOAT_HATED_REPORT_PATH", tmp_path / "hated-industries-report.md"
     )
+    monkeypatch.setattr(
+        goat_config, "GOAT_SECTOR_RANKING_MD_PATH", tmp_path / "sector-ranking.md"
+    )
+    monkeypatch.setattr(
+        goat_config, "GOAT_SECTOR_CANDIDATES_MD_PATH", tmp_path / "sector-candidates-pending-review.md"
+    )
+    monkeypatch.setattr(
+        goat_config, "GOAT_INDUSTRY_CANDIDATES_MD_PATH", tmp_path / "industry-candidates-pending-review.md"
+    )
+    monkeypatch.setattr(
+        goat_config, "GOAT_INDUSTRY_HEARTBEAT_CANDIDATES_MD_PATH",
+        tmp_path / "industry-heartbeat-candidates-pending-review.md",
+    )
+    monkeypatch.setattr(
+        goat_config, "GOAT_ETF_HEARTBEAT_CANDIDATES_MD_PATH",
+        tmp_path / "etf-heartbeat-candidates-pending-review.md",
+    )
 
 
 @pytest.fixture(autouse=True)

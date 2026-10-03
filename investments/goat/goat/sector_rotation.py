@@ -29,6 +29,7 @@ def fetch_all_sector_closes() -> dict[str, pd.Series | None]:
 
 def rank_sectors(closes: dict[str, pd.Series | None]) -> list[dict[str, Any]]:
     window = config.GOAT_SECTOR_RANK_WINDOW_TRADING_DAYS
+    short_window = config.GOAT_ROTATION_SHORT_WINDOW_TRADING_DAYS
     rows: list[dict[str, Any]] = []
     for ticker, sector_label in config.GOAT_SECTOR_ETFS.items():
         close = closes.get(ticker)
@@ -36,12 +37,22 @@ def rank_sectors(closes: dict[str, pd.Series | None]) -> list[dict[str, Any]]:
             rows.append({
                 "ticker": ticker, "sector_label": sector_label,
                 "return_pct": None, "rising": None,
+                "return_pct_1w": None, "rising_1w": None,
             })
             continue
         pct = float((close.iloc[-1] / close.iloc[-(window + 1)] - 1) * 100)
+        # Short-window ("this week") read, added 2026-10-03 -- same None-safe
+        # missing-data handling as the long-window field above, computed off the
+        # same closes already fetched for the long-window ranking (no new fetch).
+        if len(close) < short_window + 1:
+            pct_1w, rising_1w = None, None
+        else:
+            pct_1w = float((close.iloc[-1] / close.iloc[-(short_window + 1)] - 1) * 100)
+            rising_1w = pct_1w > 0
         rows.append({
             "ticker": ticker, "sector_label": sector_label,
             "return_pct": pct, "rising": pct > 0,
+            "return_pct_1w": pct_1w, "rising_1w": rising_1w,
         })
     # Rows with no data sort last, not first/interspersed.
     rows.sort(key=lambda r: (r["return_pct"] is None, -(r["return_pct"] or 0)))

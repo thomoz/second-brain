@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 
 def _now() -> str:
@@ -88,6 +88,26 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
                 reasoning         TEXT NOT NULL,
                 top_holdings_json TEXT NOT NULL,
                 fetched_at        TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS goat_rotation_snapshots (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                scope           TEXT NOT NULL,
+                snapshot_date   TEXT NOT NULL,
+                ticker          TEXT NOT NULL,
+                label           TEXT NOT NULL,
+                return_pct      REAL,
+                return_pct_1w   REAL,
+                rank            INTEGER,
+                rising          INTEGER,
+                UNIQUE(scope, snapshot_date, ticker)
+            );
+            CREATE TABLE IF NOT EXISTS goat_industry_constituents (
+                ticker          TEXT NOT NULL,
+                industry_label  TEXT NOT NULL,
+                market          TEXT NOT NULL,
+                company         TEXT NOT NULL,
+                fetched_at      TEXT NOT NULL,
+                PRIMARY KEY (ticker, industry_label)
             );
         """)
     # Migration for DBs created before pct_owned_change existed (added
@@ -473,6 +493,101 @@ def get_cached_hated_narrative(conn: sqlite3.Connection, industry_label: str) ->
     return conn.execute(
         "SELECT * FROM goat_hated_industries_narrative_cache WHERE industry_label = ?", (industry_label,)
     ).fetchone()
+
+
+def insert_rotation_snapshots(
+    conn: sqlite3.Connection, *, scope: str, snapshot_date: str, rows: list[dict], label_key: str,
+) -> None:
+    """INSERT OR IGNORE on the UNIQUE(scope, snapshot_date, ticker) constraint --
+    this is what makes a same-day re-run of monitor a safe no-op (Part A
+    Decision 5). Never INSERT OR REPLACE here."""
+    with conn:
+        conn.executemany(
+            """INSERT OR IGNORE INTO goat_rotation_snapshots
+               (scope, snapshot_date, ticker, label, return_pct, return_pct_1w, rank, rising)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            [
+                (
+                    scope, snapshot_date, r["ticker"], r[label_key],
+                    r.get("return_pct"), r.get("return_pct_1w"), r.get("rank"),
+                    None if r.get("rising") is None else int(r["rising"]),
+                )
+                for r in rows
+            ],
+        )
+
+
+def get_rotation_snapshots_for_date(
+    conn: sqlite3.Connection, scope: str, snapshot_date: str
+) -> list[sqlite3.Row]:
+    return conn.execute(
+        "SELECT * FROM goat_rotation_snapshots WHERE scope = ? AND snapshot_date = ?",
+        (scope, snapshot_date),
+    ).fetchall()
+
+
+def get_latest_snapshot_date_before(conn: sqlite3.Connection, scope: str, before_date: str) -> str | None:
+    row = conn.execute(
+        """SELECT DISTINCT snapshot_date FROM goat_rotation_snapshots
+           WHERE scope = ? AND snapshot_date < ? ORDER BY snapshot_date DESC LIMIT 1""",
+        (scope, before_date),
+    ).fetchone()
+    return row["snapshot_date"] if row is not None else None
+
+
+def prune_rotation_snapshots(conn: sqlite3.Connection, retention_days: int) -> int:
+    """Deletes snapshot rows older than `retention_days` calendar days, across
+    every scope -- mirrors delete_stale_pending_candidates's age-based delete
+    shape, keyed on snapshot_date instead of flagged_at."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=retention_days)).date().isoformat()
+    with conn:
+        cur = conn.execute("DELETE FROM goat_rotation_snapshots WHERE snapshot_date < ?", (cutoff,))
+        return cur.rowcount
+
+
+def get_rotation_history(
+    conn: sqlite3.Connection, *, scope: str, ticker: str | None = None, since_date: str | None = None,
+) -> list[sqlite3.Row]:
+    query = "SELECT * FROM goat_rotation_snapshots WHERE scope = ?"
+    params = [scope]
+    if ticker is not None:
+        query += " AND ticker = ?"
+        params.append(ticker)
+    if since_date is not None:
+        query += " AND snapshot_date >= ?"
+        params.append(since_date)
+    query += " ORDER BY snapshot_date"
+    return conn.execute(query, params).fetchall()
+
+
+def get_industry_constituents_fetched_at(conn: sqlite3.Connection, industry_label: str) -> str | None:
+    row = conn.execute(
+        "SELECT MAX(fetched_at) AS fetched_at FROM goat_industry_constituents WHERE industry_label = ?",
+        (industry_label,),
+    ).fetchone()
+    return row["fetched_at"] if row is not None else None
+
+
+def replace_industry_constituents(conn: sqlite3.Connection, industry_label: str, rows: list[dict]) -> None:
+    """Delete-then-insert scoped to this one industry_label only -- mirrors
+    replace_sp500_constituents' delete-all-then-insert-all shape, but per-label
+    since the cache here is keyed per industry, not global."""
+    now = _now()
+    with conn:
+        conn.execute("DELETE FROM goat_industry_constituents WHERE industry_label = ?", (industry_label,))
+        conn.executemany(
+            """INSERT INTO goat_industry_constituents
+               (ticker, industry_label, market, company, fetched_at)
+               VALUES (?, ?, ?, ?, ?)""",
+            [(r["ticker"], industry_label, r["market"], r["company"], now) for r in rows],
+        )
+
+
+def get_industry_constituents(conn: sqlite3.Connection, industry_label: str) -> list[sqlite3.Row]:
+    return conn.execute(
+        "SELECT * FROM goat_industry_constituents WHERE industry_label = ? ORDER BY ticker",
+        (industry_label,),
+    ).fetchall()
 
 
 def upsert_hated_narrative_cache(

@@ -21,10 +21,12 @@ def _open_conn():
 
 def cmd_monitor(args) -> None:
     from .monitor import (
+        capture_rotation_snapshot,
         maybe_notify,
         run_industry_scan,
         run_monitor,
         run_sector_scan,
+        write_industry_candidates_report,
         write_industry_ranking_report,
         write_report,
         write_sector_candidates_report,
@@ -35,14 +37,27 @@ def cmd_monitor(args) -> None:
     conn = _open_conn()
     result = run_monitor(conn)
     sector_result = run_sector_scan(conn)
-    conn.close()
-    industry_result = run_industry_scan()  # no conn needed -- pure compute-and-render
+    sector_result.update(capture_rotation_snapshot(
+        conn, scope="sector", ranking=sector_result["ranking"], label_key="sector_label",
+    ))
+    industry_result = run_industry_scan(conn)
+    industry_result.update(capture_rotation_snapshot(
+        conn, scope="industry", ranking=industry_result["ranking"], label_key="industry_label",
+    ))
+    conn.close()  # moved to after BOTH scans + snapshot captures -- was between
+                  # run_sector_scan and run_industry_scan, the exact bug Part A
+                  # and Part B-1 both independently required fixing.
     result["new_sector_candidates"] = sector_result["new_candidates"]
     write_report(result)
     write_sector_ranking_report(sector_result)
     write_sector_candidates_report(sector_result)
     write_industry_ranking_report(industry_result)
+    write_industry_candidates_report(industry_result)
     maybe_notify(result, new_candidates=sector_result["new_candidates"])
+    maybe_notify(
+        {"new_alerts": []}, new_candidates=industry_result["new_candidates"],
+        candidate_label="new industry rotation candidate(s)",
+    )
 
     stale_warnings = check_stale_reports()
     maybe_notify_stale_reports(stale_warnings)
@@ -50,6 +65,7 @@ def cmd_monitor(args) -> None:
     print(
         f"Goat Monitor complete: {len(result['new_alerts'])} new exit alert(s), "
         f"{len(sector_result['new_candidates'])} new sector candidate(s), "
+        f"{len(industry_result['new_candidates'])} new industry candidate(s), "
         f"{len(stale_warnings)} stale report(s). "
         f"See investments/goat/goat-report.md"
     )
@@ -91,15 +107,25 @@ def cmd_scan_sectors(args) -> None:
 
 
 def cmd_scan_industries(args) -> None:
-    from .monitor import run_industry_scan, write_industry_ranking_report
+    from .monitor import maybe_notify, run_industry_scan, write_industry_candidates_report, write_industry_ranking_report
 
-    result = run_industry_scan()  # no DB connection needed -- pure compute-and-render
+    conn = _open_conn()  # now connection-using -- run_industry_scan gained a
+                           # required conn (breakout + staging), matching
+                           # cmd_scan_sectors's existing shape.
+    result = run_industry_scan(conn)
+    conn.close()
     write_industry_ranking_report(result)
+    write_industry_candidates_report(result)
+    maybe_notify(
+        {"new_alerts": []}, new_candidates=result["new_candidates"],
+        candidate_label="new industry rotation candidate(s)",
+    )
     covered = len(result["ranking"])
     print(
         f"Industry scan complete: ranked {covered} covered industry ETF(s), "
-        f"{len(result['not_covered'])} industries not covered. "
-        f"See investments/goat/industry-ranking.md"
+        f"{len(result['not_covered'])} industries not covered, "
+        f"{len(result['new_candidates'])} new breakout candidate(s). "
+        f"See investments/goat/industry-ranking.md and industry-candidates-pending-review.md"
     )
 
 
@@ -120,6 +146,48 @@ def cmd_scan_heartbeat(args) -> None:
         f"{len(result['rising_sectors'])} rising sector(s), "
         f"{len(result['new_candidates'])} new candidate(s). "
         f"See investments/goat/heartbeat-candidates-pending-review.md"
+    )
+
+
+def cmd_scan_industry_heartbeat(args) -> None:
+    from .industry_heartbeat_scan import run_industry_heartbeat_scan, write_industry_heartbeat_candidates_report
+    from .monitor import maybe_notify
+
+    industries = (
+        [s.strip() for s in args.industries.split(",")] if getattr(args, "industries", None) else None
+    )
+    conn = _open_conn()
+    result = run_industry_heartbeat_scan(conn, industries=industries)
+    conn.close()
+    write_industry_heartbeat_candidates_report(result)
+    maybe_notify(
+        {"new_alerts": []}, new_candidates=result["new_candidates"],
+        candidate_label="new industry heartbeat candidate(s)",
+    )
+    print(
+        f"Industry heartbeat scan complete: scanned {result['scanned']} ticker(s) across "
+        f"{len(result['gated_industries'])} gated industry(ies), "
+        f"{len(result['new_candidates'])} new candidate(s). "
+        f"See investments/goat/industry-heartbeat-candidates-pending-review.md"
+    )
+
+
+def cmd_scan_etf_heartbeat(args) -> None:
+    from .etf_heartbeat_scan import run_etf_heartbeat_scan, write_etf_heartbeat_candidates_report
+    from .monitor import maybe_notify
+
+    conn = _open_conn()
+    result = run_etf_heartbeat_scan(conn)
+    conn.close()
+    write_etf_heartbeat_candidates_report(result)
+    maybe_notify(
+        {"new_alerts": []}, new_candidates=result["new_candidates"],
+        candidate_label="new ETF heartbeat candidate(s)",
+    )
+    print(
+        f"ETF heartbeat scan complete: scanned {result['scanned']} ticker(s), "
+        f"{len(result['new_candidates'])} new candidate(s). "
+        f"See investments/goat/etf-heartbeat-candidates-pending-review.md"
     )
 
 
@@ -232,6 +300,21 @@ def cmd_scan_hormuz(args) -> None:
     )
 
 
+# Keyed by goat_pending_candidates.source -- read the pending row's own source
+# and label accordingly, rather than the old hardcoded sector-rotation-only
+# label/source literal. Needed now that this plan adds multiple distinct
+# sources beyond goat_sector_rotation (see .agent/plans/goat-industry-pipeline.md
+# Decision 18).
+_PROMOTE_LABELS = {
+    "goat_sector_rotation": "Goat-approved sector rotation candidate",
+    "goat_industry_rotation": "Goat-approved industry rotation candidate",
+    "goat_heartbeat_scan": "Goat-approved heartbeat candidate",
+    "goat_dma_breakout_scan": "Goat-approved DMA breakout candidate",
+    "goat_industry_heartbeat_scan": "Goat-approved industry heartbeat candidate",
+    "goat_etf_heartbeat_scan": "Goat-approved ETF heartbeat candidate",
+}
+
+
 def cmd_promote_candidate(args) -> None:
     from mytrader.db import upsert_watchlist_row
     from mytrader.snapshot import regenerate_all
@@ -251,6 +334,8 @@ def cmd_promote_candidate(args) -> None:
         print(f"No pending Goat sector candidate found for {ticker}.")
         return
 
+    label = _PROMOTE_LABELS.get(pending["source"], "Goat-approved candidate")
+
     # Deliberate, explicit exception to "Goat never writes into my-trader's
     # tables" -- see .agent/plans/goat-phase2-sector-rotation-ranking.md,
     # "THREE DECISIONS RESOLVED" #3. Only this command, only on explicit user
@@ -258,13 +343,28 @@ def cmd_promote_candidate(args) -> None:
     upsert_watchlist_row(
         conn, ticker=ticker, name=None, asset_type=args.asset_type,
         bucket=args.bucket, status=args.status,
-        notes=f"Goat-approved sector rotation candidate — {pending['signal_detail']}",
-        source="goat_sector_rotation",
+        notes=f"{label} — {pending['signal_detail']}",
+        source=pending["source"],
     )
     delete_goat_pending_candidate(conn, ticker)
     regenerate_all(conn)  # refreshes my-trader's watchlist.md so the promoted row is visible
     conn.close()
-    print(f"Promoted {ticker} to my-trader's watchlist (bucket {args.bucket}), labeled Goat-approved.")
+    print(f"Promoted {ticker} to my-trader's watchlist (bucket {args.bucket}), labeled {label!r}.")
+
+
+def cmd_query_rotation_history(args) -> None:
+    """Read-only -- no DB writes, no report write, no maybe_notify. Mirrors
+    cmd_dismiss_candidate's minimalism, not a full scan pipeline."""
+    import json
+    from datetime import datetime, timedelta, timezone
+
+    from .db import get_rotation_history
+
+    conn = _open_conn()
+    since_date = (datetime.now(timezone.utc) - timedelta(days=args.days)).date().isoformat()
+    rows = get_rotation_history(conn, scope=args.scope, ticker=args.ticker, since_date=since_date)
+    conn.close()
+    print(json.dumps([dict(r) for r in rows], indent=2, default=str))
 
 
 def cmd_dismiss_candidate(args) -> None:
@@ -278,6 +378,8 @@ def cmd_dismiss_candidate(args) -> None:
 
 
 def main() -> None:
+    from . import config as _config
+
     parser = argparse.ArgumentParser(description="Goat -- sector-rotation + momentum tool")
     subparsers = parser.add_subparsers(dest="command")
     subparsers.add_parser("monitor", help="Daily 150DMA exit-rule check against all holdings + sector rotation scan")
@@ -300,6 +402,18 @@ def main() -> None:
     subparsers.add_parser(
         "scan-dma-breakout",
         help="On-demand discovery scan: S&P 500 + ASX 200 names that just crossed above their 150-day or 200-day MA",
+    )
+    p_industry_heartbeat = subparsers.add_parser(
+        "scan-industry-heartbeat",
+        help="On-demand stock-level heartbeat scan within industries currently in a fresh ETF breakout",
+    )
+    p_industry_heartbeat.add_argument(
+        "--industries", default=None,
+        help='Comma-separated industry labels, bypassing breakout-gate computation (e.g. "Semiconductors,Oil & Gas Equipment & Services")',
+    )
+    subparsers.add_parser(
+        "scan-etf-heartbeat",
+        help="On-demand heartbeat scan across the full curated ETF universe, unconditionally (no sector/industry filter)",
     )
     subparsers.add_parser(
         "scan-hated-industries",
@@ -329,6 +443,16 @@ def main() -> None:
     )
     p_dismiss.add_argument("--ticker", required=True)
 
+    p_rotation_history = subparsers.add_parser(
+        "query-rotation-history",
+        help="Read-only: print JSON snapshot history for a scope (no DB writes, no notification)",
+    )
+    p_rotation_history.add_argument("--scope", required=True, choices=["sector", "industry"])
+    p_rotation_history.add_argument("--ticker", default=None)
+    p_rotation_history.add_argument(
+        "--days", type=int, default=_config.GOAT_ROTATION_SNAPSHOT_RETENTION_DAYS,
+    )
+
     args = parser.parse_args()
     dispatch = {
         "monitor": cmd_monitor,
@@ -336,12 +460,15 @@ def main() -> None:
         "scan-industries": cmd_scan_industries,
         "check-live": cmd_check_live,
         "scan-heartbeat": cmd_scan_heartbeat,
+        "scan-industry-heartbeat": cmd_scan_industry_heartbeat,
+        "scan-etf-heartbeat": cmd_scan_etf_heartbeat,
         "scan-dma-breakout": cmd_scan_dma_breakout,
         "scan-hated-industries": cmd_scan_hated_industries,
         "scan-insiders": cmd_scan_insiders,
         "scan-hormuz": cmd_scan_hormuz,
         "promote-candidate": cmd_promote_candidate,
         "dismiss-candidate": cmd_dismiss_candidate,
+        "query-rotation-history": cmd_query_rotation_history,
     }
     if args.command in dispatch:
         dispatch[args.command](args)

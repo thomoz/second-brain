@@ -29,7 +29,7 @@ from typing import Any
 from mytrader import db as mt_db
 from mytrader.checks import CheckResult
 
-from . import config, db, exit_check, industry_rotation, price_history, sector_rotation
+from . import config, db, exit_check, industry_rotation, price_history, rotation_flow, sector_rotation
 
 SEVERITY = "flag"
 SOURCE_TABLE = "holdings"
@@ -251,6 +251,34 @@ def _stage_new_sector_candidates(
     return new_candidates
 
 
+def capture_rotation_snapshot(
+    conn: sqlite3.Connection, *, scope: str, ranking: list[dict[str, Any]], label_key: str,
+) -> dict[str, Any]:
+    """Looks up the most recent PRIOR snapshot date for this scope, diffs it
+    against today's ranking (both the long- and short-window sign), inserts
+    today's snapshot row (a same-day re-run is a safe no-op -- see
+    db.insert_rotation_snapshots), then prunes anything past retention. Called
+    once per scope from cmd_monitor only -- the on-demand scan-sectors/
+    scan-industries path never calls this (Part A Decision 5), which is why
+    those paths' result dicts never carry "rotation_flow"/"short_window_flow"."""
+    today = _today_sydney()
+    previous_date = db.get_latest_snapshot_date_before(conn, scope, today)
+    previous_rows = db.get_rotation_snapshots_for_date(conn, scope, previous_date) if previous_date else []
+
+    long_flow = (
+        rotation_flow.compute_flow(previous_rows, ranking, label_key=label_key) if previous_rows else None
+    )
+    short_flow = (
+        rotation_flow.compute_flow(previous_rows, ranking, label_key=label_key, field="rising_1w")
+        if previous_rows else None
+    )
+
+    db.insert_rotation_snapshots(conn, scope=scope, snapshot_date=today, rows=ranking, label_key=label_key)
+    db.prune_rotation_snapshots(conn, config.GOAT_ROTATION_SNAPSHOT_RETENTION_DAYS)
+
+    return {"rotation_flow": long_flow, "short_window_flow": short_flow}
+
+
 def run_sector_scan(conn: sqlite3.Connection) -> dict[str, Any]:
     closes = sector_rotation.fetch_all_sector_closes()
     ranking = sector_rotation.rank_sectors(closes)
@@ -291,6 +319,15 @@ def render_sector_ranking_report(result: dict[str, Any]) -> str:
         ret = f"{row['return_pct']:+.1f}%" if row["return_pct"] is not None else "—"
         rising = ("Yes" if row["rising"] else "No") if row["rising"] is not None else "—"
         lines.append(f"| {row['rank']} | {row['ticker']} | {row['sector_label']} | {ret} | {rising} |")
+    # Only present on the daily `monitor` path (capture_rotation_snapshot) --
+    # the on-demand scan-sectors path never sets these keys, so .get(...) (not
+    # [...]) is deliberate here: this is the regression guard proving that path
+    # stays unaffected (Part A Decision 5).
+    if "rotation_flow" in result:
+        lines += rotation_flow.render_flow_section(result.get("rotation_flow"), title="Rotation Flow")
+        lines += rotation_flow.render_flow_section(
+            result.get("short_window_flow"), title="Short-Window Flow (1-Week)"
+        )
     lines += ["", f"Last auto-generated: {_today_sydney()}."]
     return "\n".join(lines) + "\n"
 
@@ -329,16 +366,65 @@ def write_sector_candidates_report(result: dict[str, Any]) -> None:
     )
 
 
-def run_industry_scan() -> dict[str, Any]:
-    """No conn param -- unlike run_sector_scan, this has no breakout signal, no
-    candidate staging, no DB access at all (pure compute-and-render), per
-    .agent/plans/goat-industry-rotation-ranking.md."""
+def _stage_new_industry_candidates(
+    checks: list[tuple[str, str, CheckResult]], conn: sqlite3.Connection
+) -> list[dict[str, Any]]:
+    """Exact copy of _stage_new_sector_candidates, source="goat_industry_rotation"
+    -- see that function's docstring for the three-way dedup rationale."""
+    new_candidates: list[dict[str, Any]] = []
+    for ticker, industry_label, check in checks:
+        if check.verdict != "interesting":
+            continue
+        if ticker in config.GOAT_BANNED_TICKERS:
+            continue
+        if mt_db.get_holding_row(conn, ticker) is not None:
+            continue
+        if mt_db.get_watchlist_row(conn, ticker) is not None:
+            continue
+        if db.get_goat_pending_candidate(conn, ticker) is not None:
+            continue
+        db.insert_goat_pending_candidate(
+            conn, ticker=ticker, sector_label=industry_label, signal_detail=check.detail,
+            source="goat_industry_rotation",
+        )
+        new_candidates.append({"ticker": ticker, "sector_label": industry_label, "detail": check.detail})
+    return new_candidates
+
+
+def run_industry_scan(conn: sqlite3.Connection) -> dict[str, Any]:
+    """Gained a required `conn` param (was no-conn/pure-compute) -- brings the
+    industry level to full parity with run_sector_scan (ranking + breakout +
+    staging), per .agent/plans/goat-industry-pipeline.md Part B-1."""
     closes = industry_rotation.fetch_all_industry_closes()
     ranking = industry_rotation.rank_industries(closes)
     not_covered = sorted(
         set(config.GOAT_FINVIZ_INDUSTRIES) - set(config.GOAT_INDUSTRY_ETFS.values())
     )
-    return {"ranking": ranking, "not_covered": not_covered}
+
+    breakout_checks = []
+    for ticker, industry_label in config.GOAT_INDUSTRY_ETFS.items():
+        close = closes.get(ticker)
+        if close is None:
+            print(f"[goat-industry-scan] no price history for {ticker}, skipping breakout check")
+            continue
+        check = industry_rotation.check_industry_breakout(ticker, industry_label, close)
+        breakout_checks.append((ticker, industry_label, check))
+
+    new_candidates = _stage_new_industry_candidates(breakout_checks, conn)
+    heartbeat_gate = [
+        ticker for ticker, _label, check in breakout_checks if check.verdict == "interesting"
+    ]
+
+    return {
+        "ranking": ranking,
+        "not_covered": not_covered,
+        "heartbeat_gate": heartbeat_gate,
+        "new_candidates": new_candidates,
+        "pending_candidates": [
+            dict(r) for r in db.get_all_goat_pending_candidates(conn)
+            if r["source"] == "goat_industry_rotation"
+        ],
+    }
 
 
 def render_industry_ranking_report(result: dict[str, Any]) -> str:
@@ -386,6 +472,23 @@ def render_industry_ranking_report(result: dict[str, Any]) -> str:
         rising = ("Yes" if row["rising"] else "No") if row["rising"] is not None else "—"
         lines.append(f"| {row['rank']} | {row['ticker']} | {row['industry_label']} | {ret} | {rising} |")
 
+    # Only present on the daily `monitor` path (capture_rotation_snapshot) --
+    # see render_sector_ranking_report's identical guard for why .get(...) is
+    # deliberate (the on-demand scan-industries path never sets these keys).
+    if "rotation_flow" in result:
+        lines += rotation_flow.render_flow_section(result.get("rotation_flow"), title="Rotation Flow")
+        lines += rotation_flow.render_flow_section(
+            result.get("short_window_flow"), title="Short-Window Flow (1-Week)"
+        )
+
+    heartbeat_gate = result.get("heartbeat_gate")
+    if heartbeat_gate is not None:
+        lines += [
+            "",
+            f"{len(heartbeat_gate)} industries currently in a fresh breakout -- see "
+            "industry-candidates-pending-review.md.",
+        ]
+
     not_covered = result["not_covered"]
     lines += [
         "",
@@ -406,4 +509,34 @@ def render_industry_ranking_report(result: dict[str, Any]) -> str:
 def write_industry_ranking_report(result: dict[str, Any]) -> None:
     config.GOAT_INDUSTRY_RANKING_MD_PATH.write_text(
         render_industry_ranking_report(result), encoding="utf-8"
+    )
+
+
+def render_industry_candidates_report(result: dict[str, Any]) -> str:
+    """Exact copy of render_sector_candidates_report's shape."""
+    lines = [
+        "# Industry Breakout Candidates — Pending Review",
+        "",
+        "Auto-generated by Goat Monitor -- a fresh 50DMA-cross-and-rising breakout "
+        "on an industry ETF (same signal as sector-candidates-pending-review.md, "
+        "finer granularity). Review each one and either `promote-candidate` "
+        "(writes it into my-trader's real watchlist, labeled Goat-approved) or "
+        "`dismiss-candidate` (discards it). Edits here are overwritten on the "
+        "next `monitor`/`scan-industries` run.",
+        "",
+        "| Ticker | Industry | Signal | Flagged |",
+        "|--------|----------|--------|---------|",
+    ]
+    for row in result["pending_candidates"]:
+        lines.append(
+            f"| {row['ticker']} | {row['sector_label']} | {row['signal_detail']} "
+            f"| {row['flagged_at'][:10]} |"
+        )
+    lines += ["", f"Last auto-generated: {_today_sydney()}."]
+    return "\n".join(lines) + "\n"
+
+
+def write_industry_candidates_report(result: dict[str, Any]) -> None:
+    config.GOAT_INDUSTRY_CANDIDATES_MD_PATH.write_text(
+        render_industry_candidates_report(result), encoding="utf-8"
     )

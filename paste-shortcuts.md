@@ -1,16 +1,12 @@
-## to do:
-
-Sep 2 made: investments/goat/industry-pipeline-handoff.md
-
 
 ## Paste shortcuts:
 
 claude --dangerously-skip-permissions
 
-go ahead and create the structured plan, asking me questions if you need to, for the handoff file 
-deep 
+go ahead and create the structured plan, asking me questions if you need to, for the handoff file .investments/goat/industry-pipeline-handoff.md
 
-ready for execution:
+
+ready for execution: 
 
 adds etfs to breakouts:
 
