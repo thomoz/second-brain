@@ -4,7 +4,7 @@ What this is: 14 historical market-crash warning markers, checked daily so an ea
 
 Auto-generated daily -- overwritten every run. Advisor notes only; no trade action is ever suggested here (see SOUL.md). Per-marker source: investments/my-trader/14-signals-crash-warning-handoff.md.
 
-## Run: 2026-10-03
+## Run: 2026-10-04
 
 ## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)
 Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 mega-cap constituents -- never hardcoded to a fixed ticker list.
@@ -41,10 +41,19 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 2 | Debt moves off balance sheet (META) | ok | META: $279.0B uncommenced lease commitments (+0.0% since last filing, 10-Q filed 2026-07-30) |
 | 2 | Debt moves off balance sheet (AMD) | ok | AMD: $4.5B uncommenced lease commitments (+0.0% since last filing, 10-Q filed 2026-08-05) |
 | 3 | Seller finances buyer | unknown | No automatable source exists for vendor/circular-financing deals -- periodically news-scan the current hot watchlist yourself: NVDA, AAPL, GOOGL, GOOG, MSFT, META, AVGO, MU, AMD, LLY |
-| 4 | Capex outruns cash flow | ok | No hot-watchlist tickers with a resolvable cash-flow statement this run. |
+| 4 | Capex outruns cash flow (NVDA) | ok | NVDA: Free Cash Flow $+96.7B, Capital Expenditure $6.0B (period ending 2026-01-31) |
+| 4 | Capex outruns cash flow (AAPL) | ok | AAPL: Free Cash Flow $+98.8B, Capital Expenditure $12.7B (period ending 2025-09-30) |
+| 4 | Capex outruns cash flow (GOOGL) | ok | GOOGL: Free Cash Flow $+73.3B, Capital Expenditure $91.4B (period ending 2025-12-31) |
+| 4 | Capex outruns cash flow (GOOG) | ok | GOOG: Free Cash Flow $+73.3B, Capital Expenditure $91.4B (period ending 2025-12-31) |
+| 4 | Capex outruns cash flow (MSFT) | ok | MSFT: Free Cash Flow $+67.0B, Capital Expenditure $115.9B (period ending 2026-06-30) |
+| 4 | Capex outruns cash flow (META) | ok | META: Free Cash Flow $+46.1B, Capital Expenditure $69.7B (period ending 2025-12-31) |
+| 4 | Capex outruns cash flow (AVGO) | ok | AVGO: Free Cash Flow $+26.9B, Capital Expenditure $0.6B (period ending 2025-10-31) |
+| 4 | Capex outruns cash flow (MU) | ok | MU: Free Cash Flow $+1.7B, Capital Expenditure $15.9B (period ending 2025-08-31) |
+| 4 | Capex outruns cash flow (AMD) | ok | AMD: Free Cash Flow $+6.7B, Capital Expenditure $1.0B (period ending 2025-12-31) |
+| 4 | Capex outruns cash flow (LLY) | ok | LLY: Free Cash Flow $+6.0B, Capital Expenditure $10.8B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-08-01, +37.2% YoY vs 2025-08-01 |
 | 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 177 filing(s) in the trailing 30d vs 313 in the same window a year ago (0.57x); 424B4 (priced IPO): 21 filing(s) in the trailing 30d vs 62 in the same window a year ago (0.34x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.58 (z=0.21 vs trailing 44d mean 0.56) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.58 (z=0.21 vs trailing 45d mean 0.57) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (NVDA) | flag | NVDA: $1,877,876,037 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (AAPL) | flag | AAPL: $117,099,250 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (GOOGL) | flag | GOOGL: $121,836,049 sold vs $0 bought, trailing 365 days |
