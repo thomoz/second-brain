@@ -41,14 +41,14 @@ All 39 covered industries.
 | 12 | KBWB | Banks - Diversified | +10.2% | Yes |
 | 13 | KRE | Banks - Regional | +8.5% | Yes |
 | 14 | KIE | Insurance - Diversified | +8.1% | Yes |
-| 15 | ESPO | Electronic Gaming & Multimedia | +8.0% | Yes |
+| 15 | ESPO | Electronic Gaming & Multimedia | +8.1% | Yes |
 | 16 | IAI | Capital Markets | +6.4% | Yes |
 | 17 | PICK | Other Industrial Metals & Mining | +6.4% | Yes |
 | 18 | IYZ | Telecom Services | +6.0% | Yes |
 | 19 | IBUY | Internet Retail | +5.8% | Yes |
 | 20 | PAVE | Engineering & Construction | +5.2% | Yes |
 | 21 | XOP | Oil & Gas E&P | +5.0% | Yes |
-| 22 | INDS | REIT - Industrial | +2.0% | Yes |
+| 22 | INDS | REIT - Industrial | +1.8% | Yes |
 | 23 | PHO | Utilities - Regulated Water | +1.4% | Yes |
 | 24 | XHB | Building Products & Equipment | -0.9% | No |
 | 25 | EVX | Waste Management | -1.5% | No |
@@ -66,6 +66,14 @@ All 39 covered industries.
 | 37 | TAN | Solar | -19.7% | No |
 | 38 | BJK | Gambling | — | — |
 | 39 | EATZ | Restaurants | — | — |
+
+### Rotation Flow
+No prior snapshot yet.
+
+### Short-Window Flow (1-Week)
+No prior snapshot yet.
+
+4 industries currently in a fresh breakout -- see industry-candidates-pending-review.md.
 
 ## Not Covered (104)
 No dedicated, currently-trading ETF found for these Finviz industries -- never silently substituted with a broader/looser proxy.
