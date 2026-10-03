@@ -185,3 +185,8 @@ Skip drafts for: Newsletters, automated notifications, spam
 - (Oct 02) HY OAS was 3.12pp on 2026-09-30, below Marker 14 watch threshold 3.2pp.
 - (Oct 02) Marker 14 flag threshold is 3.5pp and requires 21 trading days above it.
 - (Oct 02) Marker 14 tracks streak count, not credit-spread trend or rate of change.
+
+## 2026-10-03 Reflection
+- (Oct 03) GOAT industry heartbeat scheduled 22:50 UTC; ETF heartbeat scheduled 23:00 UTC.
+- (Oct 03) GOAT industry pipeline plan is `.agent/plans/goat-industry-pipeline.md`.
+- (Oct 03) Manual GOAT industry validation should use `scripts\invoke_investments.ps1` on VPS.
