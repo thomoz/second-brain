@@ -19,3 +19,4 @@
 - (Sep 25) Facebook user data deletion request received, likely needs compliance action.
 - (Sep 26) Requests Hoster mobile app uses poll-failure error 2042, not 3123.
 - (Oct 03) sbdbsoftware.com auto-renews in 7 days; payment/card should be checked.
+- (Oct 04) 2 new song request emails need review/add-to-library triage
