@@ -4,7 +4,7 @@ What this is: 14 historical market-crash warning markers, checked daily so an ea
 
 Auto-generated daily -- overwritten every run. Advisor notes only; no trade action is ever suggested here (see SOUL.md). Per-marker source: investments/my-trader/14-signals-crash-warning-handoff.md.
 
-## Run: 2026-10-04
+## Run: 2026-10-05
 
 ## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)
 Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 mega-cap constituents -- never hardcoded to a fixed ticker list.
@@ -52,7 +52,7 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (AMD) | ok | AMD: Free Cash Flow $+6.7B, Capital Expenditure $1.0B (period ending 2025-12-31) |
 | 4 | Capex outruns cash flow (LLY) | ok | LLY: Free Cash Flow $+6.0B, Capital Expenditure $10.8B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-08-01, +37.2% YoY vs 2025-08-01 |
-| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 177 filing(s) in the trailing 30d vs 313 in the same window a year ago (0.57x); 424B4 (priced IPO): 21 filing(s) in the trailing 30d vs 62 in the same window a year ago (0.34x) |
+| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 172 filing(s) in the trailing 30d vs 303 in the same window a year ago (0.57x); 424B4 (priced IPO): 18 filing(s) in the trailing 30d vs 61 in the same window a year ago (0.30x) |
 | 7 | Retail piles into leverage | ok | Equity put/call ratio 0.58 (z=0.21 vs trailing 45d mean 0.57) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (NVDA) | flag | NVDA: $1,877,876,037 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (AAPL) | flag | AAPL: $117,099,250 sold vs $0 bought, trailing 365 days |
@@ -63,7 +63,7 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 8 | Insider selling (MU) | flag | MU: $217,924,784 sold vs $7,821,723 bought, trailing 365 days |
 | 8 | Insider selling (AMD) | flag | AMD: $368,748,506 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (LLY) | flag | LLY: $516,389,029 sold vs $0 bought, trailing 365 days |
-| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (134 day(s) away) -- ad-share content is not automatable, nothing to check yet |
+| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (133 day(s) away) -- ad-share content is not automatable, nothing to check yet |
 | 10 | Most-valuable-company milestone | flag | NVDA is the largest company in the current hot-sector watchlist ($5.65T, most recently crossed the $5.5T rung) |
 | 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
 | 12 | Credit turns in the hot sector while broad market stays calm (AAPL) | unknown | AAPL: bond CUSIP 037833EY2 found, but no live or manually-entered yield reading available -- run `record-bond-yield AAPL <yield_pct>` |
