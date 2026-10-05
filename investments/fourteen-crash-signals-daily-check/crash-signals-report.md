@@ -4,29 +4,28 @@ What this is: 14 historical market-crash warning markers, checked daily so an ea
 
 Auto-generated daily -- overwritten every run. Advisor notes only; no trade action is ever suggested here (see SOUL.md). Per-marker source: investments/my-trader/14-signals-crash-warning-handoff.md.
 
-## Run: 2026-10-05
+## Run: 2026-10-06
 
 ## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)
 Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 mega-cap constituents -- never hardcoded to a fixed ticker list.
 
 | Rank | Ticker | Sector | Market Cap |
 |------|--------|--------|------------|
-| 1 | NVDA | Technology | $5649B |
-| 2 | AAPL | Technology | $4870B |
-| 3 | GOOGL | Communication Services | $4201B |
-| 4 | GOOG | Communication Services | $4162B |
-| 5 | MSFT | Technology | $3843B |
-| 6 | META | Communication Services | $1855B |
-| 7 | AVGO | Technology | $1695B |
-| 8 | MU | Technology | $1214B |
-| 9 | AMD | Technology | $1035B |
+| 1 | NVDA | Technology | $5769B |
+| 2 | AAPL | Technology | $4858B |
+| 3 | GOOGL | Communication Services | $4237B |
+| 4 | GOOG | Communication Services | $4205B |
+| 5 | MSFT | Technology | $3900B |
+| 6 | META | Communication Services | $1890B |
+| 7 | AVGO | Technology | $1730B |
+| 8 | MU | Technology | $1202B |
+| 9 | AMD | Technology | $1031B |
 | 10 | LLY | Health Care | $1019B |
 
 ## Markers
 
 | # | Marker | Status | Detail |
 |---|--------|--------|--------|
-| 1 | Record debt issuance, hot sector (NVDA) | flag | NVDA: 3 debt-prospectus filing(s) in the trailing 180d (own 730d average: 0.7/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (AAPL) | ok | AAPL: 0 debt-prospectus filing(s) in the trailing 180d (own 730d average: 0.7/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (GOOGL) | flag | GOOGL: 23 debt-prospectus filing(s) in the trailing 180d (own 730d average: 10.1/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (GOOG) | flag | GOOG: 23 debt-prospectus filing(s) in the trailing 180d (own 730d average: 10.1/period) -- counts filing events, not dollar principal |
@@ -52,8 +51,8 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (AMD) | ok | AMD: Free Cash Flow $+6.7B, Capital Expenditure $1.0B (period ending 2025-12-31) |
 | 4 | Capex outruns cash flow (LLY) | ok | LLY: Free Cash Flow $+6.0B, Capital Expenditure $10.8B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-08-01, +37.2% YoY vs 2025-08-01 |
-| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 172 filing(s) in the trailing 30d vs 303 in the same window a year ago (0.57x); 424B4 (priced IPO): 18 filing(s) in the trailing 30d vs 61 in the same window a year ago (0.30x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.58 (z=0.21 vs trailing 45d mean 0.57) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 169 filing(s) in the trailing 30d vs 300 in the same window a year ago (0.56x); 424B4 (priced IPO): 18 filing(s) in the trailing 30d vs 58 in the same window a year ago (0.31x) |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.58 (z=0.20 vs trailing 46d mean 0.57) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (NVDA) | flag | NVDA: $1,877,876,037 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (AAPL) | flag | AAPL: $117,099,250 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (GOOGL) | flag | GOOGL: $121,836,049 sold vs $0 bought, trailing 365 days |
@@ -63,10 +62,10 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 8 | Insider selling (MU) | flag | MU: $217,924,784 sold vs $7,821,723 bought, trailing 365 days |
 | 8 | Insider selling (AMD) | flag | AMD: $368,748,506 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (LLY) | flag | LLY: $516,389,029 sold vs $0 bought, trailing 365 days |
-| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (133 day(s) away) -- ad-share content is not automatable, nothing to check yet |
-| 10 | Most-valuable-company milestone | flag | NVDA is the largest company in the current hot-sector watchlist ($5.65T, most recently crossed the $5.5T rung) |
-| 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
+| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (132 day(s) away) -- ad-share content is not automatable, nothing to check yet |
+| 10 | Most-valuable-company milestone | flag | NVDA is the largest company in the current hot-sector watchlist ($5.77T, most recently crossed the $5.5T rung) |
+| 11 | Regulators sound the alarm | flag | SEC Coordinates with Global Financial Regulators to Raise Fraud Awareness During World Investor Week (https://www.sec.gov/newsroom/press-releases/2026-101-sec-coordinates-global-financial-regulators-raise-fraud-awareness-during-world-investor-week) |
 | 12 | Credit turns in the hot sector while broad market stays calm (AAPL) | unknown | AAPL: bond CUSIP 037833EY2 found, but no live or manually-entered yield reading available -- run `record-bond-yield AAPL <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (MU) | unknown | MU: bond CUSIP 595112CG6 found, but no live or manually-entered yield reading available -- run `record-bond-yield MU <yield_pct>` |
 | 13 | Funding markets start choking | ok | CP-Treasury spread (DCPN3M-DTB3) 0.06pp (z=-0.04 vs trailing 365d) |
-| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.24pp (as of 2026-10-01); 0 consecutive day(s) at/above 3.5pp (needs 21 to flag) -- WATCH: within 0.3pp of the flag threshold (WATCH) |
+| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.10pp (as of 2026-10-02); 0 consecutive day(s) at/above 3.5pp (needs 21 to flag) |
