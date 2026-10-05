@@ -8,4 +8,4 @@ Scanned 54 ticker(s) across the full ETF universe.
 |--------|-------|--------|---------|
 | MOO | Agricultural Inputs | MOO (Agricultural Inputs): 126 trading days of tight sideways consolidation -- 15.0% high-low close range vs. the 15% ceiling (tighter is better), 100% of days inside the smooth inner band, 7 confirmed up-down swings (a real rhythm, not a single move) -- currently 8.5% below the top of its own range -- no breakout yet -- invalidation (base floor) 76.54 / resistance (base high) 88.85, reward-to-risk ratio (distance to resistance over distance to the invalidation floor -- higher is better) 1.56, volume over the base is declining (a possible compression/accumulation signal) -- heartbeat entry signal; survival context: not applicable — fund | 2026-10-03 |
 
-Last auto-generated: 2026-10-05.
+Last auto-generated: 2026-10-06.
