@@ -50,6 +50,12 @@ def init_superinvestor_tables(conn: sqlite3.Connection) -> None:
         # continuity with filings already recorded) -- this is a separate, purely
         # display column. NULL for every row recorded before this migration.
         "ALTER TABLE superinvestor_filings_seen ADD COLUMN issuer_name TEXT",
+        # price added 2026-10-06 -- Form 4 purchases/sales carry a per-share price
+        # that was only ever rendered into the transient "summary" text (New Since
+        # Last Run / WhatsApp), never stored, so it vanished from the report's All
+        # Recent Filings table once the filing aged out of "new". NULL for every row
+        # recorded before this migration and for 13D/G rows (no per-transaction price).
+        "ALTER TABLE superinvestor_filings_seen ADD COLUMN price REAL",
     )
     with conn:
         for stmt in _MIGRATIONS:
@@ -74,6 +80,7 @@ def insert_superinvestor_filing_seen(
     event_date: str | None = None,
     filed_date: str | None = None,
     shares: float | None = None,
+    price: float | None = None,
     pct_owned: float | None = None,
     pct_owned_change: float | None = None,
     material_crossing: str | None = None,
@@ -87,11 +94,11 @@ def insert_superinvestor_filing_seen(
         cur = conn.execute(
             """INSERT OR IGNORE INTO superinvestor_filings_seen
                (dedup_key, source, filer_key, filer_display, form_type, issuer, issuer_name,
-                issuer_ticker, accession, event_date, filed_date, shares, pct_owned,
+                issuer_ticker, accession, event_date, filed_date, shares, price, pct_owned,
                 pct_owned_change, material_crossing, transaction_code, raw_url, first_seen_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (dedup_key, source, filer_key, filer_display, form_type, issuer, issuer_name,
-             issuer_ticker, accession, event_date, filed_date, shares, pct_owned,
+             issuer_ticker, accession, event_date, filed_date, shares, price, pct_owned,
              pct_owned_change, material_crossing, transaction_code, raw_url, _now()),
         )
         return cur.rowcount == 1

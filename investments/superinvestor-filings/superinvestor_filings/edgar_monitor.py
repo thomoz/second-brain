@@ -94,8 +94,17 @@ def _resolve_schedule_text(cik: str, accession: str, primary_document: str) -> s
     return primary
 
 
-def _summarize_ownership(parsed: dict[str, Any], form_type: str) -> tuple[str, str | None, str | None]:
-    """Returns (human summary, combined transaction code(s), most-recent txn date)."""
+def _summarize_ownership(
+    parsed: dict[str, Any], form_type: str
+) -> tuple[str, str | None, str | None, float | None, float | None]:
+    """Returns (human summary, combined transaction code(s), most-recent txn date,
+    shares, price). The last two are the structured counterparts of the numbers
+    already embedded in the summary text -- stored so they survive into the report's
+    All Recent Filings table once the filing ages out of "New Since Last Run" (see
+    db.py's `price` column migration note). A filing with both a buy and a sell
+    leg keeps both in the summary text, but only the last-processed leg (sell,
+    since the loop below runs P then S) is kept as the single structured
+    shares/price pair -- rare combination, acceptable ambiguity."""
     txns = parsed.get("transactions", [])
     headline = [t for t in txns if t.get("code") in edgar_parse.HEADLINE_TRANSACTION_CODES]
     dates = sorted(t["date"] for t in headline if t.get("date"))
@@ -103,11 +112,13 @@ def _summarize_ownership(parsed: dict[str, Any], form_type: str) -> tuple[str, s
 
     if not headline:
         if form_type == "3":
-            return "new >10% beneficial-owner position disclosed", None, None
-        return "no open-market buy/sell in this filing", None, event_date
+            return "new >10% beneficial-owner position disclosed", None, None, None, None
+        return "no open-market buy/sell in this filing", None, event_date, None, None
 
     parts: list[str] = []
     codes: list[str] = []
+    shares_out: float | None = None
+    price_out: float | None = None
     for code in ("P", "S"):
         matching = [t for t in headline if t["code"] == code]
         if not matching:
@@ -118,7 +129,9 @@ def _summarize_ownership(parsed: dict[str, Any], form_type: str) -> tuple[str, s
         price_clause = f" @ USD {prices[-1]:,.2f}" if prices else ""
         parts.append(f"{verb} {total_shares:,.0f} sh{price_clause}")
         codes.append(code)
-    return "; ".join(parts), "/".join(codes), event_date
+        shares_out = total_shares
+        price_out = prices[-1] if prices else None
+    return "; ".join(parts), "/".join(codes), event_date, shares_out, price_out
 
 
 def _process_ownership(
@@ -148,10 +161,12 @@ def _process_ownership(
     issuer_label = issuer_ticker or issuer_name or "unknown issuer"
     issuer_display = _format_issuer_display(issuer_name, issuer_ticker, issuer_label)
 
-    summary_body, txn_codes, event_date = ("filing details unavailable", None, None)
+    summary_body, txn_codes, event_date, shares, price = (
+        "filing details unavailable", None, None, None, None
+    )
     is_ten_pct = False
     if parsed:
-        summary_body, txn_codes, event_date = _summarize_ownership(parsed, form_type)
+        summary_body, txn_codes, event_date, shares, price = _summarize_ownership(parsed, form_type)
         is_ten_pct = bool(parsed.get("is_ten_pct_owner"))
 
     material_crossing = "10% cross" if form_type == "3" else None
@@ -161,7 +176,7 @@ def _process_ownership(
         conn, dedup_key=dedup_key, source="edgar", filer_key=filer_key,
         filer_display=filer_display, form_type=f"Form {form_type}", issuer=issuer_label,
         issuer_name=issuer_name, issuer_ticker=issuer_ticker, accession=accession,
-        event_date=event_date, filed_date=filed_date, shares=None, pct_owned=None,
+        event_date=event_date, filed_date=filed_date, shares=shares, price=price, pct_owned=None,
         pct_owned_change=None, material_crossing=material_crossing, transaction_code=txn_codes,
         raw_url=_archive_url(cik, accession, filing["primary_document"]),
     )

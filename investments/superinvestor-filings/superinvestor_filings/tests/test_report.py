@@ -46,6 +46,21 @@ def test_render_omits_chart_line_when_note_empty():
     assert "Chart:" not in md
 
 
+def test_recent_filings_table_shows_price_alongside_shares():
+    # Form 4 purchases carry a per-share price that must survive into the All Recent
+    # Filings table once the filing ages out of "New Since Last Run" -- otherwise the
+    # detail WhatsApp showed at alert time is lost from the persistent history
+    # (Shaun, 2026-10-06).
+    row = {"source": "edgar", "filer_display": "Warren Buffett / Berkshire Hathaway",
+           "form_type": "Form 4", "issuer": "LEN", "issuer_name": "Lennar Corp",
+           "issuer_ticker": "LEN", "shares": 2_418_637.0, "price": 79.74,
+           "filed_date": "2026-10-05"}
+    assert report._recent_row(row) == (
+        "| US EDGAR | Warren Buffett / Berkshire Hathaway | Form 4 "
+        "| Lennar Corp (LEN) | 2,418,637 @ USD 79.74 | - | 2026-10-05 |"
+    )
+
+
 def test_recent_filings_table_shows_source_column():
     result = {
         "new_filings": [],

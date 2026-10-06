@@ -74,6 +74,8 @@ def _issuer_cell(r: dict[str, Any]) -> str:
 def _recent_row(r: dict[str, Any]) -> str:
     pct = f"{r['pct_owned']:.1f}%" if r.get("pct_owned") is not None else ""
     shares = f"{r['shares']:,.0f}" if r.get("shares") is not None else ""
+    if shares and r.get("price") is not None:
+        shares += f" @ USD {r['price']:,.2f}"
     size = " / ".join(x for x in (pct, shares) if x) or "-"
     src = _SOURCE_LABEL.get(r.get("source", ""), r.get("source", "") or "-")
     return (

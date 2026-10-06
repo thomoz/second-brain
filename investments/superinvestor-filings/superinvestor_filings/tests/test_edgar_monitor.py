@@ -66,6 +66,11 @@ def test_new_form4_appears_in_new_filings_and_seen_log(db_conn, monkeypatch):
     assert alert["issuer"] == "AMR"  # dedup/tracking identity stays ticker-only, unchanged
     seen_row = db.get_recent_superinvestor_filings_seen(db_conn)[0]
     assert seen_row["issuer_name"] == "Alpha Metallurgical Resources, Inc."
+    # shares/price must persist in the DB row, not just the transient summary text --
+    # otherwise the detail disappears once the filing ages out of "New Since Last Run"
+    # into the report's All Recent Filings table (Shaun, 2026-10-06).
+    assert seen_row["shares"] == 40_000.0
+    assert seen_row["price"] == 200.0
 
 
 def test_same_filing_is_quiet_on_repeat_run(db_conn, monkeypatch):
