@@ -4,23 +4,23 @@ What this is: 14 historical market-crash warning markers, checked daily so an ea
 
 Auto-generated daily -- overwritten every run. Advisor notes only; no trade action is ever suggested here (see SOUL.md). Per-marker source: investments/my-trader/14-signals-crash-warning-handoff.md.
 
-## Run: 2026-10-06
+## Run: 2026-10-07
 
 ## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)
 Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 mega-cap constituents -- never hardcoded to a fixed ticker list.
 
 | Rank | Ticker | Sector | Market Cap |
 |------|--------|--------|------------|
-| 1 | NVDA | Technology | $5769B |
-| 2 | AAPL | Technology | $4858B |
-| 3 | GOOGL | Communication Services | $4237B |
-| 4 | GOOG | Communication Services | $4205B |
-| 5 | MSFT | Technology | $3900B |
-| 6 | META | Communication Services | $1890B |
-| 7 | AVGO | Technology | $1730B |
-| 8 | MU | Technology | $1202B |
-| 9 | AMD | Technology | $1031B |
-| 10 | LLY | Health Care | $1019B |
+| 1 | NVDA | Technology | $5777B |
+| 2 | AAPL | Technology | $4869B |
+| 3 | GOOGL | Communication Services | $4252B |
+| 4 | GOOG | Communication Services | $4214B |
+| 5 | MSFT | Technology | $3930B |
+| 6 | META | Communication Services | $1882B |
+| 7 | AVGO | Technology | $1794B |
+| 8 | MU | Technology | $1181B |
+| 9 | AMD | Technology | $1060B |
+| 10 | LLY | Health Care | $1032B |
 
 ## Markers
 
@@ -52,21 +52,13 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (AMD) | ok | AMD: Free Cash Flow $+6.7B, Capital Expenditure $1.0B (period ending 2025-12-31) |
 | 4 | Capex outruns cash flow (LLY) | ok | LLY: Free Cash Flow $+6.0B, Capital Expenditure $10.8B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-08-01, +37.2% YoY vs 2025-08-01 |
-| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 169 filing(s) in the trailing 30d vs 301 in the same window a year ago (0.56x); 424B4 (priced IPO): 18 filing(s) in the trailing 30d vs 58 in the same window a year ago (0.31x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.59 (z=0.34 vs trailing 47d mean 0.57) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
-| 8 | Insider selling (NVDA) | flag | NVDA: $1,877,876,037 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (AAPL) | flag | AAPL: $204,872,754 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (GOOGL) | flag | GOOGL: $121,566,706 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (MSFT) | flag | MSFT: $96,290,334 sold vs $3,436,971 bought, trailing 365 days |
-| 8 | Insider selling (META) | flag | META: $256,151,982 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (AVGO) | flag | AVGO: $1,153,379,764 sold vs $698,699 bought, trailing 365 days |
-| 8 | Insider selling (MU) | flag | MU: $217,924,784 sold vs $7,821,723 bought, trailing 365 days |
-| 8 | Insider selling (AMD) | flag | AMD: $368,748,506 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (LLY) | flag | LLY: $515,909,991 sold vs $0 bought, trailing 365 days |
+| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 177 filing(s) in the trailing 30d vs 301 in the same window a year ago (0.59x); 424B4 (priced IPO): 19 filing(s) in the trailing 30d vs 58 in the same window a year ago (0.33x) |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.59 (z=0.34 vs trailing 48d mean 0.57) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 8 | Insider selling (?) | unknown | OpenInsider fetch failed for both purchases and sales |
 | 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (131 day(s) away) -- ad-share content is not automatable, nothing to check yet |
-| 10 | Most-valuable-company milestone | flag | NVDA is the largest company in the current hot-sector watchlist ($5.77T, most recently crossed the $5.5T rung) |
-| 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
+| 10 | Most-valuable-company milestone | flag | NVDA is the largest company in the current hot-sector watchlist ($5.78T, most recently crossed the $5.5T rung) |
+| 11 | Regulators sound the alarm | flag | SEC Seeks Final Judgment Against Former Western Asset Co-CIO Ken Leech in Cherry Picking Case (https://www.sec.gov/newsroom/press-releases/2026-103-sec-seeks-final-judgment-against-former-western-asset-co-cio-ken-leech-cherry-picking-case) |
 | 12 | Credit turns in the hot sector while broad market stays calm (AAPL) | unknown | AAPL: bond CUSIP 037833EY2 found, but no live or manually-entered yield reading available -- run `record-bond-yield AAPL <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (MU) | unknown | MU: bond CUSIP 595112CG6 found, but no live or manually-entered yield reading available -- run `record-bond-yield MU <yield_pct>` |
-| 13 | Funding markets start choking | ok | CP-Treasury spread (DCPN3M-DTB3) 0.06pp (z=-0.04 vs trailing 365d) |
-| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.10pp (as of 2026-10-02); 0 consecutive day(s) at/above 3.5pp (needs 21 to flag) |
+| 13 | Funding markets start choking | ok | CP-Treasury spread (DCPN3M-DTB3) 0.00pp (z=-1.12 vs trailing 365d) |
+| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.12pp (as of 2026-10-05); 0 consecutive day(s) at/above 3.5pp (needs 21 to flag) |
