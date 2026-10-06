@@ -35,7 +35,6 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | PRS.OL | unassigned | Rebel Capitalist recommendation |
 | ROSY.TO | unassigned | New TSX macro fund, too new for data - watching for price history/AUM to build up |
 | STNG | unassigned | George Gammon long trade |
-| VGT | unassigned | Watching alongside XLK/SMH tech-sector rotation strength (Shaun request 2026-09-01) |
 | VLGEA | unassigned | Felix watching -- waiting for a break above recent highs. |
 | WPM | unassigned | Precious metals |
 
