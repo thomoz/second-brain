@@ -190,3 +190,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 - (Oct 03) GOAT industry heartbeat scheduled 22:50 UTC; ETF heartbeat scheduled 23:00 UTC.
 - (Oct 03) GOAT industry pipeline plan is `.agent/plans/goat-industry-pipeline.md`.
 - (Oct 03) Manual GOAT industry validation should use `scripts\invoke_investments.ps1` on VPS.
+
+## 2026-10-06 Reflection
+- market_wizards_flow setup follows the superinvestor-filings price/shares fix.
