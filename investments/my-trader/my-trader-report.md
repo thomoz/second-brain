@@ -13,7 +13,7 @@ No CPI/PPI/jobs releases scheduled in the next 48 hours.
 ### Holdings (this run)
 
 **AG** (None, No strategic bucket assigned yet)
-40.0264 @ avg $20.98 | now $17.51 | P&L $-138.89 (-16.5%) | 6.7% of tracked portfolio
+40.0264 @ avg $20.98 | now $17.51 | P&L $-138.89 (-16.5%) | 6.8% of tracked portfolio
 Bottom line: Nothing notable this run.
 - OPEN ALERT (earnings_watch_guidance, since 2026-09-17): First Majestic’s most recent reported quarter showed a meaningful consensus miss, and while 2026 production guidance was raised, management also raised AISC and capital-spending guidance, which could pressure margins/free cash flow versus expectations. I did not find demand-softening commentary or monthly operating metrics indicating a slowdown. (Q2 2026 adjusted EPS missed consensus: $0.21 vs. $0.25, and revenue missed: about $415.5M vs. $496M consensus (MarketBeat/TipRanks).; Company raised 2026 production guidance, but also raised 2026 AISC guidance to $27.69-$28.77/AgEq oz from $26.15-$27.91 and lifted capex guidance 47% to $318M-$344M from $213M-$236M (First Majestic July 2026 release: https://firstmajestic.com/investors/news-releases/first-majestic-reports-q2-2026-production-results-announces-updated-2026-production-and-cost-guidance-and-q2-conference-call-details).; Q2 costs rose year over year: cash costs +20% and AISC +22%; management cited Mexican peso strength, higher contractor/haulage/maintenance/reagent costs, royalties/taxes, and temporary disruptions at Los Gatos and San Dimas, though the disruptions were described as resolved (SEC Q2 release: https://www.sec.gov/Archives/edgar/data/1308648/000162828026050781/ag-2026q2financialnrxex995.htm).)
 - [info] company_profile: First Majestic Silver Corp. engages in the acquisition, exploration, development, and production of mineral properties in North America.
@@ -46,23 +46,23 @@ Open alerts: none
 - [unknown] technical_levels: No market data available
 
 **CYL.AX** (None, No strategic bucket assigned yet)
-200.0 @ avg $5.86 | now $5.58 | P&L $-55.05 (-4.7%) | 10.7% of tracked portfolio
+200.0 @ avg $5.86 | now $5.55 | P&L $-60.05 (-5.1%) | 10.7% of tracked portfolio
 Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - OPEN ALERT (earnings_watch_guidance, since 2026-10-04): Recent broker commentary indicates FY26 underlying earnings/NPAT missed some analyst forecasts, with Bell Potter cutting FY27-FY29 EPS forecasts by 8-10%. Company operating updates were otherwise strong: June-quarter production was a record, FY26 production met guidance, AISC beat revised guidance, and September reserve/presentation updates supported the long-term 200koz plan, though management recast prior 10-year guidance as a general guide due to permitting timelines, operational delays and processing-capability changes. (FY26 production of 103.8koz was within 100-110koz guidance and FY26 AISC of A$2,738/oz was below revised A$2,750-A$2,950/oz guidance.; Bell Potter said FY26 underlying EBITDA was 5% below forecast and lowered FY27-FY29 EPS forecasts by 8-10%.; Canaccord noted FY26 NPAT of A$171m was 12% below its estimate, mainly from higher depreciation, while revenue reached A$632m.; June quarter was operationally strong: record 31,886oz production, A$2,666/oz AISC produced, and A$54m cash build.; September reserve update said 2025 10-year guidance should be treated as a general guide because of permitting timeline changes, operational delays, processing capability and reserve/resource changes, but also said 2Moz reserves de-risk the 200koz plan.)
 - [info] company_profile: Catalyst Metals Limited engages in the mineral exploration and evaluation in Australia. The company explores for gold and silver deposits.
 - [info] dividend: No dividend history
-- [ok] valuation: PE 9.0 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
+- [ok] valuation: PE 8.7 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
 - [ok] balance_sheet: Debt/Equity 3.7 -- lower is generally safer (10/10 — excellent), Current Ratio 3.02 -- higher is generally safer, up to a point (10/10 — excellent) — within thresholds
 - [info] fx: AUD-denominated, no FX exposure
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Basic Materials is 13.9% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
-- [interesting] opportunity: Graham [PE 9.0 x P/B 2.08 = 18.7, below 22.5]; Buffett/Smith [ROE 29.2% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
-- [info] price_action: 1mo -15.5%, 3mo -8.1%
+- [interesting] opportunity: Graham [PE 8.7 x P/B 2.07 = 18.0, below 22.5]; Buffett/Smith [ROE 29.2% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
+- [info] price_action: 1mo -15.8%, 3mo -8.5%
 - [info] crash_resilience: 2008 financial crisis -85.0%; Dec 2018 correction -15.4%; COVID crash (2020) -40.1%; 2022 bear market -49.8%
-- [info] technical_levels: Price $5.58 vs 50DMA $6.34 (below, -12.0%); 150DMA $6.03 (below, -7.4%); 200DMA $6.54 (below, -14.6%)
+- [info] technical_levels: Price $5.55 vs 50DMA $6.34 (below, -12.3%); 150DMA $6.01 (below, -7.6%); 200DMA $6.53 (below, -14.9%)
 
 **GOLD.AX** (None, No strategic bucket assigned yet)
-20.0 @ avg $59.31 | now $54.46 | P&L $-97.05 (-8.2%) | 10.5% of tracked portfolio
+20.0 @ avg $59.31 | now $54.09 | P&L $-104.45 (-8.8%) | 10.4% of tracked portfolio
 Bottom line: Nothing notable this run.
 Open alerts: none
 - [unknown] company_profile: No business summary available
@@ -73,12 +73,12 @@ Open alerts: none
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: No sector data for candidate
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: No standout positive signal this run
-- [info] price_action: 1mo -2.2%, 3mo -0.5%
+- [info] price_action: 1mo -2.8%, 3mo -1.2%
 - [info] crash_resilience: 2008 financial crisis -7.2%; Dec 2018 correction -0.2%; COVID crash (2020) -1.6%; 2022 bear market -13.4%
-- [info] technical_levels: Price $54.46 vs 50DMA $55.82 (below, -2.4%); 150DMA $57.41 (below, -5.1%); 200DMA $59.11 (below, -7.9%)
+- [info] technical_levels: Price $54.09 vs 50DMA $55.84 (below, -3.1%); 150DMA $57.33 (below, -5.6%); 200DMA $59.08 (below, -8.5%)
 
 **GXLD.AX** (None, No strategic bucket assigned yet)
-25.0 @ avg $61.82 | now $59.39 | P&L $-60.81 (-3.9%) | 14.3% of tracked portfolio
+25.0 @ avg $61.82 | now $59.01 | P&L $-70.31 (-4.5%) | 14.2% of tracked portfolio
 Bottom line: Nothing notable this run.
 Open alerts: none
 - [unknown] company_profile: No business summary available
@@ -90,9 +90,9 @@ Open alerts: none
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [info] etf_mechanics: Expense ratio unavailable, AUM $754,829,888
 - [ok] opportunity: No standout positive signal this run
-- [info] price_action: 1mo -2.0%, 3mo -0.4%
+- [info] price_action: 1mo -2.7%, 3mo -1.0%
 - [info] crash_resilience: No historical crash-window data available (likely IPO'd after all tracked windows)
-- [info] technical_levels: Price $59.39 vs 50DMA $60.82 (below, -2.3%); 150DMA $62.56 (below, -5.1%); 200DMA $64.40 (below, -7.8%)
+- [info] technical_levels: Price $59.01 vs 50DMA $60.84 (below, -3.0%); 150DMA $62.47 (below, -5.5%); 200DMA $64.37 (below, -8.3%)
 
 **LLY** (Eli Lilly & Co, Long-term hold — never timed, dips are expected and not a reason to act alone)
 0.0001 @ avg $1,148.00 | now $1,143.12 | P&L $-0.00 (-0.4%) | 0.0% of tracked portfolio
@@ -112,7 +112,7 @@ Bottom line: 2 flag(s) active (valuation, balance_sheet) — worth a look.
 - [info] technical_levels: Price $1,143.12 vs 50DMA $1,175.26 (below, -2.7%); 150DMA $1,079.85 (above, +5.9%); 200DMA $1,071.81 (above, +6.7%)
 
 **LULU** (lululemon athletica inc., Long-term hold — never timed, dips are expected and not a reason to act alone)
-22.0 @ avg $113.22 | now $93.14 | P&L $-441.65 (-17.7%) | 19.7% of tracked portfolio
+22.0 @ avg $113.22 | now $93.14 | P&L $-441.65 (-17.7%) | 19.8% of tracked portfolio
 Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - OPEN ALERT (earnings_watch_guidance, since 2026-09-17): Material deterioration signals found: lululemon’s Sep. 3, 2026 Q2 release cut FY2026 revenue/EPS guidance well below prior guidance, reported a revenue miss, and showed worsening comps/traffic pressure. Management commentary pointed to pressured traffic, negative conversion, inconsistent product launches, weaker brand sentiment in North America/China, and Q3 revenue expected down 10%-11%. (FY2026 revenue guide cut to $10.35B-$10.50B from $11.00B-$11.15B; EPS guide cut to $9.48-$9.73 from $10.95-$11.15. Source: https://corporate.lululemon.com/newsroom/press-releases/2026/09-03-2026-210528733; Q2 revenue of about $2.42B missed consensus of about $2.46B; comparable sales fell 9% reported/10% constant currency, with Americas comps down 12%. Sources: https://corporate.lululemon.com/newsroom/press-releases/2026/09-03-2026-210528733 and https://www.marketbeat.com/earnings/reports/2026-9-3-lululemon-athletica-inc-stock/; Management said Q3 began slowly and guided Q3 revenue down 10%-11%; commentary cited traffic pressure, negative conversion, inconsistent product response, China brand-sentiment issues, leggings down about 20%, and accessories down 13%. Source: https://www.fool.com/earnings/call-transcripts/2026/09/09/lululemon-lulu-q2-2026-earnings-call-transcript/)
 - [info] company_profile: lululemon athletica inc., together with its subsidiaries, designs, distributes, and retails technical athletic apparel, footwear, and accessories for women and men under the lululemon brand in the United States, Canada, Mexico, China, Hong Kong, Taiwan, Macau, Greece, and internationally. It offers pants, shorts, tops, and jackets for athletic activities, such as yoga, running, training, and ot...
@@ -162,7 +162,7 @@ Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - [info] technical_levels: Price $77.90 vs 50DMA $83.68 (below, -6.9%); 150DMA $89.76 (below, -13.2%); 200DMA $94.35 (below, -17.4%)
 
 **PMGOLD.AX** (None, Gold tactical — timed sleeve, evaluate against your entry thesis)
-50.0 @ avg $62.06 | now $17.94 | P&L $-2,206.18 (-71.1%) | 8.6% of tracked portfolio
+50.0 @ avg $62.06 | now $17.94 | P&L $-2,206.18 (-71.1%) | 8.7% of tracked portfolio
 Bottom line: Nothing notable this run.
 Open alerts: none
 - [unknown] company_profile: No business summary available
@@ -185,12 +185,12 @@ Bottom line: 1 flag(s) active (dividend) — worth a look.
 - OPEN ALERT (earnings_watch_guidance, since 2026-09-17): Recent top SILJ holdings show several earnings-risk signals: Coeur and Aya missed Q2 consensus, SSR Mining missed estimates with higher sustaining capital, and Hecla cut Keno Hill production guidance despite better consolidated costs. These are operational/estimate-risk items rather than broad end-demand deterioration, but they are material enough to watch for weaker-than-expected fund constituent earnings. (Coeur Mining, a top SILJ holding, missed Q2 EPS/revenue estimates and lowered 2026 production guidance for New Afton and Rainy River while raising capex guidance: https://www.coeur.com/investors/news/news-details/2026/Coeur-Reports-Second-Quarter-2026-Results/default.aspx; Aya Gold & Silver missed Q2 profit and sales expectations, with EPS and revenue below consensus despite record operational performance: https://www.investing.com/news/transcripts/earnings-call-transcript-aya-gold--silver-misses-q2-2026-profit-and-sales-targets-93CH-4861224; SSR Mining missed Q2 estimates, reported AISC/cost pressure, and raised sustaining capital guidance while keeping full-year production guidance intact: https://www.investing.com/equities/silver-standard-resources-earnings; Hecla lowered Keno Hill 2026 silver production guidance to 2.2-2.6 Moz from 2.9-3.2 Moz and narrowed total silver production guidance, partly offset by lower cost guidance: https://www.sec.gov/Archives/edgar/data/719413/000119312526333077/hl-ex99_1.htm)
 - [info] company_profile: The index tracks the performance of the equity securities (or corresponding American Depositary Receipts (“ADRs”) or Global Depositary Receipts (“GDRs”)) of companies actively engaged in silver mining industry (“Silver Companies”). The fund invests at least 80% of its total assets in the component securities of the index and in ADRs and GDRs based on the component securities in the index.
 - [flag] dividend: Dividend declined -23.2% vs prior 12 months
-- [ok] valuation: PE 17.9 within normal range -- lower is generally cheaper (7/10 — good)
+- [ok] valuation: PE 18.0 within normal range -- lower is generally cheaper (7/10 — good)
 - [unknown] balance_sheet: No balance sheet data available
 - [info] fx: USD-denominated; AUD/USD 3mo move: +0.5%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: No sector data for candidate
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
-- [info] etf_mechanics: Expense ratio 0.69%, AUM $4,132,843,264 — top holdings: Hecla Mining Co (10.6%), Coeur Mining Inc (10.5%), First Majestic Silver Corp (10.3%); dominant sector: Basic Materials (100%)
+- [info] etf_mechanics: Expense ratio 0.69%, AUM $3,552,283,904 — top holdings: Hecla Mining Co (10.5%), Coeur Mining Inc (10.3%), First Majestic Silver Corp (10.2%); dominant sector: Basic Materials (100%)
 - [ok] opportunity: Active risk flag(s) present elsewhere this run — not calling this an opportunity regardless of price or valuation
 - [info] price_action: 1mo -14.1%, 3mo +1.9%
 - [info] crash_resilience: Dec 2018 correction -25.6%; COVID crash (2020) -54.8%; 2022 bear market -46.7%
@@ -235,7 +235,7 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - OPEN ALERT (balance_sheet, since 2026-09-28): Current Ratio 0.98 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
 - [info] company_profile: Visa Inc. operates as a payment technology company in the United States and internationally.
 - [ok] dividend: Dividend grew 13.6% vs prior 12 months
-- [ok] valuation: PE 31.5 within normal range -- lower is generally cheaper (2/10 — below average)
+- [ok] valuation: PE 30.7 within normal range -- lower is generally cheaper (2/10 — below average)
 - [flag] balance_sheet: Current Ratio 0.98 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
 - [info] fx: USD-denominated; AUD/USD 3mo move: +0.5%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Financial Services is 6.8% of holdings value
@@ -307,11 +307,11 @@ No new material changes.
 - **MACRO** (macro) — australia_cpi: Australia headline CPI 3.8% YoY (reference month 2026-06-01), outside the RBA's 2-3% target band (first flagged 2026-08-07)
 
 ### Watchlist Opportunities (this run)
-- **3750.HK** — Lynch [PEG 0.99 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 24.8% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -27.5% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
+- **3750.HK** — Buffett/Smith [ROE 24.8% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -27.0% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **AEM** — Buffett/Smith [ROE 23.0% at/above 15.0% (10/10 — excellent), not richly valued]
-- **ASML** — Crash-discount fit [ROE 53.9% at/above 15.0% (10/10 — excellent), but currently rich (PE 60.4) — quality worth watching for a crash-driven discount rather than buying at today's price]
+- **ASML** — Crash-discount fit [ROE 53.9% at/above 15.0% (10/10 — excellent), but currently rich (PE 60.6) — quality worth watching for a crash-driven discount rather than buying at today's price]
 - **CEG** — Buffett/Smith [ROE 15.1% at/above 15.0% (10/10 — excellent), not richly valued]
-- **CF** — Graham [PE 8.6 at/below cheap threshold (12.0), P/B unavailable/implausible]; Lynch [PEG 0.50 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 29.9% at/above 15.0% (10/10 — excellent), not richly valued] (3 independent signals)
+- **CF** — Graham [PE 8.5 at/below cheap threshold (12.0), P/B unavailable/implausible]; Lynch [PEG 0.50 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 29.9% at/above 15.0% (10/10 — excellent), not richly valued] (3 independent signals)
 - **COUR** — Graham [PE 6.3 x P/B 1.22 = 7.7, below 22.5]; Marks/Neilson [down -12.6% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **CPRT** — Buffett/Smith [ROE 16.2% at/above 15.0% (10/10 — excellent), not richly valued]
 - **DTG.DE** — Lynch [PEG 0.31 at/below 1.0 — growth at a reasonable price]
@@ -334,9 +334,9 @@ No new material changes.
 - **PDD** — Graham [PE 8.8 x P/B 1.64 = 14.4, below 22.5]; Lynch [PEG 0.66 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 22.7% at/above 15.0% (10/10 — excellent), not richly valued] (3 independent signals)
 - **RACE** — Crash-discount fit [ROE 45.4% at/above 15.0% (10/10 — excellent), but currently rich (PE 35.6) — quality worth watching for a crash-driven discount rather than buying at today's price]
 - **SII.TO** — Buffett/Smith [ROE 27.3% at/above 15.0% (10/10 — excellent), not richly valued]
-- **VLGEA** — Graham [PE 12.4 x P/B 1.31 = 16.2, below 22.5]
+- **VLGEA** — Graham [PE 12.5 x P/B 1.31 = 16.4, below 22.5]
 - **VRTX** — Buffett/Smith [ROE 23.5% at/above 15.0% (10/10 — excellent), not richly valued]
-- **XRO.AX** — Marks/Neilson [down -23.2% over 3 months with no other flags — possible overreaction, not a fundamental problem]
+- **XRO.AX** — Marks/Neilson [down -23.9% over 3 months with no other flags — possible overreaction, not a fundamental problem]
 
 ### Macro Indicators (this run)
 - **move_index** [ok] — MOVE index (bond market volatility) at 113.6, below the flag threshold
@@ -350,8 +350,8 @@ No new material changes.
 - **uk_cpi** [flag] — UK headline CPI 3.1% YoY (reference month 2026-08-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone
 - **real_yields** [flag] — 10Y real yield +2.92% (as of 2026-10-02), above the 2.0% threshold -- elevated real yields historically pressure gold hard
 - **dollar_index** [ok] — Broad USD index 121.4, +2.8% over the past 30 days
-- **gold_trend** [info] — GC=F $4,168 (50DMA $4,368, 200DMA $4,553, -8.5% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $59.23 AUD; AUD/USD 3mo move +0.5%
-- **gold_silver_ratio** [ok] — Gold/silver ratio at 67.9
+- **gold_trend** [info] — GC=F $4,148 (50DMA $4,369, 200DMA $4,551, -8.9% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $59.23 AUD; AUD/USD 3mo move +0.5%
+- **gold_silver_ratio** [ok] — Gold/silver ratio at 68.2
 - **vix** [ok] — VIX at 15.5, below the flag threshold
 
 ### Gold Outlook
