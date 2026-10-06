@@ -24,7 +24,6 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | GOOG | unassigned | Keep an eye on (Shaun request 2026-09-24) |
 | ICLN | unassigned | Clean energy ETF |
 | IHI | unassigned | Medical devices ETF |
-| KAR.AX | unassigned | Keep an eye on (Shaun request 2026-09-16) |
 | KMI | unassigned | Energy sector - keep an eye on |
 | MCD | 1 | Looking for a 42 entry |
 | MTA | unassigned | Not yet discussed -- flagged to watch. |
