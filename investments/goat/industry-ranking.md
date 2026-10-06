@@ -49,7 +49,7 @@ All 39 covered industries.
 | 20 | IBUY | Internet Retail | +5.5% | Yes |
 | 21 | PAVE | Engineering & Construction | +5.4% | Yes |
 | 22 | PHO | Utilities - Regulated Water | +1.9% | Yes |
-| 23 | INDS | REIT - Industrial | +1.0% | Yes |
+| 23 | INDS | REIT - Industrial | +1.4% | Yes |
 | 24 | EVX | Waste Management | -0.7% | No |
 | 25 | XHB | Building Products & Equipment | -2.2% | No |
 | 26 | XES | Oil & Gas Equipment & Services | -2.3% | No |
