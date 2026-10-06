@@ -1,6 +1,6 @@
 # Cash-Value Scan
 
-**Last run: 2026-10-06** - scanned 545 US + 200 ASX names (599 returned balance-sheet data), 11 qualify at net cash >= 50% of market cap.
+**Last run: 2026-10-06** - scanned 545 US + 200 ASX names (591 returned balance-sheet data), 11 qualify at net cash >= 50% of market cap.
 
 What this is: companies whose net cash (cash minus all debt) is at least 50% of their market cap AND that generate positive operating cash flow - the market is pricing the whole operating business at a steep discount and handing you the balance-sheet cash on top. Classic Graham / deep-value screen. Free cash flow is shown and tagged when negative, but is not a filter (positive OCF with negative FCF is usually growth capex, not burn).
 
@@ -20,6 +20,6 @@ Auto-generated daily - overwritten every run. Advisor notes only; no trade actio
 | USNA | Usana Health Sciences Inc | US | 61% | 39% | 274.4M USD | 27.7M USD | 49.1M USD | 46.4% | 168.6M USD | -5% | Consumer Defensive | shrinking revenue | 168.6M USD net cash, 274.4M USD mcap, 49.1M USD FCF - paying ~105.8M USD for the operating business. |
 | TRS | Trimas Corp | US | 58% | 42% | 1.40B USD | 20.1M USD | 293.6M USD | 49.6% | 804.7M USD | +2% | Consumer Cyclical | - | 804.7M USD net cash, 1.40B USD mcap, 293.6M USD FCF - paying ~591.9M USD for the operating business. |
 | ACTG | Acacia Research Corp | US | 55% | 45% | 419.6M USD | 30.0M USD | -16.4M USD | -8.7% | 230.5M USD | +124% | Industrials | negative FCF | 230.5M USD net cash, 419.6M USD mcap, -16.4M USD FCF - paying ~189.1M USD for the operating business. |
-| TUA | Tuas | ASX | 53% | 47% | 940.5M SGD | 91.3M SGD | 52.0M SGD | 11.8% | 498.3M SGD | +22% | Communication Services | - | 498.3M SGD net cash, 940.5M SGD mcap, 52.0M SGD FCF - paying ~442.2M SGD for the operating business. |
+| TUA | Tuas | ASX | 54% | 46% | 924.0M SGD | 91.3M SGD | 52.0M SGD | 12.2% | 498.3M SGD | +22% | Communication Services | - | 498.3M SGD net cash, 924.0M SGD mcap, 52.0M SGD FCF - paying ~425.7M SGD for the operating business. |
 
 Tag key: `held` / `watchlist` = already tracked in my-trader; `micro` = market cap under US$50M / A$75M (thinner liquidity, higher risk); `shrinking revenue` = negative YoY revenue growth; `negative FCF` = free cash flow negative (heavy capex or cash burn - check which); `REVIEW:` = borderline ethical-filter flag.
