@@ -193,3 +193,8 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-10-06 Reflection
 - market_wizards_flow setup follows the superinvestor-filings price/shares fix.
+
+## 2026-10-08 Reflection
+- (Oct 08) Goat heartbeat scanner should mimic Shaun's chart reading.
+- (Oct 08) Goat heartbeat may use 150DMA proximity, or either 50DMA/150DMA.
+- (Oct 08) NVDA's range is considered acceptable for heartbeat scanning.
