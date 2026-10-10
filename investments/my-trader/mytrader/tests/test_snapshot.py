@@ -164,6 +164,34 @@ def test_regenerate_watchlist_md_renders_named_keep_an_eye_sub_block(db_conn, mo
     assert group_block.index("| KARS | unassigned | 35% allocation |") < group_block.index("| Ticker | Name |")
 
 
+def test_regenerate_watchlist_md_renders_bucket4_ateam_above_bucket4_table(db_conn, monkeypatch, tmp_path):
+    _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
+    db.upsert_watchlist_row(db_conn, ticker="MX", name="MagnaChip Semiconductor Corp",
+                            asset_type="stock", bucket="unassigned")
+    db.upsert_watchlist_row(db_conn, ticker="TSLA", name="Tesla Inc", asset_type="stock", bucket="4",
+                            status="discussed", notes="Crash-discount candidate")
+    db.set_watch_note(db_conn, "MX", "Shaun request 2026-09-26")
+    db.set_watch_group(db_conn, "MX", config.SUPER_HOT_WATCH_GROUP)
+    db.set_watch_note(db_conn, "TSLA", "Biggest bounce-back candidate")
+    db.set_watch_group(db_conn, "TSLA", config.BUCKET4_ATEAM_WATCH_GROUP)
+    snapshot.regenerate_watchlist_md(db_conn)
+
+    content = watchlist_path.read_text(encoding="utf-8")
+    assert "### 👁 Bucket 4 A-Team" in content
+    super_hot_idx = content.index("### 👁 Super Hot!")
+    ateam_idx = content.index("### 👁 Bucket 4 A-Team")
+    bucket4_heading_idx = content.index("## Bucket 4 — Crash Discount Buys")
+    # not lumped in with the other top-of-file named groups (Super Hot! renders
+    # there)...
+    assert super_hot_idx < bucket4_heading_idx
+    # ...it sits directly above the Bucket 4 table instead
+    assert super_hot_idx < ateam_idx < bucket4_heading_idx
+    ateam_block, rest = content.split("## Bucket 4 — Crash Discount Buys")
+    assert "| TSLA | 4 | Biggest bounce-back candidate |" in ateam_block
+    assert "| TSLA | 4 | Biggest bounce-back candidate |" not in rest
+    assert "| 10 | TSLA |" in rest or "| — | TSLA |" in rest  # normal Bucket 4 row still present
+
+
 def test_regenerate_watchlist_md_splits_post_crash_ai_section(db_conn, monkeypatch, tmp_path):
     _, watchlist_path, _ = _patch_paths(monkeypatch, tmp_path)
 

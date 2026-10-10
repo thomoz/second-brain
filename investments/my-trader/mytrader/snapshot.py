@@ -178,7 +178,7 @@ def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
         _append_watch_block("Keep an eye on", watched, group_flagged=False)
 
     for group in groups:
-        if group == config.SUPER_HOT_WATCH_GROUP:
+        if group in (config.SUPER_HOT_WATCH_GROUP, config.BUCKET4_ATEAM_WATCH_GROUP):
             continue
         group_rows = db.get_watched(conn, group=group)
         if not group_rows:
@@ -186,8 +186,17 @@ def regenerate_watchlist_md(conn: sqlite3.Connection) -> None:
         _append_watch_block(group, group_rows, group_flagged=True)
 
     lines += _watchlist_table(main_rows)
+    lines.append("")
+
+    # Bucket 4 A-Team renders directly above the Bucket 4 table (not with the
+    # other named groups at the top) -- it's a themed subset of Bucket 4 itself,
+    # not a general cross-bucket watch list.
+    if config.BUCKET4_ATEAM_WATCH_GROUP in groups:
+        ateam_rows = db.get_watched(conn, group=config.BUCKET4_ATEAM_WATCH_GROUP)
+        if ateam_rows:
+            _append_watch_block(config.BUCKET4_ATEAM_WATCH_GROUP, ateam_rows, group_flagged=True)
+
     lines += [
-        "",
         "## Bucket 4 — Crash Discount Buys",
         "",
         "Great, durable companies highly likely to still be around long-term — "

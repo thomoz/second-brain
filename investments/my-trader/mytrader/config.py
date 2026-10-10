@@ -43,6 +43,13 @@ SUPER_HOT_WATCH_GROUP = "Super Hot!"  # a `watchlist-watch --group` name (Shaun
     # block instead of alphabetically among the other groups, since these are the
     # names Shaun wants to see first.
 
+BUCKET4_ATEAM_WATCH_GROUP = "Bucket 4 A-Team"  # a `watchlist-watch --group` name
+    # (Shaun 2026-10-10), same duplicate-into-a-themed-sub-block mechanism as
+    # Super Hot!/Alternative Energy Transport, but rendered directly above the
+    # Bucket 4 — Crash Discount Buys table (not with the other top-of-file groups)
+    # since it's Shaun's curated subset of Bucket 4 names expected to bounce back
+    # hardest off a bear-market bottom, not a general cross-bucket watch list.
+
 # Bucket code -> plain-English framing, added 2026-08-13 for monitor.py's Holdings
 # report (Shaun rated the report 35/100 for trader decision-usefulness -- a raw
 # bucket code like "1" doesn't tell you a -20% dip is expected/acceptable there,
