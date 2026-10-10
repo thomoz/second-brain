@@ -129,8 +129,10 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 |--------|-----------|-----|
 | AMZN | 4 | Mega-cap repeat bear-market bounce back, already rank 10 in Bucket 4 |
 | CRWD | 4 | Already proved a fast full recovery -- 2024 outage, -40pct then fully recovered within months |
+| LULU | 4 | Most extreme drawdowns in the group (-92pct/-47pct/-46pct) but cheap now, opportunity signal fired 3x |
 | META | 4 | 2022 crash to AI-earnings all-time highs -- archetypal sharp-bottom bounce |
 | NET | 4 | -77pct in 2022, earliest-stage growth runway of the three new adds |
+| ORCL | 4 | -41pct/-40pct historical drawdowns, then one of the largest AI/cloud re-rates in the bucket |
 | SHOP | 4 | E-commerce infra, -80pct in 2022, growth re-accelerated after |
 | TSLA | 4 | Most extreme beta on the list -- +2425pct 10Y return already |
 | UBER | 4 | COVID -64pct / 2022 -58pct drawdowns, multi-bagger since, still growing |
