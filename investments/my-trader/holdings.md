@@ -4,7 +4,7 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 
 | Ticker | Name | Qty | Mkt Value | Avg Price | Unrealized P&L | Bucket |
 |--------|------|-----|-----------|-----------|-----------------|--------|
-| AG |  | 40.0264 | — | $20.98 | — | unassigned |
+| AG |  | 40.0264 | $691.66 | $20.98 | $-148.09 | unassigned |
 | BMS |  | 250.0 | — | $2.32 | — | unassigned |
 | CYL.AX |  | 200.0 | $1,130.00 | $5.86 | $-41.05 | unassigned |
 | GOLD.AX |  | 20.0 | $1,095.60 | $59.31 | $-90.65 | unassigned |

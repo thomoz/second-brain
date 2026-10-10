@@ -127,7 +127,9 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
+| AEM | 4 | Gold miner, -72.9pct/-41.5pct/-42.0pct, extreme cyclicality on a genuinely quality balance sheet |
 | AMZN | 4 | Mega-cap repeat bear-market bounce back, already rank 10 in Bucket 4 |
+| CF | 4 | Cyclical commodity compounder, -76.7pct/-54.1pct historical drawdowns, strong fundamentals |
 | CRWD | 4 | Already proved a fast full recovery -- 2024 outage, -40pct then fully recovered within months |
 | INTC | 4 | Turnaround + historically severe amplifier, highest risk/reward in semis |
 | LULU | 4 | Most extreme drawdowns in the group (-92pct/-47pct/-46pct) but cheap now, opportunity signal fired 3x |
