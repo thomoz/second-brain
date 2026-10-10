@@ -48,8 +48,8 @@ All 39 covered industries.
 | 19 | KRE | Banks - Regional | +1.3% | Yes |
 | 20 | PICK | Other Industrial Metals & Mining | -0.2% | No |
 | 21 | PHO | Utilities - Regulated Water | -0.9% | No |
-| 22 | INDS | REIT - Industrial | -1.4% | No |
-| 23 | PAVE | Engineering & Construction | -2.0% | No |
+| 22 | PAVE | Engineering & Construction | -2.0% | No |
+| 23 | INDS | REIT - Industrial | -2.2% | No |
 | 24 | IHI | Medical Devices | -2.5% | No |
 | 25 | EVX | Waste Management | -2.6% | No |
 | 26 | MOO | Agricultural Inputs | -5.3% | No |
@@ -78,8 +78,8 @@ No transitions since the prior snapshot.
 | Ticker | Label | From | To |
 |--------|-------|------|----|
 | PICK | Other Industrial Metals & Mining | Falling | Rising |
-| INDS | REIT - Industrial | Falling | Rising |
 | PAVE | Engineering & Construction | Rising | Falling |
+| INDS | REIT - Industrial | Falling | Rising |
 | MOO | Agricultural Inputs | Rising | Falling |
 | WOOD | Lumber & Wood Production | Falling | Rising |
 | SIL | Silver | Falling | Rising |

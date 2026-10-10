@@ -121,6 +121,17 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 | XLU | Utilities Select Sector SPDR ETF | etf | unassigned | 4.29% | +138% | Not yet discussed. Sector/thematic |
 | XRO.AX | Xero Limited | stock | unassigned | — | — | Deep dive 2026-09-01. ANZ accounting SaaS moat + high-risk US/Melio payments bet. PE 42.4 flagged rich (0/10), principles-fit avg 44/100. Down ~45pct from peak, bounced 17pct in a month. Watching next few results for US/payments traction. |
 
+### 👁 Bucket 4 A-Team
+
+Flagged via `watchlist-watch --group` — these still appear in their normal bucket table below; this is a themed keep-an-eye-on sub-block.
+
+| Ticker | Bucket(s) | Why |
+|--------|-----------|-----|
+| AMZN | 4 | Mega-cap repeat bear-market bounce back, already rank 10 in Bucket 4 |
+| META | 4 | 2022 crash to AI-earnings all-time highs -- archetypal sharp-bottom bounce |
+| TSLA | 4 | Most extreme beta on the list -- +2425pct 10Y return already |
+| UBER | 4 | COVID -64pct / 2022 -58pct drawdowns, multi-bagger since, still growing |
+
 ## Bucket 4 — Crash Discount Buys
 
 Great, durable companies highly likely to still be around long-term — waiting for a crash-driven discount to enter rather than buying at today's price. Not timed around a specific bubble like Post-Crash AI Watch below, and not a sell-after-recovery trade like Bucket 2. Once actually bought, migrate to Bucket 1. Rank is a 0-10 must-buy score (10 = must-buy), set via `watchlist-rank` — sorted highest-rank first; unranked rows sort last.
