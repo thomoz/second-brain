@@ -129,6 +129,7 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 |--------|-----------|-----|
 | AMZN | 4 | Mega-cap repeat bear-market bounce back, already rank 10 in Bucket 4 |
 | CRWD | 4 | Already proved a fast full recovery -- 2024 outage, -40pct then fully recovered within months |
+| INTC | 4 | Turnaround + historically severe amplifier, highest risk/reward in semis |
 | LULU | 4 | Most extreme drawdowns in the group (-92pct/-47pct/-46pct) but cheap now, opportunity signal fired 3x |
 | META | 4 | 2022 crash to AI-earnings all-time highs -- archetypal sharp-bottom bounce |
 | NET | 4 | -77pct in 2022, earliest-stage growth runway of the three new adds |
