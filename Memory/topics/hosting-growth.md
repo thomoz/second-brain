@@ -33,3 +33,4 @@ Active
 - (Aug 12) WhatsOnSydney has no karaoke or trivia categories, so that listing path is closed.
 - (Aug 18) Meta approved the ad and delivery should now begin
 - (Aug 19) Meta ad approved at 14:21; monitor spend and delivery
+- (Oct 11) Meta ad approved at 17:05 and should begin delivering shortly or when scheduled.

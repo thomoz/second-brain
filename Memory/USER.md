@@ -198,3 +198,7 @@ Skip drafts for: Newsletters, automated notifications, spam
 - (Oct 08) Goat heartbeat scanner should mimic Shaun's chart reading.
 - (Oct 08) Goat heartbeat may use 150DMA proximity, or either 50DMA/150DMA.
 - (Oct 08) NVDA's range is considered acceptable for heartbeat scanning.
+
+## 2026-10-11 Reflection
+- (Oct 11) Rotation Watch artifact URL: https://claude.ai/code/artifact/2b273c17-d4f4-4948-81b9-af0b155c6d92
+- (Oct 11) Rotation Watch source path was temp scratchpad `rotation-watch.html`.
