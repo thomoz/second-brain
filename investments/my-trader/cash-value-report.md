@@ -1,6 +1,6 @@
 # Cash-Value Scan
 
-**Last run: 2026-10-14** - scanned 564 US + 200 ASX names (620 returned balance-sheet data), 14 qualify at net cash >= 50% of market cap.
+**Last run: 2026-10-14** - scanned 564 US + 200 ASX names (614 returned balance-sheet data), 14 qualify at net cash >= 50% of market cap.
 
 What this is: companies whose net cash (cash minus all debt) is at least 50% of their market cap AND that generate positive operating cash flow - the market is pricing the whole operating business at a steep discount and handing you the balance-sheet cash on top. Classic Graham / deep-value screen. Free cash flow is shown and tagged when negative, but is not a filter (positive OCF with negative FCF is usually growth capex, not burn).
 
@@ -20,7 +20,7 @@ Auto-generated daily - overwritten every run. Advisor notes only; no trade actio
 | MTRX | Matrix Service Co | US | 68% | 32% | 298.8M USD | 6.9M USD | -1.5M USD | -1.5% | 203.5M USD | +13% | Industrials | negative FCF | 203.5M USD net cash, 298.8M USD mcap, -1.5M USD FCF - paying ~95.3M USD for the operating business. |
 | USNA | Usana Health Sciences Inc | US | 59% | 41% | 285.6M USD | 27.7M USD | 49.1M USD | 42.0% | 168.6M USD | -5% | Consumer Defensive | shrinking revenue | 168.6M USD net cash, 285.6M USD mcap, 49.1M USD FCF - paying ~117.1M USD for the operating business. |
 | TRS | Trimas Corp | US | 58% | 42% | 1.38B USD | 20.1M USD | 293.6M USD | 51.2% | 804.7M USD | +2% | Consumer Cyclical | - | 804.7M USD net cash, 1.38B USD mcap, 293.6M USD FCF - paying ~572.8M USD for the operating business. |
-| TUA | Tuas | ASX | 58% | 42% | 861.0M SGD | 91.3M SGD | 52.0M SGD | 14.3% | 498.3M SGD | +22% | Communication Services | - | 498.3M SGD net cash, 861.0M SGD mcap, 52.0M SGD FCF - paying ~362.7M SGD for the operating business. |
+| TUA | Tuas | ASX | 57% | 43% | 870.3M SGD | 91.3M SGD | 52.0M SGD | 14.0% | 498.3M SGD | +22% | Communication Services | - | 498.3M SGD net cash, 870.3M SGD mcap, 52.0M SGD FCF - paying ~372.0M SGD for the operating business. |
 | DUOT | Duos Technologies Group Inc | US | 55% | 45% | 201.7M USD | 5.5M USD | -103.1M USD | -114.1% | 111.4M USD | +30% | Technology | negative FCF | 111.4M USD net cash, 201.7M USD mcap, -103.1M USD FCF - paying ~90.4M USD for the operating business. |
 | BULL | Webull Corp | US | 54% | 46% | 3.41B USD | 43.5M USD | 561.5M USD | 36.0% | 1.85B USD | +52% | Technology | - | 1.85B USD net cash, 3.41B USD mcap, 561.5M USD FCF - paying ~1.56B USD for the operating business. |
 | ACTG | Acacia Research Corp | US | 54% | 46% | 429.4M USD | 30.0M USD | -16.4M USD | -8.3% | 230.5M USD | +124% | Industrials | negative FCF | 230.5M USD net cash, 429.4M USD mcap, -16.4M USD FCF - paying ~198.8M USD for the operating business. |
