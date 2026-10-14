@@ -6,7 +6,7 @@ Auto-generated -- overwritten every run. Advisor notes only; no trade action is 
 
 Not covered: alternative data (app downloads, web traffic, credit-card spend) -- no free source in this toolset.
 
-## Run: 2026-10-14
+## Run: 2026-10-15
 Checked 14 holding(s).
 
 ### Holdings
@@ -15,7 +15,7 @@ Checked 14 holding(s).
 - [ok] Estimate trend: EPS estimate down 1.9% over the trailing 30 days -- below the 3.0% flag threshold; corroborating: 4 analyst downward revisions vs 0 upward in the last 30 days
 - [flag] Guidance/commentary: AG/First Majestic did not cut production guidance; it raised 2026 output guidance, but the most recent quarter showed an EPS/revenue miss and higher cost guidance. The main earnings-risk signal is margin pressure from higher AISC/cash costs rather than demand weakness. (Q2 2026 adjusted EPS missed consensus, with sources showing $0.21 vs estimates around $0.25-$0.30.; Q2 2026 revenue reportedly missed consensus, with Benzinga showing $415.5M vs $496.0M estimate.; Updated 2026 guidance raised silver and gold production, but consolidated AISC guidance increased about 4% at the midpoint due to higher costs tied to silver prices and a stronger Mexican peso.; Q2 cash costs per silver-equivalent ounce rose 20% YoY, indicating cost pressure despite strong realized metals prices.)
 - No earnings-relevant 8-Ks in the lookback window.
-- Industry context (Silver, SIL): falling -11.4% over the trailing window (informational only, not a gate)
+- Industry context (Silver, SIL): falling -18.4% over the trailing window (informational only, not a gate)
 
 **BMS** (unnamed, bucket unassigned)
 - No earnings data available (fund/commodity instrument).
@@ -24,7 +24,7 @@ Checked 14 holding(s).
 - [flag] Estimate trend: EPS estimate down 3.0% over the trailing 30 days (1.01 -> 0.98); corroborating: 2 analyst downward revisions vs 0 upward in the last 30 days
 - [info] Guidance/commentary: No lowered/cut current guidance found in the last ~3 months; FY26 production was reported at 103,761oz, within 100,000-110,000oz guidance, and AISC was A$2,738/oz, slightly below the revised A$2,750-A$2,950/oz range.; Most recent reported period showed record June-quarter production of about 31.9koz and strong FY26 revenue/EBITDA/NPAT growth, not an earnings miss signal.; Recent September investor/conference commentary emphasized reserve growth to 2Moz and a path toward ~200koz annual production; management noted operating plans can move around but did not describe demand weakness, margin deterioration, or slowing growth.; No relevant weekly/monthly operating KPI series suggesting a slowdown was found for CYL.AX; available operating metrics are quarterly mine production/cost data.
 - No earnings-relevant 8-Ks in the lookback window.
-- Industry context (Gold, GDX): falling -10.4% over the trailing window (informational only, not a gate)
+- Industry context (Gold, GDX): falling -14.7% over the trailing window (informational only, not a gate)
 
 **GOLD.AX** (unnamed, bucket unassigned)
 - No earnings data available (fund/commodity instrument).
@@ -33,12 +33,12 @@ Checked 14 holding(s).
 - No earnings data available (fund/commodity instrument).
 
 **LLY** (Eli Lilly & Co, bucket 1)
-- [flag] Estimate trend: EPS estimate down 4.2% over the trailing 30 days (36.73 -> 35.19)
+- [flag] Estimate trend: EPS estimate down 4.1% over the trailing 30 days (36.73 -> 35.22)
 - [info] Guidance/commentary: Most recent Q2 2026 release raised full-year revenue and performance-margin guidance; EPS range was adjusted for acquired IPR&D charges rather than operating weakness.; Q2 2026 results showed strong demand-led growth for Mounjaro/Zepbound and beat broadly cited consensus estimates, with Reuters/LSEG reporting adjusted EPS above expectations.; Recent conference/analyst commentary points to continued GLP-1 demand and possible pricing headwinds, but not enough to suggest earnings deterioration versus current expectations.; No material company-level weekly/monthly operating metric slowdown was found in the last ~3 months.
 - [seen] 8-K (Items 2.02,9.01) filed 2026-08-05: Eli Lilly filed an 8-K on August 5, 2026 under Items 2.02 and 9.01 to furnish its press release announcing financial results for the quarter ended June 30, 2026. The filing itself contains no operating metrics, revenue, earnings, margin details, product-level performance, restructuring or cost actions, material agreement changes, or updated guidance; those details, if any, are only in Exhibit 99.1, which is referenced but not included in the provided text. For deterioration monitoring, the actionable takeaway from the filing body is limited: Lilly reported quarterly results via a furnished earnings release, but this excerpt provides no evidence of earnings weakness, expense pressure, demand slowdown, impairments, restructuring, or changes to outlook.
 
 **LULU** (lululemon athletica inc., bucket 1)
-- [ok] Estimate trend: EPS estimate up 0.0% over the trailing 30 days -- below the 3.0% flag threshold; corroborating: 19 analyst downward revisions vs 0 upward in the last 30 days
+- [ok] Estimate trend: EPS estimate up 0.3% over the trailing 30 days -- below the 3.0% flag threshold; corroborating: 19 analyst downward revisions vs 0 upward in the last 30 days
 - [flag] Guidance/commentary: Lululemon’s Sept. 3, 2026 Q2 report showed clear earnings-deterioration signals: it missed revenue estimates, cut FY2026 revenue/EPS guidance for the second time, and guided Q3 revenue/EPS sharply below last year. Management and filings cited reduced traffic, lower conversion, weaker brand sentiment, slower top-line trends, markdown pressure, fixed-cost deleverage, and softness in key regions/products. (FY2026 revenue guidance cut to $10.35B-$10.50B, down 5%-7%, from prior flat to down 1%; EPS cut to $9.48-$9.73 from $10.95-$11.15.; Q2 revenue was $2.42B versus analyst consensus of $2.46B; comparable sales fell 9%, including Americas comps down 12%.; Q3 guide calls for revenue down 10%-11% and EPS of $0.93-$0.98 versus $2.59 last year, with operating margin expected around 6.5% versus 17% last year.; Management/commentary cited reduced traffic, lower conversion, lower average order value in the Americas, weaker brand sentiment, product misses, and additional seasonal clearance due to slower-than-expected top-line trends.; Reuters cited M Science data showing Lululemon’s athleisure share fell 10 percentage points year over year to 43.9% in August while Alo and Vuori gained share.)
 - [seen] 8-K (Items 5.02,7.01,9.01) filed 2026-10-07: lululemon disclosed a leadership reshuffle affecting product, brand, and operations. Nikki Neuburger, Chief Brand and Product Activation Officer, and Ted Dagnese, Chief Supply Chain Officer, will depart on November 6, 2026, with each treated as terminated without cause under their employment agreements. The company created two new senior roles effective October 26, 2026: Maggie Gauger, formerly President and CEO of Athleta and a longtime Nike executive, will become President and Chief Product Officer; Joseph Godsey, formerly Chief Growth Officer of Walmart Canada and previously a supply chain and digital leader at Sam’s Club and adidas, will become Chief Operating Officer.
 
@@ -56,7 +56,7 @@ For an earnings-deterioration screen, this 8-K cover filing alone provides no di
 - [ok] Estimate trend: EPS estimate down 0.1% over the trailing 30 days -- below the 3.0% flag threshold; corroborating: 13 analyst downward revisions vs 12 upward in the last 30 days
 - [flag] Guidance/commentary: Recent Q2 2026 signals look incrementally negative: PDD missed revenue estimates, net income declined year over year, and management flagged short-term cross-border order pressure from EU customs changes plus higher fulfillment costs. No explicit full-year/quarterly guidance cut or company-published monthly operating metric slowdown was found. (Q2 2026 revenue of RMB112.36B missed LSEG consensus of RMB116.35B, while net income attributable to ordinary shareholders fell 12% YoY.; Management said EU customs-duty changes mean cross-border orders in affected markets face lower fulfillment efficiency and higher costs with a considerable short-term impact.; Management noted regulatory/compliance pressure and continued platform, supply-chain, logistics, and merchant-support investments, with non-GAAP operating margin down to 26% from 27% YoY.; Reuters reported intense China e-commerce competition, weak consumer confidence, subdued 618 spending, and higher shipping/compliance costs that may dampen demand among price-sensitive Temu shoppers.)
 - No earnings-relevant 8-Ks in the lookback window.
-- Industry context (Internet Retail, IBUY): rising +5.2% over the trailing window (informational only, not a gate)
+- Industry context (Internet Retail, IBUY): rising +0.7% over the trailing window (informational only, not a gate)
 
 **PMGOLD.AX** (unnamed, bucket 3b)
 - No earnings data available (fund/commodity instrument).
@@ -79,7 +79,7 @@ For an earnings-deterioration screen, this 8-K cover filing alone provides no di
 Borrowings will bear interest at EURIBOR plus a ratings-based margin, with a commitment fee beginning November 13, 2026 if commitments remain outstanding. The agreement is unsecured and not guaranteed by subsidiaries. Key covenants include limits on liens and subsidiary debt, plus a minimum consolidated adjusted EBITDA-to-interest expense ratio of 3.00x. For analysts, the main watch items are incremental acquisition-related leverage, higher interest expense, and covenant headroom following the Delivery Hero transaction.
 - [seen] 8-K (Items 2.02,9.01) filed 2026-08-05: Uber filed an 8-K on August 5, 2026, reporting that it issued a press release announcing financial results for the second quarter ended June 30, 2026. The filing itself does not disclose the actual quarterly metrics, segment performance, margins, cash flow, operating trends, guidance, or management commentary; those details are contained in Exhibit 99.1, which is referenced but not included in the provided text. No cost-cutting, restructuring actions, workforce reductions, impairment charges, material agreement changes, or updated outlook are described in the body of the filing. For an analyst monitoring early signs of earnings deterioration, the key takeaway from the provided 8-K text is limited: Uber has released Q2 2026 results, but this excerpt provides no substantive financial data or operational indicators to assess deterioration risk.
 - [seen] 8-K (Items 1.01,2.03,7.01,9.01) filed 2026-07-16: Uber entered into a Business Combination Agreement to launch a voluntary public takeover offer for Delivery Hero SE at €41.50 per share in cash. The offer is expected to close in the second half of 2027, subject to regulatory approvals, financial-services approvals, and a minimum tender condition; upon completion, Delivery Hero would become a majority-owned indirect subsidiary of Uber. Uber expects to fund the transaction primarily with existing cash balances and debt, making leverage, liquidity use, and financing costs relevant to future earnings and free cash flow. Delivery Hero agreed to operate in the ordinary course until closing and is restricted from soliciting or negotiating competing offers, subject to fiduciary exceptions. The filing does not disclose near-term operating results, cost cuts, restructuring actions, or updated financial guidance, but the proposed acquisition could materially affect Uber’s balance sheet, integration costs, and future consolidated operating performance after closing.
-- Industry context (Software - Application, IGV): rising +41.4% over the trailing window (informational only, not a gate)
+- Industry context (Software - Application, IGV): rising +29.8% over the trailing window (informational only, not a gate)
 
 **V** (Visa Inc (Class A), bucket 1)
 - [ok] Estimate trend: EPS estimate up 0.0% over the trailing 30 days -- below the 3.0% flag threshold
@@ -89,4 +89,4 @@ Borrowings will bear interest at EURIBOR plus a ratings-based margin, with a com
 ### New Alerts This Run
 No new material changes.
 
-Last auto-generated: 2026-10-14.
+Last auto-generated: 2026-10-15.
