@@ -15,7 +15,7 @@ Checked 14 holding(s).
 - [ok] Estimate trend: EPS estimate down 1.9% over the trailing 30 days -- below the 3.0% flag threshold; corroborating: 4 analyst downward revisions vs 0 upward in the last 30 days
 - [flag] Guidance/commentary: AG/First Majestic did not cut production guidance; it raised 2026 output guidance, but the most recent quarter showed an EPS/revenue miss and higher cost guidance. The main earnings-risk signal is margin pressure from higher AISC/cash costs rather than demand weakness. (Q2 2026 adjusted EPS missed consensus, with sources showing $0.21 vs estimates around $0.25-$0.30.; Q2 2026 revenue reportedly missed consensus, with Benzinga showing $415.5M vs $496.0M estimate.; Updated 2026 guidance raised silver and gold production, but consolidated AISC guidance increased about 4% at the midpoint due to higher costs tied to silver prices and a stronger Mexican peso.; Q2 cash costs per silver-equivalent ounce rose 20% YoY, indicating cost pressure despite strong realized metals prices.)
 - No earnings-relevant 8-Ks in the lookback window.
-- Industry context (Silver, SIL): falling -15.6% over the trailing window (informational only, not a gate)
+- Industry context (Silver, SIL): falling -11.4% over the trailing window (informational only, not a gate)
 
 **BMS** (unnamed, bucket unassigned)
 - No earnings data available (fund/commodity instrument).
@@ -24,7 +24,7 @@ Checked 14 holding(s).
 - [flag] Estimate trend: EPS estimate down 3.0% over the trailing 30 days (1.01 -> 0.98); corroborating: 2 analyst downward revisions vs 0 upward in the last 30 days
 - [info] Guidance/commentary: No lowered/cut current guidance found in the last ~3 months; FY26 production was reported at 103,761oz, within 100,000-110,000oz guidance, and AISC was A$2,738/oz, slightly below the revised A$2,750-A$2,950/oz range.; Most recent reported period showed record June-quarter production of about 31.9koz and strong FY26 revenue/EBITDA/NPAT growth, not an earnings miss signal.; Recent September investor/conference commentary emphasized reserve growth to 2Moz and a path toward ~200koz annual production; management noted operating plans can move around but did not describe demand weakness, margin deterioration, or slowing growth.; No relevant weekly/monthly operating KPI series suggesting a slowdown was found for CYL.AX; available operating metrics are quarterly mine production/cost data.
 - No earnings-relevant 8-Ks in the lookback window.
-- Industry context (Gold, GDX): falling -13.4% over the trailing window (informational only, not a gate)
+- Industry context (Gold, GDX): falling -10.4% over the trailing window (informational only, not a gate)
 
 **GOLD.AX** (unnamed, bucket unassigned)
 - No earnings data available (fund/commodity instrument).
@@ -87,6 +87,6 @@ Borrowings will bear interest at EURIBOR plus a ratings-based margin, with a com
 - [seen] 8-K (Items 2.02,8.01,9.01) filed 2026-07-28: Visa filed an 8-K announcing that it issued its fiscal 3Q 2026 earnings release for the quarter ended June 30, 2026, and planned to discuss results on a July 28, 2026 conference call. The filing itself does not include the operating metrics, revenue, margin, EPS, volume, cross-border trends, client incentives, expenses, or guidance details from the earnings release; those are incorporated as Exhibit 99.1 but not provided in the text here. No restructuring actions, cost-reduction programs, impairments, liquidity concerns, or material agreement changes are disclosed in the body of the 8-K. Visa’s board declared a quarterly cash dividend of $0.670 per Class A share, payable September 1, 2026 to holders of record as of August 11, 2026, suggesting continued capital return. For deterioration monitoring, the key missing document is Exhibit 99.1, where any signs of slowing payments volume, cross-border weakness, margin pressure, higher incentives, or changed outlook would likely appear.
 
 ### New Alerts This Run
-- **LLY** (Eli Lilly & Co) (holdings) -- earnings_watch_trend: EPS estimate down 4.2% over the trailing 30 days (36.73 -> 35.19)
+No new material changes.
 
 Last auto-generated: 2026-10-14.

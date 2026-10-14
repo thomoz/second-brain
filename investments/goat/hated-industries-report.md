@@ -10,7 +10,7 @@ Hated since: 2026-09-28
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -20.5% | -19.6% | -23.8pp | -32.2pp | -40.0% |
+| -21.1% | -20.8% | -24.9pp | -34.8pp | -41.2% |
 
 **Narrative:** The dominant negative narrative is that solar equities are being punished by a renewed higher-for-longer rate shock plus U.S. policy/tax-credit/tariff/FEOC uncertainty, which makes project finance models and demand visibility harder despite strong underlying installation activity. A secondary pressure is global module oversupply and margin pressure, especially for panel makers exposed to China-linked supply chains.
 **Systemic read:** industry-wide -- The evidence points to broad sector derating rather than one constituent-specific scandal: reports cite declines across equipment suppliers, residential solar, module makers, and even relatively advantaged names like First Solar and Enphase. The impact is not uniform by business model, but the market narrative is being applied across the industry rather than being concentrated in one or two holdings.
