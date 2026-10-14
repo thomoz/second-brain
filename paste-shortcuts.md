@@ -3,12 +3,19 @@
 
 claude --dangerously-skip-permissions
 
-go ahead and create the structured plan, asking me questions if you need to, for the handoff file .investments/goat/industry-pipeline-handoff.md
+go ahead and create the structured plan, asking me questions if you need to, for the handoff file 
 
 
-ready for execution: 
+ready for execution: .agent/plans/goat-industry-pipeline.md
 
 adds etfs to breakouts:
+
+Market Wizards sector rotation tool (paste as one block into Powershell):
+Set-Location "O:\AI\Dynamous\Courses\second-brain-workshop\investments\market_wizards_flow"
+python -m streamlit run app.py
+
+Rotation Watch prompt:
+refresh the Rotation Watch dashboard artifact
 
 
 ## Market Hours:

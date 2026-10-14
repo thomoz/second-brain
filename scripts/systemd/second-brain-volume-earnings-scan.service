@@ -1,0 +1,11 @@
+[Unit]
+Description=Volume-Spike + Record-Earnings Scan
+After=network.target
+
+[Service]
+Type=oneshot
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain/investments/volume-earnings-scanner
+ExecStart=/home/secondbrain/second-brain/investments/.venv/bin/python -m volume_earnings_scanner.main scan
+StandardOutput=append:/home/secondbrain/second-brain/investments/volume-earnings-scanner/volume_earnings_scan_runs.log
+StandardError=append:/home/secondbrain/second-brain/investments/volume-earnings-scanner/volume_earnings_scan_runs.log

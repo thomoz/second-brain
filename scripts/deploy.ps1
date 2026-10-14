@@ -31,7 +31,8 @@ $TIMERS = @(
     "second-brain-mytrader-earnings-watch.timer",
     "second-brain-mytrader-monitor.timer",
     "second-brain-superinvestor-edgar.timer",
-    "second-brain-superinvestor-sast.timer"
+    "second-brain-superinvestor-sast.timer",
+    "second-brain-volume-earnings-scan.timer"
 )
 
 function Invoke-Remote {

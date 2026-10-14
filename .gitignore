@@ -31,6 +31,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+.venv/
 
 # Phase 3: Memory Search
 .claude/data/memory.db

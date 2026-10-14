@@ -1,2 +1,2 @@
 [tool.uv.workspace]
-members = ["briefs-finance", "my-trader", "goat", "fourteen-crash-signals-daily-check", "superinvestor-filings", "ai-resistant-moat-scanner"]
+members = ["briefs-finance", "my-trader", "goat", "fourteen-crash-signals-daily-check", "superinvestor-filings", "ai-resistant-moat-scanner", "volume-earnings-scanner"]

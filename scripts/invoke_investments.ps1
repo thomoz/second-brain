@@ -8,6 +8,7 @@
 #   .\scripts\invoke_investments.ps1 -Package goat -Command "scan-sectors"
 #   .\scripts\invoke_investments.ps1 -Package fourteen-signals -Command "daily-check"
 #   .\scripts\invoke_investments.ps1 -Package superinvestor-filings -Command "scan --edgar-only"
+#   .\scripts\invoke_investments.ps1 -Package volume-earnings-scanner -Command "scan"
 #
 # goat/fourteen-signals share the same VPS-only investments.db as my-trader/briefs-
 # finance -- never run them via a local `uv run --directory investments/goat ...`;
@@ -21,7 +22,7 @@
 
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("my-trader", "briefs-finance", "goat", "fourteen-signals", "superinvestor-filings", "ai-resistant-moat-scanner")]
+    [ValidateSet("my-trader", "briefs-finance", "goat", "fourteen-signals", "superinvestor-filings", "ai-resistant-moat-scanner", "volume-earnings-scanner")]
     [string]$Package,
 
     [Parameter(Mandatory=$true)]
@@ -38,6 +39,7 @@ $PACKAGES = @{
     "fourteen-signals" = @{ Dir = "fourteen-crash-signals-daily-check"; Module = "fourteen_crash_signals_daily_check.main" }
     "superinvestor-filings" = @{ Dir = "superinvestor-filings"; Module = "superinvestor_filings.main" }
     "ai-resistant-moat-scanner" = @{ Dir = "ai-resistant-moat-scanner"; Module = "ai_resistant_moat_scanner.main" }
+    "volume-earnings-scanner" = @{ Dir = "volume-earnings-scanner"; Module = "volume_earnings_scanner.main" }
 }
 
 $pkg = $PACKAGES[$Package]

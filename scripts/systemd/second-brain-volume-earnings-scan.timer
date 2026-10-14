@@ -1,0 +1,10 @@
+[Unit]
+Description=Volume-Spike + Record-Earnings Scan Timer
+Requires=second-brain-volume-earnings-scan.service
+
+[Timer]
+OnCalendar=*-*-* 23:58:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

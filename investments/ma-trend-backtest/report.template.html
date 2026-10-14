@@ -1,0 +1,863 @@
+<title>The 200-Day Verdict</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-page: #f9f9f6;
+    --surface-card: #fdfcfa;
+    --surface-raised: #ffffff;
+    --surface-sunken: #f1efea;
+    --ink-primary: #17160f;
+    --ink-secondary: #55524a;
+    --ink-muted: #8c887d;
+    --gridline: #e3e0d6;
+    --baseline: #c7c3b6;
+    --border: rgba(23,22,15,0.10);
+    --accent: #93631a;
+    --accent-strong: #6e4a12;
+    --accent-soft: #f2e6cd;
+    --series-buyhold: #2a78d6;
+    --series-cash: #1baf7a;
+    --series-short: #eb6834;
+    --status-good: #0ca30c;
+    --status-critical: #d03b3b;
+    --shadow-card: 0 1px 2px rgba(23,22,15,0.06), 0 8px 24px -16px rgba(23,22,15,0.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-page: #0c0d0f;
+      --surface-card: #15161a;
+      --surface-raised: #1b1c21;
+      --surface-sunken: #101114;
+      --ink-primary: #f3f1ea;
+      --ink-secondary: #c2bfb4;
+      --ink-muted: #8c887d;
+      --gridline: #2a2b2f;
+      --baseline: #3a3b3f;
+      --border: rgba(243,241,234,0.12);
+      --accent: #d9a34c;
+      --accent-strong: #e8bc73;
+      --accent-soft: #2b2314;
+      --series-buyhold: #3987e5;
+      --series-cash: #199e70;
+      --series-short: #d95926;
+      --status-good: #0ca30c;
+      --status-critical: #e66767;
+      --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -18px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-page: #0c0d0f;
+    --surface-card: #15161a;
+    --surface-raised: #1b1c21;
+    --surface-sunken: #101114;
+    --ink-primary: #f3f1ea;
+    --ink-secondary: #c2bfb4;
+    --ink-muted: #8c887d;
+    --gridline: #2a2b2f;
+    --baseline: #3a3b3f;
+    --border: rgba(243,241,234,0.12);
+    --accent: #d9a34c;
+    --accent-strong: #e8bc73;
+    --accent-soft: #2b2314;
+    --series-buyhold: #3987e5;
+    --series-cash: #199e70;
+    --series-short: #d95926;
+    --status-good: #0ca30c;
+    --status-critical: #e66767;
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 12px 32px -18px rgba(0,0,0,0.6);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--surface-page);
+    color: var(--ink-primary);
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  a { color: var(--accent-strong); }
+  h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, 'Times New Roman', serif; font-weight: 600; text-wrap: balance; margin: 0; color: var(--ink-primary); }
+  .mono { font-family: 'IBM Plex Mono', 'Courier New', monospace; font-variant-numeric: tabular-nums; }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-strong);
+    font-weight: 600;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+  .prose { max-width: 740px; }
+
+  /* ---------- header ---------- */
+  header.hero {
+    padding: 72px 0 40px;
+    border-bottom: 1px solid var(--border);
+    background:
+      radial-gradient(ellipse 900px 400px at 85% -10%, var(--accent-soft), transparent 60%);
+  }
+  header.hero .eyebrow { display: block; margin-bottom: 18px; }
+  header.hero h1 { font-size: clamp(2.3rem, 4.4vw, 3.4rem); line-height: 1.08; max-width: 16ch; }
+  header.hero .dek { margin-top: 18px; max-width: 56ch; color: var(--ink-secondary); font-size: 1.08rem; }
+  header.hero .dek .mono { color: var(--ink-primary); }
+
+  .stat-strip {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .stat-tile {
+    background: var(--surface-card);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stat-tile .label { font-size: 0.74rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-tile .value { font-family: 'IBM Plex Mono', monospace; font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat-tile .sub { font-size: 0.82rem; color: var(--ink-secondary); }
+  .up { color: var(--status-good); }
+  .down { color: var(--status-critical); }
+
+  /* ---------- nav ---------- */
+  nav.jump {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--surface-page) 92%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.jump .wrap { display: flex; gap: 4px; overflow-x: auto; padding-top: 10px; padding-bottom: 10px; scrollbar-width: thin; }
+  nav.jump a {
+    flex: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.76rem;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    color: var(--ink-secondary);
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  nav.jump a:hover { background: var(--surface-sunken); color: var(--ink-primary); }
+
+  /* ---------- sections ---------- */
+  section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 28px; }
+  .sec-num { font-family: 'IBM Plex Mono', monospace; color: var(--accent); font-size: 0.95rem; font-weight: 600; }
+  .sec-head h2 { font-size: clamp(1.5rem, 2.6vw, 1.9rem); }
+  .sec-intro { color: var(--ink-secondary); max-width: 68ch; margin: -10px 0 28px; }
+
+  .card {
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
+    padding: 22px 24px;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .grid-2, .grid-4 { grid-template-columns: 1fr; } .stat-strip { grid-template-columns: repeat(2,1fr); } }
+
+  details.methodology { background: var(--surface-card); border: 1px solid var(--border); border-radius: 12px; padding: 4px 24px; }
+  details.methodology summary { cursor: pointer; padding: 16px 0; font-weight: 600; font-size: 1.02rem; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  details.methodology summary::-webkit-details-marker { display: none; }
+  details.methodology summary::after { content: "+"; font-family: 'IBM Plex Mono', monospace; font-size: 1.2rem; color: var(--accent); }
+  details.methodology[open] summary::after { content: "–"; }
+  .method-body { padding-bottom: 20px; }
+  .method-body h4 { font-size: 0.95rem; margin: 20px 0 8px; color: var(--ink-primary); }
+  .method-body h4:first-child { margin-top: 0; }
+  .method-body p, .method-body li { color: var(--ink-secondary); font-size: 0.94rem; }
+  .method-body ul { margin: 6px 0; padding-left: 20px; }
+  .assumption-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; margin: 10px 0 18px; font-size: 0.9rem; }
+  .assumption-grid dt { color: var(--ink-muted); }
+  .assumption-grid dd { margin: 0; font-family: 'IBM Plex Mono', monospace; }
+
+  /* ---------- tables ---------- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-card); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; min-width: 640px; }
+  table.data-table { font-family: 'IBM Plex Mono', monospace; }
+  th, td { padding: 10px 14px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--gridline); }
+  th:first-child, td:first-child { text-align: left; font-family: 'IBM Plex Sans', sans-serif; }
+  thead th { color: var(--ink-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; font-family: 'IBM Plex Sans', sans-serif; background: var(--surface-sunken); position: sticky; top: 0; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--surface-sunken); }
+  td.best { font-weight: 700; position: relative; }
+  td.best::before { content: ""; position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+  .metric-label-col { color: var(--ink-secondary); }
+
+  /* ---------- legend / chart chrome ---------- */
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 10px; font-size: 0.82rem; }
+  .legend .item { display: flex; align-items: center; gap: 7px; color: var(--ink-secondary); }
+  .legend .swatch { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+  .chart-wrap { position: relative; }
+  .chart-wrap svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .tooltip {
+    position: absolute; pointer-events: none; z-index: 5;
+    background: var(--surface-raised); border: 1px solid var(--border); border-radius: 8px;
+    box-shadow: var(--shadow-card);
+    padding: 8px 12px; font-size: 0.78rem; font-family: 'IBM Plex Mono', monospace;
+    opacity: 0; transition: opacity .08s; white-space: nowrap;
+  }
+  .tooltip .t-date { color: var(--ink-muted); font-family: 'IBM Plex Sans', sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+  .tooltip .t-row { display: flex; justify-content: space-between; gap: 10px; }
+  .tooltip .t-swatch { display:inline-block; width:8px;height:8px;border-radius:2px;margin-right:6px; }
+
+  /* ---------- bear market cards ---------- */
+  .bear-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .bear-grid { grid-template-columns: 1fr; } }
+  .bear-card h3 { font-size: 1.08rem; }
+  .bear-card .dates { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--ink-muted); margin-top: 3px; }
+  .bear-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+  .bear-stat { background: var(--surface-sunken); border-radius: 8px; padding: 10px 12px; }
+  .bear-stat .lbl { font-size: 0.7rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .bear-stat .ret { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 1.05rem; margin-top: 3px; }
+  .bear-stat .dd { font-family: 'IBM Plex Mono', monospace; font-size: 0.76rem; color: var(--ink-muted); }
+  .bear-card .note { font-size: 0.88rem; color: var(--ink-secondary); margin-top: 14px; border-top: 1px dashed var(--gridline); padding-top: 12px; }
+
+  /* ---------- tabs ---------- */
+  .tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .tab-btn {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; letter-spacing: 0.02em;
+    padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface-card); color: var(--ink-secondary); cursor: pointer;
+  }
+  .tab-btn.active { background: var(--ink-primary); color: var(--surface-page); border-color: var(--ink-primary); }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+
+  .trade-log-wrap { max-height: 480px; overflow-y: auto; }
+  .side-pill { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  .side-long { background: color-mix(in srgb, var(--series-buyhold) 18%, transparent); color: var(--series-buyhold); }
+  .side-short { background: color-mix(in srgb, var(--series-short) 18%, transparent); color: var(--series-short); }
+
+  .ma-select { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .conclusion-list { display: flex; flex-direction: column; gap: 22px; }
+  .conclusion { display: grid; grid-template-columns: 56px 1fr; gap: 18px; }
+  .conclusion .qnum { font-family: 'Fraunces', serif; font-size: 2rem; color: var(--accent); line-height: 1; }
+  .conclusion h4 { font-size: 1.04rem; margin-bottom: 6px; }
+  .conclusion p { color: var(--ink-secondary); margin: 0; max-width: 70ch; }
+  .verdict-banner { background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 12px; padding: 20px 24px; margin-top: 8px; }
+  .verdict-banner strong { color: var(--accent-strong); }
+
+  footer { padding: 36px 0 64px; color: var(--ink-muted); font-size: 0.82rem; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  footer code { font-family: 'IBM Plex Mono', monospace; background: var(--surface-sunken); padding: 2px 6px; border-radius: 4px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Quant research note &middot; S&amp;P 500 &middot; 1999&ndash;2026</span>
+    <h1>The 200&#8209;Day Verdict</h1>
+    <p class="dek">A trend-following rule &mdash; long above a rising moving average, defensive below a falling one &mdash; tested against buy-and-hold across <span class="mono">28 years</span>, four crashes, and six moving-average lengths. Signals from the index, execution on SPY at the next open, real dividends, real costs.</p>
+    <div class="stat-strip" id="heroStats"></div>
+  </div>
+</header>
+
+<nav class="jump">
+  <div class="wrap">
+    <a href="#methodology">01 Methodology</a>
+    <a href="#headline">02 Headline Results</a>
+    <a href="#equity">03 Equity &amp; Drawdown</a>
+    <a href="#yearly">04 Year-by-Year</a>
+    <a href="#bears">05 Bear Markets</a>
+    <a href="#trades">06 Trade Log</a>
+    <a href="#optimize">07 Optimizing the Length</a>
+    <a href="#verdict">08 Final Verdict</a>
+  </div>
+</nav>
+
+<main>
+
+<section id="methodology">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">01</span><h2>Methodology &amp; assumptions</h2></div>
+    <details class="methodology" open>
+      <summary>How the test was run &mdash; signals, execution, costs, and the one judgment call</summary>
+      <div class="method-body">
+        <h4>Signal &amp; rule</h4>
+        <p>Every day, the S&amp;P 500 index (^GSPC) close is compared to its own simple moving average. <strong>Long</strong> requires close above the average <em>and</em> the average itself higher than the prior day's average (rising). <strong>Bearish</strong> requires close below the average <em>and</em> the average lower than the prior day's (falling). No 5-day confirmation, no percentage buffer. When price and slope disagree, the system holds its existing position &mdash; it only flips once the opposite condition is fully satisfied.</p>
+        <h4>Execution &amp; look-ahead</h4>
+        <p>Signals are computed on ^GSPC's close. The trade itself executes on <strong>SPY</strong> at the <em>next</em> trading day's open &mdash; never the same close that generated the signal. On a transition day the return is split into an overnight leg (old position, prior close &rarr; today's open) and an intraday leg (new position, today's open &rarr; close), so the switch costs exactly what it would have in real time.</p>
+        <h4>Dividends, counted once</h4>
+        <p>Returns are built from SPY's <em>raw</em> Open/Close plus its actual historical dividend payments &mdash; never from a pre-adjusted "Adj Close" series. That keeps dividends from being counted twice, and lets a short position correctly <em>pay</em> the dividend (economically identical to inverting the instrument's whole total return, price plus income) rather than just inverting the price change.</p>
+        <h4>Initial position, 4 Jan 1999</h4>
+        <p>At every moving-average length tested, the S&amp;P 500 on the first trading day of 1999 was already above a rising average &mdash; the long condition was outright satisfied, so both the Long/Cash and Long/Short systems simply start long on day one. No tiebreak or discretionary call was needed at any length.</p>
+        <h4>Costs &amp; financing &mdash; before vs. after</h4>
+        <p>"Before costs" means zero commission, slippage, and borrow fee. "After costs" applies all of the below. The chosen cash-interest treatment (0% vs. T-bill) is a strategy variant, not a cost, so it applies identically in both views.</p>
+        <dl class="assumption-grid">
+          <dt>Commission</dt><dd>$3.00 / leg (&asymp;$6 round trip &mdash; matches IBKR-style per-trade cost on a long)</dd>
+          <dt>Slippage</dt><dd>2 bps of notional / leg</dd>
+          <dt>Short borrow fee</dt><dd>0.30%/yr on notional while short (SPY: easy-to-borrow)</dd>
+          <dt>Cash interest</dt><dd>Actual ^IRX 13-week T-bill yield, accrued daily (Long/Cash T-bill variant only)</dd>
+          <dt>Signal instrument</dt><dd>^GSPC close vs. SMA</dd>
+          <dt>Execution instrument</dt><dd>SPY raw Open/Close + Dividends</dd>
+        </dl>
+        <p>Real-world caveats this doesn't model: IBKR's actual per-share commission schedule (the flat $3 above is a simplifying stand-in you can retune), margin-interest spreads beyond the stated borrow fee, and any AUD/USD conversion drag on an Australian account trading a USD-denominated ETF.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section id="headline">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">02</span><h2>Headline comparison &mdash; 200-day moving average</h2></div>
+    <p class="sec-intro">$10,000 invested 4 January 1999, run to the latest close. Long/Cash shown both with idle cash earning 0% and earning the prevailing T-bill rate.</p>
+    <div class="toggle-row">
+      <div class="tabs" id="costToggle">
+        <button class="tab-btn active" data-cost="after">After costs</button>
+        <button class="tab-btn" data-cost="before">Before costs</button>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="comparisonTable"></table>
+    </div>
+  </div>
+</section>
+
+<section id="equity">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">03</span><h2>Equity curves &amp; drawdowns</h2></div>
+    <p class="sec-intro">Log-scale growth of $10,000, after costs, Long/Cash shown at the T-bill cash rate. The drawdown panel shares the same time axis.</p>
+    <div class="card">
+      <div class="legend" id="equityLegend"></div>
+      <div class="chart-wrap" id="equityChart"></div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <div class="eyebrow" style="margin-bottom:10px;">Underwater &mdash; drawdown from prior peak</div>
+      <div class="chart-wrap" id="drawdownChart"></div>
+    </div>
+  </div>
+</section>
+
+<section id="yearly">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">04</span><h2>Year-by-year returns</h2></div>
+    <p class="sec-intro">Best performer each year marked with &bull;. 2026 is year-to-date (through the latest close), not a full year.</p>
+    <div class="table-scroll">
+      <table class="data-table" id="yearlyTable"></table>
+    </div>
+  </div>
+</section>
+
+<section id="bears">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">05</span><h2>Bear-market dossier</h2></div>
+    <p class="sec-intro">Peak-to-trough performance of each strategy through the four major drawdowns, with the switch dates that fired nearby.</p>
+    <div class="bear-grid" id="bearGrid"></div>
+  </div>
+</section>
+
+<section id="trades">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">06</span><h2>Trade log</h2></div>
+    <p class="sec-intro">Every position change at the 200-day average, after costs. P&amp;L is measured on the realized equity curve, so it already reflects commissions, slippage, borrow fee and dividends for that holding.</p>
+    <div class="toggle-row">
+      <div class="tabs" id="tradeTabs">
+        <button class="tab-btn active" data-side="long_cash" id="tabLongCash">Long / Cash</button>
+        <button class="tab-btn" data-side="long_short" id="tabLongShort">Long / Short</button>
+      </div>
+    </div>
+    <div class="grid-4" id="tradeStats" style="margin-bottom:18px;"></div>
+    <div class="table-scroll trade-log-wrap">
+      <table class="data-table" id="tradeTable"></table>
+    </div>
+  </div>
+</section>
+
+<section id="optimize">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">07</span><h2>Optimizing the moving-average length</h2></div>
+    <p class="sec-intro">Same rules, same dates, six lengths. Buy &amp; hold doesn't depend on the average, so it's shown as a flat reference.</p>
+    <div class="legend" id="sweepLegend"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="eyebrow" style="margin-bottom:10px;">CAGR by length</div>
+        <div class="chart-wrap" id="cagrBars"></div>
+      </div>
+      <div class="card">
+        <div class="eyebrow" style="margin-bottom:10px;">Calmar ratio by length</div>
+        <div class="chart-wrap" id="calmarBars"></div>
+      </div>
+    </div>
+    <div class="table-scroll" style="margin-top:20px;">
+      <table class="data-table" id="sweepTable"></table>
+    </div>
+    <h3 style="margin-top:36px; font-size:1.15rem;">Robustness across sub-periods</h3>
+    <p class="sec-intro">CAGR split into three roughly equal eras, so a length that only worked in one decade stands out.</p>
+    <div class="table-scroll">
+      <table class="data-table" id="subPeriodTable"></table>
+    </div>
+  </div>
+</section>
+
+<section id="verdict">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-num">08</span><h2>Final verdict</h2></div>
+    <div class="conclusion-list" id="conclusionList"></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      Data: Yahoo Finance via <code>yfinance</code> &mdash; ^GSPC (signal), SPY (execution, raw OHLC + dividends), ^IRX (13-week T-bill). Generated <span id="genDate"></span>.
+    </div>
+    <div>Engine saved at <code>investments/ma-trend-backtest/backtest.py</code> for re-runs with different assumptions.</div>
+  </div>
+</footer>
+
+<script>
+const DATA = /*__DATA_JSON__*/null;
+</script>
+<script>
+(function () {
+  "use strict";
+
+  const fmtPct = (v, d = 1) => (v === null || v === undefined) ? "&mdash;" : (v > 0 ? "+" : "") + v.toFixed(d) + "%";
+  const fmtNum = (v, d = 2) => (v === null || v === undefined) ? "&mdash;" : v.toFixed(d);
+  const fmtMoney = (v) => "$" + Math.round(v).toLocaleString("en-US");
+  const signClass = (v) => v > 0 ? "up" : (v < 0 ? "down" : "");
+  const COLORS = { buy_hold: "var(--series-buyhold)", long_cash_0: "var(--series-cash)", long_cash_tbill: "var(--series-cash)", long_short: "var(--series-short)" };
+  const LABELS = { buy_hold: "Buy & Hold", long_cash_0: "Long / Cash (0%)", long_cash_tbill: "Long / Cash (T-bill)", long_short: "Long / Short" };
+
+  // ---------------------------------------------------------------- hero ---
+  function renderHero() {
+    const c = DATA.headline.comparison;
+    const el = document.getElementById("heroStats");
+    const rows = [
+      ["Buy & Hold", c.buy_hold.after, "series-buyhold"],
+      ["Long / Cash (T-bill)", c.long_cash_tbill.after, "series-cash"],
+      ["Long / Short", c.long_short.after, "series-short"],
+    ];
+    el.innerHTML = rows.map(([label, m, cls]) => `
+      <div class="stat-tile">
+        <div class="label" style="color:var(--${cls})">${label}</div>
+        <div class="value">${fmtPct(m.cagr_pct)} <span style="font-size:.6em;color:var(--ink-muted)">CAGR</span></div>
+        <div class="sub">Max DD <span class="mono down">${fmtPct(m.max_drawdown_pct)}</span> &middot; ${fmtMoney(m.final_value)}</div>
+      </div>`).join("") + `
+      <div class="stat-tile">
+        <div class="label">Verdict</div>
+        <div class="value" style="font-size:1.05rem; font-family:'Fraunces',serif; font-weight:600; line-height:1.2;">Cash beats short</div>
+        <div class="sub">Moving to cash captures the drawdown protection; shorting gives most of it back</div>
+      </div>`;
+    document.getElementById("genDate").textContent = new Date(DATA.meta.generated_at).toLocaleDateString("en-AU", { year: "numeric", month: "long", day: "numeric" });
+  }
+
+  // ----------------------------------------------------- comparison table --
+  const METRIC_ROWS = [
+    ["cagr_pct", "CAGR", v => fmtPct(v, 2)],
+    ["total_return_pct", "Total return", v => fmtPct(v, 1)],
+    ["final_value", "Final value of $10,000", v => fmtMoney(v)],
+    ["max_drawdown_pct", "Maximum drawdown", v => fmtPct(v, 1)],
+    ["annualized_vol_pct", "Annualized volatility", v => fmtPct(v, 1)],
+    ["sharpe", "Sharpe ratio", v => fmtNum(v)],
+    ["sortino", "Sortino ratio", v => fmtNum(v)],
+    ["calmar", "Calmar ratio", v => fmtNum(v)],
+    ["num_trades", "Number of trades", v => v],
+    ["num_losing_trades", "Losing trades", v => v],
+    ["avg_winning_trade_pct", "Average winning trade", v => fmtPct(v, 1)],
+    ["avg_losing_trade_pct", "Average losing trade", v => fmtPct(v, 1)],
+    ["pct_days_long", "Time spent long", v => v.toFixed(0) + "%"],
+    ["pct_days_short", "Time spent short", v => v.toFixed(0) + "%"],
+    ["pct_days_cash", "Time spent in cash", v => v.toFixed(0) + "%"],
+  ];
+  const HIGHER_IS_BETTER = new Set(["cagr_pct", "total_return_pct", "final_value", "annualized_vol_pct_inv", "sharpe", "sortino", "calmar", "avg_winning_trade_pct"]);
+  const LOWER_IS_BETTER = new Set(["max_drawdown_pct", "avg_losing_trade_pct"]); // max_drawdown_pct is negative; closer to 0 is better
+
+  function renderComparisonTable(costKey) {
+    const strategies = ["buy_hold", "long_cash_0", "long_cash_tbill", "long_short"];
+    const c = DATA.headline.comparison;
+    let head = "<thead><tr><th>Metric</th>" + strategies.map(s => `<th style="color:var(--${s === 'buy_hold' ? 'series-buyhold' : (s === 'long_short' ? 'series-short' : 'series-cash')})">${LABELS[s]}</th>`).join("") + "</tr></thead>";
+    let body = "<tbody>";
+    for (const [key, label, fmt] of METRIC_ROWS) {
+      const vals = strategies.map(s => c[s][costKey][key]);
+      let bestIdx = -1;
+      if (HIGHER_IS_BETTER.has(key)) bestIdx = vals.indexOf(Math.max(...vals.filter(v => typeof v === "number")));
+      else if (LOWER_IS_BETTER.has(key)) bestIdx = vals.indexOf(Math.max(...vals.filter(v => typeof v === "number"))); // less negative = max
+      body += `<tr><td class="metric-label-col">${label}</td>` + vals.map((v, i) => `<td class="${i === bestIdx ? 'best' : ''}">${fmt(v)}</td>`).join("") + "</tr>";
+    }
+    body += "</tbody>";
+    document.getElementById("comparisonTable").innerHTML = head + body;
+  }
+
+  // ------------------------------------------------------------- charts ---
+  function parseDate(s) { return new Date(s + "T00:00:00"); }
+
+  function makeLineChart(container, { seriesList, height = 320, yFmt = (v) => v.toFixed(1), yLog = false, fill = false }) {
+    const width = 1000;
+    const marginL = 56, marginR = 16, marginT = 16, marginB = 28;
+    const plotW = width - marginL - marginR, plotH = height - marginT - marginB;
+    const n = seriesList[0].values.length;
+
+    let allVals = [];
+    seriesList.forEach(s => s.values.forEach(v => { if (v !== null && !isNaN(v)) allVals.push(v); }));
+    let vMin = Math.min(...allVals), vMax = Math.max(...allVals);
+    if (yLog) { vMin = Math.max(vMin, 1); }
+    const pad = (vMax - vMin) * 0.08 || 1;
+    let domainMin = yLog ? vMin * 0.9 : vMin - pad;
+    let domainMax = yLog ? vMax * 1.1 : vMax + pad;
+    if (!yLog && domainMin > 0 && domainMin < (vMax - vMin) * 2) domainMin = Math.min(domainMin, 0 - pad * 0.1);
+
+    const xAt = (i) => marginL + (i / (n - 1)) * plotW;
+    const yAt = (v) => {
+      if (yLog) {
+        const lv = Math.log(Math.max(v, domainMin)), l0 = Math.log(domainMin), l1 = Math.log(domainMax);
+        return marginT + plotH - ((lv - l0) / (l1 - l0)) * plotH;
+      }
+      return marginT + plotH - ((v - domainMin) / (domainMax - domainMin)) * plotH;
+    };
+
+    // y ticks
+    let yTicks = [];
+    if (yLog) {
+      let p = Math.pow(10, Math.floor(Math.log10(domainMin)));
+      while (p < domainMax) { for (const m of [1, 2, 5]) { const val = p * m; if (val >= domainMin && val <= domainMax) yTicks.push(val); } p *= 10; }
+    } else {
+      const steps = 5;
+      for (let i = 0; i <= steps; i++) yTicks.push(domainMin + (domainMax - domainMin) * i / steps);
+    }
+
+    // x ticks: ~6 evenly spaced
+    const xTickCount = Math.min(7, n);
+    let xTicks = [];
+    for (let i = 0; i < xTickCount; i++) xTicks.push(Math.round(i * (n - 1) / (xTickCount - 1)));
+
+    let svg = `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" role="img">`;
+    // gridlines
+    yTicks.forEach(t => {
+      const y = yAt(t);
+      svg += `<line x1="${marginL}" y1="${y}" x2="${width - marginR}" y2="${y}" stroke="var(--gridline)" stroke-width="1" />`;
+      svg += `<text x="${marginL - 8}" y="${y + 3}" text-anchor="end" font-size="10.5" fill="var(--ink-muted)" font-family="IBM Plex Mono, monospace">${yFmt(t)}</text>`;
+    });
+    xTicks.forEach(i => {
+      const x = xAt(i);
+      svg += `<text x="${x}" y="${height - 8}" text-anchor="middle" font-size="10.5" fill="var(--ink-muted)" font-family="IBM Plex Mono, monospace">${seriesList[0].dates[i].slice(0, 7)}</text>`;
+    });
+    svg += `<line x1="${marginL}" y1="${marginT + plotH}" x2="${width - marginR}" y2="${marginT + plotH}" stroke="var(--baseline)" stroke-width="1" />`;
+
+    // zero-line for drawdown-style charts
+    if (!yLog && domainMin < 0 && domainMax > 0) {
+      const y0 = yAt(0);
+      svg += `<line x1="${marginL}" y1="${y0}" x2="${width - marginR}" y2="${y0}" stroke="var(--baseline)" stroke-width="1" stroke-dasharray="2,3" />`;
+    }
+
+    seriesList.forEach(s => {
+      let d = "";
+      s.values.forEach((v, i) => { if (v === null || isNaN(v)) return; d += (d ? "L" : "M") + xAt(i).toFixed(2) + "," + yAt(v).toFixed(2) + " "; });
+      if (fill) {
+        let area = d + `L${xAt(n - 1).toFixed(2)},${yAt(0).toFixed(2)} L${xAt(0).toFixed(2)},${yAt(0).toFixed(2)} Z`;
+        svg += `<path d="${area}" fill="${s.color}" opacity="0.12" stroke="none" />`;
+      }
+      svg += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />`;
+    });
+
+    svg += `<g class="hover-layer"></g>`;
+    svg += `</svg>`;
+
+    container.innerHTML = svg;
+    const svgEl = container.querySelector("svg");
+    const hoverLayer = svgEl.querySelector(".hover-layer");
+
+    const tip = document.createElement("div");
+    tip.className = "tooltip";
+    container.appendChild(tip);
+
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("x", marginL); rect.setAttribute("y", marginT);
+    rect.setAttribute("width", plotW); rect.setAttribute("height", plotH);
+    rect.setAttribute("fill", "transparent");
+    svgEl.appendChild(rect);
+
+    const crosshair = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    crosshair.setAttribute("stroke", "var(--ink-muted)");
+    crosshair.setAttribute("stroke-width", "1");
+    crosshair.setAttribute("y1", marginT); crosshair.setAttribute("y2", marginT + plotH);
+    crosshair.setAttribute("opacity", "0");
+    svgEl.appendChild(crosshair);
+
+    const dots = seriesList.map(s => {
+      const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      c.setAttribute("r", "3.5"); c.setAttribute("fill", s.color); c.setAttribute("opacity", "0");
+      svgEl.appendChild(c);
+      return c;
+    });
+
+    function onMove(evt) {
+      const bbox = svgEl.getBoundingClientRect();
+      const px = (evt.clientX - bbox.left) * (width / bbox.width);
+      let i = Math.round(((px - marginL) / plotW) * (n - 1));
+      i = Math.max(0, Math.min(n - 1, i));
+      const x = xAt(i);
+      crosshair.setAttribute("x1", x); crosshair.setAttribute("x2", x); crosshair.setAttribute("opacity", "1");
+      let rows = "";
+      seriesList.forEach((s, k) => {
+        const v = s.values[i];
+        dots[k].setAttribute("cx", x);
+        if (v === null || isNaN(v)) { dots[k].setAttribute("opacity", "0"); return; }
+        dots[k].setAttribute("cy", yAt(v)); dots[k].setAttribute("opacity", "1");
+        rows += `<div class="t-row"><span><span class="t-swatch" style="background:${s.color}"></span>${s.label}</span><strong>${s.tipFmt ? s.tipFmt(v) : v.toFixed(1)}</strong></div>`;
+      });
+      tip.innerHTML = `<div class="t-date">${s0date(seriesList, i)}</div>${rows}`;
+      tip.style.opacity = "1";
+      let left = x + 14, top = marginT;
+      if (left > width - 230) left = x - 230;
+      tip.style.left = (left / width * 100) + "%";
+      tip.style.top = (top / height * 100) + "%";
+    }
+    function s0date(list, i) { return list[0].dates[i]; }
+    function onLeave() { crosshair.setAttribute("opacity", "0"); dots.forEach(d => d.setAttribute("opacity", "0")); tip.style.opacity = "0"; }
+    rect.addEventListener("mousemove", onMove);
+    rect.addEventListener("mouseleave", onLeave);
+    rect.addEventListener("touchmove", (e) => { onMove(e.touches[0]); }, { passive: true });
+  }
+
+  function renderLegend(el, keys) {
+    el.innerHTML = keys.map(k => `<div class="item"><span class="swatch" style="background:${COLORS[k]}"></span>${LABELS[k]}</div>`).join("");
+  }
+
+  function renderEquityChart() {
+    const ec = DATA.headline.equity_curves;
+    const keys = ["buy_hold", "long_cash_tbill", "long_short"];
+    renderLegend(document.getElementById("equityLegend"), keys);
+    const seriesList = keys.map(k => ({
+      label: LABELS[k], color: COLORS[k], dates: ec.dates, values: ec[k], tipFmt: (v) => "$" + Math.round(v).toLocaleString("en-US"),
+    }));
+    makeLineChart(document.getElementById("equityChart"), { seriesList, yLog: true, yFmt: (v) => "$" + Math.round(v).toLocaleString("en-US") });
+  }
+
+  function renderDrawdownChart() {
+    const ec = DATA.headline.equity_curves;
+    const keys = ["buy_hold", "long_cash_tbill", "long_short"];
+    const seriesList = keys.map(k => {
+      const vals = ec[k];
+      let peak = -Infinity;
+      const dd = vals.map(v => { peak = Math.max(peak, v); return (v / peak - 1) * 100; });
+      return { label: LABELS[k], color: COLORS[k], dates: ec.dates, values: dd, tipFmt: (v) => v.toFixed(1) + "%" };
+    });
+    makeLineChart(document.getElementById("drawdownChart"), { seriesList, yLog: false, yFmt: (v) => v.toFixed(0) + "%", fill: true });
+  }
+
+  // ------------------------------------------------------------- yearly ---
+  function renderYearlyTable() {
+    const yby = DATA.headline.year_by_year;
+    const years = Object.keys(yby.buy_hold).sort();
+    const keys = ["buy_hold", "long_cash_0", "long_cash_tbill", "long_short"];
+    let head = "<thead><tr><th>Year</th>" + keys.map(k => `<th>${LABELS[k]}</th>`).join("") + "</tr></thead>";
+    let body = "<tbody>";
+    years.forEach(y => {
+      const vals = keys.map(k => yby[k][y]);
+      const bestIdx = vals.indexOf(Math.max(...vals));
+      body += `<tr><td>${y}${y === "2026" ? " <span style='color:var(--ink-muted);font-size:.75em'>(YTD)</span>" : ""}</td>` +
+        vals.map((v, i) => `<td class="${signClass(v)}">${i === bestIdx ? "&bull; " : ""}${fmtPct(v)}</td>`).join("") + "</tr>";
+    });
+    body += "</tbody>";
+    document.getElementById("yearlyTable").innerHTML = head + body;
+  }
+
+  // ------------------------------------------------------------- bears ---
+  function renderBearCards() {
+    const bm = DATA.headline.bear_markets;
+    const defs = {}; DATA.bear_market_defs.forEach(b => defs[b.name] = b);
+    const notes = {
+      "Dot-com crash": "Cash avoided most of the damage (-13.7% vs. -47.5% buy-and-hold); shorting went further and turned the crash into a +32.7% gain since the downtrend was long and clean.",
+      "Global Financial Crisis": "The best case for shorting in this test: a sustained, orderly decline let the short side add +41.9% while cash merely dodged the worst of a -55.2% buy-and-hold loss.",
+      "COVID crash": "Too fast for a 200-day average. By the time the bearish signal confirmed, most of the damage was done — cash (-18.9%) and short (-18.9%, before the shorting fee) ended up roughly level, and both missed much of the V-shaped recovery.",
+      "2022 bear market": "A choppy, whipsaw-prone decline. Cash still helped (-16.8% vs. -24.5%), but shorting lost money outright (-11.4%) — repeated false signals cut both ways.",
+    };
+    const el = document.getElementById("bearGrid");
+    el.innerHTML = Object.keys(defs).map(name => {
+      const d = defs[name], row = bm[name];
+      const seriesList = ["buy_hold", "long_cash", "long_short"].map(k => ({
+        label: LABELS[k === "long_cash" ? "long_cash_tbill" : (k === "long_short" ? "long_short" : "buy_hold")],
+        color: COLORS[k === "long_cash" ? "long_cash_tbill" : (k === "long_short" ? "long_short" : "buy_hold")],
+        dates: row[k].daily_series.dates, values: row[k].daily_series.equity, tipFmt: (v) => "$" + Math.round(v).toLocaleString("en-US"),
+      }));
+      return `<div class="card bear-card">
+        <h3>${name}</h3>
+        <div class="dates">${d.start} &rarr; ${d.end}</div>
+        <div class="bear-stats">
+          <div class="bear-stat"><div class="lbl" style="color:var(--series-buyhold)">Buy &amp; Hold</div><div class="ret ${signClass(row.buy_hold.return_pct)}">${fmtPct(row.buy_hold.return_pct)}</div><div class="dd">DD ${fmtPct(row.buy_hold.max_drawdown_pct)}</div></div>
+          <div class="bear-stat"><div class="lbl" style="color:var(--series-cash)">Long/Cash</div><div class="ret ${signClass(row.long_cash.return_pct)}">${fmtPct(row.long_cash.return_pct)}</div><div class="dd">DD ${fmtPct(row.long_cash.max_drawdown_pct)}</div></div>
+          <div class="bear-stat"><div class="lbl" style="color:var(--series-short)">Long/Short</div><div class="ret ${signClass(row.long_short.return_pct)}">${fmtPct(row.long_short.return_pct)}</div><div class="dd">DD ${fmtPct(row.long_short.max_drawdown_pct)}</div></div>
+        </div>
+        <div class="chart-wrap bear-chart" data-name="${name}"></div>
+        <div class="note">${notes[name] || ""}</div>
+      </div>`;
+    }).join("");
+
+    document.querySelectorAll(".bear-chart").forEach(container => {
+      const name = container.dataset.name;
+      const row = bm[name];
+      const seriesList = ["buy_hold", "long_cash", "long_short"].map(k => ({
+        label: LABELS[k === "long_cash" ? "long_cash_tbill" : (k === "long_short" ? "long_short" : "buy_hold")],
+        color: COLORS[k === "long_cash" ? "long_cash_tbill" : (k === "long_short" ? "long_short" : "buy_hold")],
+        dates: row[k].daily_series.dates, values: row[k].daily_series.equity, tipFmt: (v) => "$" + Math.round(v).toLocaleString("en-US"),
+      }));
+      makeLineChart(container, { seriesList, height: 160, yLog: true, yFmt: (v) => "$" + (v / 1000).toFixed(0) + "k" });
+    });
+  }
+
+  // ------------------------------------------------------------- trades ---
+  function renderTrades(side) {
+    const trades = DATA.headline.trades[side];
+    const m = DATA.headline.comparison[side === "long_cash" ? "long_cash_tbill" : "long_short"].after;
+    document.getElementById("tabLongCash").textContent = `Long / Cash — ${DATA.headline.trades.long_cash.length} trades`;
+    document.getElementById("tabLongShort").textContent = `Long / Short — ${DATA.headline.trades.long_short.length} trades`;
+    document.getElementById("tradeStats").innerHTML = [
+      ["Win rate", m.win_rate_pct.toFixed(1) + "%"],
+      ["Avg win / avg loss", fmtPct(m.avg_winning_trade_pct, 1) + " / " + fmtPct(m.avg_losing_trade_pct, 1)],
+      ["Largest win / loss", fmtPct(m.largest_winning_trade_pct, 1) + " / " + fmtPct(m.largest_losing_trade_pct, 1)],
+      ["Longest losing streak", m.longest_losing_streak + " trades"],
+    ].map(([l, v]) => `<div class="card" style="padding:14px 16px;"><div class="eyebrow" style="margin-bottom:6px;">${l}</div><div class="mono" style="font-size:1.1rem;font-weight:600;">${v}</div></div>`).join("");
+
+    let head = "<thead><tr><th>Entry</th><th>Exit</th><th>Side</th><th>Entry $</th><th>Exit $</th><th>P&amp;L</th><th>Days</th></tr></thead>";
+    let body = "<tbody>" + trades.map(t => `<tr>
+      <td>${t.entry_date}</td><td>${t.exit_date}</td>
+      <td><span class="side-pill ${t.side === 1 ? 'side-long' : 'side-short'}">${t.side === 1 ? "LONG" : "SHORT"}</span></td>
+      <td>${t.entry_price.toFixed(2)}</td><td>${t.exit_price.toFixed(2)}</td>
+      <td class="${signClass(t.pnl_pct)}">${fmtPct(t.pnl_pct, 2)}</td>
+      <td>${t.duration_days}</td></tr>`).join("") + "</tbody>";
+    document.getElementById("tradeTable").innerHTML = head + body;
+  }
+
+  // ----------------------------------------------------------- sweep ---
+  function renderSweepBars(containerId, metricKey, fmt) {
+    const lengths = DATA.meta.ma_lengths;
+    const rows = DATA.ma_sweep.rows;
+    const bh = DATA.ma_sweep.buy_hold_after[metricKey];
+    const width = 460, height = 260, marginL = 48, marginR = 12, marginT = 16, marginB = 28;
+    const plotW = width - marginL - marginR, plotH = height - marginT - marginB;
+    const groups = lengths.length;
+    const groupW = plotW / groups;
+    const barW = groupW * 0.32;
+
+    let vals = [bh];
+    lengths.forEach(l => { vals.push(rows[l].long_cash_tbill.after[metricKey]); vals.push(rows[l].long_short.after[metricKey]); });
+    let vMin = Math.min(0, ...vals), vMax = Math.max(0, ...vals) * 1.15;
+    const yAt = (v) => marginT + plotH - ((v - vMin) / (vMax - vMin)) * plotH;
+    const y0 = yAt(0);
+
+    let svg = `<svg viewBox="0 0 ${width} ${height}">`;
+    [...new Set([vMin, vMin / 2, 0, vMax / 2, vMax])].forEach(t => {
+      const y = yAt(t);
+      svg += `<line x1="${marginL}" y1="${y}" x2="${width - marginR}" y2="${y}" stroke="var(--gridline)" stroke-width="1" />`;
+      svg += `<text x="${marginL - 6}" y="${y + 3}" text-anchor="end" font-size="9.5" fill="var(--ink-muted)" font-family="IBM Plex Mono, monospace">${fmt(t)}</text>`;
+    });
+    lengths.forEach((l, gi) => {
+      const gx = marginL + gi * groupW;
+      const cashV = rows[l].long_cash_tbill.after[metricKey];
+      const shortV = rows[l].long_short.after[metricKey];
+      const x1 = gx + groupW * 0.5 - barW - 2, x2 = gx + groupW * 0.5 + 2;
+      svg += `<rect x="${x1}" y="${Math.min(yAt(cashV), y0)}" width="${barW}" height="${Math.max(Math.abs(yAt(cashV) - y0), 0.5)}" fill="var(--series-cash)" rx="2"><title>${l}-day Long/Cash: ${fmt(cashV)}</title></rect>`;
+      svg += `<rect x="${x2}" y="${Math.min(yAt(shortV), y0)}" width="${barW}" height="${Math.max(Math.abs(yAt(shortV) - y0), 0.5)}" fill="var(--series-short)" rx="2"><title>${l}-day Long/Short: ${fmt(shortV)}</title></rect>`;
+      svg += `<text x="${gx + groupW / 2}" y="${height - 8}" text-anchor="middle" font-size="10" fill="var(--ink-muted)" font-family="IBM Plex Mono, monospace">${l}</text>`;
+    });
+    svg += `<line x1="${marginL}" y1="${y0}" x2="${width - marginR}" y2="${y0}" stroke="var(--baseline)" stroke-width="1" />`;
+    const bhY = yAt(bh);
+    svg += `<line x1="${marginL}" y1="${bhY}" x2="${width - marginR}" y2="${bhY}" stroke="var(--series-buyhold)" stroke-width="1.5" stroke-dasharray="5,4" />`;
+    svg += `</svg>`;
+    document.getElementById(containerId).innerHTML = svg;
+  }
+
+  function renderSweepTable() {
+    const lengths = DATA.meta.ma_lengths;
+    const rows = DATA.ma_sweep.rows;
+    let head = `<thead><tr><th>Length</th><th colspan="4" style="text-align:center;color:var(--series-cash)">Long / Cash (T-bill)</th><th colspan="4" style="text-align:center;color:var(--series-short)">Long / Short</th></tr>
+      <tr><th></th><th>CAGR</th><th>Max DD</th><th>Sharpe</th><th>Calmar</th><th>CAGR</th><th>Max DD</th><th>Sharpe</th><th>Calmar</th></tr></thead>`;
+    let body = "<tbody>";
+    lengths.forEach(l => {
+      const c = rows[l].long_cash_tbill.after, s = rows[l].long_short.after;
+      const hl = l === DATA.meta.headline_ma ? ' style="background:var(--accent-soft)"' : "";
+      body += `<tr${hl}><td>${l}-day${l === DATA.meta.headline_ma ? " &bull;" : ""}</td>
+        <td>${fmtPct(c.cagr_pct, 2)}</td><td>${fmtPct(c.max_drawdown_pct, 1)}</td><td>${fmtNum(c.sharpe)}</td><td>${fmtNum(c.calmar)}</td>
+        <td>${fmtPct(s.cagr_pct, 2)}</td><td>${fmtPct(s.max_drawdown_pct, 1)}</td><td>${fmtNum(s.sharpe)}</td><td>${fmtNum(s.calmar)}</td></tr>`;
+    });
+    body += `<tr><td>Buy &amp; Hold</td><td colspan="8" style="text-align:left;color:var(--ink-muted)">CAGR ${fmtPct(DATA.ma_sweep.buy_hold_after.cagr_pct, 2)} &middot; Max DD ${fmtPct(DATA.ma_sweep.buy_hold_after.max_drawdown_pct, 1)} &middot; Sharpe ${fmtNum(DATA.ma_sweep.buy_hold_after.sharpe)} &middot; Calmar ${fmtNum(DATA.ma_sweep.buy_hold_after.calmar)} (doesn't depend on length)</td></tr>`;
+    body += "</tbody>";
+    document.getElementById("sweepTable").innerHTML = head + body;
+  }
+
+  function renderSubPeriodTable() {
+    const lengths = DATA.meta.ma_lengths;
+    const rows = DATA.ma_sweep.rows;
+    const bh = DATA.headline.sub_period_cagr.buy_hold;
+    const periods = [["1999_2008", "1999–2008"], ["2009_2018", "2009–2018"], ["2019_present", "2019–present"]];
+    let head = "<thead><tr><th>Length / strategy</th>" + periods.map(p => `<th>${p[1]}</th>`).join("") + "</tr></thead>";
+    let body = "<tbody>";
+    body += `<tr><td>Buy &amp; Hold</td>` + periods.map(p => `<td>${fmtPct(bh[p[0]], 1)}</td>`).join("") + "</tr>";
+    lengths.forEach(l => {
+      const c = rows[l].long_cash_tbill.sub_period, s = rows[l].long_short.sub_period;
+      body += `<tr><td style="color:var(--series-cash)">${l}d Long/Cash</td>` + periods.map(p => `<td>${fmtPct(c[p[0]], 1)}</td>`).join("") + "</tr>";
+      body += `<tr><td style="color:var(--series-short)">${l}d Long/Short</td>` + periods.map(p => `<td>${fmtPct(s[p[0]], 1)}</td>`).join("") + "</tr>";
+    });
+    body += "</tbody>";
+    document.getElementById("subPeriodTable").innerHTML = head + body;
+  }
+
+  // -------------------------------------------------------- conclusions ---
+  function renderConclusions() {
+    const c = DATA.headline.comparison;
+    const items = [
+      ["Does the 200-day rule beat buy-and-hold?", `Not on raw compounding &mdash; buy-and-hold's ${fmtPct(c.buy_hold.after.cagr_pct, 2)} CAGR beats Long/Cash's ${fmtPct(c.long_cash_tbill.after.cagr_pct, 2)} and Long/Short's ${fmtPct(c.long_short.after.cagr_pct, 2)}. It wins on the metric that actually matters for staying invested through a crash: Long/Cash cut maximum drawdown from ${fmtPct(c.buy_hold.after.max_drawdown_pct,1)} to ${fmtPct(c.long_cash_tbill.after.max_drawdown_pct,1)} while giving up less than one point of CAGR, which is why its Sharpe (${fmtNum(c.long_cash_tbill.after.sharpe)}) and Calmar (${fmtNum(c.long_cash_tbill.after.calmar)}) both beat buy-and-hold's (${fmtNum(c.buy_hold.after.sharpe)} / ${fmtNum(c.buy_hold.after.calmar)}).`],
+      ["Is Long/Cash better than Long/Short?", `Clearly, in this test. Long/Cash compounds to ${fmtMoney(c.long_cash_tbill.after.final_value)} against Long/Short's ${fmtMoney(c.long_short.after.final_value)} &mdash; and Long/Short's drawdown (${fmtPct(c.long_short.after.max_drawdown_pct,1)}) is almost as bad as buy-and-hold's. Shorting paid off handsomely in the two cleanest, longest bear markets (dot-com, GFC) but got ground down by whipsaws the rest of the time: its win rate across ${c.long_short.after.num_trades} trades is just ${c.long_short.after.win_rate_pct}%, against ${c.long_cash_tbill.after.win_rate_pct}% for the ${c.long_cash_tbill.after.num_trades} Long/Cash trades.`],
+      ["Does the slope requirement earn its keep?", `Indirectly, yes &mdash; it's the mechanism behind "hold on disagreement," which is what keeps trade counts low (26 at 200 days) instead of chopping on every price/average crossover. The shorter lengths in the sweep, where the slope flips far more often, show the cost of losing that filter: the 100-day version racks up 65 Long/Cash trades and 129 Long/Short trades for a worse CAGR and a worse Calmar ratio than 200 days.`],
+      ["Is 200 days the best length, or is something else?", `175 days narrowly leads this sweep on every risk-adjusted measure (CAGR ${fmtPct(rows175Cagr(), 2)}, Calmar ${fmtNum(rows175Calmar())}), with 200 and 250 close behind and internally consistent across all three sub-periods. 100 and 125 days are demonstrably worse everywhere they're measured &mdash; more trades, worse drawdowns, lower Sharpe. The useful range sits around 175&ndash;250 days; there's no sign the result hinges on picking exactly 200.`],
+      ["Which strategy would you actually run?", `Long/Cash at 175&ndash;200 days. It keeps almost all of buy-and-hold's upside, cuts the worst drawdowns by more than half, costs one phone call's worth of trades a year to execute, and doesn't carry a borrow fee, a dividend obligation, or the psychological load of being short a rising market. Long/Short's edge is real only in the two biggest, most sustained bear markets on record &mdash; a bet this test suggests isn't worth making as a standing policy.`],
+    ];
+    function rows175Cagr() { return DATA.ma_sweep.rows["175"].long_cash_tbill.after.cagr_pct; }
+    function rows175Calmar() { return DATA.ma_sweep.rows["175"].long_cash_tbill.after.calmar; }
+    document.getElementById("conclusionList").innerHTML = items.map(([q, a], i) => `
+      <div class="conclusion"><div class="qnum">${i + 1}</div><div><h4>${q}</h4><p>${a}</p></div></div>
+    `).join("") + `<div class="verdict-banner">Bottom line: <strong>Long/Cash, 175&ndash;200 day average, cash parked at T-bill rates.</strong> It is the only variant tested that improves both CAGR-for-risk and drawdown at the same time &mdash; shorting adds cost and whipsaw risk for a payoff that only showed up twice in 28 years.</div>`;
+  }
+
+  // ----------------------------------------------------------------- init
+  renderHero();
+  renderComparisonTable("after");
+  document.getElementById("costToggle").addEventListener("click", (e) => {
+    const btn = e.target.closest(".tab-btn"); if (!btn) return;
+    document.querySelectorAll("#costToggle .tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderComparisonTable(btn.dataset.cost);
+  });
+  renderEquityChart();
+  renderDrawdownChart();
+  renderYearlyTable();
+  renderBearCards();
+
+  let currentSide = "long_cash";
+  renderTrades(currentSide);
+  document.getElementById("tradeTabs").addEventListener("click", (e) => {
+    const btn = e.target.closest(".tab-btn"); if (!btn) return;
+    document.querySelectorAll("#tradeTabs .tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderTrades(btn.dataset.side);
+  });
+
+  renderLegend(document.getElementById("sweepLegend"), ["long_cash_tbill", "long_short"]);
+  renderSweepBars("cagrBars", "cagr_pct", v => v.toFixed(0) + "%");
+  renderSweepBars("calmarBars", "calmar", v => v.toFixed(2));
+  renderSweepTable();
+  renderSubPeriodTable();
+  renderConclusions();
+
+  window.addEventListener("resize", () => { renderEquityChart(); renderDrawdownChart(); });
+})();
+</script>

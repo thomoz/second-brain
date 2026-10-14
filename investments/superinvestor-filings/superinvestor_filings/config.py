@@ -198,6 +198,17 @@ SUPERINVESTOR_TRACKED: dict[str, dict] = {
         "edgar_ciks": ["938869"],   # WATSA V PREM ET AL
         "india_aliases": [],
     },
+    "tudor": {
+        "display": "Paul Tudor Jones / Tudor Investment Corp",
+        # Macro/trading fund, not a classic concentrated-value holder -- added on
+        # request 2026-10-14 despite that mismatch. Verified same day: firm CIK
+        # 923093 carries 89 SC 13G/A, 51 SC 13G, 17 SC 13D/A, 10 SC 13D, 32 Form 4,
+        # 5 Form 3, 1 Form 5 (+ 74 13F-HR, outside the tracked form set), active to
+        # 2026-09-09. Individual CIK 1270196 (JONES PAUL TUDOR II) is dormant since
+        # 2009-11-10 -- not added, same rule as Klarman's dormant individual CIK.
+        "edgar_ciks": ["923093"],   # TUDOR INVESTMENT CORP ET AL
+        "india_aliases": [],
+    },
 
     # --- India / SEBI SAST only (no SEC EDGAR presence) ------------------------
     # These disclose SAST Reg 29 on BSE, not with the SEC, so edgar_ciks is empty.

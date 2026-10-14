@@ -21,6 +21,7 @@ members = [
     "goat",
     "my-trader",
     "superinvestor-filings",
+    "volume-earnings-scanner",
 ]
 
 [[package]]
@@ -1253,6 +1254,40 @@ sdist = { url = "https://files.pythonhosted.org/packages/53/0c/06f8b233b8fd13b9e
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7f/3e/5db95bcf282c52709639744ca2a8b149baccf648e39c8cc87553df9eae0c/urllib3-2.7.0-py3-none-any.whl", hash = "sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897", size = 131087, upload-time = "2026-05-07T16:13:17.151Z" },
 ]
+
+[[package]]
+name = "volume-earnings-scanner"
+version = "0.1.0"
+source = { editable = "volume-earnings-scanner" }
+dependencies = [
+    { name = "beautifulsoup4" },
+    { name = "my-trader" },
+    { name = "pandas" },
+    { name = "requests" },
+    { name = "yfinance" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.12.0" },
+    { name = "my-trader", editable = "my-trader" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8.0" },
+    { name = "pandas", specifier = ">=2.0.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
+    { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.12.0" },
+    { name = "requests", specifier = ">=2.31.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.2.0" },
+    { name = "yfinance", specifier = ">=0.2.40" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "websockets"

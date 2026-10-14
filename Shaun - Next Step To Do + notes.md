@@ -1,7 +1,7 @@
 ## Where we are up to:
 
 execute: O:\AI\Dynamous\Courses\second-brain-workshop\.agent\plans\reflection-tighten-and-memory-cleanup.md to help keep bloat d
-
+1
 From Rahul:
 
 "use the Codex desktop app and enable the sync to mobile. This lets you access Codex via the ChatGPT phone app, so you can easily start individual conversation sessions just like you would on the Codex Desktop app or Codex CLI."
