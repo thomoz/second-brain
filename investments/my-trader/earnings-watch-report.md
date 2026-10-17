@@ -6,7 +6,7 @@ Auto-generated -- overwritten every run. Advisor notes only; no trade action is 
 
 Not covered: alternative data (app downloads, web traffic, credit-card spend) -- no free source in this toolset.
 
-## Run: 2026-10-17
+## Run: 2026-10-18
 Checked 14 holding(s).
 
 ### Holdings
@@ -50,7 +50,7 @@ For an earnings-deterioration screen, this 8-K cover filing alone provides no di
 **LYV** (Live Nation Entertainment Inc, bucket 1)
 - [ok] Estimate trend: EPS estimate down 2.9% over the trailing 30 days -- below the 3.0% flag threshold
 - [info] Guidance/commentary: Most recent reported quarter appears to be Q2 2026; LYV beat analyst EPS and revenue estimates rather than missing them.; No lowered earnings guidance found in the last ~3 months; Q2 commentary projected 10% full-year fan-attendance growth, double-digit Concerts AOI growth, and margin expansion.; Recent management commentary from Q2 and September conference transcripts described strong demand/no demand deceleration, not softening demand or margin pressure.; Operating indicators cited were positive: ticket sales pacing up 11%, event-related deferred revenue up 25%, and deferred service-fee revenue up 23%.
-- [NEW] 8-K (Items 1.01,2.03,9.01) filed 2026-10-16: summary unavailable
+- [seen] 8-K (Items 1.01,2.03,9.01) filed 2026-10-16: summary unavailable
 - [seen] 8-K (Items 2.02,9.01) filed 2026-07-30: Live Nation filed an 8-K on July 30, 2026 reporting that it issued a press release announcing results of operations for the quarter ended June 30, 2026. The filing itself does not include the operating metrics, financial results, segment performance, margins, cash flow, cost actions, restructuring measures, agreement changes, or forward-looking commentary from the release; those details are contained in Exhibit 99.1, which is referenced but not provided in the excerpt. Based on the text shown, there are no disclosed signs of earnings deterioration, no specific cost-control or restructuring initiatives, and no guidance-relevant updates to assess. The filing is limited to Item 2.02 results announcement notice and Item 9.01 exhibit listing.
 
 **PDD** (unnamed, bucket unassigned)
@@ -87,6 +87,6 @@ Borrowings will bear interest at EURIBOR plus a ratings-based margin, with a com
 - [seen] 8-K (Items 2.02,8.01,9.01) filed 2026-07-28: Visa filed an 8-K announcing that it issued its fiscal 3Q 2026 earnings release for the quarter ended June 30, 2026, and planned to discuss results on a July 28, 2026 conference call. The filing itself does not include the operating metrics, revenue, margin, EPS, volume, cross-border trends, client incentives, expenses, or guidance details from the earnings release; those are incorporated as Exhibit 99.1 but not provided in the text here. No restructuring actions, cost-reduction programs, impairments, liquidity concerns, or material agreement changes are disclosed in the body of the 8-K. Visa’s board declared a quarterly cash dividend of $0.670 per Class A share, payable September 1, 2026 to holders of record as of August 11, 2026, suggesting continued capital return. For deterioration monitoring, the key missing document is Exhibit 99.1, where any signs of slowing payments volume, cross-border weakness, margin pressure, higher incentives, or changed outlook would likely appear.
 
 ### New Alerts This Run
-- **LYV** (Live Nation Entertainment Inc) (holdings) -- earnings_watch_8k: New earnings-relevant 8-K (Item 1.01,2.03,9.01) filed 2026-10-16: summary unavailable
+No new material changes.
 
-Last auto-generated: 2026-10-17.
+Last auto-generated: 2026-10-18.
