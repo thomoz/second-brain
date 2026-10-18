@@ -6,7 +6,7 @@ Auto-generated -- overwritten every run. Advisor notes only; no trade action is 
 
 Not covered: alternative data (app downloads, web traffic, credit-card spend) -- no free source in this toolset.
 
-## Run: 2026-10-18
+## Run: 2026-10-19
 Checked 14 holding(s).
 
 ### Holdings
@@ -89,4 +89,4 @@ Borrowings will bear interest at EURIBOR plus a ratings-based margin, with a com
 ### New Alerts This Run
 No new material changes.
 
-Last auto-generated: 2026-10-18.
+Last auto-generated: 2026-10-19.
