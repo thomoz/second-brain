@@ -4,23 +4,33 @@ Advisor notes only; no trade action is ever suggested here (see SOUL.md). Source
 
 ## Run: 2026-10-18
 
-## Top 5 Rising
-| Rank | Industry | Perf Half |
-|------|----------|-----------|
-| 1 | Oil & Gas Refining & Marketing | +93.68% |
-| 2 | Health Information Services | +44.59% |
-| 3 | Staffing & Employment Services | +36.05% |
-| 4 | Diagnostics & Research | +32.15% |
-| 5 | Healthcare Plans | +27.54% |
+## Top 10 Rising
+| Rank | Industry | Perf Week | Perf Month | Perf Quarter | Perf Half | Perf Year | Perf YTD |
+|------|----------|--- | --- | --- | --- | --- | ---|
+| 1 | Oil & Gas Refining & Marketing | +3.77% | +8.18% | +39.99% | +93.68% | +137.35% | +148.75% |
+| 2 | Health Information Services | -0.03% | +5.32% | +23.82% | +44.59% | -1.05% | +21.96% |
+| 3 | Staffing & Employment Services | -1.10% | -6.89% | -8.03% | +36.05% | +9.21% | +22.88% |
+| 4 | Diagnostics & Research | +2.21% | +4.20% | +23.04% | +32.15% | +28.72% | +17.97% |
+| 5 | Healthcare Plans | +4.98% | +5.64% | -2.92% | +27.54% | +16.59% | +23.10% |
+| 6 | Consumer Electronics | +2.05% | +1.98% | +5.47% | +26.60% | +35.28% | +25.18% |
+| 7 | Electronics & Computer Distribution | -7.49% | -2.72% | +7.77% | +25.94% | +61.12% | +75.51% |
+| 8 | Software - Infrastructure | -5.61% | +1.56% | +22.68% | +23.74% | -1.58% | +10.18% |
+| 9 | REIT - Hotel & Motel | +4.69% | +7.49% | -0.92% | +22.76% | +43.56% | +38.45% |
+| 10 | Computer Hardware | -18.23% | -17.42% | -5.31% | +22.08% | +79.43% | +95.47% |
 
-## Bottom 5 Falling
-| Rank | Industry | Perf Half |
-|------|----------|-----------|
-| 140 | Airports & Air Services | -27.09% |
-| 141 | Aluminum | -32.25% |
-| 142 | Advertising Agencies | -32.96% |
-| 143 | Uranium | -36.13% |
-| 144 | Mortgage Finance | -36.43% |
+## Bottom 10 Falling
+| Rank | Industry | Perf Week | Perf Month | Perf Quarter | Perf Half | Perf Year | Perf YTD |
+|------|----------|--- | --- | --- | --- | --- | ---|
+| 135 | Solar | -5.44% | -11.58% | -21.67% | -21.34% | -31.10% | -29.97% |
+| 136 | Resorts & Casinos | +1.80% | -7.33% | -18.30% | -21.69% | -15.50% | -25.27% |
+| 137 | Other Precious Metals & Mining | -5.99% | -15.15% | +7.20% | -24.15% | -5.76% | -16.16% |
+| 138 | REIT - Mortgage | -0.83% | -14.26% | -20.90% | -25.06% | -23.37% | -24.85% |
+| 139 | Utilities - Renewable | -4.04% | -8.75% | -20.20% | -26.78% | -11.04% | -12.00% |
+| 140 | Airports & Air Services | -1.04% | -4.92% | -14.24% | -27.09% | -35.16% | -33.53% |
+| 141 | Aluminum | -2.34% | -9.99% | -8.08% | -32.25% | +24.75% | -9.26% |
+| 142 | Advertising Agencies | -1.24% | -11.71% | -27.69% | -32.96% | -47.16% | -50.25% |
+| 143 | Uranium | -8.76% | -14.98% | -7.65% | -36.13% | -29.93% | -17.74% |
+| 144 | Mortgage Finance | -5.23% | -13.88% | -24.16% | -36.43% | -39.99% | -46.03% |
 
 ## Full Ranking
 All 144/144 industries.
