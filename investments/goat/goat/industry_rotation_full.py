@@ -86,6 +86,23 @@ def capture_full_industry_snapshot(conn: sqlite3.Connection, ranking: list[dict[
     return capture_rotation_snapshot(conn, scope=_SNAPSHOT_SCOPE, ranking=snapshot_rows, label_key="name")
 
 
+def _perf_table_header() -> list[str]:
+    header_cells = " | ".join(label for _field, label in _PERF_COLUMNS)
+    divider_cells = " | ".join("---" for _field, _label in _PERF_COLUMNS)
+    return [f"| Rank | Industry | {header_cells} |", f"|------|----------|{divider_cells}|"]
+
+
+def _perf_table_rows(rows: list[dict[str, Any]]) -> list[str]:
+    lines = []
+    for row in rows:
+        cells = " | ".join(
+            f"{row[field]:+.2f}%" if row[field] is not None else "—"
+            for field, _label in _PERF_COLUMNS
+        )
+        lines.append(f"| {row['rank']} | {row['name']} | {cells} |")
+    return lines
+
+
 def render_full_industry_ranking_report(result: dict[str, Any]) -> str:
     ranking = result["ranking"]
     lines = [
@@ -101,40 +118,23 @@ def render_full_industry_ranking_report(result: dict[str, Any]) -> str:
         "",
         f"## Run: {_today_sydney()}",
         "",
-        "## Top 5 Rising",
-        "| Rank | Industry | Perf Half |",
-        "|------|----------|-----------|",
+        "## Top 10 Rising",
     ]
-    for row in ranking[:5]:
-        half = f"{row['perf_half']:+.2f}%" if row["perf_half"] is not None else "—"
-        lines.append(f"| {row['rank']} | {row['name']} | {half} |")
+    lines += _perf_table_header()
+    lines += _perf_table_rows(ranking[:10])
 
-    lines += [
-        "",
-        "## Bottom 5 Falling",
-        "| Rank | Industry | Perf Half |",
-        "|------|----------|-----------|",
-    ]
-    for row in ranking[-5:]:
-        half = f"{row['perf_half']:+.2f}%" if row["perf_half"] is not None else "—"
-        lines.append(f"| {row['rank']} | {row['name']} | {half} |")
+    lines += ["", "## Bottom 10 Falling"]
+    lines += _perf_table_header()
+    lines += _perf_table_rows(ranking[-10:])
 
-    header_cells = " | ".join(label for _field, label in _PERF_COLUMNS)
-    divider_cells = " | ".join("---" for _field, _label in _PERF_COLUMNS)
     lines += [
         "",
         "## Full Ranking",
         f"All {len(ranking)}/144 industries.",
         "",
-        f"| Rank | Industry | {header_cells} |",
-        f"|------|----------|{divider_cells}|",
     ]
-    for row in ranking:
-        cells = " | ".join(
-            f"{row[field]:+.2f}%" if row[field] is not None else "—"
-            for field, _label in _PERF_COLUMNS
-        )
-        lines.append(f"| {row['rank']} | {row['name']} | {cells} |")
+    lines += _perf_table_header()
+    lines += _perf_table_rows(ranking)
 
     # Only present once a snapshot has actually been captured for this scope
     # (capture_full_industry_snapshot) -- absent entirely on a render called
