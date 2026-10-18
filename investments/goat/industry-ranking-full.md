@@ -2,7 +2,7 @@
 
 Advisor notes only; no trade action is ever suggested here (see SOUL.md). Sourced from Finviz's own Groups performance view (finviz.com/groups.ashx?g=industry&v=140), covering all 144 Finviz industries -- not just the 39 with a dedicated, currently-trading ETF (see industry-ranking.md for that narrower, breakout-gated report). This is a pure informational ranking: no breakout signal, no candidate staging, no WhatsApp alert.
 
-## Run: 2026-10-18
+## Run: 2026-10-19
 
 ## Top 10 Rising
 | Rank | Industry | Perf Week | Perf Month | Perf Quarter | Perf Half | Perf Year | Perf YTD |
@@ -183,9 +183,13 @@ All 144/144 industries.
 | 144 | Mortgage Finance | -5.23% | -13.88% | -24.16% | -36.43% | -39.99% | -46.03% |
 
 ### Rotation Flow
-No prior snapshot yet.
+0 newly rising, 0 newly falling since the prior snapshot (58 still rising, 86 still falling unchanged).
+
+No transitions since the prior snapshot.
 
 ### Short-Window Flow (1-Week)
-No prior snapshot yet.
+0 newly rising, 0 newly falling since the prior snapshot (87 still rising, 57 still falling unchanged).
 
-Last auto-generated: 2026-10-18.
+No transitions since the prior snapshot.
+
+Last auto-generated: 2026-10-19.
