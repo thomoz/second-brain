@@ -104,4 +104,4 @@ Scanned 742 ticker(s) across the combined universe.
 | UNH | UnitedHealth Group | NYSE | Health Care | UNH (Health Care): crossed above its 150-day MA 10 trading day(s) ago, now +7.2% above it (MA currently rising) -- DMA breakout discovery signal; survival context: debt/equity 70.4 (below flag threshold), N/A — cash generative, gross margin 20.0%, operating margin 5.8%, revenue growth -0.4% YoY, cash-generating | 2026-10-17 |
 | WDS.AX | Woodside Energy Group | ASX | Energy | WDS.AX (Energy): crossed above its 150-day MA 10 trading day(s) ago, now +6.4% above it (MA currently rising) -- DMA breakout discovery signal; survival context: debt/equity 32.8 (below flag threshold), N/A — cash generative, gross margin 34.9%, operating margin 23.9%, revenue growth +13.0% YoY, cash-generating | 2026-10-17 |
 
-Last auto-generated: 2026-10-18.
+Last auto-generated: 2026-10-19.
