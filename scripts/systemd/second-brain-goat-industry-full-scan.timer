@@ -1,0 +1,10 @@
+[Unit]
+Description=Goat Full-Coverage Industry Ranking Scan Timer
+Requires=second-brain-goat-industry-full-scan.service
+
+[Timer]
+OnCalendar=*-*-* 21:40:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

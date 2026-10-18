@@ -129,6 +129,24 @@ def cmd_scan_industries(args) -> None:
     )
 
 
+def cmd_scan_industries_full(args) -> None:
+    from . import finviz_groups, industry_rotation_full
+
+    rows = finviz_groups.fetch_industry_groups()
+    if rows is None:
+        print("[goat-industry-full-scan] Finviz Groups fetch failed -- no report written this run")
+        return
+    ranking = industry_rotation_full.rank_all_industries(rows)
+    conn = _open_conn()
+    flow = industry_rotation_full.capture_full_industry_snapshot(conn, ranking)
+    conn.close()
+    industry_rotation_full.write_full_industry_ranking_report({"ranking": ranking, **flow})
+    print(
+        f"Full industry ranking complete: ranked {len(ranking)}/144 industries. "
+        f"See investments/goat/industry-ranking-full.md"
+    )
+
+
 def cmd_scan_heartbeat(args) -> None:
     from .heartbeat_scan import run_heartbeat_scan, write_heartbeat_candidates_report
     from .monitor import maybe_notify
@@ -392,6 +410,10 @@ def main() -> None:
         help="On-demand industry rotation ranking (also runs daily as part of monitor)",
     )
     subparsers.add_parser(
+        "scan-industries-full",
+        help="On-demand full-coverage (144 industries) rotation ranking via Finviz Groups",
+    )
+    subparsers.add_parser(
         "check-live",
         help="Intraday 150DMA live-price check against currently-open-market holdings",
     )
@@ -447,7 +469,7 @@ def main() -> None:
         "query-rotation-history",
         help="Read-only: print JSON snapshot history for a scope (no DB writes, no notification)",
     )
-    p_rotation_history.add_argument("--scope", required=True, choices=["sector", "industry"])
+    p_rotation_history.add_argument("--scope", required=True, choices=["sector", "industry", "industry_full"])
     p_rotation_history.add_argument("--ticker", default=None)
     p_rotation_history.add_argument(
         "--days", type=int, default=_config.GOAT_ROTATION_SNAPSHOT_RETENTION_DAYS,
@@ -458,6 +480,7 @@ def main() -> None:
         "monitor": cmd_monitor,
         "scan-sectors": cmd_scan_sectors,
         "scan-industries": cmd_scan_industries,
+        "scan-industries-full": cmd_scan_industries_full,
         "check-live": cmd_check_live,
         "scan-heartbeat": cmd_scan_heartbeat,
         "scan-industry-heartbeat": cmd_scan_industry_heartbeat,

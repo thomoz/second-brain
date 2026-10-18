@@ -243,6 +243,20 @@ GOAT_FINVIZ_INDUSTRY_SLUGS: dict[str, str] = {
                                                                 # verification coverage only)
 }
 
+# Full-coverage industry ranking (all 144 Finviz industries, not just the 39 with
+# a dedicated ETF), per .agent/plans/goat-industry-ranking-full-coverage.md.
+# LIVE-VERIFIED 2026-10-18: Finviz's own Groups "Performance" view
+# (groups.ashx?g=industry&v=140) already aggregates return data by industry
+# server-side -- no yfinance, no constituent-stock classification needed.
+# Deliberately separate from GOAT_INDUSTRY_ETFS/GOAT_FINVIZ_INDUSTRY_SLUGS above
+# -- this feature cannot feed or replace the 39-industry breakout/candidate
+# pipeline (no daily price series in this data source), see plan Decision #2.
+GOAT_FINVIZ_GROUPS_URL = "https://finviz.com/groups.ashx"
+GOAT_INDUSTRY_FULL_RANKING_MD_PATH = GOAT_DIR / "industry-ranking-full.md"
+GOAT_INDUSTRY_FULL_PRIMARY_WINDOW = "perf_half"  # closest match to the existing
+    # ~6-month GOAT_INDUSTRY_RANK_WINDOW_TRADING_DAYS convention; v1/tunable --
+    # "perf_quarter" or "perf_month" are equally valid choices, change freely.
+
 # Hand-curated ASX ticker -> Finviz industry-label mapping, per Decision 20
 # (2026-10-03, Shaun: build this now, do not defer). Covers a useful slice --
 # large/liquid ASX names in industries most likely to actually clear the

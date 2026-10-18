@@ -49,6 +49,9 @@ def _isolate_goat_report_path(monkeypatch, tmp_path):
         goat_config, "GOAT_INDUSTRY_RANKING_MD_PATH", tmp_path / "industry-ranking.md"
     )
     monkeypatch.setattr(
+        goat_config, "GOAT_INDUSTRY_FULL_RANKING_MD_PATH", tmp_path / "industry-ranking-full.md"
+    )
+    monkeypatch.setattr(
         goat_config, "GOAT_HATED_REPORT_PATH", tmp_path / "hated-industries-report.md"
     )
     monkeypatch.setattr(

@@ -1,0 +1,11 @@
+[Unit]
+Description=Goat Full-Coverage Industry Ranking Scan
+After=network.target
+
+[Service]
+Type=oneshot
+User=secondbrain
+WorkingDirectory=/home/secondbrain/second-brain/investments/goat
+ExecStart=/home/secondbrain/second-brain/investments/.venv/bin/python -m goat.main scan-industries-full
+StandardOutput=append:/home/secondbrain/second-brain/investments/goat/industry_full_scan_runs.log
+StandardError=append:/home/secondbrain/second-brain/investments/goat/industry_full_scan_runs.log
