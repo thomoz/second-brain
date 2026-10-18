@@ -215,7 +215,6 @@ Open alerts: none
 **UBER** (None, No strategic bucket assigned yet)
 10.0 @ avg $79.08 | now $70.35 | P&L $-87.26 (-11.0%) | 6.8% of tracked portfolio
 Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
-- OPEN ALERT (earnings_watch_trend, since 2026-10-15): EPS estimate down 3.0% over the trailing 30 days (3.28 -> 3.18)
 - OPEN ALERT (balance_sheet, since 2026-09-28): Current Ratio 0.84 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
 - OPEN ALERT (earnings_watch_guidance, since 2026-09-17): Uber's latest Q2 2026 report was mixed: revenue missed consensus and Q3 guidance for gross bookings and non-GAAP EPS came in slightly below analyst expectations. Management also flagged Brazil mobility trip softness from delivery-side competition for two-wheeler supply, though overall demand/profit metrics remained strong. (Q3 gross bookings guidance midpoint of $59.25B was slightly below ~$59.33B consensus; non-GAAP EPS guide midpoint of $0.86 was below ~$0.89 consensus.; Q2 revenue of $14.19B missed consensus of about $14.21B-$14.24B, while EPS was in line or beat depending on GAAP/non-GAAP basis.; Q2 call commentary cited Brazil mobility trip softness and higher cost to secure two-wheeler supply, with incentives shifted toward delivery supply.; No clear cut to full-year guidance or broad published monthly operating-metric slowdown found in the last ~3 months.)
 - [info] company_profile: Uber Technologies, Inc. develops and operates proprietary technology applications in the United States, Canada, Latin America, Europe, the Middle East, Africa, and the Asia Pacific.
@@ -251,7 +250,6 @@ No new material changes.
 
 ### All Open Alerts
 - **JNJ** (watchlist) — valuation: PE 38.8 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-10-16)
-- **UBER** (holdings) — earnings_watch_trend: EPS estimate down 3.0% over the trailing 30 days (3.28 -> 3.18) (first flagged 2026-10-15)
 - **TBIL** (watchlist) — dividend: Dividend declined -14.3% vs prior 12 months (first flagged 2026-10-14)
 - **TAN** (watchlist) — dividend: Dividend declined -100.0% vs prior 12 months (first flagged 2026-10-14)
 - **STNG** (watchlist) — dividend: Dividend declined -15.6% vs prior 12 months (first flagged 2026-10-14)
@@ -325,7 +323,7 @@ No new material changes.
 - **GOOGL** — Buffett/Smith [ROE 48.7% at/above 15.0% (10/10 — excellent), not richly valued]
 - **GROW.L** — Graham [PE 9.5 x P/B 0.78 = 7.5, below 22.5]
 - **KO** — Buffett/Smith [ROE 42.1% at/above 15.0% (10/10 — excellent), not richly valued]
-- **KSPI** — Graham [PE 8.9 at/below cheap threshold (12.0), P/B unavailable/implausible]; Buffett/Smith [ROE 44.8% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
+- **KSPI** — Graham [PE 8.5 at/below cheap threshold (12.0), P/B unavailable/implausible]; Buffett/Smith [ROE 44.8% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
 - **LEN** — Graham [PE 14.6 x P/B 0.85 = 12.4, below 22.5]
 - **LULU** — Graham [PE 8.0 x P/B 2.26 = 18.1, below 22.5]; Lynch [PEG 0.98 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 30.9% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -16.5% over 3 months with no other flags — possible overreaction, not a fundamental problem] (4 independent signals)
 - **META** — Lynch [PEG 0.94 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 29.8% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
@@ -355,9 +353,9 @@ No new material changes.
 - **us_cpi** [flag] — US headline CPI 3.72% YoY (as of 2026-09-01), outside the 1-3% tolerance band around the Fed's 2% target — inflation running hotter than the Fed's comfort zone
 - **uk_cpi** [flag] — UK headline CPI 3.1% YoY (reference month 2026-08-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone
 - **real_yields** [flag] — 10Y real yield +2.78% (as of 2026-10-15), above the 2.0% threshold -- elevated real yields historically pressure gold hard
-- **dollar_index** [ok] — Broad USD index 121.6, +1.9% over the past 30 days
+- **dollar_index** [ok] — Broad USD index 121.6, +1.8% over the past 30 days
 - **gold_trend** [info] — GC=F $4,181 (50DMA $4,374, 200DMA $4,541, -7.9% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $59.66 AUD; AUD/USD 3mo move -0.8%
-- **gold_silver_ratio** [ok] — Gold/silver ratio at 73.4
+- **gold_silver_ratio** [ok] — Gold/silver ratio at 73.0
 - **vix** [ok] — VIX at 20.0, below the flag threshold
 
 ### Gold Outlook
