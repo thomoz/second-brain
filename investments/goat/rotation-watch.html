@@ -167,6 +167,41 @@
   }
   .tile-label { font-size: 10.5px; color: var(--text-muted); margin-top: 8px; }
 
+  .tile.clickable { cursor: pointer; }
+  .tile.clickable:hover { border-color: var(--accent); }
+  .tile.clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(11, 11, 11, 0.5);
+    display: none; align-items: flex-start; justify-content: center;
+    padding: 10vh 16px; z-index: 50; overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    max-width: 440px; width: 100%; padding: 18px 20px 20px; position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 12px; right: 14px; appearance: none; border: none;
+    background: none; font-size: 18px; line-height: 1; cursor: pointer;
+    color: var(--text-muted); padding: 2px 4px;
+  }
+  .modal-close:hover { color: var(--text-primary); }
+  .modal-card h3 { margin: 0 24px 4px 0; font-size: 17px; font-weight: 700; }
+  .modal-sub { font-size: 12px; color: var(--text-muted); margin: 0 0 14px; line-height: 1.5; }
+  .etf-option {
+    border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px; margin-bottom: 8px;
+  }
+  .etf-option:last-child { margin-bottom: 0; }
+  .etf-ticker { font-size: 14px; font-weight: 700; }
+  .etf-tier { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .etf-links { display: flex; gap: 8px; margin-top: 8px; }
+  .etf-links a {
+    font-size: 11.5px; font-weight: 600; color: var(--accent); text-decoration: none;
+    border: 1px solid var(--border); border-radius: 6px; padding: 5px 9px;
+  }
+  .etf-links a:hover { background: var(--accent-wash); }
+
   .explainer {
     display: flex; gap: 10px; align-items: flex-start;
     background: var(--accent-wash); border: 1px solid var(--border); border-radius: 10px;
@@ -303,6 +338,15 @@
     was dropped from this page 2026-10-20 in favor of the full-coverage one above. The custom watch section
     is a one-off live yfinance pull, not persisted anywhere &mdash; ask again for an updated version.
   </footer>
+
+  <div class="modal-overlay" id="etfModal">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="etfModalCloseBtn" aria-label="Close">&times;</button>
+      <h3 id="etfModalTitle"></h3>
+      <p class="modal-sub" id="etfModalSub"></p>
+      <div id="etfModalBody"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -361,7 +405,1100 @@
   ];
   // === INDUSTRY_FULL_DATA:END ===
 
-  var CUSTOM_DATES = ["2026-07-10","2026-07-13","2026-07-14","2026-07-15","2026-07-16","2026-07-17","2026-07-20","2026-07-21","2026-07-22","2026-07-23","2026-07-24","2026-07-27","2026-07-28","2026-07-29","2026-07-30","2026-07-31","2026-08-03","2026-08-04","2026-08-05","2026-08-06","2026-08-07","2026-08-10","2026-08-11","2026-08-12","2026-08-13","2026-08-14","2026-08-17","2026-08-18","2026-08-19","2026-08-20","2026-08-21","2026-08-24","2026-08-25","2026-08-26","2026-08-27","2026-08-28","2026-08-31","2026-09-01","2026-09-02","2026-09-03","2026-09-04","2026-09-08","2026-09-09","2026-09-10","2026-09-11","2026-09-14","2026-09-15","2026-09-16","2026-09-17","2026-09-18","2026-09-21","2026-09-22","2026-09-23","2026-09-24","2026-09-25","2026-09-28","2026-09-29","2026-09-30","2026-10-01","2026-10-02","2026-10-05","2026-10-06","2026-10-07","2026-10-08","2026-10-09"];
+  // === ETF_REFERENCE_DATA:BEGIN (hand-regenerated from industry-etf-reference.md
+  // via `python -m goat.main build-etf-reference` whenever that file changes --
+  // NOT part of the nightly auto-rebuild; industry-etf-reference.md is a static,
+  // manually-maintained reference, not auto-generated) ===
+  var ETF_REFERENCE = {
+  "Advertising Agencies": {
+    "popular": [],
+    "sector_etf": "XLC"
+  },
+  "Aerospace & Defense": {
+    "popular": [
+      {
+        "ticker": "ITA",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLI"
+  },
+  "Agricultural Inputs": {
+    "popular": [
+      {
+        "ticker": "MOO",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLB"
+  },
+  "Airlines": {
+    "popular": [
+      {
+        "ticker": "JETS",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLI"
+  },
+  "Airports & Air Services": {
+    "popular": [
+      {
+        "ticker": "XTN",
+        "tier": "related",
+        "note": "related \u2014 transportation"
+      }
+    ],
+    "sector_etf": "XLI"
+  },
+  "Aluminum": {
+    "popular": [
+      {
+        "ticker": "PICK",
+        "tier": "related",
+        "note": "related \u2014 industrial metals"
+      }
+    ],
+    "sector_etf": "XLB"
+  },
+  "Apparel Manufacturing": {
+    "popular": [],
+    "sector_etf": "XLY"
+  },
+  "Apparel Retail": {
+    "popular": [
+      {
+        "ticker": "XRT",
+        "tier": "related",
+        "note": "related \u2014 retail"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Asset Management": {
+    "popular": [
+      {
+        "ticker": "IAI",
+        "tier": "related",
+        "note": "related \u2014 capital markets"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Auto & Truck Dealerships": {
+    "popular": [
+      {
+        "ticker": "CARZ",
+        "tier": "related",
+        "note": "related \u2014 auto"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Auto Manufacturers": {
+    "popular": [
+      {
+        "ticker": "CARZ",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Auto Parts": {
+    "popular": [
+      {
+        "ticker": "CARZ",
+        "tier": "related",
+        "note": "related \u2014 auto"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Banks - Diversified": {
+    "popular": [
+      {
+        "ticker": "KBWB",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Banks - Regional": {
+    "popular": [
+      {
+        "ticker": "KRE",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Beverages - Brewers": {
+    "popular": [
+      {
+        "ticker": "PBJ",
+        "tier": "related",
+        "note": "related \u2014 food & beverage"
+      }
+    ],
+    "sector_etf": "XLP"
+  },
+  "Beverages - Non-Alcoholic": {
+    "popular": [
+      {
+        "ticker": "PBJ",
+        "tier": "related",
+        "note": "related \u2014 food & beverage"
+      }
+    ],
+    "sector_etf": "XLP"
+  },
+  "Beverages - Wineries & Distilleries": {
+    "popular": [
+      {
+        "ticker": "PBJ",
+        "tier": "related",
+        "note": "related \u2014 food & beverage"
+      }
+    ],
+    "sector_etf": "XLP"
+  },
+  "Biotechnology": {
+    "popular": [
+      {
+        "ticker": "XBI",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLV"
+  },
+  "Broadcasting": {
+    "popular": [],
+    "sector_etf": "XLC"
+  },
+  "Building Materials": {
+    "popular": [
+      {
+        "ticker": "XHB",
+        "tier": "related",
+        "note": "related \u2014 homebuilding-linked"
+      }
+    ],
+    "sector_etf": "XLB"
+  },
+  "Building Products & Equipment": {
+    "popular": [
+      {
+        "ticker": "XHB",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Business Equipment & Supplies": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Capital Markets": {
+    "popular": [
+      {
+        "ticker": "IAI",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Chemicals": {
+    "popular": [],
+    "sector_etf": "XLB"
+  },
+  "Coking Coal": {
+    "popular": [],
+    "sector_etf": "XLE"
+  },
+  "Communication Equipment": {
+    "popular": [],
+    "sector_etf": "XLK"
+  },
+  "Computer Hardware": {
+    "popular": [],
+    "sector_etf": "XLK"
+  },
+  "Confectioners": {
+    "popular": [
+      {
+        "ticker": "PBJ",
+        "tier": "related",
+        "note": "related \u2014 food & beverage"
+      }
+    ],
+    "sector_etf": "XLP"
+  },
+  "Conglomerates": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Consulting Services": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Consumer Electronics": {
+    "popular": [],
+    "sector_etf": "XLY"
+  },
+  "Copper": {
+    "popular": [
+      {
+        "ticker": "COPX",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLB"
+  },
+  "Credit Services": {
+    "popular": [],
+    "sector_etf": "XLF"
+  },
+  "Department Stores": {
+    "popular": [
+      {
+        "ticker": "XRT",
+        "tier": "related",
+        "note": "related \u2014 retail"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Diagnostics & Research": {
+    "popular": [],
+    "sector_etf": "XLV"
+  },
+  "Discount Stores": {
+    "popular": [
+      {
+        "ticker": "XRT",
+        "tier": "related",
+        "note": "related \u2014 retail"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Drug Manufacturers - General": {
+    "popular": [
+      {
+        "ticker": "PPH",
+        "tier": "related",
+        "note": "related \u2014 pharma"
+      }
+    ],
+    "sector_etf": "XLV"
+  },
+  "Drug Manufacturers - Specialty & Generic": {
+    "popular": [
+      {
+        "ticker": "PPH",
+        "tier": "related",
+        "note": "related \u2014 pharma"
+      }
+    ],
+    "sector_etf": "XLV"
+  },
+  "Education & Training Services": {
+    "popular": [],
+    "sector_etf": "XLY"
+  },
+  "Electrical Equipment & Parts": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Electronic Components": {
+    "popular": [],
+    "sector_etf": "XLK"
+  },
+  "Electronic Gaming & Multimedia": {
+    "popular": [
+      {
+        "ticker": "ESPO",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLC"
+  },
+  "Electronics & Computer Distribution": {
+    "popular": [],
+    "sector_etf": "XLK"
+  },
+  "Engineering & Construction": {
+    "popular": [
+      {
+        "ticker": "PAVE",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLI"
+  },
+  "Entertainment": {
+    "popular": [],
+    "sector_etf": "XLC"
+  },
+  "Farm & Heavy Construction Machinery": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Farm Products": {
+    "popular": [
+      {
+        "ticker": "MOO",
+        "tier": "related",
+        "note": "related \u2014 agribusiness"
+      }
+    ],
+    "sector_etf": "XLP"
+  },
+  "Financial Conglomerates": {
+    "popular": [],
+    "sector_etf": "XLF"
+  },
+  "Financial Data & Stock Exchanges": {
+    "popular": [
+      {
+        "ticker": "IAI",
+        "tier": "related",
+        "note": "related \u2014 capital markets"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Food Distribution": {
+    "popular": [
+      {
+        "ticker": "PBJ",
+        "tier": "related",
+        "note": "related \u2014 food & beverage"
+      }
+    ],
+    "sector_etf": "XLP"
+  },
+  "Footwear & Accessories": {
+    "popular": [],
+    "sector_etf": "XLY"
+  },
+  "Furnishings, Fixtures & Appliances": {
+    "popular": [
+      {
+        "ticker": "XHB",
+        "tier": "related",
+        "note": "related \u2014 homebuilding-linked"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Gambling": {
+    "popular": [
+      {
+        "ticker": "BJK",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Gold": {
+    "popular": [
+      {
+        "ticker": "GDX",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLB"
+  },
+  "Grocery Stores": {
+    "popular": [
+      {
+        "ticker": "PBJ",
+        "tier": "related",
+        "note": "related \u2014 food & beverage"
+      }
+    ],
+    "sector_etf": "XLP"
+  },
+  "Health Information Services": {
+    "popular": [],
+    "sector_etf": "XLV"
+  },
+  "Healthcare Plans": {
+    "popular": [
+      {
+        "ticker": "IHF",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLV"
+  },
+  "Home Improvement Retail": {
+    "popular": [
+      {
+        "ticker": "XRT",
+        "tier": "related",
+        "note": "related \u2014 retail"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Household & Personal Products": {
+    "popular": [],
+    "sector_etf": "XLP"
+  },
+  "Industrial Distribution": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Information Technology Services": {
+    "popular": [],
+    "sector_etf": "XLK"
+  },
+  "Insurance - Diversified": {
+    "popular": [
+      {
+        "ticker": "KIE",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Insurance - Life": {
+    "popular": [
+      {
+        "ticker": "IAK",
+        "tier": "related",
+        "note": "related \u2014 insurance"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Insurance - Property & Casualty": {
+    "popular": [
+      {
+        "ticker": "IAK",
+        "tier": "related",
+        "note": "related \u2014 insurance"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Insurance - Reinsurance": {
+    "popular": [
+      {
+        "ticker": "IAK",
+        "tier": "related",
+        "note": "related \u2014 insurance"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Insurance - Specialty": {
+    "popular": [
+      {
+        "ticker": "IAK",
+        "tier": "related",
+        "note": "related \u2014 insurance"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Insurance Brokers": {
+    "popular": [
+      {
+        "ticker": "IAK",
+        "tier": "related",
+        "note": "related \u2014 insurance"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Integrated Freight & Logistics": {
+    "popular": [
+      {
+        "ticker": "XTN",
+        "tier": "related",
+        "note": "related \u2014 transportation"
+      }
+    ],
+    "sector_etf": "XLI"
+  },
+  "Internet Content & Information": {
+    "popular": [
+      {
+        "ticker": "FDN",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLC"
+  },
+  "Internet Retail": {
+    "popular": [
+      {
+        "ticker": "IBUY",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Leisure": {
+    "popular": [],
+    "sector_etf": "XLY"
+  },
+  "Lodging": {
+    "popular": [],
+    "sector_etf": "XLY"
+  },
+  "Luxury Goods": {
+    "popular": [],
+    "sector_etf": "XLY"
+  },
+  "Lumber & Wood Production": {
+    "popular": [
+      {
+        "ticker": "WOOD",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLB"
+  },
+  "Marine Shipping": {
+    "popular": [
+      {
+        "ticker": "BOAT",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLI"
+  },
+  "Medical Care Facilities": {
+    "popular": [],
+    "sector_etf": "XLV"
+  },
+  "Medical Devices": {
+    "popular": [
+      {
+        "ticker": "IHI",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLV"
+  },
+  "Medical Distribution": {
+    "popular": [],
+    "sector_etf": "XLV"
+  },
+  "Medical Instruments & Supplies": {
+    "popular": [
+      {
+        "ticker": "IHI",
+        "tier": "related",
+        "note": "related \u2014 medical devices"
+      }
+    ],
+    "sector_etf": "XLV"
+  },
+  "Metal Fabrication": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Mortgage Finance": {
+    "popular": [
+      {
+        "ticker": "REM",
+        "tier": "related",
+        "note": "related \u2014 mortgage REITs"
+      }
+    ],
+    "sector_etf": "XLF"
+  },
+  "Oil & Gas Drilling": {
+    "popular": [],
+    "sector_etf": "XLE"
+  },
+  "Oil & Gas E&P": {
+    "popular": [
+      {
+        "ticker": "XOP",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLE"
+  },
+  "Oil & Gas Equipment & Services": {
+    "popular": [
+      {
+        "ticker": "XES",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLE"
+  },
+  "Oil & Gas Integrated": {
+    "popular": [],
+    "sector_etf": "XLE"
+  },
+  "Oil & Gas Midstream": {
+    "popular": [],
+    "sector_etf": "XLE"
+  },
+  "Oil & Gas Refining & Marketing": {
+    "popular": [
+      {
+        "ticker": "CRAK",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLE"
+  },
+  "Other Industrial Metals & Mining": {
+    "popular": [
+      {
+        "ticker": "PICK",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLB"
+  },
+  "Other Precious Metals & Mining": {
+    "popular": [
+      {
+        "ticker": "SIL",
+        "tier": "related",
+        "note": "related \u2014 precious metals"
+      },
+      {
+        "ticker": "GDX",
+        "tier": "related",
+        "note": "related \u2014 precious metals"
+      }
+    ],
+    "sector_etf": "XLB"
+  },
+  "Packaged Foods": {
+    "popular": [
+      {
+        "ticker": "PBJ",
+        "tier": "related",
+        "note": "related \u2014 food & beverage"
+      }
+    ],
+    "sector_etf": "XLP"
+  },
+  "Packaging & Containers": {
+    "popular": [],
+    "sector_etf": "XLB"
+  },
+  "Paper & Paper Products": {
+    "popular": [],
+    "sector_etf": "XLB"
+  },
+  "Personal Services": {
+    "popular": [],
+    "sector_etf": "XLY"
+  },
+  "Pharmaceutical Retailers": {
+    "popular": [],
+    "sector_etf": "XLP"
+  },
+  "Pollution & Treatment Controls": {
+    "popular": [
+      {
+        "ticker": "EVX",
+        "tier": "related",
+        "note": "related \u2014 waste/environmental"
+      }
+    ],
+    "sector_etf": "XLI"
+  },
+  "Publishing": {
+    "popular": [],
+    "sector_etf": "XLC"
+  },
+  "Railroads": {
+    "popular": [
+      {
+        "ticker": "XTN",
+        "tier": "related",
+        "note": "related \u2014 transportation"
+      }
+    ],
+    "sector_etf": "XLI"
+  },
+  "Real Estate - Development": {
+    "popular": [],
+    "sector_etf": "XLRE"
+  },
+  "Real Estate - Diversified": {
+    "popular": [],
+    "sector_etf": "XLRE"
+  },
+  "Real Estate Services": {
+    "popular": [],
+    "sector_etf": "XLRE"
+  },
+  "Recreational Vehicles": {
+    "popular": [],
+    "sector_etf": "XLY"
+  },
+  "REIT - Diversified": {
+    "popular": [
+      {
+        "ticker": "VNQ",
+        "tier": "related",
+        "note": "related \u2014 broad REIT"
+      }
+    ],
+    "sector_etf": "XLRE"
+  },
+  "REIT - Healthcare Facilities": {
+    "popular": [
+      {
+        "ticker": "VNQ",
+        "tier": "related",
+        "note": "related \u2014 broad REIT"
+      }
+    ],
+    "sector_etf": "XLRE"
+  },
+  "REIT - Hotel & Motel": {
+    "popular": [
+      {
+        "ticker": "VNQ",
+        "tier": "related",
+        "note": "related \u2014 broad REIT"
+      }
+    ],
+    "sector_etf": "XLRE"
+  },
+  "REIT - Industrial": {
+    "popular": [
+      {
+        "ticker": "INDS",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLRE"
+  },
+  "REIT - Mortgage": {
+    "popular": [
+      {
+        "ticker": "REM",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLRE"
+  },
+  "REIT - Office": {
+    "popular": [
+      {
+        "ticker": "VNQ",
+        "tier": "related",
+        "note": "related \u2014 broad REIT"
+      }
+    ],
+    "sector_etf": "XLRE"
+  },
+  "REIT - Residential": {
+    "popular": [
+      {
+        "ticker": "VNQ",
+        "tier": "related",
+        "note": "related \u2014 broad REIT"
+      }
+    ],
+    "sector_etf": "XLRE"
+  },
+  "REIT - Retail": {
+    "popular": [
+      {
+        "ticker": "VNQ",
+        "tier": "related",
+        "note": "related \u2014 broad REIT"
+      }
+    ],
+    "sector_etf": "XLRE"
+  },
+  "REIT - Specialty": {
+    "popular": [
+      {
+        "ticker": "VNQ",
+        "tier": "related",
+        "note": "related \u2014 broad REIT"
+      }
+    ],
+    "sector_etf": "XLRE"
+  },
+  "Rental & Leasing Services": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Residential Construction": {
+    "popular": [
+      {
+        "ticker": "ITB",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Resorts & Casinos": {
+    "popular": [
+      {
+        "ticker": "BJK",
+        "tier": "related",
+        "note": "related \u2014 gaming"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Restaurants": {
+    "popular": [
+      {
+        "ticker": "EATZ",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Scientific & Technical Instruments": {
+    "popular": [],
+    "sector_etf": "XLK"
+  },
+  "Security & Protection Services": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Semiconductor Equipment & Materials": {
+    "popular": [
+      {
+        "ticker": "SMH",
+        "tier": "related",
+        "note": "related \u2014 semiconductors"
+      }
+    ],
+    "sector_etf": "XLK"
+  },
+  "Semiconductors": {
+    "popular": [
+      {
+        "ticker": "SMH",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLK"
+  },
+  "Shell Companies": {
+    "popular": [],
+    "sector_etf": "XLF"
+  },
+  "Silver": {
+    "popular": [
+      {
+        "ticker": "SIL",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLB"
+  },
+  "Software - Application": {
+    "popular": [
+      {
+        "ticker": "IGV",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLK"
+  },
+  "Software - Infrastructure": {
+    "popular": [
+      {
+        "ticker": "IGV",
+        "tier": "related",
+        "note": "related \u2014 software"
+      }
+    ],
+    "sector_etf": "XLK"
+  },
+  "Solar": {
+    "popular": [
+      {
+        "ticker": "TAN",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLE"
+  },
+  "Specialty Business Services": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Specialty Chemicals": {
+    "popular": [],
+    "sector_etf": "XLB"
+  },
+  "Specialty Industrial Machinery": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Specialty Retail": {
+    "popular": [
+      {
+        "ticker": "XRT",
+        "tier": "related",
+        "note": "related \u2014 retail"
+      }
+    ],
+    "sector_etf": "XLY"
+  },
+  "Staffing & Employment Services": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Steel": {
+    "popular": [
+      {
+        "ticker": "SLX",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLB"
+  },
+  "Telecom Services": {
+    "popular": [
+      {
+        "ticker": "IYZ",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLC"
+  },
+  "Textile Manufacturing": {
+    "popular": [],
+    "sector_etf": "XLY"
+  },
+  "Thermal Coal": {
+    "popular": [],
+    "sector_etf": "XLE"
+  },
+  "Tobacco": {
+    "popular": [],
+    "sector_etf": "XLP"
+  },
+  "Tools & Accessories": {
+    "popular": [],
+    "sector_etf": "XLI"
+  },
+  "Travel Services": {
+    "popular": [],
+    "sector_etf": "XLY"
+  },
+  "Trucking": {
+    "popular": [
+      {
+        "ticker": "XTN",
+        "tier": "related",
+        "note": "related \u2014 transportation"
+      }
+    ],
+    "sector_etf": "XLI"
+  },
+  "Uranium": {
+    "popular": [
+      {
+        "ticker": "URA",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLE"
+  },
+  "Utilities - Diversified": {
+    "popular": [],
+    "sector_etf": "XLU"
+  },
+  "Utilities - Independent Power Producers": {
+    "popular": [],
+    "sector_etf": "XLU"
+  },
+  "Utilities - Regulated Electric": {
+    "popular": [],
+    "sector_etf": "XLU"
+  },
+  "Utilities - Regulated Gas": {
+    "popular": [],
+    "sector_etf": "XLU"
+  },
+  "Utilities - Regulated Water": {
+    "popular": [
+      {
+        "ticker": "PHO",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLU"
+  },
+  "Utilities - Renewable": {
+    "popular": [
+      {
+        "ticker": "ICLN",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLU"
+  },
+  "Waste Management": {
+    "popular": [
+      {
+        "ticker": "EVX",
+        "tier": "dedicated",
+        "note": "dedicated"
+      }
+    ],
+    "sector_etf": "XLI"
+  }
+};
+  // === ETF_REFERENCE_DATA:END ===
+
+    var CUSTOM_DATES = ["2026-07-10","2026-07-13","2026-07-14","2026-07-15","2026-07-16","2026-07-17","2026-07-20","2026-07-21","2026-07-22","2026-07-23","2026-07-24","2026-07-27","2026-07-28","2026-07-29","2026-07-30","2026-07-31","2026-08-03","2026-08-04","2026-08-05","2026-08-06","2026-08-07","2026-08-10","2026-08-11","2026-08-12","2026-08-13","2026-08-14","2026-08-17","2026-08-18","2026-08-19","2026-08-20","2026-08-21","2026-08-24","2026-08-25","2026-08-26","2026-08-27","2026-08-28","2026-08-31","2026-09-01","2026-09-02","2026-09-03","2026-09-04","2026-09-08","2026-09-09","2026-09-10","2026-09-11","2026-09-14","2026-09-15","2026-09-16","2026-09-17","2026-09-18","2026-09-21","2026-09-22","2026-09-23","2026-09-24","2026-09-25","2026-09-28","2026-09-29","2026-09-30","2026-10-01","2026-10-02","2026-10-05","2026-10-06","2026-10-07","2026-10-08","2026-10-09"];
 
   var CUSTOM = [
     { t: "ICLN", n: "iShares Global Clean Energy ETF", color: "var(--cat-1)",
@@ -416,7 +1553,17 @@
     var otherStatus = statusOf(otherCurrent);
     var otherLabel = isFlow ? longWord : "1 week";
 
-    return '<div class="tile">' +
+    // Only industry_full tiles are clickable -- "which ETF tracks this?" is a
+    // meaningful question for an industry, not for a tile that's already an ETF
+    // (sector/custom-watch tiles). data-industry carries the exact key into
+    // ETF_REFERENCE (see rotation_watch_build.parse_etf_reference) -- escaped since
+    // industry names can contain "&" (e.g. "Beverages - Wineries & Distilleries").
+    var clickable = scope === "industry_full";
+    var tileOpenTag = clickable
+      ? '<div class="tile clickable" tabindex="0" role="button" data-industry="' + escapeAttr(row.t) + '">'
+      : '<div class="tile">';
+
+    return tileOpenTag +
       '<div class="tile-top">' +
         '<div><div class="tile-ticker">' + row.t + '</div><div class="tile-name">' + row.n + '</div></div>' +
         badge +
@@ -426,6 +1573,10 @@
       '</div>' +
       '<div class="tile-context ' + otherStatus + '"><span>' + otherLabel + '</span><strong>' + fmtPct(otherCurrent) + '</strong></div>' +
     '</div>';
+  }
+
+  function escapeAttr(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   }
 
   function table(rows, dates) {
@@ -594,6 +1745,70 @@
     var next = root.getAttribute("data-view") === "tiles" ? "table" : "tiles";
     root.setAttribute("data-view", next);
     viewToggle.textContent = next === "tiles" ? "View as table" : "View as tiles";
+  });
+
+  // Industry tile -> ETF options popup. ETF_REFERENCE comes from the
+  // ETF_REFERENCE_DATA block (static, hand-rebuilt from industry-etf-reference.md --
+  // see that block's own comment for how to regenerate it). Event delegation on
+  // #root (not per-tile listeners) because tiles get fully re-rendered on every
+  // toggle/sort -- per-tile listeners would need constant re-wiring.
+  function openEtfModal(industryName) {
+    var ref = (typeof ETF_REFERENCE !== "undefined") ? ETF_REFERENCE[industryName] : undefined;
+    document.getElementById("etfModalTitle").textContent = industryName;
+    var body = document.getElementById("etfModalBody");
+    var sub = document.getElementById("etfModalSub");
+    if (!ref) {
+      sub.textContent = "No ETF reference found for this industry.";
+      body.innerHTML = "";
+    } else {
+      var options = (ref.popular || []).slice();
+      if (ref.sector_etf) {
+        options.push({ ticker: ref.sector_etf, tier: "sector", note: "broad sector ETF, always available as a fallback" });
+      }
+      sub.textContent = options.length + " ETF option" + (options.length === 1 ? "" : "s") +
+        " -- advisor notes only, no trade action implied.";
+      body.innerHTML = options.map(function (o) {
+        var tierLabel = o.tier === "dedicated" ? "Dedicated"
+          : o.tier === "sector" ? "Sector ETF fallback"
+          : "Related (" + o.note.replace(/^related\s*[—-]+\s*/i, "") + ")";
+        // Full interactive chart view (candles, SMAs, drawing tools) -- not the
+        // lightweight "symbol overview" page (/symbols/TICKER/), per Shaun's explicit
+        // preference 2026-10-20. No exchange prefix needed; TradingView resolves a
+        // bare ticker to the right listing for these liquid ETFs on its own.
+        var tv = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(o.ticker);
+        var holdings = "https://finance.yahoo.com/quote/" + encodeURIComponent(o.ticker) + "/holdings/";
+        return '<div class="etf-option">' +
+          '<div class="etf-ticker">' + o.ticker + '</div>' +
+          '<div class="etf-tier">' + tierLabel + '</div>' +
+          '<div class="etf-links">' +
+            '<a href="' + tv + '" target="_blank" rel="noopener">TradingView chart</a>' +
+            '<a href="' + holdings + '" target="_blank" rel="noopener">Holdings</a>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+    }
+    document.getElementById("etfModal").classList.add("open");
+  }
+
+  function closeEtfModal() {
+    document.getElementById("etfModal").classList.remove("open");
+  }
+
+  root.addEventListener("click", function (ev) {
+    var tileEl = ev.target.closest(".tile.clickable");
+    if (tileEl) openEtfModal(tileEl.getAttribute("data-industry"));
+  });
+  root.addEventListener("keydown", function (ev) {
+    if (ev.key !== "Enter" && ev.key !== " ") return;
+    var tileEl = ev.target.closest(".tile.clickable");
+    if (tileEl) { ev.preventDefault(); openEtfModal(tileEl.getAttribute("data-industry")); }
+  });
+  document.getElementById("etfModalCloseBtn").addEventListener("click", closeEtfModal);
+  document.getElementById("etfModal").addEventListener("click", function (ev) {
+    if (ev.target.id === "etfModal") closeEtfModal();
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape") closeEtfModal();
   });
 
   render();
