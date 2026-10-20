@@ -260,12 +260,18 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - [ok] going_concern: Free Cash Flow positive ($20,404M) -- cash-generative, no bankruptcy/cash-runway risk from this signal
 
 ### New Alerts This Run
-- **JNJ** (watchlist) — valuation: PE 38.5 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
-- **KAR.AX** (watchlist) — dividend: Dividend declined -41.9% vs prior 12 months
-- **KARS** (watchlist) — dividend: Dividend declined -65.6% vs prior 12 months
-- **KMI** (watchlist) — balance_sheet: Current Ratio 0.46 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
+- **ELVA** (watchlist) — valuation: PE 52.7 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
+- **ELVA** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $13M / burn ~$2M per month = ~7.1 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon
+- **EQT** (watchlist) — balance_sheet: Current Ratio 0.67 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
+- **GWRE** (watchlist) — valuation: PE 105.2 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
+- **HAIL** (watchlist) — etf_mechanics: AUM $17,634,380 below $50,000,000 closure-risk threshold (0/10 — poor) — top holdings: Via Transportation Inc Ordinary Shares - Class A (3.4%), Honda Motor Co Ltd ADR (2.0%), NVIDIA Corp (1.9%); dominant sector: Technology (39%)
 
 ### All Open Alerts
+- **HAIL** (watchlist) — etf_mechanics: AUM $17,634,380 below $50,000,000 closure-risk threshold (0/10 — poor) — top holdings: Via Transportation Inc Ordinary Shares - Class A (3.4%), Honda Motor Co Ltd ADR (2.0%), NVIDIA Corp (1.9%); dominant sector: Technology (39%) (first flagged 2026-10-20)
+- **GWRE** (watchlist) — valuation: PE 105.2 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-10-20)
+- **EQT** (watchlist) — balance_sheet: Current Ratio 0.67 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-10-20)
+- **ELVA** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $13M / burn ~$2M per month = ~7.1 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-10-20)
+- **ELVA** (watchlist) — valuation: PE 52.7 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-10-20)
 - **KMI** (watchlist) — balance_sheet: Current Ratio 0.46 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-10-20)
 - **KARS** (watchlist) — dividend: Dividend declined -65.6% vs prior 12 months (first flagged 2026-10-20)
 - **KAR.AX** (watchlist) — dividend: Dividend declined -41.9% vs prior 12 months (first flagged 2026-10-20)
@@ -339,6 +345,9 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **COUR** — Graham [PE 6.1 x P/B 1.18 = 7.1, below 22.5]
 - **CPRT** — Buffett/Smith [ROE 16.2% at/above 15.0% (10/10 — excellent), not richly valued]
 - **DTG.DE** — Lynch [PEG 0.32 at/below 1.0 — growth at a reasonable price]
+- **GOOG** — Buffett/Smith [ROE 48.7% at/above 15.0% (10/10 — excellent), not richly valued]
+- **GOOGL** — Buffett/Smith [ROE 48.7% at/above 15.0% (10/10 — excellent), not richly valued]
+- **GROW.L** — Graham [PE 9.4 x P/B 0.77 = 7.2, below 22.5]
 - **KO** — Buffett/Smith [ROE 42.1% at/above 15.0% (10/10 — excellent), not richly valued]
 - **KSPI** — Graham [PE 8.5 at/below cheap threshold (12.0), P/B unavailable/implausible]; Buffett/Smith [ROE 44.8% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
 - **LEN** — Graham [PE 14.6 x P/B 0.84 = 12.2, below 22.5]
@@ -372,8 +381,8 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **uk_cpi** [flag] — UK headline CPI 3.1% YoY (reference month 2026-08-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone
 - **real_yields** [flag] — 10Y real yield +2.74% (as of 2026-10-16), above the 2.0% threshold -- elevated real yields historically pressure gold hard
 - **dollar_index** [ok] — Broad USD index 121.4, +1.6% over the past 30 days
-- **gold_trend** [info] — GC=F $4,133 (50DMA $4,364, 200DMA $4,539, -8.9% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $58.87 AUD; AUD/USD 3mo move +0.2%
-- **gold_silver_ratio** [ok] — Gold/silver ratio at 72.2
+- **gold_trend** [info] — GC=F $4,140 (50DMA $4,364, 200DMA $4,539, -8.8% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $58.87 AUD; AUD/USD 3mo move +0.2%
+- **gold_silver_ratio** [ok] — Gold/silver ratio at 72.3
 - **vix** [ok] — VIX at 18.6, below the flag threshold
 
 ### Gold Outlook
