@@ -6,16 +6,16 @@ Auto-generated -- overwritten every run. Advisor notes only; no trade action is 
 
 Not covered: alternative data (app downloads, web traffic, credit-card spend) -- no free source in this toolset.
 
-## Run: 2026-10-20
+## Run: 2026-10-21
 Checked 14 holding(s).
 
 ### Holdings
 
 **AG** (unnamed, bucket unassigned)
-- [ok] Estimate trend: EPS estimate down 1.9% over the trailing 30 days -- below the 3.0% flag threshold; corroborating: 1 analyst downward revisions vs 0 upward in the last 30 days
+- [flag] Estimate trend: EPS estimate down 3.7% over the trailing 30 days (0.94 -> 0.91); corroborating: 1 analyst downward revisions vs 0 upward in the last 30 days
 - [flag] Guidance/commentary: AG/First Majestic did not cut production guidance; it raised 2026 output guidance, but the most recent quarter showed an EPS/revenue miss and higher cost guidance. The main earnings-risk signal is margin pressure from higher AISC/cash costs rather than demand weakness. (Q2 2026 adjusted EPS missed consensus, with sources showing $0.21 vs estimates around $0.25-$0.30.; Q2 2026 revenue reportedly missed consensus, with Benzinga showing $415.5M vs $496.0M estimate.; Updated 2026 guidance raised silver and gold production, but consolidated AISC guidance increased about 4% at the midpoint due to higher costs tied to silver prices and a stronger Mexican peso.; Q2 cash costs per silver-equivalent ounce rose 20% YoY, indicating cost pressure despite strong realized metals prices.)
 - No earnings-relevant 8-Ks in the lookback window.
-- Industry context (Silver, SIL): falling -17.6% over the trailing window (informational only, not a gate)
+- Industry context (Silver, SIL): falling -13.5% over the trailing window (informational only, not a gate)
 
 **BMS** (unnamed, bucket unassigned)
 - No earnings data available (fund/commodity instrument).
@@ -24,7 +24,7 @@ Checked 14 holding(s).
 - [flag] Estimate trend: EPS estimate down 3.0% over the trailing 30 days (1.01 -> 0.98); corroborating: 2 analyst downward revisions vs 0 upward in the last 30 days
 - [info] Guidance/commentary: No lowered/cut current guidance found in the last ~3 months; FY26 production was reported at 103,761oz, within 100,000-110,000oz guidance, and AISC was A$2,738/oz, slightly below the revised A$2,750-A$2,950/oz range.; Most recent reported period showed record June-quarter production of about 31.9koz and strong FY26 revenue/EBITDA/NPAT growth, not an earnings miss signal.; Recent September investor/conference commentary emphasized reserve growth to 2Moz and a path toward ~200koz annual production; management noted operating plans can move around but did not describe demand weakness, margin deterioration, or slowing growth.; No relevant weekly/monthly operating KPI series suggesting a slowdown was found for CYL.AX; available operating metrics are quarterly mine production/cost data.
 - No earnings-relevant 8-Ks in the lookback window.
-- Industry context (Gold, GDX): falling -12.8% over the trailing window (informational only, not a gate)
+- Industry context (Gold, GDX): falling -7.4% over the trailing window (informational only, not a gate)
 
 **GOLD.AX** (unnamed, bucket unassigned)
 - No earnings data available (fund/commodity instrument).
@@ -57,7 +57,7 @@ For an earnings-deterioration screen, this 8-K cover filing alone provides no di
 - [ok] Estimate trend: EPS estimate up 0.0% over the trailing 30 days -- below the 3.0% flag threshold; corroborating: 13 analyst downward revisions vs 12 upward in the last 30 days
 - [flag] Guidance/commentary: Recent Q2 2026 signals look incrementally negative: PDD missed revenue estimates, net income declined year over year, and management flagged short-term cross-border order pressure from EU customs changes plus higher fulfillment costs. No explicit full-year/quarterly guidance cut or company-published monthly operating metric slowdown was found. (Q2 2026 revenue of RMB112.36B missed LSEG consensus of RMB116.35B, while net income attributable to ordinary shareholders fell 12% YoY.; Management said EU customs-duty changes mean cross-border orders in affected markets face lower fulfillment efficiency and higher costs with a considerable short-term impact.; Management noted regulatory/compliance pressure and continued platform, supply-chain, logistics, and merchant-support investments, with non-GAAP operating margin down to 26% from 27% YoY.; Reuters reported intense China e-commerce competition, weak consumer confidence, subdued 618 spending, and higher shipping/compliance costs that may dampen demand among price-sensitive Temu shoppers.)
 - No earnings-relevant 8-Ks in the lookback window.
-- Industry context (Internet Retail, IBUY): falling -0.9% over the trailing window (informational only, not a gate)
+- Industry context (Internet Retail, IBUY): rising +1.7% over the trailing window (informational only, not a gate)
 
 **PMGOLD.AX** (unnamed, bucket 3b)
 - No earnings data available (fund/commodity instrument).
@@ -79,7 +79,7 @@ For an earnings-deterioration screen, this 8-K cover filing alone provides no di
 
 Borrowings will bear interest at EURIBOR plus a ratings-based margin, with a commitment fee beginning November 13, 2026 if commitments remain outstanding. The agreement is unsecured and not guaranteed by subsidiaries. Key covenants include limits on liens and subsidiary debt, plus a minimum consolidated adjusted EBITDA-to-interest expense ratio of 3.00x. For analysts, the main watch items are incremental acquisition-related leverage, higher interest expense, and covenant headroom following the Delivery Hero transaction.
 - [seen] 8-K (Items 2.02,9.01) filed 2026-08-05: Uber filed an 8-K on August 5, 2026, reporting that it issued a press release announcing financial results for the second quarter ended June 30, 2026. The filing itself does not disclose the actual quarterly metrics, segment performance, margins, cash flow, operating trends, guidance, or management commentary; those details are contained in Exhibit 99.1, which is referenced but not included in the provided text. No cost-cutting, restructuring actions, workforce reductions, impairment charges, material agreement changes, or updated outlook are described in the body of the filing. For an analyst monitoring early signs of earnings deterioration, the key takeaway from the provided 8-K text is limited: Uber has released Q2 2026 results, but this excerpt provides no substantive financial data or operational indicators to assess deterioration risk.
-- Industry context (Software - Application, IGV): rising +22.8% over the trailing window (informational only, not a gate)
+- Industry context (Software - Application, IGV): rising +23.4% over the trailing window (informational only, not a gate)
 
 **V** (Visa Inc (Class A), bucket 1)
 - [ok] Estimate trend: EPS estimate up 0.0% over the trailing 30 days -- below the 3.0% flag threshold
@@ -87,6 +87,6 @@ Borrowings will bear interest at EURIBOR plus a ratings-based margin, with a com
 - [seen] 8-K (Items 2.02,8.01,9.01) filed 2026-07-28: Visa filed an 8-K announcing that it issued its fiscal 3Q 2026 earnings release for the quarter ended June 30, 2026, and planned to discuss results on a July 28, 2026 conference call. The filing itself does not include the operating metrics, revenue, margin, EPS, volume, cross-border trends, client incentives, expenses, or guidance details from the earnings release; those are incorporated as Exhibit 99.1 but not provided in the text here. No restructuring actions, cost-reduction programs, impairments, liquidity concerns, or material agreement changes are disclosed in the body of the 8-K. Visa’s board declared a quarterly cash dividend of $0.670 per Class A share, payable September 1, 2026 to holders of record as of August 11, 2026, suggesting continued capital return. For deterioration monitoring, the key missing document is Exhibit 99.1, where any signs of slowing payments volume, cross-border weakness, margin pressure, higher incentives, or changed outlook would likely appear.
 
 ### New Alerts This Run
-No new material changes.
+- **AG** (holdings) -- earnings_watch_trend: EPS estimate down 3.7% over the trailing 30 days (0.94 -> 0.91); corroborating: 1 analyst downward revisions vs 0 upward in the last 30 days
 
-Last auto-generated: 2026-10-20.
+Last auto-generated: 2026-10-21.
