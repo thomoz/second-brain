@@ -175,6 +175,19 @@ GOAT_ROTATION_SHORT_WINDOW_TRADING_DAYS = 5  # 1 trading week -- a second, faste
     # can mask money already flowing out this week. Pure diff over closes already
     # fetched for the long-window ranking -- no new fetch.
 
+# Rotation history JSON export, added 2026-10-20 -- feeds the "Rotation Watch" Claude
+# Artifact (see memory project_rotation_watch_artifact.md), both the daily scheduled
+# cloud-routine refresh and any on-demand "refresh Rotation Watch" request. Dumps
+# goat_rotation_snapshots for the "sector" and "industry_full" scopes (the only two
+# scopes that artifact's current page shows -- the old 39-ETF "industry" scope block
+# was dropped from that page 2026-10-20) to one JSON file, which vault sync then
+# carries into the git repo like every other goat/*.md report -- no VPS SSH access or
+# credentials needed by the cloud routine, it just reads this file from its own repo
+# checkout.
+GOAT_ROTATION_EXPORT_JSON_PATH = GOAT_DIR / "rotation-history-export.json"
+GOAT_ROTATION_EXPORT_DAYS = 90  # matches the --days 90 convention the manual
+    # query-rotation-history refresh steps already used before this export existed.
+
 # Industry constituent universe -- Part B-2 of .agent/plans/goat-industry-pipeline.md.
 # Feeds industry_heartbeat_scan.py's stock-level gate. US side comes from a
 # per-industry Finviz screen; ASX side is a hand-curated dict (no Finviz/

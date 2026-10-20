@@ -385,6 +385,32 @@ def cmd_query_rotation_history(args) -> None:
     print(json.dumps([dict(r) for r in rows], indent=2, default=str))
 
 
+def cmd_export_rotation_history(args) -> None:
+    """Read-only -- dumps goat_rotation_snapshots (sector + industry_full scopes) to a
+    JSON file vault sync carries into the git repo, so the Rotation Watch artifact's
+    daily cloud-routine refresh (and any on-demand refresh) can read it without VPS
+    SSH access. No report write, no maybe_notify -- same minimalism as
+    cmd_query_rotation_history, just writes a file instead of printing."""
+    import json
+    from datetime import datetime, timedelta, timezone
+
+    from . import config as _config
+    from .db import get_rotation_history
+
+    conn = _open_conn()
+    since_date = (datetime.now(timezone.utc) - timedelta(days=_config.GOAT_ROTATION_EXPORT_DAYS)).date().isoformat()
+    scopes = ["sector", "industry_full"]
+    scope_rows = {
+        scope: [dict(r) for r in get_rotation_history(conn, scope=scope, since_date=since_date)]
+        for scope in scopes
+    }
+    conn.close()
+    data = {"generated_at": datetime.now(timezone.utc).isoformat(), "scopes": scope_rows}
+    _config.GOAT_ROTATION_EXPORT_JSON_PATH.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
+    counts = {scope: len(rows) for scope, rows in scope_rows.items()}
+    print(f"Rotation history export complete: {counts}. See investments/goat/rotation-history-export.json")
+
+
 def cmd_dismiss_candidate(args) -> None:
     from .db import delete_goat_pending_candidate
 
@@ -475,6 +501,12 @@ def main() -> None:
         "--days", type=int, default=_config.GOAT_ROTATION_SNAPSHOT_RETENTION_DAYS,
     )
 
+    subparsers.add_parser(
+        "export-rotation-history",
+        help="Read-only: dump sector + industry_full rotation snapshot history to "
+             "rotation-history-export.json (feeds the Rotation Watch artifact refresh)",
+    )
+
     args = parser.parse_args()
     dispatch = {
         "monitor": cmd_monitor,
@@ -492,6 +524,7 @@ def main() -> None:
         "promote-candidate": cmd_promote_candidate,
         "dismiss-candidate": cmd_dismiss_candidate,
         "query-rotation-history": cmd_query_rotation_history,
+        "export-rotation-history": cmd_export_rotation_history,
     }
     if args.command in dispatch:
         dispatch[args.command](args)

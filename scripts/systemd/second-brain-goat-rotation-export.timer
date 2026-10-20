@@ -1,0 +1,10 @@
+[Unit]
+Description=Goat Rotation History JSON Export Timer
+Requires=second-brain-goat-rotation-export.service
+
+[Timer]
+OnCalendar=*-*-* 21:45:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
