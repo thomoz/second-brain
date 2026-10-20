@@ -264,6 +264,7 @@ def _interesting_close() -> pd.Series:
 
 def _patch_common(
     monkeypatch, constituents=None, fetch_close=None, ticker_data=None, etf_universe=None,
+    industry_allow_set=None,
 ):
     monkeypatch.setattr(
         "goat.dma_breakout_scan.sp500_universe.get_or_refresh_sp500_constituents",
@@ -285,6 +286,45 @@ def _patch_common(
         "goat.dma_breakout_scan.market_data.fetch_ticker_data",
         ticker_data if ticker_data is not None else (lambda ticker: _healthy_ticker_data(ticker)),
     )
+    # No industry filter by default (industry_allow_set=None -> unfiltered, matching
+    # pre-filter behavior) -- keeps every pre-existing test isolated from the new
+    # industry-rotation gate; tests exercising it opt in explicitly.
+    monkeypatch.setattr(
+        "goat.dma_breakout_scan.fetch_top_industry_allow_set", lambda conn: industry_allow_set,
+    )
+
+
+# --- fetch_top_industry_allow_set -------------------------------------------
+
+def test_fetch_top_industry_allow_set_returns_none_when_no_snapshot_exists(db_conn):
+    assert dma_breakout_scan.fetch_top_industry_allow_set(db_conn) is None
+
+
+def test_fetch_top_industry_allow_set_unions_top_n_industries(db_conn, monkeypatch):
+    monkeypatch.setattr(config, "GOAT_DMA_BREAKOUT_TOP_INDUSTRY_COUNT", 2)
+    goat_db.insert_rotation_snapshots(
+        db_conn, scope="industry_full", snapshot_date="2026-10-20",
+        rows=[
+            {"ticker": "Semiconductors", "name": "Semiconductors", "rank": 1},
+            {"ticker": "Gold", "name": "Gold", "rank": 2},
+            {"ticker": "Airlines", "name": "Airlines", "rank": 3},
+        ],
+        label_key="name",
+    )
+
+    def _fake_get_or_refresh(conn, industry_label):
+        return {
+            "Semiconductors": [{"ticker": "NVDA"}],
+            "Gold": [{"ticker": "NST.AX"}],
+            "Airlines": [{"ticker": "LUV"}],
+        }[industry_label]
+
+    monkeypatch.setattr(
+        "goat.dma_breakout_scan.industry_constituents.get_or_refresh_industry_constituents",
+        _fake_get_or_refresh,
+    )
+    result = dma_breakout_scan.fetch_top_industry_allow_set(db_conn)
+    assert result == {"NVDA", "NST.AX"}  # Airlines (rank 3) excluded by the top-2 cutoff
 
 
 def test_run_dma_breakout_scan_stages_new_candidate(db_conn, monkeypatch):
@@ -435,6 +475,43 @@ def test_run_dma_breakout_scan_never_stages_banned_etf_ticker(db_conn, monkeypat
     assert goat_db.get_goat_pending_candidate(db_conn, "XLI") is None
 
 
+# --- run_dma_breakout_scan industry filter ----------------------------------
+
+def test_run_dma_breakout_scan_stages_when_industry_in_allow_set(db_conn, monkeypatch):
+    _patch_common(monkeypatch, industry_allow_set={"AAPL"})
+    result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
+    assert len(result["new_candidates"]) == 1
+    assert result["new_candidates"][0]["ticker"] == "AAPL"
+    assert result["filtered_by_industry"] == 0
+    assert result["industry_filter_applied"] is True
+
+
+def test_run_dma_breakout_scan_filters_when_industry_not_in_allow_set(db_conn, monkeypatch):
+    _patch_common(monkeypatch, industry_allow_set={"NOT-AAPL"})
+    result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
+    assert result["new_candidates"] == []
+    assert result["filtered_by_industry"] == 1
+    assert goat_db.get_goat_pending_candidate(db_conn, "AAPL") is None
+
+
+def test_run_dma_breakout_scan_etf_exempt_from_industry_filter(db_conn, monkeypatch):
+    _patch_common(
+        monkeypatch, constituents=[], ticker_data=lambda ticker: _etf_ticker_data(ticker),
+        etf_universe={"SPY": "Broad Market"}, industry_allow_set=set(),
+    )
+    result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
+    assert len(result["new_candidates"]) == 1
+    assert result["new_candidates"][0]["ticker"] == "SPY"
+    assert result["filtered_by_industry"] == 0
+
+
+def test_run_dma_breakout_scan_unfiltered_when_no_snapshot_exists(db_conn, monkeypatch):
+    _patch_common(monkeypatch)  # industry_allow_set=None default -- no snapshot yet
+    result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
+    assert result["industry_filter_applied"] is False
+    assert len(result["new_candidates"]) == 1
+
+
 # --- render_dma_breakout_candidates_report ----------------------------------
 
 def test_render_dma_breakout_candidates_report_lists_pending_rows():
@@ -475,6 +552,24 @@ def test_render_dma_breakout_candidates_report_surfaces_already_staged_elsewhere
     result = {"scanned": 500, "asx_unavailable": False, "already_staged_elsewhere": 3, "pending_candidates": []}
     report = dma_breakout_scan.render_dma_breakout_candidates_report(result)
     assert "3 ticker(s)" in report
+
+
+def test_render_dma_breakout_candidates_report_shows_industry_filter_unavailable_banner():
+    result = {
+        "scanned": 500, "asx_unavailable": False, "already_staged_elsewhere": 0,
+        "industry_filter_applied": False, "filtered_by_industry": 0, "pending_candidates": [],
+    }
+    report = dma_breakout_scan.render_dma_breakout_candidates_report(result)
+    assert "Industry-rotation filter unavailable" in report
+
+
+def test_render_dma_breakout_candidates_report_shows_filtered_by_industry_count():
+    result = {
+        "scanned": 500, "asx_unavailable": False, "already_staged_elsewhere": 0,
+        "industry_filter_applied": True, "filtered_by_industry": 4, "pending_candidates": [],
+    }
+    report = dma_breakout_scan.render_dma_breakout_candidates_report(result)
+    assert "4 ticker(s) crossed but were filtered out" in report
 
 
 def test_render_dma_breakout_candidates_report_sorts_newest_cross_first():

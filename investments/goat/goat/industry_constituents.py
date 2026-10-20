@@ -13,16 +13,34 @@ from mytrader import finviz_screener, tickers
 
 from . import config, db
 
+# Added 2026-10-20 for the DMA-breakout industry filter -- mirrors the exact
+# slug rule documented above GOAT_FINVIZ_INDUSTRY_SLUGS in config.py (lowercase,
+# strip spaces/ampersands/hyphens/commas/periods, prefix "ind_"). Used as the
+# fallback for any Finviz industry label not already in that override dict.
+_FINVIZ_SLUG_STRIP_CHARS = " &-,."
+
+
+def _derive_finviz_slug(industry_label: str) -> str:
+    """Mechanically derives a Finviz industry screener slug from a label, per
+    the rule verified in config.py's GOAT_FINVIZ_INDUSTRY_SLUGS comment. A
+    wrong/stale derived slug just yields an empty Finviz screen for that
+    industry (fail-safe-empty, via fetch_screener_universe), never a crash."""
+    return f"ind_{''.join(ch for ch in industry_label if ch not in _FINVIZ_SLUG_STRIP_CHARS).lower()}"
+
 
 def fetch_industry_constituents_us(industry_label: str) -> list[dict] | None:
-    """Returns None (logged, not a crash) when no Finviz slug is mapped for
-    this industry_label -- a gated industry that happens to be one of the 39
-    with an ETF but somehow missing a slug entry still degrades safely rather
-    than raising."""
+    """Looks up an explicit Finviz slug override in GOAT_FINVIZ_INDUSTRY_SLUGS
+    first; falls back to the rule-derived slug (_derive_finviz_slug) for any
+    of the other Finviz industries that dict doesn't cover. A wrong/stale slug
+    (explicit or derived) just yields an empty Finviz screen for that industry
+    -- fetch_screener_universe's own fail-safe-empty behavior, not a crash."""
     slug = config.GOAT_FINVIZ_INDUSTRY_SLUGS.get(industry_label)
     if slug is None:
-        print(f"[goat-industry-constituents] no Finviz slug mapped for {industry_label!r}")
-        return None
+        slug = _derive_finviz_slug(industry_label)
+        print(
+            f"[goat-industry-constituents] no explicit slug override for {industry_label!r} "
+            f"-- using derived slug {slug!r}"
+        )
     rows = finviz_screener.fetch_screener_universe(filters=f"{slug},sh_avgvol_o100,sh_price_o1")
     if rows is None:
         return None

@@ -6,7 +6,7 @@ claude --dangerously-skip-permissions
 go ahead and create the structured plan, asking me questions if you need to, for the handoff file 
 
 
-ready for execution: .agent/plans/goat-industry-pipeline.md
+ready for execution: .agent\plans\volume-spike-earnings-scanner.md
 
 adds etfs to breakouts:
 

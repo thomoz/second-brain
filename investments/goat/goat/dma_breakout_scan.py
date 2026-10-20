@@ -56,7 +56,7 @@ from mytrader import config as mytrader_config
 from mytrader.checks import CheckResult
 from scripts.ethical_filter import check_ticker as ethical_check
 
-from . import config, db, fundamentals_context, price_history, sp500_universe
+from . import config, db, fundamentals_context, industry_constituents, price_history, sp500_universe
 
 _SYDNEY_TZ = ZoneInfo("Australia/Sydney")
 
@@ -212,6 +212,27 @@ def passes_liquidity_floor(market: str, data) -> bool:
     return market_cap >= floor
 
 
+def fetch_top_industry_allow_set(conn: sqlite3.Connection) -> set[str] | None:
+    """Top config.GOAT_DMA_BREAKOUT_TOP_INDUSTRY_COUNT industries by rank from
+    the latest industry_full snapshot (written daily by scan-industries-full),
+    expanded into a ticker allow-set via the existing (cached) per-industry
+    constituent lookup. Returns None -- not an empty set -- when no
+    industry_full snapshot exists for any date yet, so the caller can fail
+    open (skip the gate) rather than stage zero candidates. Added 2026-10-20,
+    see .agent/plans/dma-breakout-industry-filter.md."""
+    latest_date = db.get_latest_rotation_snapshot_date(conn, "industry_full")
+    if latest_date is None:
+        return None
+    rows = db.get_rotation_snapshots_for_date(conn, "industry_full", latest_date)
+    top_rows = sorted(rows, key=lambda r: r["rank"])[: config.GOAT_DMA_BREAKOUT_TOP_INDUSTRY_COUNT]
+    allow_set: set[str] = set()
+    for row in top_rows:
+        industry_label = row["ticker"]  # repurposed column -- holds the industry name for this scope
+        for c in industry_constituents.get_or_refresh_industry_constituents(conn, industry_label):
+            allow_set.add(c["ticker"])
+    return allow_set
+
+
 def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
     cutoff = (
         datetime.now(timezone.utc) - timedelta(days=config.GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS)
@@ -223,9 +244,11 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
 
     constituents = fetch_universe_constituents(conn)
     asx_unavailable = not any(c["market"] == "ASX" for c in constituents)
+    industry_allow_set = fetch_top_industry_allow_set(conn)
 
     scanned = 0
     already_staged_elsewhere = 0
+    filtered_by_industry = 0
     new_candidates: list[dict[str, Any]] = []
 
     with market_data.cached_session():
@@ -245,6 +268,10 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
                 ]
                 interesting = [h for h in hits if h.verdict == "interesting"]
                 if not interesting:
+                    continue
+
+                if industry_allow_set is not None and market != "ETF" and ticker not in industry_allow_set:
+                    filtered_by_industry += 1
                     continue
 
                 if ticker in config.GOAT_BANNED_TICKERS:
@@ -289,6 +316,8 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         "scanned": scanned,
         "asx_unavailable": asx_unavailable,
         "already_staged_elsewhere": already_staged_elsewhere,
+        "industry_filter_applied": industry_allow_set is not None,
+        "filtered_by_industry": filtered_by_industry,
         "new_candidates": new_candidates,
         "pending_candidates": [
             dict(r) for r in db.get_all_goat_pending_candidates(conn)
@@ -337,6 +366,16 @@ def render_dma_breakout_candidates_report(result: dict[str, Any]) -> str:
             f"{result['already_staged_elsewhere']} ticker(s) crossed but were already "
             "staged by another Goat scan (a ticker can only be pending from one "
             "source at a time) -- not double-counted below."
+        )
+    if not result.get("industry_filter_applied", True):
+        lines.append(
+            "> Industry-rotation filter unavailable this run (no industry_full "
+            "snapshot yet) -- unfiltered scan, matching pre-filter behavior."
+        )
+    elif result.get("filtered_by_industry"):
+        lines.append(
+            f"{result['filtered_by_industry']} ticker(s) crossed but were filtered out -- "
+            f"industry not in today's top {config.GOAT_DMA_BREAKOUT_TOP_INDUSTRY_COUNT} by Perf Week."
         )
     lines += [
         "",

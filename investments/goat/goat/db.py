@@ -526,6 +526,19 @@ def get_rotation_snapshots_for_date(
     ).fetchall()
 
 
+def get_latest_rotation_snapshot_date(conn: sqlite3.Connection, scope: str) -> str | None:
+    """Latest snapshot_date for this scope, full stop (no before_date bound) --
+    mirrors get_sp500_constituents_fetched_at's MAX(...) idiom. Added 2026-10-20
+    for the DMA-breakout industry filter, which needs "today's (or the most
+    recent) industry_full ranking" rather than "the run before a given date"
+    (get_latest_snapshot_date_before's purpose)."""
+    row = conn.execute(
+        "SELECT MAX(snapshot_date) AS snapshot_date FROM goat_rotation_snapshots WHERE scope = ?",
+        (scope,),
+    ).fetchone()
+    return row["snapshot_date"] if row is not None else None
+
+
 def get_latest_snapshot_date_before(conn: sqlite3.Connection, scope: str, before_date: str) -> str | None:
     row = conn.execute(
         """SELECT DISTINCT snapshot_date FROM goat_rotation_snapshots

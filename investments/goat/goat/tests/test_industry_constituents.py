@@ -12,10 +12,40 @@ def _patch_universe(monkeypatch):
     monkeypatch.setattr(goat_config, "GOAT_ASX_INDUSTRY_CONSTITUENTS", _FAKE_ASX)
 
 
-def test_fetch_industry_constituents_us_returns_none_for_unmapped_slug(monkeypatch):
+def test_fetch_industry_constituents_us_derives_slug_for_unmapped_industry_label(monkeypatch):
     _patch_universe(monkeypatch)
-    result = industry_constituents.fetch_industry_constituents_us("Not A Real Industry")
-    assert result is None
+    captured = {}
+
+    def _fake_fetch_screener_universe(filters=None, sort="pricecash"):
+        captured["filters"] = filters
+        return []
+
+    monkeypatch.setattr(
+        "goat.industry_constituents.finviz_screener.fetch_screener_universe",
+        _fake_fetch_screener_universe,
+    )
+    result = industry_constituents.fetch_industry_constituents_us("Business Equipment & Supplies")
+    assert captured["filters"] == "ind_businessequipmentsupplies,sh_avgvol_o100,sh_price_o1"
+    assert result == []
+
+
+def test_fetch_industry_constituents_us_explicit_slug_overrides_derived_rule(monkeypatch):
+    _patch_universe(monkeypatch)
+    monkeypatch.setattr(
+        goat_config, "GOAT_FINVIZ_INDUSTRY_SLUGS", {"Semiconductors": "ind_totally_different_slug"},
+    )
+    captured = {}
+
+    def _fake_fetch_screener_universe(filters=None, sort="pricecash"):
+        captured["filters"] = filters
+        return []
+
+    monkeypatch.setattr(
+        "goat.industry_constituents.finviz_screener.fetch_screener_universe",
+        _fake_fetch_screener_universe,
+    )
+    industry_constituents.fetch_industry_constituents_us("Semiconductors")
+    assert captured["filters"] == "ind_totally_different_slug,sh_avgvol_o100,sh_price_o1"
 
 
 def test_fetch_industry_constituents_us_calls_finviz_screener_with_slug_and_liquidity_filter(monkeypatch):

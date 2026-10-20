@@ -1,6 +1,7 @@
 [Unit]
 Description=Goat DMA Breakout Scan
 After=network.target
+After=second-brain-goat-industry-full-scan.service
 
 [Service]
 Type=oneshot

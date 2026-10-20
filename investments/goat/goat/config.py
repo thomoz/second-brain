@@ -196,6 +196,13 @@ GOAT_INDUSTRY_CONSTITUENTS_CACHE_TTL_DAYS = 7  # mirrors GOAT_SP500_CACHE_TTL_DA
 # MOAT_FINVIZ_SECTOR_SCREENS. A wrong/stale slug just yields an empty screen for
 # that one industry (fail-safe-empty, not a crash) -- the --industries manual
 # override on scan-industry-heartbeat is the practical workaround for any drift.
+#
+# Added 2026-10-20 for the DMA-breakout industry filter (dma_breakout_scan.
+# fetch_top_industry_allow_set): this dict is now an override table consulted
+# FIRST, not the sole source -- industry_constituents._derive_finviz_slug applies
+# the same rule mechanically to any of the other ~105 Finviz industries not
+# listed here, per Shaun's explicit call not to hand-type ~105 more literal
+# entries (.agent/plans/dma-breakout-industry-filter.md).
 GOAT_FINVIZ_INDUSTRY_SLUGS: dict[str, str] = {
     "Aerospace & Defense": "ind_aerospacedefense",
     "Airlines": "ind_airlines",
@@ -815,6 +822,13 @@ GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS = 3  # added 2026-09-28 -- Shaun: "we jus
     # just hidden from the report -- an explicit review action (promote/dismiss) is
     # still how a candidate leaves early; this only removes ones nobody looked at
     # before they went stale on their own.
+GOAT_DMA_BREAKOUT_TOP_INDUSTRY_COUNT = 36  # added 2026-10-20 per
+    # .agent/plans/dma-breakout-industry-filter.md -- only stage a non-ETF
+    # candidate if its Finviz industry is also in the day's top N (of 144) by
+    # GOAT_INDUSTRY_FULL_PRIMARY_WINDOW (Perf Week) in the industry_full
+    # rotation snapshot, i.e. only surface breakouts where money is actively
+    # rotating in right now. 36 is a v1/tunable starting point (roughly a
+    # quarter of the 144-industry universe), not literature-final.
 
 # DMA Breakout Scanner -- ETF universe extension, per
 # investments/dma-breakout-etf-universe-handoff.md and Shaun's confirmation 2026-09-19
