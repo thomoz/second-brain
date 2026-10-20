@@ -260,14 +260,20 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - [ok] going_concern: Free Cash Flow positive ($20,404M) -- cash-generative, no bankruptcy/cash-runway risk from this signal
 
 ### New Alerts This Run
-No new material changes.
+- **JNJ** (watchlist) — valuation: PE 38.5 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
+- **KAR.AX** (watchlist) — dividend: Dividend declined -41.9% vs prior 12 months
+- **KARS** (watchlist) — dividend: Dividend declined -65.6% vs prior 12 months
+- **KMI** (watchlist) — balance_sheet: Current Ratio 0.46 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
 
 ### All Open Alerts
+- **KMI** (watchlist) — balance_sheet: Current Ratio 0.46 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-10-20)
+- **KARS** (watchlist) — dividend: Dividend declined -65.6% vs prior 12 months (first flagged 2026-10-20)
+- **KAR.AX** (watchlist) — dividend: Dividend declined -41.9% vs prior 12 months (first flagged 2026-10-20)
+- **JNJ** (watchlist) — valuation: PE 38.5 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-10-20)
 - **CSV** (watchlist) — balance_sheet: Debt/Equity 196.6 >= 150.0 -- lower is generally safer (0/10 — poor) (first flagged 2026-10-20)
 - **WPM** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $100M / burn ~$294M per month = ~0.3 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-10-20)
 - **PRS.OL** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $52M / burn ~$5M per month = ~11.1 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-10-20)
 - **ORCL** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $37,077M / burn ~$3,821M per month = ~9.7 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-10-20)
-- **ELVA** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $13M / burn ~$2M per month = ~7.1 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-10-20)
 - **CV** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $9M / burn ~$1M per month = ~6.7 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-10-20)
 - **CEG** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $697M / burn ~$552M per month = ~1.3 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-10-20)
 - **SOFI** (holdings) — going_concern: BANKRUPTCY RISK: Cash $3,367M / burn ~$333M per month (annual FCF) = ~10.1 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-10-20)
@@ -276,8 +282,6 @@ No new material changes.
 - **STNG** (watchlist) — dividend: Dividend declined -15.6% vs prior 12 months (first flagged 2026-10-14)
 - **INTC** (watchlist) — valuation: PE 46.9 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-10-14)
 - **ICLN** (watchlist) — dividend: Dividend declined -27.6% vs prior 12 months (first flagged 2026-10-14)
-- **HAIL** (watchlist) — etf_mechanics: AUM $17,634,380 below $50,000,000 closure-risk threshold (0/10 — poor) — top holdings: Via Transportation Inc Ordinary Shares - Class A (3.4%), Honda Motor Co Ltd ADR (2.0%), NVIDIA Corp (1.9%); dominant sector: Technology (39%) (first flagged 2026-10-14)
-- **GWRE** (watchlist) — valuation: PE 101.2 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-10-14)
 - **LLY** (holdings) — earnings_watch_trend: EPS estimate down 4.2% over the trailing 30 days (36.73 -> 35.19) (first flagged 2026-10-13)
 - **SHOP** (watchlist) — valuation: PE 110.9 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-10-10)
 - **NET** (watchlist) — balance_sheet: Debt/Equity 217.9 >= 150.0 -- lower is generally safer (0/10 — poor) (first flagged 2026-10-10)
@@ -299,8 +303,6 @@ No new material changes.
 - **MTA** (watchlist) — valuation: PE 65.0 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-09-28)
 - **MELI** (watchlist) — balance_sheet: Debt/Equity 168.6 >= 150.0 -- lower is generally safer (0/10 — poor) (first flagged 2026-09-28)
 - **MELI** (watchlist) — valuation: PE 47.6 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-09-28)
-- **EQT** (watchlist) — balance_sheet: Current Ratio 0.67 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-09-28)
-- **ELVA** (watchlist) — valuation: PE 63.5 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-09-28)
 - **DIS** (watchlist) — balance_sheet: Current Ratio 0.71 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-09-28)
 - **CRAK** (watchlist) — dividend: Dividend declined -50.9% vs prior 12 months (first flagged 2026-09-28)
 - **CORN** (watchlist) — etf_mechanics: Expense ratio 1.00% at/above 1.0% (0/10 — poor) — top holdings: Goldman Sachs FS Government Instl (44.1%) (first flagged 2026-09-28)
@@ -337,9 +339,9 @@ No new material changes.
 - **COUR** — Graham [PE 6.1 x P/B 1.18 = 7.1, below 22.5]
 - **CPRT** — Buffett/Smith [ROE 16.2% at/above 15.0% (10/10 — excellent), not richly valued]
 - **DTG.DE** — Lynch [PEG 0.32 at/below 1.0 — growth at a reasonable price]
-- **GOOG** — Buffett/Smith [ROE 48.7% at/above 15.0% (10/10 — excellent), not richly valued]
-- **GOOGL** — Buffett/Smith [ROE 48.7% at/above 15.0% (10/10 — excellent), not richly valued]
-- **GROW.L** — Graham [PE 9.3 x P/B 0.77 = 7.2, below 22.5]
+- **KO** — Buffett/Smith [ROE 42.1% at/above 15.0% (10/10 — excellent), not richly valued]
+- **KSPI** — Graham [PE 8.5 at/below cheap threshold (12.0), P/B unavailable/implausible]; Buffett/Smith [ROE 44.8% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
+- **LEN** — Graham [PE 14.6 x P/B 0.84 = 12.2, below 22.5]
 - **LULU** — Graham [PE 8.0 x P/B 2.28 = 18.3, below 22.5]; Lynch [PEG 0.98 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 30.9% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -16.2% over 3 months with no other flags — possible overreaction, not a fundamental problem] (4 independent signals)
 - **META** — Lynch [PEG 0.94 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 29.8% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
 - **MPL.AX** — Buffett/Smith [ROE 27.2% at/above 15.0% (10/10 — excellent), not richly valued]
@@ -371,8 +373,8 @@ No new material changes.
 - **real_yields** [flag] — 10Y real yield +2.74% (as of 2026-10-16), above the 2.0% threshold -- elevated real yields historically pressure gold hard
 - **dollar_index** [ok] — Broad USD index 121.4, +1.6% over the past 30 days
 - **gold_trend** [info] — GC=F $4,133 (50DMA $4,364, 200DMA $4,539, -8.9% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $58.87 AUD; AUD/USD 3mo move +0.2%
-- **gold_silver_ratio** [ok] — Gold/silver ratio at 72.3
-- **vix** [ok] — VIX at 18.7, below the flag threshold
+- **gold_silver_ratio** [ok] — Gold/silver ratio at 72.2
+- **vix** [ok] — VIX at 18.6, below the flag threshold
 
 ### Gold Outlook
 See investments/my-trader/gold-outlook.md — today/tomorrow, this week, and this month reads, refreshed this run.
