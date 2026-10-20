@@ -40,7 +40,16 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 2 | Debt moves off balance sheet (GOOG) | ok | GOOG: $91.0B uncommenced lease commitments (+0.0% since last filing, 10-Q filed 2026-07-23) |
 | 2 | Debt moves off balance sheet (META) | ok | META: $279.0B uncommenced lease commitments (+0.0% since last filing, 10-Q filed 2026-07-30) |
 | 3 | Seller finances buyer | unknown | No automatable source exists for vendor/circular-financing deals -- periodically news-scan the current hot watchlist yourself: NVDA, AAPL, GOOGL, GOOG, MSFT, META, AVGO, LLY, MU, WMT |
-| 4 | Capex outruns cash flow | ok | No hot-watchlist tickers with a resolvable cash-flow statement this run. |
+| 4 | Capex outruns cash flow (NVDA) | ok | NVDA: Free Cash Flow $+96.7B, Capital Expenditure $6.0B (period ending 2026-01-31) |
+| 4 | Capex outruns cash flow (AAPL) | ok | AAPL: Free Cash Flow $+98.8B, Capital Expenditure $12.7B (period ending 2025-09-30) |
+| 4 | Capex outruns cash flow (GOOGL) | ok | GOOGL: Free Cash Flow $+73.3B, Capital Expenditure $91.4B (period ending 2025-12-31) |
+| 4 | Capex outruns cash flow (GOOG) | ok | GOOG: Free Cash Flow $+73.3B, Capital Expenditure $91.4B (period ending 2025-12-31) |
+| 4 | Capex outruns cash flow (MSFT) | ok | MSFT: Free Cash Flow $+67.0B, Capital Expenditure $115.9B (period ending 2026-06-30) |
+| 4 | Capex outruns cash flow (META) | ok | META: Free Cash Flow $+46.1B, Capital Expenditure $69.7B (period ending 2025-12-31) |
+| 4 | Capex outruns cash flow (AVGO) | ok | AVGO: Free Cash Flow $+26.9B, Capital Expenditure $0.6B (period ending 2025-10-31) |
+| 4 | Capex outruns cash flow (LLY) | ok | LLY: Free Cash Flow $+6.0B, Capital Expenditure $10.8B (period ending 2025-12-31) |
+| 4 | Capex outruns cash flow (MU) | ok | MU: Free Cash Flow $+1.7B, Capital Expenditure $15.9B (period ending 2025-08-31) |
+| 4 | Capex outruns cash flow (WMT) | ok | WMT: Free Cash Flow $+14.9B, Capital Expenditure $26.6B (period ending 2026-01-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.48T as of 2026-09-01, +31.4% YoY vs 2025-09-01 |
 | 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 151 filing(s) in the trailing 30d vs 268 in the same window a year ago (0.56x); 424B4 (priced IPO): 27 filing(s) in the trailing 30d vs 44 in the same window a year ago (0.61x) |
 | 7 | Retail piles into leverage | ok | Equity put/call ratio 0.55 (z=-0.37 vs trailing 62d mean 0.57) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
