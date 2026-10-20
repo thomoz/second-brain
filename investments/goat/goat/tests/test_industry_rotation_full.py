@@ -57,6 +57,30 @@ def test_render_full_industry_ranking_report_shows_all_six_perf_columns_and_no_n
     assert "+4.00%" in report
 
 
+def test_render_full_industry_ranking_report_top_bottom_10_ordered_by_perf_week():
+    # Overall rank (Perf Half) deliberately scrambled relative to Perf Week, so
+    # a passing test proves the sections re-sort by Perf Week rather than just
+    # slicing the already-Perf-Half-ordered ranking.
+    rows = [
+        _row("HighHalfLowWeek", perf_half=50.0, perf_week=-9.0),
+        _row("LowHalfHighWeek", perf_half=-50.0, perf_week=9.0),
+        _row("Mid", perf_half=0.0, perf_week=0.0),
+    ]
+    ranking = industry_rotation_full.rank_all_industries(rows)
+    report = industry_rotation_full.render_full_industry_ranking_report({"ranking": ranking})
+
+    top_section = report.split("## Top 10 Rising")[1].split("## Bottom 10 Falling")[0]
+    assert top_section.index("LowHalfHighWeek") < top_section.index("Mid")
+    assert top_section.index("Mid") < top_section.index("HighHalfLowWeek")
+
+    bottom_section = report.split("## Bottom 10 Falling")[1].split("## Full Ranking")[0]
+    assert bottom_section.index("HighHalfLowWeek") < bottom_section.index("Mid")
+    assert bottom_section.index("Mid") < bottom_section.index("LowHalfHighWeek")
+
+    assert "Top 10 Rising (by Perf Week)" in report
+    assert "Bottom 10 Falling (by Perf Week)" in report
+
+
 def test_render_full_industry_ranking_report_shows_no_flow_section_when_absent():
     ranking = industry_rotation_full.rank_all_industries([_row("Semiconductors", perf_half=4.0)])
     report = industry_rotation_full.render_full_industry_ranking_report({"ranking": ranking})

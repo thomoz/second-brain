@@ -92,6 +92,18 @@ def _perf_table_header() -> list[str]:
     return [f"| Rank | Industry | {header_cells} |", f"|------|----------|{divider_cells}|"]
 
 
+def _sorted_by_perf_week(ranking: list[dict[str, Any]], *, descending: bool) -> list[dict[str, Any]]:
+    """Independent re-sort for the Top/Bottom 10 sections -- Perf Week, not
+    config.GOAT_INDUSTRY_FULL_PRIMARY_WINDOW (Perf Half), per Shaun's explicit
+    request 2026-10-20. Each row keeps its own overall rank field (still Perf
+    Half-based, from rank_all_industries) -- only the SELECTION and ORDER of
+    which 10 rows get shown here changes, not what "Rank" means in the table.
+    Missing Perf Week sorts last in both directions, same idiom as
+    rank_all_industries."""
+    multiplier = -1 if descending else 1
+    return sorted(ranking, key=lambda r: (r["perf_week"] is None, multiplier * (r["perf_week"] or 0)))
+
+
 def _perf_table_rows(rows: list[dict[str, Any]]) -> list[str]:
     lines = []
     for row in rows:
@@ -118,14 +130,14 @@ def render_full_industry_ranking_report(result: dict[str, Any]) -> str:
         "",
         f"## Run: {_today_sydney()}",
         "",
-        "## Top 10 Rising",
+        "## Top 10 Rising (by Perf Week)",
     ]
     lines += _perf_table_header()
-    lines += _perf_table_rows(ranking[:10])
+    lines += _perf_table_rows(_sorted_by_perf_week(ranking, descending=True)[:10])
 
-    lines += ["", "## Bottom 10 Falling"]
+    lines += ["", "## Bottom 10 Falling (by Perf Week)"]
     lines += _perf_table_header()
-    lines += _perf_table_rows(ranking[-10:])
+    lines += _perf_table_rows(_sorted_by_perf_week(ranking, descending=False)[:10])
 
     lines += [
         "",
