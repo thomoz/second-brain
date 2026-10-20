@@ -14,18 +14,18 @@ def _row(name: str, **perf) -> dict:
 
 
 def test_rank_all_industries_orders_by_primary_window_descending():
-    assert config.GOAT_INDUSTRY_FULL_PRIMARY_WINDOW == "perf_half"
+    assert config.GOAT_INDUSTRY_FULL_PRIMARY_WINDOW == "perf_week"
     rows = [
-        _row("Low", perf_half=-5.0),
-        _row("High", perf_half=10.0),
-        _row("Mid", perf_half=2.0),
+        _row("Low", perf_week=-5.0),
+        _row("High", perf_week=10.0),
+        _row("Mid", perf_week=2.0),
     ]
     ranked = industry_rotation_full.rank_all_industries(rows)
     assert [r["name"] for r in ranked] == ["High", "Mid", "Low"]
 
 
 def test_rank_all_industries_assigns_rank_starting_at_one():
-    rows = [_row("A", perf_half=1.0), _row("B", perf_half=2.0)]
+    rows = [_row("A", perf_week=1.0), _row("B", perf_week=2.0)]
     ranked = industry_rotation_full.rank_all_industries(rows)
     assert [r["rank"] for r in ranked] == [1, 2]
     assert ranked[0]["name"] == "B"
@@ -33,8 +33,8 @@ def test_rank_all_industries_assigns_rank_starting_at_one():
 
 def test_rank_all_industries_missing_data_sorts_last():
     rows = [
-        _row("Known", perf_half=1.0),
-        _row("Unknown", perf_half=None),
+        _row("Known", perf_week=1.0),
+        _row("Unknown", perf_week=None),
     ]
     ranked = industry_rotation_full.rank_all_industries(rows)
     assert [r["name"] for r in ranked] == ["Known", "Unknown"]
@@ -57,28 +57,36 @@ def test_render_full_industry_ranking_report_shows_all_six_perf_columns_and_no_n
     assert "+4.00%" in report
 
 
-def test_render_full_industry_ranking_report_top_bottom_10_ordered_by_perf_week():
-    # Overall rank (Perf Half) deliberately scrambled relative to Perf Week, so
-    # a passing test proves the sections re-sort by Perf Week rather than just
-    # slicing the already-Perf-Half-ordered ranking.
-    rows = [
-        _row("HighHalfLowWeek", perf_half=50.0, perf_week=-9.0),
-        _row("LowHalfHighWeek", perf_half=-50.0, perf_week=9.0),
-        _row("Mid", perf_half=0.0, perf_week=0.0),
-    ]
+def test_render_full_industry_ranking_report_top_bottom_10_rank_column_matches_display_order():
+    # 15 rows, distinct perf_week values -- Shaun's bug report 2026-10-20: the
+    # Rank column shown in Top/Bottom 10 must be the SAME field the rows are
+    # ordered by (Perf Week), not some other window's overall position, so it
+    # reads as a clean contiguous sequence rather than scattered numbers.
+    rows = [_row(f"Industry{i}", perf_week=float(i)) for i in range(15)]
     ranking = industry_rotation_full.rank_all_industries(rows)
     report = industry_rotation_full.render_full_industry_ranking_report({"ranking": ranking})
 
-    top_section = report.split("## Top 10 Rising")[1].split("## Bottom 10 Falling")[0]
-    assert top_section.index("LowHalfHighWeek") < top_section.index("Mid")
-    assert top_section.index("Mid") < top_section.index("HighHalfLowWeek")
-
-    bottom_section = report.split("## Bottom 10 Falling")[1].split("## Full Ranking")[0]
-    assert bottom_section.index("HighHalfLowWeek") < bottom_section.index("Mid")
-    assert bottom_section.index("Mid") < bottom_section.index("LowHalfHighWeek")
-
     assert "Top 10 Rising (by Perf Week)" in report
     assert "Bottom 10 Falling (by Perf Week)" in report
+
+    top10 = industry_rotation_full._sorted_by_primary_window(ranking, descending=True)[:10]
+    assert [r["name"] for r in top10] == [f"Industry{i}" for i in range(14, 4, -1)]
+    assert [r["rank"] for r in top10] == list(range(1, 11))  # contiguous, matches display order
+
+    bottom10 = industry_rotation_full._sorted_by_primary_window(ranking, descending=False)[:10]
+    assert [r["name"] for r in bottom10] == [f"Industry{i}" for i in range(0, 10)]
+    assert [r["rank"] for r in bottom10] == list(range(15, 5, -1))  # contiguous, matches display order
+
+
+def test_sorted_by_primary_window_missing_data_sorts_last_in_both_directions():
+    rows = [
+        _row("Known", perf_week=1.0),
+        _row("Unknown", perf_week=None),
+    ]
+    descending = industry_rotation_full._sorted_by_primary_window(rows, descending=True)
+    ascending = industry_rotation_full._sorted_by_primary_window(rows, descending=False)
+    assert [r["name"] for r in descending] == ["Known", "Unknown"]
+    assert [r["name"] for r in ascending] == ["Known", "Unknown"]
 
 
 def test_render_full_industry_ranking_report_shows_no_flow_section_when_absent():

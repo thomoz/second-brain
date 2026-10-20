@@ -42,6 +42,7 @@ _PERF_COLUMNS = [
     ("perf_year", "Perf Year"),
     ("perf_ytd", "Perf YTD"),
 ]
+_PERF_LABELS = dict(_PERF_COLUMNS)
 
 
 def _today_sydney() -> str:
@@ -92,16 +93,17 @@ def _perf_table_header() -> list[str]:
     return [f"| Rank | Industry | {header_cells} |", f"|------|----------|{divider_cells}|"]
 
 
-def _sorted_by_perf_week(ranking: list[dict[str, Any]], *, descending: bool) -> list[dict[str, Any]]:
-    """Independent re-sort for the Top/Bottom 10 sections -- Perf Week, not
-    config.GOAT_INDUSTRY_FULL_PRIMARY_WINDOW (Perf Half), per Shaun's explicit
-    request 2026-10-20. Each row keeps its own overall rank field (still Perf
-    Half-based, from rank_all_industries) -- only the SELECTION and ORDER of
-    which 10 rows get shown here changes, not what "Rank" means in the table.
-    Missing Perf Week sorts last in both directions, same idiom as
-    rank_all_industries."""
+def _sorted_by_primary_window(ranking: list[dict[str, Any]], *, descending: bool) -> list[dict[str, Any]]:
+    """Explicit re-sort by config.GOAT_INDUSTRY_FULL_PRIMARY_WINDOW -- the same
+    field rank_all_industries already sorts the full list by, so Top 10 Rising
+    (descending) just reproduces the list's own head and "Rank" reads as a
+    clean 1-10. Bottom 10 Falling (ascending -- lowest/most-negative first, per
+    Shaun's explicit request 2026-10-20) needs its own sort rather than
+    reversing a tail slice, so missing data still sorts last in THIS direction
+    too, not first (same idiom as rank_all_industries)."""
+    window = config.GOAT_INDUSTRY_FULL_PRIMARY_WINDOW
     multiplier = -1 if descending else 1
-    return sorted(ranking, key=lambda r: (r["perf_week"] is None, multiplier * (r["perf_week"] or 0)))
+    return sorted(ranking, key=lambda r: (r[window] is None, multiplier * (r[window] or 0)))
 
 
 def _perf_table_rows(rows: list[dict[str, Any]]) -> list[str]:
@@ -117,6 +119,7 @@ def _perf_table_rows(rows: list[dict[str, Any]]) -> list[str]:
 
 def render_full_industry_ranking_report(result: dict[str, Any]) -> str:
     ranking = result["ranking"]
+    window_label = _PERF_LABELS[config.GOAT_INDUSTRY_FULL_PRIMARY_WINDOW]
     lines = [
         "# Goat Full-Coverage Industry Ranking",
         "",
@@ -126,23 +129,25 @@ def render_full_industry_ranking_report(result: dict[str, Any]) -> str:
         "industries -- not just the 39 with a dedicated, currently-trading ETF "
         "(see industry-ranking.md for that narrower, breakout-gated report). This "
         "is a pure informational ranking: no breakout signal, no candidate "
-        "staging, no WhatsApp alert.",
+        f"staging, no WhatsApp alert. Ranked throughout by {window_label} -- the "
+        "nearest-term read on where money is moving into/out of an industry "
+        "right now, not a longer trend (see industry-ranking.md for that).",
         "",
         f"## Run: {_today_sydney()}",
         "",
-        "## Top 10 Rising (by Perf Week)",
+        f"## Top 10 Rising (by {window_label})",
     ]
     lines += _perf_table_header()
-    lines += _perf_table_rows(_sorted_by_perf_week(ranking, descending=True)[:10])
+    lines += _perf_table_rows(_sorted_by_primary_window(ranking, descending=True)[:10])
 
-    lines += ["", "## Bottom 10 Falling (by Perf Week)"]
+    lines += ["", f"## Bottom 10 Falling (by {window_label})"]
     lines += _perf_table_header()
-    lines += _perf_table_rows(_sorted_by_perf_week(ranking, descending=False)[:10])
+    lines += _perf_table_rows(_sorted_by_primary_window(ranking, descending=False)[:10])
 
     lines += [
         "",
         "## Full Ranking",
-        f"All {len(ranking)}/144 industries.",
+        f"All {len(ranking)}/144 industries, ranked by {window_label}.",
         "",
     ]
     lines += _perf_table_header()

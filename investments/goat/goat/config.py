@@ -253,9 +253,15 @@ GOAT_FINVIZ_INDUSTRY_SLUGS: dict[str, str] = {
 # pipeline (no daily price series in this data source), see plan Decision #2.
 GOAT_FINVIZ_GROUPS_URL = "https://finviz.com/groups.ashx"
 GOAT_INDUSTRY_FULL_RANKING_MD_PATH = GOAT_DIR / "industry-ranking-full.md"
-GOAT_INDUSTRY_FULL_PRIMARY_WINDOW = "perf_half"  # closest match to the existing
-    # ~6-month GOAT_INDUSTRY_RANK_WINDOW_TRADING_DAYS convention; v1/tunable --
-    # "perf_quarter" or "perf_month" are equally valid choices, change freely.
+GOAT_INDUSTRY_FULL_PRIMARY_WINDOW = "perf_week"  # changed from "perf_half" 2026-10-20
+    # per Shaun's explicit call -- the point of this report is "where is money
+    # moving into NOW", which Perf Week (trailing 1 week) answers much more
+    # directly than a 6-month trend window; the 39-ETF tool already covers the
+    # longer trend view. Drives the Full Ranking order AND the Top/Bottom 10
+    # sections (industry_rotation_full._sorted_by_primary_window) -- both read
+    # this one constant, so changing it again later stays a one-line change,
+    # not a multi-place edit. v1/tunable regardless -- "perf_month" etc. remain
+    # valid choices if the near-term read proves too noisy.
 
 # Hand-curated ASX ticker -> Finviz industry-label mapping, per Decision 20
 # (2026-10-03, Shaun: build this now, do not defer). Covers a useful slice --
