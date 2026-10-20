@@ -212,25 +212,34 @@ def passes_liquidity_floor(market: str, data) -> bool:
     return market_cap >= floor
 
 
-def fetch_top_industry_allow_set(conn: sqlite3.Connection) -> set[str] | None:
+def fetch_top_industry_map(conn: sqlite3.Connection) -> dict[str, str] | None:
     """Top config.GOAT_DMA_BREAKOUT_TOP_INDUSTRY_COUNT industries by rank from
     the latest industry_full snapshot (written daily by scan-industries-full),
-    expanded into a ticker allow-set via the existing (cached) per-industry
-    constituent lookup. Returns None -- not an empty set -- when no
-    industry_full snapshot exists for any date yet, so the caller can fail
-    open (skip the gate) rather than stage zero candidates. Added 2026-10-20,
-    see .agent/plans/dma-breakout-industry-filter.md."""
+    expanded into a ticker -> Finviz industry label map via the existing
+    (cached) per-industry constituent lookup. Returns None -- not an empty
+    dict -- when no industry_full snapshot exists for any date yet, so the
+    caller can fail open (skip the gate) rather than stage zero candidates.
+    Added 2026-10-20, see .agent/plans/dma-breakout-industry-filter.md.
+
+    Doubles as the source of the report's displayed industry label (its keys
+    are the gate allow-set; its values are the actual Finviz industry each
+    ticker matched on) -- replaces the coarse GICS/ASX sector label that
+    fetch_universe_constituents attaches, which was misleadingly shown even
+    for tickers gated in under a specific Finviz industry override (e.g.
+    NHF.AX/MPL.AX display as "Financials" via ASX's GICS sector, but are
+    gated in under config.GOAT_ASX_INDUSTRY_CONSTITUENTS's "Healthcare Plans"
+    -- a real business-model distinction GICS's sector bucket erases)."""
     latest_date = db.get_latest_rotation_snapshot_date(conn, "industry_full")
     if latest_date is None:
         return None
     rows = db.get_rotation_snapshots_for_date(conn, "industry_full", latest_date)
     top_rows = sorted(rows, key=lambda r: r["rank"])[: config.GOAT_DMA_BREAKOUT_TOP_INDUSTRY_COUNT]
-    allow_set: set[str] = set()
+    ticker_industry: dict[str, str] = {}
     for row in top_rows:
         industry_label = row["ticker"]  # repurposed column -- holds the industry name for this scope
         for c in industry_constituents.get_or_refresh_industry_constituents(conn, industry_label):
-            allow_set.add(c["ticker"])
-    return allow_set
+            ticker_industry[c["ticker"]] = industry_label
+    return ticker_industry
 
 
 def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
@@ -246,7 +255,7 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
 
     constituents = fetch_universe_constituents(conn)
     asx_unavailable = not any(c["market"] == "ASX" for c in constituents)
-    industry_allow_set = fetch_top_industry_allow_set(conn)
+    industry_map = fetch_top_industry_map(conn)
 
     scanned = 0
     already_staged_elsewhere = 0
@@ -272,7 +281,7 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
                 if not interesting:
                     continue
 
-                if industry_allow_set is not None and market != "ETF" and ticker not in industry_allow_set:
+                if industry_map is not None and market != "ETF" and ticker not in industry_map:
                     filtered_by_industry += 1
                     continue
 
@@ -301,14 +310,21 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
                     signal_detail += f"; {c['review_reason']}"
                 signal_detail += f"; survival context: {context['summary']}"
 
+                # ETFs keep their config label (already a Finviz-style industry name,
+                # e.g. "Biotechnology") and ungated runs fall back to the coarse GICS/
+                # ASX sector label -- but a gated stock shows the actual Finviz
+                # industry it matched on, not the coarser sector label fetch_universe_
+                # constituents attached (see fetch_top_industry_map's docstring).
+                display_label = industry_map.get(ticker, label) if industry_map is not None else label
+
                 company_name = c["company"] or data.info.get("longName") or ""
                 db.insert_goat_pending_candidate(
-                    conn, ticker=ticker, sector_label=label,
+                    conn, ticker=ticker, sector_label=display_label,
                     signal_detail=signal_detail, source="goat_dma_breakout_scan",
                     company_name=company_name, exchange=exchange_name,
                 )
                 new_candidates.append({
-                    "ticker": ticker, "sector_label": label, "detail": signal_detail,
+                    "ticker": ticker, "sector_label": display_label, "detail": signal_detail,
                     "company": company_name,
                 })
             except Exception as e:
@@ -318,7 +334,7 @@ def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         "scanned": scanned,
         "asx_unavailable": asx_unavailable,
         "already_staged_elsewhere": already_staged_elsewhere,
-        "industry_filter_applied": industry_allow_set is not None,
+        "industry_filter_applied": industry_map is not None,
         "filtered_by_industry": filtered_by_industry,
         "new_candidates": new_candidates,
         "pending_candidates": [
@@ -385,8 +401,8 @@ def render_dma_breakout_candidates_report(result: dict[str, Any]) -> str:
         )
     lines += [
         "",
-        "| Ticker | Company | Exchange | Sector | Signal | Flagged |",
-        "|--------|---------|----------|--------|--------|---------|",
+        "| Ticker | Company | Exchange | Industry | Signal | Flagged |",
+        "|--------|---------|----------|----------|--------|---------|",
     ]
     sorted_candidates = sorted(
         result["pending_candidates"],

@@ -264,7 +264,7 @@ def _interesting_close() -> pd.Series:
 
 def _patch_common(
     monkeypatch, constituents=None, fetch_close=None, ticker_data=None, etf_universe=None,
-    industry_allow_set=None,
+    industry_map=None,
 ):
     monkeypatch.setattr(
         "goat.dma_breakout_scan.sp500_universe.get_or_refresh_sp500_constituents",
@@ -286,21 +286,21 @@ def _patch_common(
         "goat.dma_breakout_scan.market_data.fetch_ticker_data",
         ticker_data if ticker_data is not None else (lambda ticker: _healthy_ticker_data(ticker)),
     )
-    # No industry filter by default (industry_allow_set=None -> unfiltered, matching
+    # No industry filter by default (industry_map=None -> unfiltered, matching
     # pre-filter behavior) -- keeps every pre-existing test isolated from the new
     # industry-rotation gate; tests exercising it opt in explicitly.
     monkeypatch.setattr(
-        "goat.dma_breakout_scan.fetch_top_industry_allow_set", lambda conn: industry_allow_set,
+        "goat.dma_breakout_scan.fetch_top_industry_map", lambda conn: industry_map,
     )
 
 
-# --- fetch_top_industry_allow_set -------------------------------------------
+# --- fetch_top_industry_map -------------------------------------------------
 
-def test_fetch_top_industry_allow_set_returns_none_when_no_snapshot_exists(db_conn):
-    assert dma_breakout_scan.fetch_top_industry_allow_set(db_conn) is None
+def test_fetch_top_industry_map_returns_none_when_no_snapshot_exists(db_conn):
+    assert dma_breakout_scan.fetch_top_industry_map(db_conn) is None
 
 
-def test_fetch_top_industry_allow_set_unions_top_n_industries(db_conn, monkeypatch):
+def test_fetch_top_industry_map_unions_top_n_industries(db_conn, monkeypatch):
     monkeypatch.setattr(config, "GOAT_DMA_BREAKOUT_TOP_INDUSTRY_COUNT", 2)
     goat_db.insert_rotation_snapshots(
         db_conn, scope="industry_full", snapshot_date="2026-10-20",
@@ -323,8 +323,10 @@ def test_fetch_top_industry_allow_set_unions_top_n_industries(db_conn, monkeypat
         "goat.dma_breakout_scan.industry_constituents.get_or_refresh_industry_constituents",
         _fake_get_or_refresh,
     )
-    result = dma_breakout_scan.fetch_top_industry_allow_set(db_conn)
-    assert result == {"NVDA", "NST.AX"}  # Airlines (rank 3) excluded by the top-2 cutoff
+    result = dma_breakout_scan.fetch_top_industry_map(db_conn)
+    # Airlines (rank 3) excluded by the top-2 cutoff; values are each ticker's
+    # actual Finviz industry, not just a flat allow-set.
+    assert result == {"NVDA": "Semiconductors", "NST.AX": "Gold"}
 
 
 def test_run_dma_breakout_scan_stages_new_candidate(db_conn, monkeypatch):
@@ -473,16 +475,17 @@ def test_run_dma_breakout_scan_never_stages_banned_etf_ticker(db_conn, monkeypat
 # --- run_dma_breakout_scan industry filter ----------------------------------
 
 def test_run_dma_breakout_scan_stages_when_industry_in_allow_set(db_conn, monkeypatch):
-    _patch_common(monkeypatch, industry_allow_set={"AAPL"})
+    _patch_common(monkeypatch, industry_map={"AAPL": "Semiconductors"})
     result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
     assert len(result["new_candidates"]) == 1
     assert result["new_candidates"][0]["ticker"] == "AAPL"
+    assert result["new_candidates"][0]["sector_label"] == "Semiconductors"
     assert result["filtered_by_industry"] == 0
     assert result["industry_filter_applied"] is True
 
 
 def test_run_dma_breakout_scan_filters_when_industry_not_in_allow_set(db_conn, monkeypatch):
-    _patch_common(monkeypatch, industry_allow_set={"NOT-AAPL"})
+    _patch_common(monkeypatch, industry_map={"NOT-AAPL": "Gold"})
     result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
     assert result["new_candidates"] == []
     assert result["filtered_by_industry"] == 1
@@ -492,7 +495,7 @@ def test_run_dma_breakout_scan_filters_when_industry_not_in_allow_set(db_conn, m
 def test_run_dma_breakout_scan_etf_exempt_from_industry_filter(db_conn, monkeypatch):
     _patch_common(
         monkeypatch, constituents=[], ticker_data=lambda ticker: _etf_ticker_data(ticker),
-        etf_universe={"SPY": "Broad Market"}, industry_allow_set=set(),
+        etf_universe={"SPY": "Broad Market"}, industry_map={},
     )
     result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
     assert len(result["new_candidates"]) == 1
@@ -501,7 +504,7 @@ def test_run_dma_breakout_scan_etf_exempt_from_industry_filter(db_conn, monkeypa
 
 
 def test_run_dma_breakout_scan_unfiltered_when_no_snapshot_exists(db_conn, monkeypatch):
-    _patch_common(monkeypatch)  # industry_allow_set=None default -- no snapshot yet
+    _patch_common(monkeypatch)  # industry_map=None default -- no snapshot yet
     result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
     assert result["industry_filter_applied"] is False
     assert len(result["new_candidates"]) == 1

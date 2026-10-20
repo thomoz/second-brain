@@ -198,7 +198,7 @@ GOAT_INDUSTRY_CONSTITUENTS_CACHE_TTL_DAYS = 7  # mirrors GOAT_SP500_CACHE_TTL_DA
 # override on scan-industry-heartbeat is the practical workaround for any drift.
 #
 # Added 2026-10-20 for the DMA-breakout industry filter (dma_breakout_scan.
-# fetch_top_industry_allow_set): this dict is now an override table consulted
+# fetch_top_industry_map): this dict is now an override table consulted
 # FIRST, not the sole source -- industry_constituents._derive_finviz_slug applies
 # the same rule mechanically to any of the other ~105 Finviz industries not
 # listed here, per Shaun's explicit call not to hand-type ~105 more literal
