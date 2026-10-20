@@ -37,7 +37,6 @@ Representative constituents (read-only — not staged as candidates):
 | FSLR | First Solar, Inc. | -3.7% | +23.3% | growing |
 | ENLT | Enlight Renewable Energy Ltd | +43.0% | +1900.2% | growing |
 | ENPH | Enphase Energy, Inc. | -19.6% | -3.5% | declining |
-| HASI | HA Sustainable Infrastructure Capital, Inc. | +804.4% | +24.5% | growing |
 
 ## Uranium (URA)
 
