@@ -160,9 +160,9 @@ boundary), a known, accepted gap rather than a bug, same tradeoff class as the S
 filing-section heuristics below. Falls back to `sector`/`industry`/`category` when no
 summary is available at all.
 
-## The 12 Assessment Checks
+## The 13 Assessment Checks
 
-Every `find` / `watchlist-add` runs all 12 (unless the MLP filter above short-circuits
+Every `find` / `watchlist-add` runs all 13 (unless the MLP filter above short-circuits
 first):
 
 | Check | What it looks at |
@@ -179,6 +179,7 @@ first):
 | Price action | Plain 1-month + 3-month price return, `verdict` always `"info"` — never a signal, just the fact. Added 2026-07-19 (see below) |
 | Crash resilience | Peak-to-trough drawdown in each of 4 fixed historical windows (2008 GFC, Dec 2018 correction, COVID 2020, 2022 bear market), `verdict` always `"info"`/`"unknown"` — retrospective context, not gated into opportunity's flag-suppression list. Added 2026-07-25 (see below) |
 | Technical levels | Current price vs 50/150/200-day moving averages, `verdict` always `"info"` — a contested signal (bullish trend-following vs. Goat's own 150DMA exit rule), reported not judged. Added 2026-08-13, `checks/technical_levels.py` |
+| Going concern / bankruptcy risk | Cash runway (Total Cash ÷ monthly burn, from Free Cash Flow) vs. the standard 12-month auditor going-concern horizon — `verdict="flag"` with an explicit "BANKRUPTCY RISK" statement when runway is ≤12 months. Always the LAST check shown, by design — a standalone closing statement rather than mixed in with the others. Added 2026-10-20 (see "Going Concern / Bankruptcy Risk Check" below) |
 
 Also, on every `run_assessment()` call (Find or Monitor): a ticker-scoped
 `scripts.backtest.run_backtest(ticker_filter=...)` refresh (cheap — yfinance price
@@ -189,7 +190,7 @@ everything you have at assessing it."
 
 ## Two Distinct Find Actions
 
-- **Ephemeral lookup** ("what do you think of TICKER") — runs the 12 checks (or stops
+- **Ephemeral lookup** ("what do you think of TICKER") — runs the 13 checks (or stops
   early with an MLP flag), reports back, persists nothing.
 - **Explicit watchlist-add** ("add TICKER to the watchlist") — same checks, plus writes
   a `watchlist` row (`status="discussed"`) and regenerates the markdown snapshots.
@@ -276,6 +277,34 @@ A ticker that didn't exist yet for a given window (e.g. FIVE, IPO'd 2012, has no
 data) is simply skipped for that window. `verdict` is always `"info"` (or `"unknown"`
 with no data) — retrospective context, not a live health signal, so it's deliberately
 NOT included in `opportunity.py`'s flag-suppression gate.
+
+## Going Concern / Bankruptcy Risk Check
+
+`checks/going_concern.py` — added 2026-10-20, Shaun: "I predominantly want to know if
+a company has a high likelihood of going under soon eg coreweave has about 3 months
+worth of cashflow - not great. So i want a clear statement after each deep dive about
+this."
+
+Computes cash runway = Total Cash ÷ monthly burn, where monthly burn is derived from
+Free Cash Flow (negative FCF = burn; prefers yfinance's TTM `freeCashflow` .info
+field, falls back to the latest ANNUAL cash-flow statement via
+`market_data.fetch_cash_flow_statement` when that's missing). Positive FCF always
+verdicts `"ok"` regardless of cash balance — a cash-generative company isn't burning
+toward insolvency.
+
+The 12-month flag threshold is not invented — it's the standard auditor "going
+concern" look-forward horizon (ASC 205-40 / ISA 570: substantial-doubt assessments
+cover the next twelve months). Runway ≤12 months → `verdict="flag"` with an explicit
+`"BANKRUPTCY RISK:"`-prefixed statement; above that, `"ok"` but still states the
+runway figure for context. `"unknown"` when Total Cash and/or Free Cash Flow aren't
+available at all.
+
+Deliberately scoped to cash runway only, not a debt-maturity-wall risk — yfinance
+doesn't expose a debt maturity schedule. Positioned LAST in
+`engine.run_assessment()`'s results list (after technical_levels) so it reads as the
+closing statement of the deep dive rather than one line buried among the rest — not
+folded into `opportunity.py`'s flag-suppression gate (that's scoped to the original
+7 checks + later opt-ins, not extended here without being asked).
 
 ## Monitor
 

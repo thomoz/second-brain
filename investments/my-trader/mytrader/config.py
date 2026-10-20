@@ -100,6 +100,13 @@ ROE_FLAG_THRESHOLD_PCT = 5.0  # balance_sheet.py's fallback proxy when debt/equi
                                 # current ratio are both unavailable (common for banks/
                                 # financials) — flag if return on equity is weak.
 
+# checks/going_concern.py -- 12 months is not invented, it's the standard auditor
+# "going concern" look-forward horizon (ASC 205-40 / ISA 570: substantial-doubt
+# assessment covers the next twelve months). COMFORTABLE_MONTHS is only the scale.py
+# display anchor (same pattern as DEBT_TO_EQUITY_IDEAL/CURRENT_RATIO_HEALTHY above).
+GOING_CONCERN_RUNWAY_FLAG_MONTHS = 12.0
+GOING_CONCERN_RUNWAY_COMFORTABLE_MONTHS = 24.0  # two years -- comfortably clear of the one-year audit horizon
+
 # checks/opportunity.py — confirmed 2026-07-19: Monitor was only ever surfacing risk
 # warnings, never "this looks worth a look" positive signals. Rebuilt 2026-07-19, same
 # day, after Shaun called out the first version's arbitrary thresholds ("research a

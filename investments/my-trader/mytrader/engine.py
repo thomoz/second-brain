@@ -17,6 +17,7 @@ from .checks import (
     earnings_deterioration,
     etf_mechanics,
     fx,
+    going_concern,
     insider_selling,
     news_events,
     opportunity,
@@ -172,6 +173,7 @@ def run_assessment(
         price_action.check(recent_return_1mo, recent_return_3mo),
         crash_resilience.check(data),
         technical_levels.check(data),
+        going_concern.check(data),
     ]
     if include_principles_fit:
         results.append(
