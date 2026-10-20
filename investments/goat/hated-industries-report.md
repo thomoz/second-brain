@@ -27,17 +27,7 @@ Hated since: 2026-09-28
 **Narrative:** The dominant negative narrative is that solar equities are being punished by a renewed higher-for-longer rate shock plus U.S. policy/tax-credit/tariff/FEOC uncertainty, which makes project finance models and demand visibility harder despite strong underlying installation activity. A secondary pressure is global module oversupply and margin pressure, especially for panel makers exposed to China-linked supply chains.
 **Systemic read:** industry-wide -- The evidence points to broad sector derating rather than one constituent-specific scandal: reports cite declines across equipment suppliers, residential solar, module makers, and even relatively advantaged names like First Solar and Enphase. The impact is not uniform by business model, but the market narrative is being applied across the industry rather than being concentrated in one or two holdings.
 
-**Fundamentals-divergence read:** fundamentals still growing despite the price decline
-
-Representative constituents (read-only — not staged as candidates):
-
-| Ticker | Name | Revenue growth | Earnings growth | Read |
-|--------|------|-----------------|-------------------|------|
-| NXT | Nextpower Inc. | +8.2% | +2.9% | growing |
-| FSLR | First Solar, Inc. | -3.7% | +23.3% | growing |
-| ENLT | Enlight Renewable Energy Ltd | +43.0% | +1900.2% | growing |
-| ENPH | Enphase Energy, Inc. | -19.6% | -3.5% | declining |
-| HASI | HA Sustainable Infrastructure Capital, Inc. | +804.4% | +24.5% | growing |
+**Fundamentals-divergence read:** insufficient constituent data to read a divergence signal
 
 ## Uranium (URA)
 

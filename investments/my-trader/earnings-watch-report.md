@@ -24,6 +24,7 @@ Checked 14 holding(s).
 - [flag] Estimate trend: EPS estimate down 3.0% over the trailing 30 days (1.01 -> 0.98); corroborating: 2 analyst downward revisions vs 0 upward in the last 30 days
 - [info] Guidance/commentary: No lowered/cut current guidance found in the last ~3 months; FY26 production was reported at 103,761oz, within 100,000-110,000oz guidance, and AISC was A$2,738/oz, slightly below the revised A$2,750-A$2,950/oz range.; Most recent reported period showed record June-quarter production of about 31.9koz and strong FY26 revenue/EBITDA/NPAT growth, not an earnings miss signal.; Recent September investor/conference commentary emphasized reserve growth to 2Moz and a path toward ~200koz annual production; management noted operating plans can move around but did not describe demand weakness, margin deterioration, or slowing growth.; No relevant weekly/monthly operating KPI series suggesting a slowdown was found for CYL.AX; available operating metrics are quarterly mine production/cost data.
 - No earnings-relevant 8-Ks in the lookback window.
+- Industry context (Gold, GDX): falling -12.8% over the trailing window (informational only, not a gate)
 
 **GOLD.AX** (unnamed, bucket unassigned)
 - No earnings data available (fund/commodity instrument).
@@ -78,7 +79,6 @@ For an earnings-deterioration screen, this 8-K cover filing alone provides no di
 
 Borrowings will bear interest at EURIBOR plus a ratings-based margin, with a commitment fee beginning November 13, 2026 if commitments remain outstanding. The agreement is unsecured and not guaranteed by subsidiaries. Key covenants include limits on liens and subsidiary debt, plus a minimum consolidated adjusted EBITDA-to-interest expense ratio of 3.00x. For analysts, the main watch items are incremental acquisition-related leverage, higher interest expense, and covenant headroom following the Delivery Hero transaction.
 - [seen] 8-K (Items 2.02,9.01) filed 2026-08-05: Uber filed an 8-K on August 5, 2026, reporting that it issued a press release announcing financial results for the second quarter ended June 30, 2026. The filing itself does not disclose the actual quarterly metrics, segment performance, margins, cash flow, operating trends, guidance, or management commentary; those details are contained in Exhibit 99.1, which is referenced but not included in the provided text. No cost-cutting, restructuring actions, workforce reductions, impairment charges, material agreement changes, or updated outlook are described in the body of the filing. For an analyst monitoring early signs of earnings deterioration, the key takeaway from the provided 8-K text is limited: Uber has released Q2 2026 results, but this excerpt provides no substantive financial data or operational indicators to assess deterioration risk.
-- Industry context (Software - Application, IGV): rising +22.8% over the trailing window (informational only, not a gate)
 
 **V** (Visa Inc (Class A), bucket 1)
 - [ok] Estimate trend: EPS estimate up 0.0% over the trailing 30 days -- below the 3.0% flag threshold
