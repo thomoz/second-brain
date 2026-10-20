@@ -1771,7 +1771,11 @@
         var tierLabel = o.tier === "dedicated" ? "Dedicated"
           : o.tier === "sector" ? "Sector ETF fallback"
           : "Related (" + o.note.replace(/^related\s*[—-]+\s*/i, "") + ")";
-        var tv = "https://www.tradingview.com/symbols/" + encodeURIComponent(o.ticker) + "/";
+        // Full interactive chart view (candles, SMAs, drawing tools) -- not the
+        // lightweight "symbol overview" page (/symbols/TICKER/), per Shaun's explicit
+        // preference 2026-10-20. No exchange prefix needed; TradingView resolves a
+        // bare ticker to the right listing for these liquid ETFs on its own.
+        var tv = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(o.ticker);
         var holdings = "https://finance.yahoo.com/quote/" + encodeURIComponent(o.ticker) + "/holdings/";
         return '<div class="etf-option">' +
           '<div class="etf-ticker">' + o.ticker + '</div>' +
