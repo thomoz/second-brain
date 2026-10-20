@@ -188,6 +188,14 @@ GOAT_ROTATION_EXPORT_JSON_PATH = GOAT_DIR / "rotation-history-export.json"
 GOAT_ROTATION_EXPORT_DAYS = 90  # matches the --days 90 convention the manual
     # query-rotation-history refresh steps already used before this export existed.
 
+# Deterministic static-page rebuild, added 2026-10-20 after Shaun declined an
+# Anthropic-cloud-hosted refresh routine (see memory
+# feedback_no_anthropic_cloud_routines) -- a plain Python script substitutes
+# fresh data into the committed template, no Claude API call or Artifact
+# involved. See goat/rotation_watch_build.py.
+GOAT_ROTATION_WATCH_TEMPLATE_PATH = GOAT_DIR / "rotation-watch-template.html"
+GOAT_ROTATION_WATCH_OUTPUT_PATH = GOAT_DIR / "rotation-watch.html"
+
 # Industry constituent universe -- Part B-2 of .agent/plans/goat-industry-pipeline.md.
 # Feeds industry_heartbeat_scan.py's stock-level gate. US side comes from a
 # per-industry Finviz screen; ASX side is a hand-curated dict (no Finviz/

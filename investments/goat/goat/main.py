@@ -387,10 +387,10 @@ def cmd_query_rotation_history(args) -> None:
 
 def cmd_export_rotation_history(args) -> None:
     """Read-only -- dumps goat_rotation_snapshots (sector + industry_full scopes) to a
-    JSON file vault sync carries into the git repo, so the Rotation Watch artifact's
-    daily cloud-routine refresh (and any on-demand refresh) can read it without VPS
-    SSH access. No report write, no maybe_notify -- same minimalism as
-    cmd_query_rotation_history, just writes a file instead of printing."""
+    JSON file vault sync carries into the git repo, feeding the deterministic Rotation
+    Watch page rebuild (see cmd_build_rotation_watch / rotation_watch_build.py). No
+    report write, no maybe_notify -- same minimalism as cmd_query_rotation_history,
+    just writes a file instead of printing."""
     import json
     from datetime import datetime, timedelta, timezone
 
@@ -409,6 +409,24 @@ def cmd_export_rotation_history(args) -> None:
     _config.GOAT_ROTATION_EXPORT_JSON_PATH.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
     counts = {scope: len(rows) for scope, rows in scope_rows.items()}
     print(f"Rotation history export complete: {counts}. See investments/goat/rotation-history-export.json")
+
+
+def cmd_build_rotation_watch(args) -> None:
+    """No DB connection -- reads rotation-history-export.json + the committed
+    rotation-watch-template.html off disk, writes rotation-watch.html. Deterministic,
+    no LLM/API call of any kind (see rotation_watch_build.py's module docstring for
+    why this replaced an earlier Anthropic-cloud-routine plan)."""
+    from .rotation_watch_build import write_rotation_watch_html
+
+    result = write_rotation_watch_html()
+    if not result["ok"]:
+        print(f"[goat-rotation-watch-build] skipped -- {result['reason']}")
+        return
+    print(
+        f"Rotation Watch page rebuilt: {result['sector_rows']} sector rows, "
+        f"{result['industry_rows']} industry_full rows (export generated_at="
+        f"{result['generated_at']}). See investments/goat/rotation-watch.html"
+    )
 
 
 def cmd_dismiss_candidate(args) -> None:
@@ -504,7 +522,14 @@ def main() -> None:
     subparsers.add_parser(
         "export-rotation-history",
         help="Read-only: dump sector + industry_full rotation snapshot history to "
-             "rotation-history-export.json (feeds the Rotation Watch artifact refresh)",
+             "rotation-history-export.json (feeds the Rotation Watch page rebuild)",
+    )
+
+    subparsers.add_parser(
+        "build-rotation-watch",
+        help="Deterministic rebuild of rotation-watch.html from "
+             "rotation-history-export.json + rotation-watch-template.html -- no DB, "
+             "no LLM call",
     )
 
     args = parser.parse_args()
@@ -525,6 +550,7 @@ def main() -> None:
         "dismiss-candidate": cmd_dismiss_candidate,
         "query-rotation-history": cmd_query_rotation_history,
         "export-rotation-history": cmd_export_rotation_history,
+        "build-rotation-watch": cmd_build_rotation_watch,
     }
     if args.command in dispatch:
         dispatch[args.command](args)

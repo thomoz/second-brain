@@ -55,6 +55,9 @@ def _isolate_goat_report_path(monkeypatch, tmp_path):
         goat_config, "GOAT_ROTATION_EXPORT_JSON_PATH", tmp_path / "rotation-history-export.json"
     )
     monkeypatch.setattr(
+        goat_config, "GOAT_ROTATION_WATCH_OUTPUT_PATH", tmp_path / "rotation-watch.html"
+    )
+    monkeypatch.setattr(
         goat_config, "GOAT_HATED_REPORT_PATH", tmp_path / "hated-industries-report.md"
     )
     monkeypatch.setattr(

@@ -1,5 +1,5 @@
 [Unit]
-Description=Goat Rotation History JSON Export (feeds Rotation Watch artifact)
+Description=Goat Rotation History JSON Export + Rotation Watch Page Rebuild
 After=network.target
 
 [Service]
@@ -7,5 +7,6 @@ Type=oneshot
 User=secondbrain
 WorkingDirectory=/home/secondbrain/second-brain/investments/goat
 ExecStart=/home/secondbrain/second-brain/investments/.venv/bin/python -m goat.main export-rotation-history
+ExecStart=/home/secondbrain/second-brain/investments/.venv/bin/python -m goat.main build-rotation-watch
 StandardOutput=append:/home/secondbrain/second-brain/investments/goat/rotation_export_runs.log
 StandardError=append:/home/secondbrain/second-brain/investments/goat/rotation_export_runs.log

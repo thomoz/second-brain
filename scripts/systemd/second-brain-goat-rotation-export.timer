@@ -1,5 +1,5 @@
 [Unit]
-Description=Goat Rotation History JSON Export Timer
+Description=Goat Rotation History JSON Export + Rotation Watch Page Rebuild Timer
 Requires=second-brain-goat-rotation-export.service
 
 [Timer]
