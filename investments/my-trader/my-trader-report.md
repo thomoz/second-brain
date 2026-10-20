@@ -53,12 +53,12 @@ Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - OPEN ALERT (earnings_watch_trend, since 2026-10-08): EPS estimate down 3.0% over the trailing 30 days (1.01 -> 0.98); corroborating: 4 analyst downward revisions vs 1 upward in the last 30 days
 - [info] company_profile: Catalyst Metals Limited engages in the mineral exploration and evaluation in Australia. The company explores for gold and silver deposits.
 - [info] dividend: No dividend history
-- [ok] valuation: PE 8.5 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
+- [ok] valuation: PE 8.6 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
 - [ok] balance_sheet: Debt/Equity 3.7 -- lower is generally safer (10/10 — excellent), Current Ratio 3.02 -- higher is generally safer, up to a point (10/10 — excellent) — within thresholds
 - [info] fx: AUD-denominated, no FX exposure
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Basic Materials is 13.9% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
-- [interesting] opportunity: Graham [PE 8.5 x P/B 2.02 = 17.2, below 22.5]; Buffett/Smith [ROE 29.2% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
+- [interesting] opportunity: Graham [PE 8.6 x P/B 2.02 = 17.4, below 22.5]; Buffett/Smith [ROE 29.2% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
 - [info] price_action: 1mo -19.6%, 3mo -0.2%
 - [info] crash_resilience: 2008 financial crisis -85.0%; Dec 2018 correction -15.4%; COVID crash (2020) -40.1%; 2022 bear market -49.8%
 - [info] technical_levels: Price $5.43 vs 50DMA $6.23 (below, -12.9%); 150DMA $5.94 (below, -8.6%); 200DMA $6.43 (below, -15.5%)
@@ -183,9 +183,9 @@ Open alerts: none
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [info] etf_mechanics: Expense ratio unavailable, AUM $2,219,378,944
 - [ok] opportunity: No standout positive signal this run
-- [info] price_action: 1mo -1.8%, 3mo +4.6%
+- [info] price_action: 1mo -3.0%, 3mo +3.4%
 - [info] crash_resilience: Dec 2018 correction +0.0%; COVID crash (2020) +0.0%; 2022 bear market -13.1%
-- [info] technical_levels: Price $59.55 vs 50DMA $60.79 (below, -2.0%); 150DMA $61.52 (below, -3.2%); 200DMA $63.86 (below, -6.7%)
+- [info] technical_levels: Price $58.87 vs 50DMA $60.74 (below, -3.1%); 150DMA $61.46 (below, -4.2%); 200DMA $63.82 (below, -7.8%)
 - [unknown] going_concern: Total Cash and/or Free Cash Flow unavailable -- cannot assess bankruptcy/cash-runway risk
 
 **SILJ** (None, No strategic bucket assigned yet)
@@ -260,7 +260,7 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - [ok] going_concern: Free Cash Flow positive ($20,404M) -- cash-generative, no bankruptcy/cash-runway risk from this signal
 
 ### New Alerts This Run
-- **CSV** (watchlist) — balance_sheet: Debt/Equity 196.6 >= 150.0 -- lower is generally safer (0/10 — poor)
+No new material changes.
 
 ### All Open Alerts
 - **CSV** (watchlist) — balance_sheet: Debt/Equity 196.6 >= 150.0 -- lower is generally safer (0/10 — poor) (first flagged 2026-10-20)
@@ -271,7 +271,6 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **CV** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $9M / burn ~$1M per month = ~6.7 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-10-20)
 - **CEG** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $697M / burn ~$552M per month = ~1.3 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-10-20)
 - **SOFI** (holdings) — going_concern: BANKRUPTCY RISK: Cash $3,367M / burn ~$333M per month (annual FCF) = ~10.1 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-10-20)
-- **JNJ** (watchlist) — valuation: PE 38.8 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-10-16)
 - **TBIL** (watchlist) — dividend: Dividend declined -14.3% vs prior 12 months (first flagged 2026-10-14)
 - **TAN** (watchlist) — dividend: Dividend declined -100.0% vs prior 12 months (first flagged 2026-10-14)
 - **STNG** (watchlist) — dividend: Dividend declined -15.6% vs prior 12 months (first flagged 2026-10-14)
@@ -300,9 +299,6 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **MTA** (watchlist) — valuation: PE 65.0 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-09-28)
 - **MELI** (watchlist) — balance_sheet: Debt/Equity 168.6 >= 150.0 -- lower is generally safer (0/10 — poor) (first flagged 2026-09-28)
 - **MELI** (watchlist) — valuation: PE 47.6 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-09-28)
-- **KMI** (watchlist) — balance_sheet: Current Ratio 0.46 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-09-28)
-- **KARS** (watchlist) — dividend: Dividend declined -65.6% vs prior 12 months (first flagged 2026-09-28)
-- **KAR.AX** (watchlist) — dividend: Dividend declined -41.9% vs prior 12 months (first flagged 2026-09-28)
 - **EQT** (watchlist) — balance_sheet: Current Ratio 0.67 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-09-28)
 - **ELVA** (watchlist) — valuation: PE 63.5 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-09-28)
 - **DIS** (watchlist) — balance_sheet: Current Ratio 0.71 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-09-28)
@@ -343,7 +339,7 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **DTG.DE** — Lynch [PEG 0.32 at/below 1.0 — growth at a reasonable price]
 - **GOOG** — Buffett/Smith [ROE 48.7% at/above 15.0% (10/10 — excellent), not richly valued]
 - **GOOGL** — Buffett/Smith [ROE 48.7% at/above 15.0% (10/10 — excellent), not richly valued]
-- **GROW.L** — Graham [PE 9.3 x P/B 0.77 = 7.1, below 22.5]
+- **GROW.L** — Graham [PE 9.3 x P/B 0.77 = 7.2, below 22.5]
 - **LULU** — Graham [PE 8.0 x P/B 2.28 = 18.3, below 22.5]; Lynch [PEG 0.98 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 30.9% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -16.2% over 3 months with no other flags — possible overreaction, not a fundamental problem] (4 independent signals)
 - **META** — Lynch [PEG 0.94 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 29.8% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
 - **MPL.AX** — Buffett/Smith [ROE 27.2% at/above 15.0% (10/10 — excellent), not richly valued]
@@ -374,8 +370,8 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **uk_cpi** [flag] — UK headline CPI 3.1% YoY (reference month 2026-08-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone
 - **real_yields** [flag] — 10Y real yield +2.74% (as of 2026-10-16), above the 2.0% threshold -- elevated real yields historically pressure gold hard
 - **dollar_index** [ok] — Broad USD index 121.4, +1.6% over the past 30 days
-- **gold_trend** [info] — GC=F $4,141 (50DMA $4,364, 200DMA $4,539, -8.8% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $58.87 AUD; AUD/USD 3mo move +0.2%
-- **gold_silver_ratio** [ok] — Gold/silver ratio at 72.2
+- **gold_trend** [info] — GC=F $4,133 (50DMA $4,364, 200DMA $4,539, -8.9% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $58.87 AUD; AUD/USD 3mo move +0.2%
+- **gold_silver_ratio** [ok] — Gold/silver ratio at 72.3
 - **vix** [ok] — VIX at 18.7, below the flag threshold
 
 ### Gold Outlook
