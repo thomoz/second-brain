@@ -50,17 +50,11 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (JNJ) | ok | JNJ: Free Cash Flow $+19.3B, Capital Expenditure $5.2B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.48T as of 2026-09-01, +31.4% YoY vs 2025-09-01 |
 | 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 151 filing(s) in the trailing 30d vs 268 in the same window a year ago (0.56x); 424B4 (priced IPO): 27 filing(s) in the trailing 30d vs 44 in the same window a year ago (0.61x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.65 (z=1.15 vs trailing 61d mean 0.57) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
-| 8 | Insider selling (NVDA) | flag | NVDA: $1,997,067,531 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (AAPL) | flag | AAPL: $207,419,324 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (MSFT) | flag | MSFT: $120,242,344 sold vs $3,436,971 bought, trailing 365 days |
-| 8 | Insider selling (AVGO) | flag | AVGO: $1,153,379,764 sold vs $698,699 bought, trailing 365 days |
-| 8 | Insider selling (LLY) | flag | LLY: $1,043,202,981 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (MU) | flag | MU: $287,747,523 sold vs $7,821,723 bought, trailing 365 days |
-| 8 | Insider selling (WMT) | flag | WMT: $2,949,496,557 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (AMD) | flag | AMD: $378,082,091 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (XOM) | flag | XOM: $2,395,656 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (JNJ) | flag | JNJ: $154,853,055 sold vs $257,688 bought, trailing 365 days |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.65 (z=1.13 vs trailing 62d mean 0.58) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 8 | Insider selling (MSFT) | ok | MSFT: $0 sold vs $3,436,971 bought, trailing 365 days |
+| 8 | Insider selling (AVGO) | ok | AVGO: $0 sold vs $698,699 bought, trailing 365 days |
+| 8 | Insider selling (MU) | ok | MU: $0 sold vs $7,821,723 bought, trailing 365 days |
+| 8 | Insider selling (JNJ) | ok | JNJ: $0 sold vs $257,688 bought, trailing 365 days |
 | 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (117 day(s) away) -- ad-share content is not automatable, nothing to check yet |
 | 10 | Most-valuable-company milestone | flag | NVDA is the largest company in the current hot-sector watchlist ($5.24T, most recently crossed the $5.0T rung) |
 | 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |

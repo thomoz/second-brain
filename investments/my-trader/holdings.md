@@ -6,9 +6,9 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 |--------|------|-----|-----------|-----------|-----------------|--------|
 | AG |  | 40.0264 | $639.62 | $20.98 | $-200.13 | unassigned |
 | BMS |  | 250.0 | — | $2.32 | — | unassigned |
-| CYL.AX |  | 200.0 | $1,072.00 | $5.86 | $-99.05 | unassigned |
-| GOLD.AX |  | 20.0 | $1,082.00 | $59.31 | $-104.25 | unassigned |
-| GXLD.AX |  | 25.0 | $1,476.50 | $61.82 | $-69.06 | unassigned |
+| CYL.AX |  | 200.0 | $1,063.00 | $5.86 | $-108.05 | unassigned |
+| GOLD.AX |  | 20.0 | $1,082.80 | $59.31 | $-103.45 | unassigned |
+| GXLD.AX |  | 25.0 | $1,476.00 | $61.82 | $-69.56 | unassigned |
 | LLY | Eli Lilly & Co | 0.0001 | $0.12 | $1,148.00 | +$0.01 | 1 |
 | LULU | lululemon athletica inc. | 22.0 | $2,150.72 | $113.22 | $-340.01 | 1 |
 | LYV | Live Nation Entertainment Inc | 0.4 | $68.32 | $167.29 | +$1.41 | 1 |
