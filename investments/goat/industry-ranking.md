@@ -48,7 +48,7 @@ All 39 covered industries.
 | 19 | IAI | Capital Markets | -3.1% | No |
 | 20 | MOO | Agricultural Inputs | -3.7% | No |
 | 21 | PAVE | Engineering & Construction | -4.7% | No |
-| 22 | INDS | REIT - Industrial | -5.1% | No |
+| 22 | INDS | REIT - Industrial | -6.0% | No |
 | 23 | XES | Oil & Gas Equipment & Services | -6.6% | No |
 | 24 | JETS | Airlines | -7.2% | No |
 | 25 | COPX | Copper | -7.3% | No |
@@ -78,12 +78,13 @@ All 39 covered industries.
 | KBWB | Banks - Diversified | Rising | Falling |
 
 ### Short-Window Flow (1-Week)
-0 newly rising, 2 newly falling since the prior snapshot (13 still rising, 22 still falling unchanged).
+0 newly rising, 3 newly falling since the prior snapshot (12 still rising, 22 still falling unchanged).
 
 | Ticker | Label | From | To |
 |--------|-------|------|----|
 | KRE | Banks - Regional | Rising | Falling |
 | MOO | Agricultural Inputs | Rising | Falling |
+| INDS | REIT - Industrial | Rising | Falling |
 
 2 industries currently in a fresh breakout -- see industry-candidates-pending-review.md.
 
