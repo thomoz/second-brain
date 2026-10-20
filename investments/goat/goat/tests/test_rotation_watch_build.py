@@ -188,6 +188,88 @@ def test_write_rotation_watch_html_skips_when_scope_empty(tmp_path, monkeypatch)
     assert result == {"ok": False, "reason": "export JSON has an empty scope"}
 
 
+# --- ETF reference parsing/embedding ----------------------------------------------
+
+_FAKE_ETF_REFERENCE_MD = """# Industry -> ETF Quick Reference
+
+Some prose that isn't a table row.
+
+| Industry | Popular ETF(s) | Sector ETF |
+|---|---|---|
+| Advertising Agencies | — | [XLC](https://finance.yahoo.com/quote/XLC/holdings/) |
+| Aerospace & Defense | **[ITA](https://finance.yahoo.com/quote/ITA/holdings/)** (dedicated) | [XLI](https://finance.yahoo.com/quote/XLI/holdings/) |
+| Other Precious Metals & Mining | [SIL](https://finance.yahoo.com/quote/SIL/holdings/) / [GDX](https://finance.yahoo.com/quote/GDX/holdings/) (related — precious metals) | [XLB](https://finance.yahoo.com/quote/XLB/holdings/) |
+
+Last built: 2026-10-20.
+"""
+
+
+def test_parse_etf_reference_dash_cell_has_no_popular_etfs():
+    mapping = rwb.parse_etf_reference(_FAKE_ETF_REFERENCE_MD)
+    assert mapping["Advertising Agencies"]["popular"] == []
+    assert mapping["Advertising Agencies"]["sector_etf"] == "XLC"
+
+
+def test_parse_etf_reference_dedicated_cell():
+    mapping = rwb.parse_etf_reference(_FAKE_ETF_REFERENCE_MD)
+    popular = mapping["Aerospace & Defense"]["popular"]
+    assert popular == [{"ticker": "ITA", "tier": "dedicated", "note": "dedicated"}]
+    assert mapping["Aerospace & Defense"]["sector_etf"] == "XLI"
+
+
+def test_parse_etf_reference_two_related_tickers_share_note():
+    mapping = rwb.parse_etf_reference(_FAKE_ETF_REFERENCE_MD)
+    popular = mapping["Other Precious Metals & Mining"]["popular"]
+    assert [p["ticker"] for p in popular] == ["SIL", "GDX"]
+    assert all(p["tier"] == "related" for p in popular)
+    assert all(p["note"] == "related — precious metals" for p in popular)
+
+
+def test_parse_etf_reference_ignores_non_table_lines():
+    mapping = rwb.parse_etf_reference(_FAKE_ETF_REFERENCE_MD)
+    assert len(mapping) == 3  # not the prose line, not "Last built" line
+
+
+def test_render_etf_reference_block_is_valid_json_payload():
+    mapping = rwb.parse_etf_reference(_FAKE_ETF_REFERENCE_MD)
+    block = rwb.render_etf_reference_block(mapping)
+    assert "ETF_REFERENCE_DATA:BEGIN" in block
+    assert "ETF_REFERENCE_DATA:END" in block
+    payload = block.split("var ETF_REFERENCE = ", 1)[1].rsplit(";", 1)[0]
+    parsed = json.loads(payload)
+    assert parsed["Aerospace & Defense"]["sector_etf"] == "XLI"
+
+
+def test_apply_etf_reference_block_inserts_before_custom_dates_on_first_run():
+    out = rwb.apply_etf_reference_block(_FAKE_TEMPLATE, "  // marker\n  var ETF_REFERENCE = {};\n  // end")
+    assert "ETF_REFERENCE" in out
+    assert out.index("ETF_REFERENCE") < out.index("CUSTOM_DATES")
+
+
+def test_apply_etf_reference_block_replaces_existing_block_on_rerun():
+    first = rwb.apply_etf_reference_block(_FAKE_TEMPLATE, "  // === ETF_REFERENCE_DATA:BEGIN ===\n  var ETF_REFERENCE = {\"old\": 1};\n  // === ETF_REFERENCE_DATA:END ===")
+    second = rwb.apply_etf_reference_block(first, "  // === ETF_REFERENCE_DATA:BEGIN ===\n  var ETF_REFERENCE = {\"new\": 2};\n  // === ETF_REFERENCE_DATA:END ===")
+    assert '"old": 1' not in second
+    assert '"new": 2' in second
+    assert second.count("ETF_REFERENCE_DATA:BEGIN") == 1
+
+
+def test_write_etf_reference_block_end_to_end(tmp_path, monkeypatch):
+    ref_path = tmp_path / "industry-etf-reference.md"
+    ref_path.write_text(_FAKE_ETF_REFERENCE_MD, encoding="utf-8")
+    template_path = tmp_path / "template.html"
+    template_path.write_text(_FAKE_TEMPLATE, encoding="utf-8")
+    monkeypatch.setattr(config, "GOAT_INDUSTRY_ETF_REFERENCE_PATH", ref_path)
+    monkeypatch.setattr(config, "GOAT_ROTATION_WATCH_TEMPLATE_PATH", template_path)
+
+    result = rwb.write_etf_reference_block()
+
+    assert result == {"ok": True, "industries_mapped": 3}
+    updated = template_path.read_text()
+    assert "ETF_REFERENCE_DATA:BEGIN" in updated
+    assert '"Aerospace & Defense"' in updated
+
+
 def test_write_rotation_watch_html_writes_output_file(tmp_path, monkeypatch):
     export_data = {
         "generated_at": "2026-10-20T09:00:00+00:00",

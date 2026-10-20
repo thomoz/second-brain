@@ -196,6 +196,12 @@ GOAT_ROTATION_EXPORT_DAYS = 90  # matches the --days 90 convention the manual
 GOAT_ROTATION_WATCH_TEMPLATE_PATH = GOAT_DIR / "rotation-watch-template.html"
 GOAT_ROTATION_WATCH_OUTPUT_PATH = GOAT_DIR / "rotation-watch.html"
 
+# Industry -> ETF reference data for Rotation Watch's clickable industry tiles,
+# added 2026-10-20. industry-etf-reference.md is static/hand-maintained (not
+# auto-generated), so this is rebuilt on demand (`build-etf-reference`), not
+# part of the nightly export/rebuild cycle.
+GOAT_INDUSTRY_ETF_REFERENCE_PATH = GOAT_DIR / "industry-etf-reference.md"
+
 # Industry constituent universe -- Part B-2 of .agent/plans/goat-industry-pipeline.md.
 # Feeds industry_heartbeat_scan.py's stock-level gate. US side comes from a
 # per-industry Finviz screen; ASX side is a hand-curated dict (no Finviz/

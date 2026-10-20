@@ -429,6 +429,19 @@ def cmd_build_rotation_watch(args) -> None:
     )
 
 
+def cmd_build_etf_reference(args) -> None:
+    """Rebuilds the ETF_REFERENCE_DATA block in rotation-watch-template.html from
+    industry-etf-reference.md. Run manually whenever that reference file changes --
+    NOT called by the nightly export-rotation-history/build-rotation-watch cycle."""
+    from .rotation_watch_build import write_etf_reference_block
+
+    result = write_etf_reference_block()
+    print(
+        f"ETF reference data rebuilt into rotation-watch-template.html: "
+        f"{result['industries_mapped']} industries mapped."
+    )
+
+
 def cmd_dismiss_candidate(args) -> None:
     from .db import delete_goat_pending_candidate
 
@@ -532,6 +545,13 @@ def main() -> None:
              "no LLM call",
     )
 
+    subparsers.add_parser(
+        "build-etf-reference",
+        help="Rebuild the ETF_REFERENCE_DATA block in rotation-watch-template.html "
+             "from industry-etf-reference.md -- run manually when that file changes, "
+             "not part of the nightly cycle",
+    )
+
     args = parser.parse_args()
     dispatch = {
         "monitor": cmd_monitor,
@@ -551,6 +571,7 @@ def main() -> None:
         "query-rotation-history": cmd_query_rotation_history,
         "export-rotation-history": cmd_export_rotation_history,
         "build-rotation-watch": cmd_build_rotation_watch,
+        "build-etf-reference": cmd_build_etf_reference,
     }
     if args.command in dispatch:
         dispatch[args.command](args)

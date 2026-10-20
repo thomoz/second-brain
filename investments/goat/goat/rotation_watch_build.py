@@ -11,6 +11,7 @@ for the full history."""
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 from . import config
@@ -164,3 +165,92 @@ def write_rotation_watch_html() -> dict[str, Any]:
         "sector_rows": len(sector_rows),
         "industry_rows": len(industry_rows),
     }
+
+
+# --- Industry -> ETF reference data (clickable tile popups), added 2026-10-20 ---
+# industry-etf-reference.md is a STATIC, hand-maintained file (see its own header --
+# "not auto-generated... re-verify if more than a few months old"), so this block is
+# NOT part of the nightly export/build cycle -- rebuild it manually (`goat.main
+# build-etf-reference`) only when that markdown file itself changes.
+
+_ETF_REF_BEGIN_ANCHOR = "// === ETF_REFERENCE_DATA:BEGIN"
+_ETF_REF_END_ANCHOR = "// === ETF_REFERENCE_DATA:END ==="
+_ETF_REF_INSERT_BEFORE_ANCHOR = "var CUSTOM_DATES"  # stable fallback anchor for the
+    # very first run, before the ETF_REFERENCE_DATA markers exist in the template yet.
+_ETF_REF_COMMENT = (
+    "  // === ETF_REFERENCE_DATA:BEGIN (hand-regenerated from industry-etf-reference.md\n"
+    "  // via `python -m goat.main build-etf-reference` whenever that file changes --\n"
+    "  // NOT part of the nightly auto-rebuild; industry-etf-reference.md is a static,\n"
+    "  // manually-maintained reference, not auto-generated) ===\n"
+)
+
+_ETF_LINK_RE = re.compile(r"\[([A-Z0-9.\-]+)\]\(https://finance\.yahoo\.com/quote/[^)]+\)")
+_ETF_ROW_RE = re.compile(r"^\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*$")
+
+
+def _parse_popular_cell(cell: str) -> list[dict[str, str]]:
+    if cell.strip() == "—":  # em dash -- this industry has no dedicated/related ETF
+        return []
+    tickers = _ETF_LINK_RE.findall(cell)
+    tier = "dedicated" if "**" in cell else "related"
+    note_match = re.search(r"\(([^)]*)\)\s*$", cell)
+    note = note_match.group(1) if note_match else tier
+    return [{"ticker": t, "tier": tier, "note": note} for t in tickers]
+
+
+def parse_etf_reference(markdown_text: str) -> dict[str, dict[str, Any]]:
+    """Parses industry-etf-reference.md's one table into
+    {industry_name: {"popular": [{"ticker", "tier", "note"}, ...], "sector_etf": ticker}}.
+    Skips the header row, the markdown separator row, and any non-table text (the
+    file's own prose, "Last built:" footer, blank lines)."""
+    mapping: dict[str, dict[str, Any]] = {}
+    for line in markdown_text.splitlines():
+        if not line.startswith("|"):
+            continue
+        stripped = line.replace("|", "").strip()
+        if not stripped or set(stripped.replace(" ", "")) <= {"-"}:
+            continue  # separator row
+        if stripped.startswith("Industry ") or stripped == "Industry":
+            continue  # header row
+        m = _ETF_ROW_RE.match(line)
+        if not m:
+            continue
+        industry, popular_cell, sector_cell = m.groups()
+        sector_match = _ETF_LINK_RE.search(sector_cell)
+        mapping[industry] = {
+            "popular": _parse_popular_cell(popular_cell),
+            "sector_etf": sector_match.group(1) if sector_match else None,
+        }
+    return mapping
+
+
+def render_etf_reference_block(mapping: dict[str, dict[str, Any]]) -> str:
+    body = json.dumps(mapping, indent=2)
+    return _ETF_REF_COMMENT + f"  var ETF_REFERENCE = {body};\n" + "  " + _ETF_REF_END_ANCHOR
+
+
+def apply_etf_reference_block(template_text: str, js_block: str) -> str:
+    """Replaces the existing ETF_REFERENCE_DATA span if the template already has one
+    (every re-run after the first), otherwise inserts a brand-new block just before
+    the CUSTOM_DATES declaration (first run only -- that anchor is stable/pre-existing
+    structural content, safe to insert ahead of)."""
+    if _ETF_REF_BEGIN_ANCHOR in template_text:
+        return _replace_span(template_text, _ETF_REF_BEGIN_ANCHOR, _ETF_REF_END_ANCHOR, js_block)
+    insert_at = template_text.index(_ETF_REF_INSERT_BEFORE_ANCHOR)
+    line_start = template_text.rfind("\n", 0, insert_at) + 1
+    return template_text[:line_start] + js_block + "\n\n  " + template_text[line_start:]
+
+
+def write_etf_reference_block() -> dict[str, Any]:
+    """CLI-facing entrypoint for `goat.main build-etf-reference`. Reads
+    config.GOAT_INDUSTRY_ETF_REFERENCE_PATH, writes the parsed result straight back
+    into config.GOAT_ROTATION_WATCH_TEMPLATE_PATH (the template, not the daily output
+    file -- every subsequent nightly build-rotation-watch run then carries this block
+    through untouched, same as the CUSTOM_DATES/CUSTOM block)."""
+    markdown_text = config.GOAT_INDUSTRY_ETF_REFERENCE_PATH.read_text(encoding="utf-8")
+    mapping = parse_etf_reference(markdown_text)
+    js_block = render_etf_reference_block(mapping)
+    template_text = config.GOAT_ROTATION_WATCH_TEMPLATE_PATH.read_text(encoding="utf-8")
+    new_template = apply_etf_reference_block(template_text, js_block)
+    config.GOAT_ROTATION_WATCH_TEMPLATE_PATH.write_text(new_template, encoding="utf-8")
+    return {"ok": True, "industries_mapped": len(mapping)}
