@@ -20,12 +20,14 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
 | ADBE | unassigned | Feels oversold/hated-on - watching for a good entry, not convinced it wont drop further |
+| CSV | unassigned | Keep an eye on |
 | CV | unassigned | EPS miss + margin pressure Q2 2026, H2 guided higher - monitor next print |
 | GOOG | unassigned | Keep an eye on (Shaun request 2026-09-24) |
 | ICLN | unassigned | Clean energy ETF |
 | IHI | unassigned | Medical devices ETF |
 | KMI | unassigned | Energy sector - keep an eye on |
 | MCD | 1 | Looking for a 42 entry |
+| MPL.AX | unassigned | Keep an eye on |
 | MTA | unassigned | Not yet discussed -- flagged to watch. |
 | NEM | unassigned | Precious metals |
 | NEWP | unassigned | Buy at cheaper entry level |
@@ -61,6 +63,7 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 | COUR | Coursera Inc | stock | unassigned | — | — | Added from Cash Value Report (2026-08-26) |
 | CPRT | Copart Inc | stock | 1 | — | — | Vehicle salvage/insurance auction near-duopoly (land-bank moat). Fair-price-today case, not a crash-timing trade: PE 17.4, clean balance sheet (D/E 1.1), ROE 17.6%, opportunity check fired 2 signals on a -15.8% 3mo dip. Crash-resilience check shows it amplifies broad-market crashes ~1.3x (COVID -43.8% vs S&P -33.9%, 2022 -35.4% vs S&P -25.4%) -- moat protects market position, not stock price, so doesn't fit the AI-postcrash 'wait for a bubble to deflate' framing either. |
 | CRAK | VanEck Oil Refiners ETF | etf | unassigned | — | — | Tracks the MVIS Global Oil Refiners Index (~30 global refiners; top holdings Marathon Petroleum, Valero, Reliance Industries). Expense ratio 0.59%, AUM grew from ~$38M to ~$172-251M in 2026 on fresh inflows. Up ~40% YTD 2026 (vs XLE's 29%), driven by the 3-2-1 crack spread hitting a record ~$55.78/bbl in March 2026 (2-3x its historical $10-20 norm) -- permanent refining-capacity cuts (~4.5M bpd off globally from closures + war damage) outpacing demand growth. PE 13.5 (reasonable), but dividend down -50.9% vs prior 12mo (flagged) and 99% concentrated in Energy -- a cyclical commodity-margin play riding currently-extreme crack spreads, not a moat/pricing-power business by Shaun's usual Bucket 1 criteria. Left unassigned pending discussion on which bucket (if any) fits, given the margin-spike thesis could reverse as capacity comes back online. |
+| CSV | Carriage Services Inc | stock | unassigned | — | — | Flagged to keep an eye on |
 | CV | CapsoVision | stock | unassigned | — | — | Q2 2026 EPS miss, gross margin fell to 51 pct from 55 pct on competitive pricing/tariff pressure; revenue and unit growth still positive, H2 guided higher |
 | DG | Dollar General | stock | 1 | 1.86% | +55% | Not yet discussed. Dollar-store category |
 | DLTR | Dollar Tree | stock | 1 | — | +32% | Not yet discussed. Dollar-store category |
@@ -86,6 +89,7 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 | MCD | McDonalds Corp | stock | 1 | 2.65% | +175% | Deep dive 2026-09-25: 2 active flags -- US traffic/value-execution earnings deterioration (Q2 US comps only +0.8% vs +2.5% YoY, guest counts negative, Bloomberg Sept 18 reports July/Aug US sales declines on card data, 50k-restaurant target pushed to 2028) and a leadership change (Skye Anderson replacing Joe Erlinger as President of McDonalds USA, Aug 4). Opportunity signal suppressed by the gate. PE 19.5 (7/10 good), dividend +5.1%, current ratio 1.08 flagged thin (within threshold). Down -11.0% 1mo / -11.4% 3mo, price below 50/150/200DMA. Was flagged defensive? -- mixed answer: mild in 2008 (-21.4%) and 2022 (-4.8%), but hit hard in COVID (-36.6%, dine-in shutdowns), not pure ballast. Principles fit avg 66/100 (Buffett 82, Fisher/Munger 78) but Graham only 35/100 (no margin of safety, negative book equity, heavy leverage). No Briefs Finance score history yet. |
 | MLPX | Global X MLP & Energy Infrastructure ETF | etf | unassigned | — | — | Fund (not an MLP itself, no K-1/UBTI issue) holding MLPs + midstream corporations (TC Energy, Enbridge, Williams). Expense ratio 0.45%, AUM 3.64B, dividend +7.7%. Watching for a better entry point -- no active flags at deep-dive 2026-08-12, PE 21.2 (good), amplifies crashes ~2x (COVID -62.3%). |
 | MOUS | Mous | private | unassigned | — | — | Private UK phone-case company (Airo Shock material), not publicly traded -- no ticker, no yfinance data, no SEC filings. Opened pre-registration for an investment round; terms/valuation not yet known. Inert placeholder: Find/Monitor cannot check this (no market data source exists for a private company), so this row will never populate price/PE/dividend fields or receive automated re-checks -- requires manual follow-up when pre-registration details firm up. |
+| MPL.AX | Medibank Private Limited | stock | unassigned | — | — | Flagged to keep an eye on |
 | MTA | Metalla Royalty & Streaming Ltd. | stock | unassigned | — | — | Not yet discussed. |
 | MX | MagnaChip Semiconductor Corp | stock | unassigned | — | — | Super Hot (Shaun request 2026-09-26) |
 | NEM | Newmont Corp | stock | unassigned | — | — | Precious metals, added 2026-09-24. |
