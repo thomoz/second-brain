@@ -22,6 +22,19 @@ doesn't expose a debt maturity schedule, and modeling that would need data this 
 doesn't have access to. Positioned last in engine.run_assessment's results list (see
 engine.py) so it reads as the closing statement of the deep dive, not buried among
 the other checks.
+
+Banks/lenders carve-out (added 2026-10-20 after a false-positive BANKRUPTCY RISK flag
+on SOFI): fund loan growth through deposits/warehouse debt, and GAAP routes loan
+origination/sale activity through *operating* cash flow for these entities -- so a
+growing loan book shows up as large negative FCF that reflects balance-sheet growth,
+not real cash depletion. Reuses balance_sheet.py's own financial-sector signal
+(debtToEquity AND currentRatio both absent from yfinance -- confirmed against NU/SOFI,
+Yahoo simply doesn't populate a conventional current-assets/liabilities split for
+these) rather than a sector-string check, for the same reason balance_sheet.py made
+that choice: no extra network call, already-fetched data, and it doesn't depend on
+Yahoo's sector/industry label being populated or spelled consistently. The runway
+figure is still shown (never hidden) -- it's just never verdicted "flag" for this
+profile, since the BANKRUPTCY RISK framing would be wrong, not merely uncertain.
 """
 
 from __future__ import annotations
@@ -80,6 +93,18 @@ def check(data) -> CheckResult:
         f"= ~{runway_months:.1f} months of runway at the current rate -- more runway is safer ({runway_scale})"
     )
     data_out = {"free_cash_flow": fcf, "total_cash": total_cash, "runway_months": round(runway_months, 1)}
+
+    # Bank/lender profile (see module docstring) -- loan-growth cash flow isn't real
+    # burn, so never verdict this a bankruptcy risk regardless of the raw number.
+    if info.get("debtToEquity") is None and info.get("currentRatio") is None:
+        return CheckResult(
+            name="going_concern", verdict="ok",
+            detail=f"{base} -- not flagged as bankruptcy risk: Debt/Equity and Current Ratio both "
+                   f"unavailable (bank/lender profile), where loan origination/sale activity runs "
+                   f"through operating cash flow and inflates apparent burn without reflecting real "
+                   f"going-concern risk",
+            data=data_out,
+        )
 
     if runway_months <= config.GOING_CONCERN_RUNWAY_FLAG_MONTHS:
         return CheckResult(
