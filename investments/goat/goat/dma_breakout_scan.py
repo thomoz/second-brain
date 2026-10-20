@@ -46,7 +46,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -234,13 +234,15 @@ def fetch_top_industry_allow_set(conn: sqlite3.Connection) -> set[str] | None:
 
 
 def run_dma_breakout_scan(conn: sqlite3.Connection) -> dict[str, Any]:
-    cutoff = (
-        datetime.now(timezone.utc) - timedelta(days=config.GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS)
-    ).isoformat()
-    expired = db.delete_stale_pending_candidates(conn, "goat_dma_breakout_scan", cutoff)
-    if expired:
-        print(f"[goat-dma-breakout-scan] expired {expired} never-reviewed candidate(s) "
-              f"older than {config.GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS} days")
+    # Each run starts fresh -- added 2026-10-20 at Shaun's request, replacing the
+    # prior 3-day rolling expiry (see db.delete_pending_candidates_for_source). A
+    # never-reviewed candidate from a prior run is cleared unconditionally rather
+    # than carried forward; if it's still a genuine signal today it gets re-staged
+    # fresh by this same run anyway.
+    cleared = db.delete_pending_candidates_for_source(conn, "goat_dma_breakout_scan")
+    if cleared:
+        print(f"[goat-dma-breakout-scan] cleared {cleared} never-reviewed candidate(s) from "
+              f"the previous run -- starting fresh")
 
     constituents = fetch_universe_constituents(conn)
     asx_unavailable = not any(c["market"] == "ASX" for c in constituents)

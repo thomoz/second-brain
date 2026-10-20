@@ -274,13 +274,25 @@ def delete_stale_pending_candidates(conn: sqlite3.Connection, source: str, older
     sort correctly as text). Scoped to `source` since goat_pending_candidates is
     shared across every Goat scan (heartbeat, sector rotation, insiders, DMA
     breakout) -- a blanket age-based delete here would wipe another scan's
-    candidates too. See GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS for the first
-    caller/rationale."""
+    candidates too."""
     with conn:
         cur = conn.execute(
             "DELETE FROM goat_pending_candidates WHERE source = ? AND flagged_at < ?",
             (source, older_than),
         )
+        return cur.rowcount
+
+
+def delete_pending_candidates_for_source(conn: sqlite3.Connection, source: str) -> int:
+    """Unconditional wipe of every pending candidate from a single source, regardless
+    of age -- added 2026-10-20 at Shaun's request to replace dma_breakout_scan's prior
+    3-day rolling expiry (GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS, now removed): each
+    run should start fresh and only show what's interesting right now, not carry
+    never-reviewed rows forward across runs. Scoped to `source` for the same reason
+    as delete_stale_pending_candidates -- goat_pending_candidates is shared across
+    every Goat scan."""
+    with conn:
+        cur = conn.execute("DELETE FROM goat_pending_candidates WHERE source = ?", (source,))
         return cur.rowcount
 
 

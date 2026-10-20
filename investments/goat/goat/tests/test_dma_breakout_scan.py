@@ -340,33 +340,24 @@ def test_run_dma_breakout_scan_stages_new_candidate(db_conn, monkeypatch):
     assert row["exchange"] == "NasdaqGS"
 
 
-def test_run_dma_breakout_scan_expires_stale_never_reviewed_candidate(db_conn, monkeypatch):
-    """Real gap caught 2026-09-28: never-reviewed DMA breakout candidates piled up
-    with no expiry -- 100+ rows going back 12 days, none dismissed/promoted. A
-    candidate older than GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS should be wiped
-    automatically, scoped to this source only (other Goat scans' pending
-    candidates are untouched)."""
+def test_run_dma_breakout_scan_clears_never_reviewed_candidate_from_previous_run(db_conn, monkeypatch):
+    """Changed 2026-10-20 at Shaun's request: every run now starts fresh rather than
+    carrying a never-reviewed candidate forward for up to 3 days -- a candidate from
+    the immediately prior run (not just an old/stale one) must be cleared, scoped to
+    this source only (other Goat scans' pending candidates are untouched)."""
     goat_db.insert_goat_pending_candidate(
-        db_conn, ticker="STALE", sector_label="Technology", signal_detail="old",
+        db_conn, ticker="PRIOR_RUN", sector_label="Technology", signal_detail="old",
         source="goat_dma_breakout_scan",
     )
-    with db_conn:
-        db_conn.execute(
-            "UPDATE goat_pending_candidates SET flagged_at = '2020-01-01T00:00:00+00:00' WHERE ticker = 'STALE'"
-        )
     goat_db.insert_goat_pending_candidate(
         db_conn, ticker="OTHERSCAN", sector_label="Technology", signal_detail="old",
         source="goat_sector_rotation",
     )
-    with db_conn:
-        db_conn.execute(
-            "UPDATE goat_pending_candidates SET flagged_at = '2020-01-01T00:00:00+00:00' WHERE ticker = 'OTHERSCAN'"
-        )
     _patch_common(monkeypatch, constituents=[])
 
     dma_breakout_scan.run_dma_breakout_scan(db_conn)
 
-    assert goat_db.get_goat_pending_candidate(db_conn, "STALE") is None
+    assert goat_db.get_goat_pending_candidate(db_conn, "PRIOR_RUN") is None
     assert goat_db.get_goat_pending_candidate(db_conn, "OTHERSCAN") is not None
 
 
@@ -432,11 +423,15 @@ def test_run_dma_breakout_scan_skips_ticker_with_no_price_history(db_conn, monke
     assert result["new_candidates"] == []
 
 
-def test_run_dma_breakout_scan_stays_quiet_on_repeat_run(db_conn, monkeypatch):
+def test_run_dma_breakout_scan_restages_same_ticker_on_repeat_run_without_duplicating(db_conn, monkeypatch):
+    """Changed 2026-10-20: with the fresh-start-every-run behavior, a ticker that's
+    still genuinely interesting gets re-staged each run (it's cleared and reinserted,
+    not suppressed as 'already pending from last time') -- but never duplicated."""
     _patch_common(monkeypatch)
     dma_breakout_scan.run_dma_breakout_scan(db_conn)
     result = dma_breakout_scan.run_dma_breakout_scan(db_conn)
-    assert result["new_candidates"] == []
+    assert len(result["new_candidates"]) == 1
+    assert result["new_candidates"][0]["ticker"] == "AAPL"
     assert len(result["pending_candidates"]) == 1
 
 

@@ -813,15 +813,6 @@ GOAT_DMA_BREAKOUT_MIN_AVG_VOLUME = 100_000  # shares/day -- matches Finviz's own
     # instead of a Finviz screener param since this scan's universe comes from
     # S&P 500 / ASX 200 constituent lists, not a Finviz screen.
 GOAT_DMA_BREAKOUT_CANDIDATES_MD_PATH = GOAT_DIR / "dma-breakout-candidates-pending-review.md"
-GOAT_DMA_BREAKOUT_PENDING_MAX_AGE_DAYS = 3  # added 2026-09-28 -- Shaun: "we just need
-    # the latest ones", after the report accumulated 100+ never-reviewed candidates
-    # back to 2026-09-16. Shaun's own confirmed reasoning: if he hasn't checked
-    # within 3 days, the breakout opportunity it flagged is past anyway -- a review
-    # window, not a "keep everything just in case" archive. Calendar days
-    # (flagged_at is a real timestamp, not trading-day-indexed). Auto-deleted, not
-    # just hidden from the report -- an explicit review action (promote/dismiss) is
-    # still how a candidate leaves early; this only removes ones nobody looked at
-    # before they went stale on their own.
 GOAT_DMA_BREAKOUT_TOP_INDUSTRY_COUNT = 36  # added 2026-10-20 per
     # .agent/plans/dma-breakout-industry-filter.md -- only stage a non-ETF
     # candidate if its Finviz industry is also in the day's top N (of 144) by
