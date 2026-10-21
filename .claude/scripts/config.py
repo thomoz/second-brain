@@ -158,6 +158,12 @@ EXPIRED_DRAFT_RETENTION_DAYS = int(_os.getenv("EXPIRED_DRAFT_RETENTION_DAYS", "3
 WHATSAPP_INSTANCE_ID = _os.getenv("WHATSAPP_INSTANCE_ID", "")
 WHATSAPP_API_TOKEN = _os.getenv("WHATSAPP_API_TOKEN", "")
 WHATSAPP_MY_NUMBER = _os.getenv("WHATSAPP_MY_NUMBER", "")  # format: 61412345678
+# Shaun's WhatsApp lid (replaces the phone-number JID now that WhatsApp has migrated his
+# account to lid-tagged senders) — the bot's security filter needs this to recognize his
+# messages. There's no reverse phone->lid lookup API; this was read off a real incoming
+# message's senderId. Static like WHATSAPP_MY_NUMBER above, not re-resolved at runtime.
+# Found 2026-10-21 — see GREEN-API-troubleshooting.md.
+WHATSAPP_MY_LID = _os.getenv("WHATSAPP_MY_LID", "215895204962474@lid")
 
 
 def is_within_active_hours() -> bool:

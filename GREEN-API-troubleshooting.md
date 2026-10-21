@@ -186,6 +186,50 @@ check-in (turn it on, let it connect) would likely also stay under the ~14-day
 window, but is a maintenance task that's easy to forget — always-on removes the
 failure mode entirely rather than managing around it.
 
+## Two stacked bugs: wrong API host, then wrong lid (found 2026-10-21)
+
+Bot was `Authorized` in the console and still sending outbound alerts (goat/my-trader reports),
+but never replied to any chat message. `whatsapp_runs.log` was a continuous wall of
+`WhatsApp poll error: ... Read timed out` / `Connection ... timed out` against
+`api.green-api.com`, going back to 2026-09-30 with zero successfully processed messages since.
+
+**Bug 1 — wrong host.** `get_greenapi_base()` in `integrations/whatsapp.py` was hardcoded to the
+generic `https://api.green-api.com/waInstance{id}` host. The console's own instance page shows
+the real assigned endpoint as a per-instance subdomain — `apiUrl: https://7107.api.green-api.com`
+for instance `7107649252` (subdomain = the instance ID's first 4 digits). The generic host had
+degraded enough to reliably time out the long-held `receiveNotification` poll, while quick
+one-shot `sendMessage` calls mostly still got through on it — same "poll degrades, quick calls
+don't" pattern as the automated-detection section above, just caused by the wrong host instead of
+a GREEN-API-side outage. **Fix:** build the base URL from `instance_id[:4]` + `.api.green-api.com`.
+
+**Bug 2 — wrong lid, fully independent of bug 1.** Fixing the host alone wasn't enough: polling
+ran clean (zero errors) but new messages still never produced a reply or a log line. Traced via
+`lastIncomingMessages` (real messages existed, e.g. `senderId: 215895204962474@lid`) against the
+adapter's sender filter in `_poll_once()` — the filter checks
+`sender == self.my_lid`, and `self.my_lid` was being set from `get_own_chat_id()`, which calls
+`getWaSettings` and returns **the bot's own account identity** (`chatId` tied to the Aldi SIM's
+`phone: 61494727931`), not Shaun's. So `self.my_lid` held the bot's own lid, which can never
+equal an incoming sender's lid — every message from Shaun was silently acknowledged and dropped,
+with zero trace anywhere (same silent-drop signature as the `incomingWebhook` and original `lid`
+migration failures above — `_poll_once()`'s sender-filter branch acks and returns `None` with no
+print on a mismatch, by design, which is correct for a stranger messaging the bot but was also
+hiding this bug).
+
+**Fix:** removed `get_own_chat_id()` (nothing else used it, and it cannot do what its name
+suggests here — there's no GREEN-API endpoint to reverse-resolve a phone number to its lid).
+Added `WHATSAPP_MY_LID` to `config.py` as a static value (`215895204962474@lid`, read directly
+off a real incoming message), same pattern as `WHATSAPP_MY_NUMBER` — override via `.env` if it
+ever needs to change, but not re-resolved at runtime.
+
+**Lesson:** "resolves the instance's own lid" (the original 2026-07-19 fix's stated intent) is
+not the same thing as "resolves the authorized sender's lid" — they read as interchangeable but
+are opposite identities (the bot's account vs. Shaun's account). A function literally named
+`get_own_chat_id` being used to populate a filter called `my_lid` that's checked against incoming
+*senders* was the kind of bug that looks correct at every call site. When the sender-matching
+filter silently drops a real message again, print `sender` and `self.my_lid` side by side before
+assuming the API layer is the problem — two completely different failures (bad host, bad
+identity) can and did stack here, each masking confirmation of the other being fixed.
+
 ## Related
 
 - Setup guide: [`GREEN-API (30 min).txt`](./GREEN-API%20(30%20min).txt)

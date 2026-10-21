@@ -39,9 +39,9 @@ class WhatsAppPollingAdapter:
         return Platform.WHATSAPP
 
     async def connect(self) -> None:
-        from integrations.whatsapp import get_own_chat_id
+        from config import WHATSAPP_MY_LID
 
-        self.my_lid = get_own_chat_id(self.instance_id, self.api_token)
+        self.my_lid = WHATSAPP_MY_LID
         print(f"[{datetime.now()}] WhatsApp adapter ready (polling instance {self.instance_id})")
 
     async def disconnect(self) -> None:
