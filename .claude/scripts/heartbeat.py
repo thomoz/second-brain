@@ -536,6 +536,16 @@ def run_heartbeat(dry_run: bool = False, force: bool = False, skip_guardrail: bo
         except Exception as e:
             print(f"[{now_local()}] WhatsApp health check error (non-fatal): {e}")
 
+        # Codex model-availability check — same rationale as the WhatsApp checks
+        # above (catch within ~30min instead of relying on someone noticing a
+        # failed reply). See codex_health.py for the self-heal-vs-alert logic.
+        try:
+            from codex_health import run_codex_model_check
+
+            run_codex_model_check()
+        except Exception as e:
+            print(f"[{now_local()}] Codex model health check error (non-fatal): {e}")
+
     # Active-hours gate
     if not force and not is_within_active_hours():
         print(f"[{now_local()}] Outside active hours, skipping heartbeat")
