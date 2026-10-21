@@ -30,8 +30,16 @@ class WhatsAppMessage:
 
 
 def get_greenapi_base(instance_id: str) -> str:
-    """Return the GREEN-API base URL for the given instance."""
-    return f"https://api.green-api.com/waInstance{instance_id}"
+    """Return the GREEN-API base URL for the given instance.
+
+    Uses the per-instance subdomain (e.g. https://7107.api.green-api.com for
+    instance 7107649252 -- the subdomain is the instance ID's first 4 digits,
+    visible as "apiUrl" in the instance's console page) rather than the
+    generic api.green-api.com host. The generic host started timing out
+    consistently on receiveNotification polls around 2026-09-30 while
+    occasional sendMessage calls mostly still got through -- found 2026-10-21.
+    """
+    return f"https://{instance_id[:4]}.api.green-api.com/waInstance{instance_id}"
 
 
 def get_own_chat_id(instance_id: str = "", api_token: str = "") -> str:

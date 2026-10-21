@@ -19,8 +19,8 @@ from integrations.whatsapp import (
 
 
 def test_get_greenapi_base():
-    assert get_greenapi_base("12345") == "https://api.green-api.com/waInstance12345"
-    assert get_greenapi_base("99999") == "https://api.green-api.com/waInstance99999"
+    assert get_greenapi_base("12345") == "https://1234.api.green-api.com/waInstance12345"
+    assert get_greenapi_base("99999") == "https://9999.api.green-api.com/waInstance99999"
 
 
 def test_format_messages_empty():

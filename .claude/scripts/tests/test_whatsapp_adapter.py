@@ -53,11 +53,11 @@ def test_platform():
 def test_poll_once_returns_message(requests_mock):
     adapter = make_adapter()
     requests_mock.get(
-        f"https://api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
         json=SAMPLE_PAYLOAD,
     )
     requests_mock.delete(
-        f"https://api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/12345"
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/12345"
     )
     msg = adapter._poll_once()
     assert msg is not None
@@ -68,11 +68,11 @@ def test_poll_once_returns_message(requests_mock):
 def test_poll_once_filters_unknown_sender(requests_mock):
     adapter = make_adapter()
     requests_mock.get(
-        f"https://api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
         json=OTHER_PAYLOAD,
     )
     requests_mock.delete(
-        f"https://api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/99"
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/99"
     )
     msg = adapter._poll_once()
     assert msg is None
@@ -81,7 +81,7 @@ def test_poll_once_filters_unknown_sender(requests_mock):
 def test_poll_once_empty_queue(requests_mock):
     adapter = make_adapter()
     requests_mock.get(
-        f"https://api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
         json=None,
     )
     msg = adapter._poll_once()
@@ -92,11 +92,11 @@ def test_poll_once_empty_my_number_blocks_all(requests_mock):
     """Adapter with empty my_number is fail-closed — no sender is allowed through."""
     adapter = WhatsAppPollingAdapter(INSTANCE, TOKEN, my_number="")
     requests_mock.get(
-        f"https://api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
         json=SAMPLE_PAYLOAD,
     )
     requests_mock.delete(
-        f"https://api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/12345"
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/12345"
     )
     msg = adapter._poll_once()
     assert msg is None
@@ -121,11 +121,11 @@ def test_poll_once_accepts_lid_sender(requests_mock):
     adapter = make_adapter()
     adapter.my_lid = "215895204962474@lid"
     requests_mock.get(
-        f"https://api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
         json=payload,
     )
     requests_mock.delete(
-        f"https://api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/300"
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/300"
     )
     msg = adapter._poll_once()
     assert msg is not None
@@ -151,11 +151,11 @@ def test_poll_once_rejects_unmatched_lid(requests_mock):
     adapter = make_adapter()
     adapter.my_lid = "215895204962474@lid"
     requests_mock.get(
-        f"https://api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
         json=payload,
     )
     requests_mock.delete(
-        f"https://api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/301"
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/301"
     )
     msg = adapter._poll_once()
     assert msg is None
@@ -172,11 +172,11 @@ def test_poll_once_non_text_message(requests_mock):
     }
     adapter = make_adapter()
     requests_mock.get(
-        f"https://api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/receiveNotification/{TOKEN}",
         json=payload,
     )
     requests_mock.delete(
-        f"https://api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/200"
+        f"https://{INSTANCE[:4]}.api.green-api.com/waInstance{INSTANCE}/deleteNotification/{TOKEN}/200"
     )
     msg = adapter._poll_once()
     assert msg is None
