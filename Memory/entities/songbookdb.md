@@ -21,3 +21,4 @@
 - (Oct 03) sbdbsoftware.com auto-renews in 7 days; payment/card should be checked.
 - (Oct 04) 2 new song request emails need review/add-to-library triage
 - (Oct 08) Facebook sent a User Data Deletion Request for SongbookDB at 18:13.
+- (Oct 21) VPS check reached songbookdb.com at 84.75.194.13 with HTTP 200; no migration 403 appeared.
