@@ -2,230 +2,233 @@
 
 Advisor notes only; no trade action is ever suggested here (see SOUL.md). Sourced from Finviz's own Groups performance view (finviz.com/groups.ashx?g=industry&v=140), covering all 144 Finviz industries -- not just the 39 with a dedicated, currently-trading ETF (see industry-ranking.md for that narrower, breakout-gated report). This is a pure informational ranking: no breakout signal, no candidate staging, no WhatsApp alert. Ranked throughout by Perf Week -- the nearest-term read on where money is moving into/out of an industry right now, not a longer trend (see industry-ranking.md for that).
 
-## Run: 2026-10-21
+## Run: 2026-10-22
 
 ## Top 10 Rising (by Perf Week)
 | Rank | Industry | Perf Week | Perf Month | Perf Quarter | Perf Half | Perf Year | Perf YTD |
 |------|----------|--- | --- | --- | --- | --- | ---|
-| 1 | Consulting Services | +9.69% | +8.22% | +4.84% | -1.68% | -20.66% | -15.04% |
-| 2 | Insurance Brokers | +8.57% | +7.22% | +3.26% | +4.29% | -7.25% | -4.43% |
-| 3 | Healthcare Plans | +8.02% | +10.15% | -0.84% | +27.29% | +20.67% | +27.44% |
-| 4 | Lodging | +7.38% | +14.63% | +8.48% | +4.25% | +39.18% | +21.81% |
-| 5 | Waste Management | +7.35% | +8.76% | +2.25% | +6.35% | +4.04% | +4.52% |
-| 6 | Drug Manufacturers - General | +6.98% | +4.67% | +7.70% | +20.05% | +32.20% | +17.88% |
-| 7 | Home Improvement Retail | +6.60% | +5.35% | -4.54% | -12.04% | -19.62% | -11.21% |
-| 8 | Building Materials | +6.32% | +0.42% | -12.48% | -19.31% | -16.74% | -19.62% |
-| 9 | Medical Distribution | +5.98% | +13.06% | +19.47% | +18.82% | +29.24% | +17.68% |
-| 10 | REIT - Hotel & Motel | +5.92% | +10.11% | +1.10% | +27.76% | +50.97% | +43.45% |
+| 1 | Airports & Air Services | +8.92% | -2.51% | -9.56% | -23.18% | -30.64% | -29.98% |
+| 2 | Information Technology Services | +8.90% | +10.86% | +22.49% | +1.24% | -17.64% | -17.42% |
+| 3 | REIT - Hotel & Motel | +8.80% | +11.30% | +4.37% | +31.07% | +51.38% | +45.17% |
+| 4 | Consulting Services | +8.76% | +8.77% | +5.68% | +2.41% | -21.79% | -14.91% |
+| 5 | Lodging | +8.66% | +14.74% | +10.86% | +7.61% | +40.26% | +22.95% |
+| 6 | Building Materials | +7.94% | -0.01% | -10.81% | -18.40% | -16.17% | -19.15% |
+| 7 | Insurance Brokers | +7.25% | +8.75% | +2.22% | +5.80% | -7.48% | -4.90% |
+| 8 | Textile Manufacturing | +6.05% | +6.42% | -14.19% | +16.63% | +9.34% | +25.01% |
+| 9 | Home Improvement Retail | +5.75% | +2.05% | -3.24% | -11.03% | -19.36% | -11.64% |
+| 10 | Leisure | +5.64% | +9.84% | -4.32% | -2.68% | +2.53% | -3.86% |
 
 ## Bottom 10 Falling (by Perf Week)
 | Rank | Industry | Perf Week | Perf Month | Perf Quarter | Perf Half | Perf Year | Perf YTD |
 |------|----------|--- | --- | --- | --- | --- | ---|
-| 144 | Electrical Equipment & Parts | -12.36% | -15.38% | -18.73% | -21.22% | +21.58% | +31.69% |
-| 143 | Coking Coal | -11.12% | -6.42% | +0.49% | -12.29% | -9.28% | -12.27% |
-| 142 | Computer Hardware | -10.75% | -17.69% | -11.23% | +24.02% | +91.52% | +103.92% |
-| 141 | Electronic Components | -10.26% | -8.82% | -9.14% | -10.40% | +26.68% | +20.18% |
-| 140 | Utilities - Independent Power Producers | -10.14% | -0.21% | -12.16% | -12.20% | -35.82% | -24.09% |
-| 139 | Semiconductor Equipment & Materials | -9.64% | -9.66% | -17.72% | +1.06% | +65.82% | +50.59% |
-| 138 | Engineering & Construction | -8.96% | -9.55% | -17.67% | -17.65% | +6.69% | +8.82% |
-| 137 | Electronics & Computer Distribution | -8.58% | -5.46% | +2.76% | +25.38% | +63.82% | +76.47% |
-| 136 | Communication Equipment | -8.32% | -6.47% | -2.16% | +3.17% | +49.04% | +40.77% |
-| 135 | Solar | -7.11% | -10.10% | -22.50% | -19.03% | -26.16% | -29.33% |
+| 144 | Coking Coal | -6.86% | -10.49% | +3.38% | -11.24% | -12.47% | -11.95% |
+| 143 | Engineering & Construction | -5.05% | -8.95% | -17.99% | -18.32% | +5.41% | +9.29% |
+| 142 | Semiconductor Equipment & Materials | -4.45% | -10.48% | -17.02% | +1.43% | +65.16% | +52.81% |
+| 141 | Electronic Components | -4.38% | -10.01% | -8.75% | -8.63% | +26.87% | +21.45% |
+| 140 | Internet Content & Information | -3.99% | -4.61% | +7.21% | -0.57% | +14.31% | +4.44% |
+| 139 | Farm Products | -3.87% | -3.47% | -10.06% | -5.40% | +8.34% | +13.69% |
+| 138 | Oil & Gas Refining & Marketing | -3.49% | +14.87% | +39.56% | +83.63% | +132.06% | +145.05% |
+| 137 | Communication Equipment | -3.40% | -2.74% | -0.55% | +4.92% | +50.62% | +42.84% |
+| 136 | Other Industrial Metals & Mining | -3.22% | -11.19% | -6.93% | -13.86% | +18.08% | +13.38% |
+| 135 | Agricultural Inputs | -3.19% | -8.85% | -7.18% | -7.92% | +5.35% | +9.29% |
 
 ## Full Ranking
 All 144/144 industries, ranked by Perf Week.
 
 | Rank | Industry | Perf Week | Perf Month | Perf Quarter | Perf Half | Perf Year | Perf YTD |
 |------|----------|--- | --- | --- | --- | --- | ---|
-| 1 | Consulting Services | +9.69% | +8.22% | +4.84% | -1.68% | -20.66% | -15.04% |
-| 2 | Insurance Brokers | +8.57% | +7.22% | +3.26% | +4.29% | -7.25% | -4.43% |
-| 3 | Healthcare Plans | +8.02% | +10.15% | -0.84% | +27.29% | +20.67% | +27.44% |
-| 4 | Lodging | +7.38% | +14.63% | +8.48% | +4.25% | +39.18% | +21.81% |
-| 5 | Waste Management | +7.35% | +8.76% | +2.25% | +6.35% | +4.04% | +4.52% |
-| 6 | Drug Manufacturers - General | +6.98% | +4.67% | +7.70% | +20.05% | +32.20% | +17.88% |
-| 7 | Home Improvement Retail | +6.60% | +5.35% | -4.54% | -12.04% | -19.62% | -11.21% |
-| 8 | Building Materials | +6.32% | +0.42% | -12.48% | -19.31% | -16.74% | -19.62% |
-| 9 | Medical Distribution | +5.98% | +13.06% | +19.47% | +18.82% | +29.24% | +17.68% |
-| 10 | REIT - Hotel & Motel | +5.92% | +10.11% | +1.10% | +27.76% | +50.97% | +43.45% |
-| 11 | Information Technology Services | +5.88% | +8.05% | +19.99% | -1.87% | -17.96% | -19.06% |
-| 12 | Biotechnology | +5.40% | -2.71% | +4.56% | +9.18% | +24.83% | +15.82% |
-| 13 | Beverages - Brewers | +5.32% | +8.33% | +1.20% | +8.61% | +29.16% | +24.78% |
-| 14 | Beverages - Non-Alcoholic | +5.13% | +6.98% | +7.24% | +12.83% | +17.49% | +18.54% |
-| 15 | Leisure | +5.01% | +9.47% | -5.74% | -2.23% | +3.13% | -3.45% |
-| 16 | Drug Manufacturers - Specialty & Generic | +5.00% | +4.57% | +7.87% | +3.63% | +10.82% | +5.10% |
-| 17 | Household & Personal Products | +4.90% | +8.44% | +6.43% | +14.09% | +3.98% | +9.26% |
-| 18 | Personal Services | +4.85% | +5.02% | -5.20% | -15.15% | -20.94% | -20.56% |
-| 19 | Restaurants | +4.69% | +2.26% | -3.54% | -9.41% | -7.55% | -5.93% |
-| 20 | Discount Stores | +4.60% | +9.39% | +7.93% | -4.93% | +10.85% | +10.08% |
-| 21 | Travel Services | +4.53% | +5.14% | +0.28% | -1.70% | -3.88% | -8.67% |
-| 22 | Airports & Air Services | +4.52% | -3.88% | -12.01% | -23.60% | -29.47% | -31.17% |
-| 23 | Specialty Business Services | +4.51% | +8.29% | +6.24% | +4.08% | -9.29% | -3.85% |
-| 24 | Packaging & Containers | +4.38% | +0.74% | -2.24% | +3.86% | +3.52% | +3.89% |
-| 25 | Lumber & Wood Production | +4.34% | -0.80% | -3.74% | -5.66% | -0.96% | +3.52% |
-| 26 | Footwear & Accessories | +4.27% | +7.60% | -10.02% | -13.83% | -30.47% | -29.04% |
-| 27 | Chemicals | +4.24% | +4.24% | -7.59% | -22.12% | +27.18% | +21.06% |
-| 28 | Food Distribution | +4.21% | +5.66% | -0.40% | +11.07% | +12.30% | +20.12% |
-| 29 | Real Estate Services | +4.21% | -2.18% | -1.98% | -9.36% | -22.76% | -21.14% |
-| 30 | Textile Manufacturing | +4.18% | +7.16% | -14.65% | +14.20% | +11.45% | +24.12% |
-| 31 | Specialty Retail | +4.15% | +8.16% | +0.98% | -0.50% | +1.01% | +5.78% |
-| 32 | Financial Data & Stock Exchanges | +4.04% | +3.96% | +6.77% | +2.55% | -1.32% | -3.37% |
-| 33 | Health Information Services | +3.97% | +10.73% | +35.53% | +51.37% | +4.89% | +26.95% |
-| 34 | Confectioners | +3.95% | +4.94% | +3.31% | +6.95% | -1.01% | +11.51% |
-| 35 | Insurance - Reinsurance | +3.93% | +7.56% | +9.20% | +16.42% | +32.23% | +24.18% |
-| 36 | Insurance - Specialty | +3.92% | -1.93% | -8.54% | -4.57% | +0.18% | -7.07% |
-| 37 | Department Stores | +3.89% | +7.83% | +6.67% | +14.25% | +25.60% | +8.34% |
-| 38 | Business Equipment & Supplies | +3.74% | +13.11% | +5.82% | +19.74% | -11.25% | +17.73% |
-| 39 | Apparel Retail | +3.73% | +8.40% | -4.06% | -5.99% | +10.90% | -0.53% |
-| 40 | Insurance - Diversified | +3.69% | +7.03% | +9.07% | +13.93% | +10.11% | +7.15% |
-| 41 | Mortgage Finance | +3.69% | -9.26% | -18.60% | -31.21% | -37.47% | -43.94% |
-| 42 | Packaged Foods | +3.57% | -0.27% | -6.43% | -3.65% | -13.68% | -10.30% |
-| 43 | Medical Instruments & Supplies | +3.47% | +6.50% | +15.46% | +3.65% | +4.19% | -6.05% |
-| 44 | Publishing | +3.44% | +6.48% | +1.78% | +2.06% | +26.26% | +17.51% |
-| 45 | Apparel Manufacturing | +3.41% | +10.14% | -6.31% | -11.96% | +3.51% | +0.71% |
-| 46 | Grocery Stores | +3.39% | +4.57% | +3.65% | -9.22% | -16.21% | -3.51% |
-| 47 | Beverages - Wineries & Distilleries | +3.29% | +7.62% | +9.56% | +9.59% | -3.62% | +7.97% |
-| 48 | Insurance - Property & Casualty | +3.26% | +4.91% | +3.68% | +10.83% | +17.35% | +9.40% |
-| 49 | Luxury Goods | +3.25% | +6.14% | -11.55% | -16.11% | +2.08% | -5.48% |
-| 50 | Conglomerates | +3.01% | +2.55% | -4.89% | +0.02% | +8.32% | +3.43% |
-| 51 | Auto & Truck Dealerships | +2.66% | -5.46% | -9.17% | -11.58% | -12.06% | -16.21% |
-| 52 | Medical Devices | +2.66% | +2.46% | +5.65% | +3.51% | -14.44% | -14.25% |
-| 53 | REIT - Healthcare Facilities | +2.65% | +0.28% | -6.81% | +9.50% | +25.24% | +19.23% |
-| 54 | Telecom Services | +2.57% | -5.22% | -6.26% | -14.03% | -10.83% | -7.35% |
-| 55 | Residential Construction | +2.55% | -2.62% | -7.47% | -13.76% | -15.41% | -9.35% |
-| 56 | Diagnostics & Research | +2.48% | +4.49% | +25.80% | +33.24% | +27.45% | +18.50% |
-| 57 | Tobacco | +2.46% | +6.90% | +0.96% | +20.78% | +20.26% | +19.66% |
-| 58 | Oil & Gas Integrated | +2.36% | +10.96% | +15.90% | +17.50% | +60.54% | +53.14% |
-| 59 | REIT - Retail | +2.33% | -0.30% | -12.44% | -6.21% | +4.06% | +5.61% |
-| 60 | Oil & Gas E&P | +2.29% | +9.79% | +11.06% | +12.04% | +51.18% | +42.14% |
-| 61 | Credit Services | +2.18% | +6.55% | +8.28% | +16.48% | +6.68% | +3.04% |
-| 62 | Recreational Vehicles | +2.18% | -2.99% | -18.06% | -19.12% | -21.88% | -23.32% |
-| 63 | Furnishings, Fixtures & Appliances | +2.15% | +6.93% | +7.82% | +9.65% | +9.97% | +7.32% |
-| 64 | Integrated Freight & Logistics | +2.13% | +0.60% | -14.10% | -8.41% | +25.81% | +7.70% |
-| 65 | Electronic Gaming & Multimedia | +2.10% | +3.22% | -0.86% | -1.20% | -33.71% | -19.16% |
-| 66 | Utilities - Regulated Gas | +2.04% | +4.14% | -5.87% | -7.01% | +0.33% | +0.94% |
-| 67 | Specialty Chemicals | +1.98% | +5.45% | +0.52% | -1.77% | +12.87% | +14.11% |
-| 68 | Utilities - Regulated Water | +1.90% | +4.97% | +2.90% | -1.46% | +6.98% | +13.16% |
-| 69 | Software - Application | +1.88% | +6.48% | +27.17% | +22.58% | -12.56% | -5.61% |
-| 70 | REIT - Residential | +1.79% | +0.18% | -8.35% | -1.58% | -3.17% | -4.10% |
-| 71 | Insurance - Life | +1.78% | -0.07% | -1.76% | +10.10% | +18.70% | +9.67% |
-| 72 | Pharmaceutical Retailers | +1.68% | -5.12% | +6.63% | -4.06% | -28.41% | -18.19% |
-| 73 | Steel | +1.65% | +1.29% | +6.47% | +13.37% | +59.37% | +39.66% |
-| 74 | Utilities - Regulated Electric | +1.65% | +3.21% | -8.41% | -6.38% | -3.51% | +1.67% |
-| 75 | Medical Care Facilities | +1.55% | +5.28% | +12.72% | +11.08% | +16.26% | +11.93% |
-| 76 | Auto Parts | +1.54% | +0.96% | -5.71% | -9.25% | -10.28% | -2.78% |
-| 77 | Real Estate - Diversified | +1.48% | +6.96% | +7.66% | +3.12% | +15.14% | +4.47% |
-| 78 | Railroads | +1.28% | +3.98% | -3.20% | +10.31% | +24.53% | +23.14% |
-| 79 | Trucking | +1.22% | +2.74% | -18.58% | -13.48% | +33.37% | +23.26% |
-| 80 | Broadcasting | +1.19% | -4.53% | -8.11% | -21.06% | -23.00% | -23.98% |
-| 81 | Resorts & Casinos | +1.16% | -5.42% | -16.39% | -20.64% | -13.55% | -24.42% |
-| 82 | Internet Retail | +0.89% | +0.79% | +4.85% | +1.29% | +6.37% | +4.33% |
-| 83 | Gambling | +0.86% | -7.79% | -17.09% | -18.53% | -49.23% | -45.86% |
-| 84 | Asset Management | +0.70% | -5.56% | -2.98% | -3.14% | -6.77% | -9.29% |
-| 85 | Advertising Agencies | +0.68% | -11.09% | -23.98% | -31.43% | -45.81% | -49.45% |
-| 86 | Utilities - Diversified | +0.60% | +2.73% | -7.12% | -6.18% | -0.85% | +0.37% |
-| 87 | Tools & Accessories | +0.53% | +2.08% | -6.03% | -1.31% | +23.99% | +14.89% |
-| 88 | REIT - Diversified | +0.43% | -3.80% | -14.45% | -15.42% | -16.64% | -10.32% |
-| 89 | Banks - Regional | +0.34% | -3.34% | -5.14% | +1.59% | +13.68% | +3.54% |
-| 90 | Entertainment | +0.19% | -1.23% | +4.89% | -9.33% | -21.93% | -11.75% |
-| 91 | Pollution & Treatment Controls | +0.17% | +0.84% | +0.78% | +4.24% | -6.54% | -3.22% |
-| 92 | Industrial Distribution | +0.02% | +1.68% | -0.64% | -3.38% | +9.30% | +11.58% |
-| 93 | REIT - Mortgage | -0.09% | -14.33% | -20.41% | -24.86% | -22.93% | -25.00% |
-| 94 | Auto Manufacturers | -0.12% | -1.04% | -0.19% | -4.30% | -12.79% | -15.55% |
-| 95 | Oil & Gas Drilling | -0.12% | +0.95% | +5.25% | -7.60% | +59.00% | +41.66% |
-| 96 | Real Estate - Development | -0.35% | -8.08% | -12.48% | -12.36% | -10.85% | -5.38% |
-| 97 | Consumer Electronics | -0.41% | +0.32% | +4.55% | +27.16% | +30.36% | +23.60% |
-| 98 | REIT - Specialty | -0.43% | -1.84% | -2.32% | -7.27% | -1.95% | +8.91% |
-| 99 | Financial Conglomerates | -0.49% | -6.48% | -6.00% | +16.87% | +32.97% | +26.31% |
-| 100 | REIT - Industrial | -0.51% | -2.98% | -8.60% | -5.49% | -0.23% | +5.17% |
-| 101 | Gold | -0.58% | -8.72% | +14.19% | -7.81% | +12.27% | +2.30% |
-| 102 | Security & Protection Services | -0.88% | +0.35% | +0.57% | +6.79% | +0.11% | +4.80% |
-| 103 | Education & Training Services | -0.89% | +3.44% | +7.55% | -5.77% | -18.18% | +1.24% |
-| 104 | Banks - Diversified | -0.95% | -7.33% | -6.66% | +7.14% | +24.82% | +9.86% |
-| 105 | Oil & Gas Equipment & Services | -1.11% | -3.62% | -3.30% | -7.69% | +46.04% | +28.96% |
-| 106 | Aluminum | -1.18% | -6.99% | -14.00% | -33.92% | +24.99% | -10.16% |
-| 107 | Oil & Gas Midstream | -1.24% | -0.60% | -2.93% | +5.37% | +25.88% | +22.19% |
-| 108 | Rental & Leasing Services | -1.33% | -0.97% | -5.76% | -4.56% | +2.51% | +9.64% |
-| 109 | Silver | -1.34% | -14.86% | +2.04% | -8.15% | +32.27% | +12.55% |
-| 110 | Agricultural Inputs | -1.45% | -7.01% | -6.28% | -7.29% | +7.17% | +10.76% |
-| 111 | Aerospace & Defense | -1.47% | -3.86% | +2.18% | -8.05% | -1.14% | -4.13% |
-| 112 | Staffing & Employment Services | -1.51% | -5.83% | -6.00% | +31.43% | +12.51% | +23.39% |
-| 113 | Building Products & Equipment | -1.62% | +2.97% | -7.45% | -5.39% | +1.56% | +6.20% |
-| 114 | Paper & Paper Products | -1.99% | -9.04% | -1.66% | -11.85% | -7.21% | -12.54% |
-| 115 | REIT - Office | -2.01% | -8.90% | -12.50% | +3.39% | -17.44% | -3.04% |
-| 116 | Oil & Gas Refining & Marketing | -2.24% | +12.10% | +37.81% | +85.55% | +135.56% | +146.04% |
-| 117 | Farm Products | -2.50% | -3.85% | -10.31% | -4.77% | +8.90% | +14.63% |
-| 118 | Airlines | -2.98% | -8.44% | -12.16% | -1.97% | +4.11% | -10.19% |
-| 119 | Shell Companies | -2.98% | +4.60% | +9.32% | +18.73% | +16.41% | +18.82% |
-| 120 | Metal Fabrication | -3.10% | -3.08% | -16.44% | -6.12% | +32.32% | +11.79% |
-| 121 | Thermal Coal | -3.60% | -3.46% | +0.59% | -4.76% | -7.03% | -4.58% |
-| 122 | Copper | -3.69% | -1.30% | +5.82% | +8.43% | +59.79% | +38.87% |
-| 123 | Utilities - Renewable | -3.72% | -9.88% | -22.70% | -24.56% | -10.13% | -12.70% |
-| 124 | Capital Markets | -4.00% | -12.57% | -13.68% | -4.46% | -1.01% | -2.68% |
-| 125 | Farm & Heavy Construction Machinery | -4.15% | -9.44% | -12.00% | -5.17% | +31.51% | +24.05% |
-| 126 | Other Industrial Metals & Mining | -4.18% | -8.72% | -6.71% | -9.89% | +22.97% | +14.94% |
-| 127 | Specialty Industrial Machinery | -4.24% | -2.55% | -6.02% | -7.47% | +12.30% | +10.22% |
-| 128 | Other Precious Metals & Mining | -4.35% | -14.29% | -3.16% | -19.38% | -3.36% | -17.65% |
-| 129 | Software - Infrastructure | -4.77% | +1.47% | +27.30% | +23.85% | +0.35% | +11.32% |
-| 130 | Internet Content & Information | -5.09% | -4.55% | +1.97% | +2.19% | +17.30% | +5.51% |
-| 131 | Marine Shipping | -5.45% | -3.97% | +7.85% | +14.60% | +77.37% | +50.83% |
-| 132 | Scientific & Technical Instruments | -5.85% | -6.24% | -5.71% | -8.87% | +32.80% | +27.47% |
-| 133 | Uranium | -6.46% | -16.59% | -14.51% | -34.74% | -23.29% | -18.67% |
-| 134 | Semiconductors | -6.65% | -9.67% | -4.58% | +13.27% | +35.75% | +33.90% |
-| 135 | Solar | -7.11% | -10.10% | -22.50% | -19.03% | -26.16% | -29.33% |
-| 136 | Communication Equipment | -8.32% | -6.47% | -2.16% | +3.17% | +49.04% | +40.77% |
-| 137 | Electronics & Computer Distribution | -8.58% | -5.46% | +2.76% | +25.38% | +63.82% | +76.47% |
-| 138 | Engineering & Construction | -8.96% | -9.55% | -17.67% | -17.65% | +6.69% | +8.82% |
-| 139 | Semiconductor Equipment & Materials | -9.64% | -9.66% | -17.72% | +1.06% | +65.82% | +50.59% |
-| 140 | Utilities - Independent Power Producers | -10.14% | -0.21% | -12.16% | -12.20% | -35.82% | -24.09% |
-| 141 | Electronic Components | -10.26% | -8.82% | -9.14% | -10.40% | +26.68% | +20.18% |
-| 142 | Computer Hardware | -10.75% | -17.69% | -11.23% | +24.02% | +91.52% | +103.92% |
-| 143 | Coking Coal | -11.12% | -6.42% | +0.49% | -12.29% | -9.28% | -12.27% |
-| 144 | Electrical Equipment & Parts | -12.36% | -15.38% | -18.73% | -21.22% | +21.58% | +31.69% |
+| 1 | Airports & Air Services | +8.92% | -2.51% | -9.56% | -23.18% | -30.64% | -29.98% |
+| 2 | Information Technology Services | +8.90% | +10.86% | +22.49% | +1.24% | -17.64% | -17.42% |
+| 3 | REIT - Hotel & Motel | +8.80% | +11.30% | +4.37% | +31.07% | +51.38% | +45.17% |
+| 4 | Consulting Services | +8.76% | +8.77% | +5.68% | +2.41% | -21.79% | -14.91% |
+| 5 | Lodging | +8.66% | +14.74% | +10.86% | +7.61% | +40.26% | +22.95% |
+| 6 | Building Materials | +7.94% | -0.01% | -10.81% | -18.40% | -16.17% | -19.15% |
+| 7 | Insurance Brokers | +7.25% | +8.75% | +2.22% | +5.80% | -7.48% | -4.90% |
+| 8 | Textile Manufacturing | +6.05% | +6.42% | -14.19% | +16.63% | +9.34% | +25.01% |
+| 9 | Home Improvement Retail | +5.75% | +2.05% | -3.24% | -11.03% | -19.36% | -11.64% |
+| 10 | Leisure | +5.64% | +9.84% | -4.32% | -2.68% | +2.53% | -3.86% |
+| 11 | Health Information Services | +5.60% | +11.91% | +38.92% | +53.42% | +3.55% | +28.02% |
+| 12 | Mortgage Finance | +5.40% | -12.57% | -15.66% | -29.74% | -39.90% | -44.54% |
+| 13 | Silver | +5.33% | -18.24% | +8.18% | -11.08% | +30.14% | +13.51% |
+| 14 | Financial Data & Stock Exchanges | +5.23% | +6.15% | +9.03% | +2.78% | -1.15% | -2.41% |
+| 15 | Specialty Business Services | +5.06% | +9.00% | +7.07% | +6.28% | -10.07% | -3.15% |
+| 16 | Lumber & Wood Production | +4.80% | -3.47% | -3.56% | -5.64% | -0.95% | +3.58% |
+| 17 | Waste Management | +4.70% | +7.74% | +1.10% | +5.42% | +2.55% | +3.54% |
+| 18 | Business Equipment & Supplies | +4.67% | +8.61% | +6.40% | +22.52% | -12.02% | +18.37% |
+| 19 | Packaging & Containers | +4.55% | -0.27% | -1.35% | +7.74% | +2.58% | +4.26% |
+| 20 | Biotechnology | +4.53% | -3.91% | +3.99% | +9.32% | +23.49% | +16.08% |
+| 21 | Recreational Vehicles | +4.53% | -3.97% | -15.37% | -16.00% | -21.96% | -22.98% |
+| 22 | Gold | +4.42% | -11.22% | +16.97% | -8.28% | +10.04% | +2.87% |
+| 23 | Pharmaceutical Retailers | +4.35% | -6.66% | +7.92% | -20.76% | -69.71% | -23.76% |
+| 24 | Department Stores | +4.22% | +6.58% | +13.07% | +17.46% | +26.07% | +9.69% |
+| 25 | Credit Services | +4.07% | +9.47% | +10.01% | +17.01% | +6.09% | +3.76% |
+| 26 | Insurance - Reinsurance | +4.03% | +7.77% | +9.68% | +17.97% | +32.66% | +24.71% |
+| 27 | Real Estate Services | +4.03% | -1.91% | -0.63% | -11.08% | -24.74% | -21.82% |
+| 28 | Diagnostics & Research | +3.98% | +5.78% | +22.37% | +38.90% | +28.82% | +21.41% |
+| 29 | Auto Manufacturers | +3.97% | +0.57% | +14.88% | -2.14% | -12.27% | -13.68% |
+| 30 | Drug Manufacturers - Specialty & Generic | +3.92% | +3.74% | +7.01% | +3.66% | +9.60% | +4.78% |
+| 31 | Software - Application | +3.86% | +7.53% | +31.06% | +22.77% | -13.48% | -4.70% |
+| 32 | Conglomerates | +3.80% | +1.47% | -5.46% | +2.15% | +8.09% | +4.58% |
+| 33 | Healthcare Plans | +3.76% | +10.59% | +0.01% | +25.22% | +17.51% | +26.39% |
+| 34 | Oil & Gas Drilling | +3.71% | +3.02% | +7.89% | -6.65% | +58.02% | +44.95% |
+| 35 | Insurance - Property & Casualty | +3.63% | +6.94% | +2.43% | +11.92% | +17.94% | +9.44% |
+| 36 | Gambling | +3.59% | -8.28% | -18.06% | -17.31% | -49.52% | -46.23% |
+| 37 | Residential Construction | +3.21% | -6.94% | -7.65% | -14.29% | -16.84% | -10.78% |
+| 38 | Specialty Retail | +3.21% | +6.60% | +1.85% | +0.09% | +0.95% | +5.85% |
+| 39 | Real Estate - Diversified | +3.13% | +5.52% | +7.24% | +2.74% | +12.75% | +3.50% |
+| 40 | Beverages - Brewers | +3.11% | +6.54% | +2.71% | +8.38% | +27.55% | +23.27% |
+| 41 | Asset Management | +3.05% | -3.32% | -1.47% | -3.29% | -7.54% | -8.78% |
+| 42 | Footwear & Accessories | +3.05% | +4.81% | -7.81% | -13.84% | -31.62% | -30.11% |
+| 43 | Medical Distribution | +3.03% | +12.32% | +16.63% | +19.71% | +27.47% | +16.68% |
+| 44 | Publishing | +3.00% | +9.19% | +3.26% | +1.80% | +26.82% | +16.67% |
+| 45 | Drug Manufacturers - General | +2.97% | +3.43% | +5.58% | +19.18% | +30.31% | +17.07% |
+| 46 | Rental & Leasing Services | +2.97% | -0.06% | -8.30% | +4.11% | +3.28% | +11.97% |
+| 47 | Medical Instruments & Supplies | +2.88% | +4.53% | +16.05% | +0.86% | +1.64% | -6.51% |
+| 48 | Personal Services | +2.71% | +4.40% | -2.39% | -16.00% | -21.34% | -21.00% |
+| 49 | Tools & Accessories | +2.71% | +1.65% | -3.86% | +0.35% | +23.22% | +16.20% |
+| 50 | Aerospace & Defense | +2.67% | -0.89% | +3.32% | -3.48% | +0.37% | -0.86% |
+| 51 | Restaurants | +2.67% | +0.76% | -4.12% | -10.38% | -8.65% | -6.96% |
+| 52 | Beverages - Non-Alcoholic | +2.66% | +4.68% | +8.03% | +12.16% | +16.83% | +17.73% |
+| 53 | Travel Services | +2.61% | +6.27% | +0.26% | -0.47% | -6.84% | -10.32% |
+| 54 | Insurance - Diversified | +2.60% | +6.74% | +8.65% | +14.56% | +9.69% | +7.11% |
+| 55 | Insurance - Specialty | +2.58% | -2.63% | -8.62% | -5.40% | -2.00% | -8.11% |
+| 56 | Insurance - Life | +2.55% | +1.62% | -0.13% | +11.32% | +18.72% | +10.47% |
+| 57 | Electronic Gaming & Multimedia | +2.50% | +2.95% | +0.08% | -0.80% | -35.49% | -19.85% |
+| 58 | Auto & Truck Dealerships | +2.45% | -6.92% | -9.86% | -15.28% | -15.06% | -18.45% |
+| 59 | Utilities - Regulated Gas | +2.45% | +5.04% | -6.05% | -6.66% | -0.92% | +0.94% |
+| 60 | Oil & Gas E&P | +2.42% | +11.15% | +9.99% | +9.91% | +49.20% | +41.76% |
+| 61 | Oil & Gas Equipment & Services | +2.38% | -1.47% | -0.59% | -8.56% | +45.26% | +31.03% |
+| 62 | Furnishings, Fixtures & Appliances | +2.35% | +3.76% | +7.59% | +10.13% | +8.54% | +6.06% |
+| 63 | Apparel Manufacturing | +2.32% | +7.25% | -2.87% | -10.92% | +2.47% | -0.05% |
+| 64 | Advertising Agencies | +2.17% | -11.57% | -22.68% | -33.49% | -44.52% | -50.09% |
+| 65 | Aluminum | +2.15% | -6.92% | -14.46% | -35.36% | +17.54% | -9.78% |
+| 66 | Airlines | +2.13% | -8.33% | -8.22% | +2.47% | +3.47% | -8.94% |
+| 67 | Steel | +2.06% | +0.44% | +5.41% | +11.56% | +55.26% | +40.49% |
+| 68 | Banks - Regional | +1.97% | -1.92% | -3.95% | +2.56% | +12.72% | +3.85% |
+| 69 | Chemicals | +1.97% | +2.29% | -7.28% | -23.49% | +26.23% | +20.02% |
+| 70 | Integrated Freight & Logistics | +1.89% | +0.59% | -13.05% | -6.99% | +25.34% | +7.93% |
+| 71 | Other Precious Metals & Mining | +1.89% | -16.60% | +0.19% | -20.62% | -5.58% | -17.06% |
+| 72 | Specialty Chemicals | +1.83% | +3.49% | +1.77% | -1.76% | +12.29% | +14.10% |
+| 73 | Luxury Goods | +1.80% | +3.79% | -10.79% | -15.64% | -0.82% | -7.38% |
+| 74 | Internet Retail | +1.78% | +1.04% | +8.42% | -1.17% | +3.50% | +3.61% |
+| 75 | REIT - Office | +1.74% | -9.53% | -13.97% | +3.56% | -17.94% | -3.67% |
+| 76 | REIT - Residential | +1.64% | -1.02% | -8.95% | -1.15% | -4.06% | -4.61% |
+| 77 | Auto Parts | +1.58% | -1.43% | -4.92% | -9.96% | -11.00% | -3.50% |
+| 78 | Industrial Distribution | +1.57% | +1.43% | +0.33% | -0.99% | +8.57% | +12.58% |
+| 79 | Food Distribution | +1.52% | +4.84% | -0.56% | +9.05% | +11.23% | +19.04% |
+| 80 | Grocery Stores | +1.47% | +7.22% | +10.79% | -7.34% | -15.14% | -2.22% |
+| 81 | Building Products & Equipment | +1.46% | +2.83% | -6.85% | -4.33% | +1.49% | +7.62% |
+| 82 | Apparel Retail | +1.43% | +6.38% | -3.31% | -6.72% | +9.25% | -1.88% |
+| 83 | Discount Stores | +1.34% | +7.63% | +8.83% | -4.97% | +11.24% | +10.09% |
+| 84 | Oil & Gas Integrated | +1.30% | +11.33% | +14.71% | +16.81% | +60.21% | +53.45% |
+| 85 | REIT - Retail | +1.29% | -1.85% | -13.05% | -6.30% | +1.99% | +4.11% |
+| 86 | Medical Devices | +1.18% | +0.48% | +3.43% | +0.65% | -16.60% | -15.45% |
+| 87 | Household & Personal Products | +1.15% | +5.18% | +6.75% | +11.96% | +2.48% | +7.61% |
+| 88 | Trucking | +1.14% | +2.44% | -17.17% | -11.35% | +31.46% | +24.01% |
+| 89 | Utilities - Diversified | +1.11% | +3.11% | -7.39% | -5.61% | -2.10% | +0.56% |
+| 90 | Utilities - Renewable | +1.09% | -7.76% | -20.85% | -24.94% | -9.46% | -11.08% |
+| 91 | Packaged Foods | +1.07% | -1.45% | -6.03% | -4.76% | -15.51% | -11.69% |
+| 92 | Capital Markets | +1.06% | -8.70% | -10.53% | -3.21% | -0.87% | -0.43% |
+| 93 | Banks - Diversified | +1.01% | -4.30% | -4.98% | +8.77% | +24.12% | +10.94% |
+| 94 | Oil & Gas Midstream | +1.01% | +1.75% | -2.77% | +5.68% | +25.87% | +23.37% |
+| 95 | Railroads | +1.01% | +2.97% | -6.02% | +11.55% | +24.93% | +23.94% |
+| 96 | Resorts & Casinos | +0.98% | -5.88% | -17.84% | -20.97% | -16.41% | -25.46% |
+| 97 | Utilities - Regulated Electric | +0.95% | +3.32% | -8.85% | -6.23% | -4.02% | +1.53% |
+| 98 | Security & Protection Services | +0.89% | +0.52% | -1.69% | +6.54% | -0.15% | +5.10% |
+| 99 | Uranium | +0.79% | -16.71% | -12.51% | -38.92% | -23.11% | -17.53% |
+| 100 | Financial Conglomerates | +0.74% | -4.97% | -3.96% | +17.91% | +34.08% | +27.30% |
+| 101 | Real Estate - Development | +0.72% | -11.80% | -16.59% | -14.09% | -13.05% | -6.85% |
+| 102 | Beverages - Wineries & Distilleries | +0.71% | +6.25% | +11.81% | +10.37% | -4.53% | +7.45% |
+| 103 | Confectioners | +0.62% | +1.88% | +2.62% | +5.21% | -2.91% | +9.58% |
+| 104 | Broadcasting | +0.57% | -7.52% | -9.10% | -25.25% | -26.52% | -25.90% |
+| 105 | Utilities - Regulated Water | +0.53% | +4.36% | +2.21% | -1.44% | +4.42% | +12.09% |
+| 106 | REIT - Industrial | +0.52% | -2.52% | -8.68% | -5.07% | -2.19% | +4.86% |
+| 107 | REIT - Healthcare Facilities | +0.44% | -0.67% | -8.91% | +10.77% | +21.52% | +17.16% |
+| 108 | Consumer Electronics | +0.37% | +1.39% | +7.27% | +25.56% | +27.38% | +25.17% |
+| 109 | REIT - Specialty | +0.37% | -2.95% | -2.77% | -8.47% | -3.39% | +7.88% |
+| 110 | Specialty Industrial Machinery | +0.36% | -1.34% | -5.66% | -7.82% | +13.90% | +12.57% |
+| 111 | Pollution & Treatment Controls | +0.26% | -0.04% | +0.90% | +1.89% | -8.20% | -3.11% |
+| 112 | Shell Companies | -0.09% | +6.02% | +10.68% | +19.62% | +16.62% | +19.98% |
+| 113 | Solar | -0.10% | -8.95% | -19.98% | -21.77% | -26.03% | -28.31% |
+| 114 | Telecom Services | -0.12% | -5.25% | -4.47% | -15.07% | -12.29% | -8.84% |
+| 115 | REIT - Mortgage | -0.16% | -15.56% | -19.90% | -25.56% | -24.29% | -25.51% |
+| 116 | Staffing & Employment Services | -0.34% | -5.32% | -2.59% | +31.76% | +13.68% | +24.78% |
+| 117 | Thermal Coal | -0.64% | -6.36% | +1.24% | -5.60% | -8.70% | -4.50% |
+| 118 | Software - Infrastructure | -0.71% | +2.74% | +31.60% | +22.25% | +1.33% | +12.46% |
+| 119 | Semiconductors | -0.75% | -9.21% | -1.65% | +12.08% | +38.01% | +36.79% |
+| 120 | REIT - Diversified | -0.87% | -5.55% | -15.18% | -16.07% | -18.80% | -11.87% |
+| 121 | Utilities - Independent Power Producers | -0.87% | +3.75% | -9.47% | -11.25% | -31.26% | -21.19% |
+| 122 | Farm & Heavy Construction Machinery | -1.09% | -8.27% | -11.18% | -3.99% | +31.85% | +25.78% |
+| 123 | Medical Care Facilities | -1.11% | +2.56% | +11.38% | +9.45% | +13.40% | +10.84% |
+| 124 | Tobacco | -1.15% | +4.97% | +1.79% | +14.57% | +19.62% | +18.48% |
+| 125 | Paper & Paper Products | -1.34% | -11.98% | -0.61% | -12.54% | -7.64% | -12.73% |
+| 126 | Copper | -1.42% | -6.14% | +8.92% | +3.69% | +52.72% | +37.01% |
+| 127 | Scientific & Technical Instruments | -1.49% | -5.25% | -4.52% | -8.39% | +32.35% | +29.10% |
+| 128 | Entertainment | -1.55% | -2.41% | +3.62% | -12.02% | -25.33% | -13.68% |
+| 129 | Education & Training Services | -1.68% | +2.41% | +4.05% | -7.50% | -21.13% | -0.53% |
+| 130 | Marine Shipping | -1.94% | +0.46% | +7.96% | +14.71% | +79.33% | +53.01% |
+| 131 | Computer Hardware | -2.30% | -16.94% | -9.06% | +23.72% | +97.79% | +110.00% |
+| 132 | Metal Fabrication | -2.34% | -3.14% | -17.76% | -4.80% | +30.00% | +11.50% |
+| 133 | Electrical Equipment & Parts | -2.52% | -12.88% | -15.52% | -18.18% | +25.52% | +37.35% |
+| 134 | Electronics & Computer Distribution | -2.95% | -5.08% | +6.26% | +24.84% | +63.31% | +79.72% |
+| 135 | Agricultural Inputs | -3.19% | -8.85% | -7.18% | -7.92% | +5.35% | +9.29% |
+| 136 | Other Industrial Metals & Mining | -3.22% | -11.19% | -6.93% | -13.86% | +18.08% | +13.38% |
+| 137 | Communication Equipment | -3.40% | -2.74% | -0.55% | +4.92% | +50.62% | +42.84% |
+| 138 | Oil & Gas Refining & Marketing | -3.49% | +14.87% | +39.56% | +83.63% | +132.06% | +145.05% |
+| 139 | Farm Products | -3.87% | -3.47% | -10.06% | -5.40% | +8.34% | +13.69% |
+| 140 | Internet Content & Information | -3.99% | -4.61% | +7.21% | -0.57% | +14.31% | +4.44% |
+| 141 | Electronic Components | -4.38% | -10.01% | -8.75% | -8.63% | +26.87% | +21.45% |
+| 142 | Semiconductor Equipment & Materials | -4.45% | -10.48% | -17.02% | +1.43% | +65.16% | +52.81% |
+| 143 | Engineering & Construction | -5.05% | -8.95% | -17.99% | -18.32% | +5.41% | +9.29% |
+| 144 | Coking Coal | -6.86% | -10.49% | +3.38% | -11.24% | -12.47% | -11.95% |
 
 ### Rotation Flow
-6 newly rising, 1 newly falling since the prior snapshot (57 still rising, 80 still falling unchanged).
+6 newly rising, 2 newly falling since the prior snapshot (61 still rising, 75 still falling unchanged).
 
 | Ticker | Label | From | To |
 |--------|-------|------|----|
-| Medical Instruments & Supplies | Medical Instruments & Supplies | Falling | Rising |
-| Conglomerates | Conglomerates | Falling | Rising |
-| Medical Devices | Medical Devices | Falling | Rising |
-| Real Estate - Diversified | Real Estate - Diversified | Falling | Rising |
-| Banks - Regional | Banks - Regional | Falling | Rising |
-| REIT - Office | REIT - Office | Falling | Rising |
-| Thermal Coal | Thermal Coal | Rising | Falling |
+| Information Technology Services | Information Technology Services | Falling | Rising |
+| Consulting Services | Consulting Services | Falling | Rising |
+| Specialty Retail | Specialty Retail | Falling | Rising |
+| Rental & Leasing Services | Rental & Leasing Services | Falling | Rising |
+| Tools & Accessories | Tools & Accessories | Falling | Rising |
+| Airlines | Airlines | Falling | Rising |
+| Internet Retail | Internet Retail | Rising | Falling |
+| Internet Content & Information | Internet Content & Information | Rising | Falling |
 
 ### Short-Window Flow (1-Week)
-22 newly rising, 5 newly falling since the prior snapshot (70 still rising, 47 still falling unchanged).
+24 newly rising, 5 newly falling since the prior snapshot (87 still rising, 28 still falling unchanged).
 
 | Ticker | Label | From | To |
 |--------|-------|------|----|
-| Biotechnology | Biotechnology | Falling | Rising |
-| Airports & Air Services | Airports & Air Services | Falling | Rising |
-| Mortgage Finance | Mortgage Finance | Falling | Rising |
-| Conglomerates | Conglomerates | Falling | Rising |
-| Residential Construction | Residential Construction | Falling | Rising |
-| Furnishings, Fixtures & Appliances | Furnishings, Fixtures & Appliances | Falling | Rising |
-| Electronic Gaming & Multimedia | Electronic Gaming & Multimedia | Falling | Rising |
-| Utilities - Regulated Water | Utilities - Regulated Water | Falling | Rising |
-| Software - Application | Software - Application | Falling | Rising |
-| REIT - Residential | REIT - Residential | Falling | Rising |
-| Pharmaceutical Retailers | Pharmaceutical Retailers | Falling | Rising |
-| Medical Care Facilities | Medical Care Facilities | Falling | Rising |
-| Real Estate - Diversified | Real Estate - Diversified | Falling | Rising |
-| Broadcasting | Broadcasting | Falling | Rising |
-| Gambling | Gambling | Falling | Rising |
-| Asset Management | Asset Management | Falling | Rising |
-| Utilities - Diversified | Utilities - Diversified | Falling | Rising |
-| REIT - Diversified | REIT - Diversified | Falling | Rising |
-| Banks - Regional | Banks - Regional | Falling | Rising |
-| Entertainment | Entertainment | Falling | Rising |
-| Pollution & Treatment Controls | Pollution & Treatment Controls | Falling | Rising |
-| Industrial Distribution | Industrial Distribution | Falling | Rising |
-| Oil & Gas Drilling | Oil & Gas Drilling | Rising | Falling |
-| Consumer Electronics | Consumer Electronics | Rising | Falling |
-| Agricultural Inputs | Agricultural Inputs | Rising | Falling |
-| Oil & Gas Refining & Marketing | Oil & Gas Refining & Marketing | Rising | Falling |
-| Metal Fabrication | Metal Fabrication | Rising | Falling |
+| Silver | Silver | Falling | Rising |
+| Gold | Gold | Falling | Rising |
+| Auto Manufacturers | Auto Manufacturers | Falling | Rising |
+| Oil & Gas Drilling | Oil & Gas Drilling | Falling | Rising |
+| Rental & Leasing Services | Rental & Leasing Services | Falling | Rising |
+| Aerospace & Defense | Aerospace & Defense | Falling | Rising |
+| Oil & Gas Equipment & Services | Oil & Gas Equipment & Services | Falling | Rising |
+| Aluminum | Aluminum | Falling | Rising |
+| Airlines | Airlines | Falling | Rising |
+| Other Precious Metals & Mining | Other Precious Metals & Mining | Falling | Rising |
+| REIT - Office | REIT - Office | Falling | Rising |
+| Building Products & Equipment | Building Products & Equipment | Falling | Rising |
+| Utilities - Renewable | Utilities - Renewable | Falling | Rising |
+| Capital Markets | Capital Markets | Falling | Rising |
+| Banks - Diversified | Banks - Diversified | Falling | Rising |
+| Oil & Gas Midstream | Oil & Gas Midstream | Falling | Rising |
+| Security & Protection Services | Security & Protection Services | Falling | Rising |
+| Uranium | Uranium | Falling | Rising |
+| Financial Conglomerates | Financial Conglomerates | Falling | Rising |
+| Real Estate - Development | Real Estate - Development | Falling | Rising |
+| REIT - Industrial | REIT - Industrial | Falling | Rising |
+| Consumer Electronics | Consumer Electronics | Falling | Rising |
+| REIT - Specialty | REIT - Specialty | Falling | Rising |
+| Specialty Industrial Machinery | Specialty Industrial Machinery | Falling | Rising |
+| Telecom Services | Telecom Services | Rising | Falling |
+| REIT - Diversified | REIT - Diversified | Rising | Falling |
+| Medical Care Facilities | Medical Care Facilities | Rising | Falling |
+| Tobacco | Tobacco | Rising | Falling |
+| Entertainment | Entertainment | Rising | Falling |
 
-Last auto-generated: 2026-10-21.
+Last auto-generated: 2026-10-22.
