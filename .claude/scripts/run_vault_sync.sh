@@ -29,6 +29,8 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] vault sync start" >> "$LOG"
 SYNC_PATHS=(
     Memory/
     investments/goat/*.md
+    investments/goat/rotation-watch.html
+    investments/goat/rotation-history-export.json
     investments/my-trader/*.md
     investments/superinvestor-filings/*.md
     investments/ai-resistant-moat-scanner/*.md
