@@ -115,13 +115,20 @@ _SKILLS_DIR = _SCRIPTS_DIR.parent / "skills"
 # handful of models that CLI version exposes to ChatGPT accounts - bare API
 # model refs (e.g. "gpt-5-codex", "codex-mini-latest") are rejected with a 400.
 # The accepted set moves with the CLI: 0.117 shipped gpt-5.4 / gpt-5.4-mini;
-# 0.139 dropped gpt-5.4 entirely and ships gpt-5.5 (now the CLI default). So the
-# defaults track the current CLI (gpt-5.5). When the VPS CLI updates again and a
-# 400 says a model "is not supported", run `codex exec "ok"` to see the new
-# default and set CODEX_MODEL_CHEAP/MID/STRONG in .claude/scripts/.env to match.
-_MODEL_CHEAP = os.getenv("CODEX_MODEL_CHEAP", "gpt-5.5")
-_MODEL_MID = os.getenv("CODEX_MODEL_MID", "gpt-5.5")
-_MODEL_STRONG = os.getenv("CODEX_MODEL_STRONG", "gpt-5.5")
+# 0.139 dropped gpt-5.4 entirely and shipped gpt-5.5 (then the CLI default);
+# by 2026-10-21 the backend had stopped accepting gpt-5.5 for ChatGPT-account
+# auth entirely (even 0.139's own bare default got a 400) - updating the CLI
+# to 0.163 picked up the new default, gpt-6.1-sol, which the backend accepts.
+# So the defaults track the current CLI (gpt-6.1-sol). When the VPS CLI
+# updates again and a 400 says a model "is not supported", run
+# `codex exec "ok"` (bare, no -m override) to see the new default and set
+# CODEX_MODEL_CHEAP/MID/STRONG in .claude/scripts/.env to match - check
+# `codex doctor` for a pending CLI update first, since the mismatch is
+# usually the backend moving on from the installed CLI's default, not a
+# model name picked wrong on our end.
+_MODEL_CHEAP = os.getenv("CODEX_MODEL_CHEAP", "gpt-6.1-sol")
+_MODEL_MID = os.getenv("CODEX_MODEL_MID", "gpt-6.1-sol")
+_MODEL_STRONG = os.getenv("CODEX_MODEL_STRONG", "gpt-6.1-sol")
 _MODEL_DEFAULT = os.getenv("CODEX_MODEL_DEFAULT", _MODEL_MID)
 
 _MODEL_ALIASES = {
