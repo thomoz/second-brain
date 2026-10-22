@@ -10,7 +10,7 @@ Hated since: 2026-09-28
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -19.5% | -25.4% | -24.5pp | -34.6pp | -42.4% |
+| -22.3% | -23.6% | -25.4pp | -33.4pp | -43.5% |
 
 **Narrative:** The dominant narrative is US policy and subsidy uncertainty: expiring solar tax credits, shifting tariffs and import restrictions threaten project economics and future demand, compounded by rising financing costs. Broad solar-stock declines have persisted despite strong installations and some record backlogs ([S&P Global](https://www.spglobal.com/market-intelligence/en/news-insights/articles/2026/9/solar-stocks-stumble-over-stroke-of-a-pen-105648067)).
 **Systemic read:** industry-wide -- The evidence supports a broad industry headwind rather than one or two constituent-specific problems: declines span trackers, panel manufacturers and residential suppliers, although exposure varies and domestic manufacturers can benefit from import protection ([S&P Global](https://www.spglobal.com/market-intelligence/en/news-insights/articles/2026/9/solar-stocks-stumble-over-stroke-of-a-pen-105648067)). The holdings below are the five largest by weight in the October 19, 2026 disclosure ([holdings source](https://etf.net/etf/TAN)).
@@ -33,7 +33,7 @@ Hated since: 2026-10-20
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -13.6% | -38.4% | -18.6pp | -47.7pp | -42.5% |
+| -14.1% | -34.5% | -17.3pp | -44.3pp | -43.1% |
 
 **Narrative:** Recent reporting points to higher-for-longer interest rates and an unwind of expensive nuclear-growth expectations: higher financing costs and discount rates pressure capital-intensive projects, especially reactor developers with distant revenues. This appears more consistent with the selloff than a uranium glut ([TipRanks, October 15](https://www.tipranks.com/news/3-best-nuclear-stocks-to-buy-on-the-dip-today-according-to-wall-street)).
 **Systemic read:** industry-wide -- The evidence favors a broad financing and valuation shock over one or two constituents' company-specific problems, with Cameco, Centrus and Oklo declining together, although exposure is substantially greater for developers dependent on new funding. This does not establish uniform deterioration in uranium fundamentals: Cameco reported strengthening long-term prices and unchanged annual production guidance ([Cameco](https://www.cameco.com/media/news/cameco-reports-2026-second-quarter-results)); the holdings below follow the October 19 weight ranking ([holdings source](https://stockanalysis.com/etf/ura/holdings/)), with Sprott's ticker verified by [Global X](https://www.globalxetfs.com/funds/ura).
@@ -52,7 +52,7 @@ Hated since: 2026-10-20
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -10.2% | -16.7% | -15.2pp | -25.9pp | -30.3% |
+| -11.9% | -15.6% | -15.1pp | -25.4pp | -31.1% |
 
 **Narrative:** The dominant recent narrative is renewed inflation and rising Treasury yields squeezing financing costs and valuations, compounded by U.S. wind/solar subsidy rollbacks and permitting obstacles. October reporting explicitly links Bloom Energy's decline to higher yields, while federal rules shorten wind/solar tax-credit eligibility: [market report](https://www.investing.com/news/stock-market-news/why-is-bloom-energy-stock-sliding-today-93CH-4949612), [IRS guidance](https://www.irs.gov/irb/2025-36_IRB).
 **Systemic read:** unclear whether industry-wide or concentrated -- Financing pressure affects many constituents, but U.S. subsidy restrictions do not apply uniformly to this global portfolio, which also includes equipment makers and fuel cells rather than exclusively renewable utilities. Evidence does not cleanly separate broad macro pressure from constituent concentration; the five holdings below are ranked by reported October 19, 2026 weights of 7.99%, 7.62%, 6.51%, 6.39%, and 5.45%: [holdings source](https://stockanalysis.com/etf/icln/holdings/).
