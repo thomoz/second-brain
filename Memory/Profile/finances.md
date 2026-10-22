@@ -84,3 +84,6 @@ _(not yet populated)_
 
 ## 2026-09-20 Update
 - (Sep 20) Added NEWP and NEXG.V to watchlist; both are buy at cheaper entry level.
+
+## 2026-10-22 Update
+- (Oct 22) Shaun reports earning 5.75% on his ING savings account.
