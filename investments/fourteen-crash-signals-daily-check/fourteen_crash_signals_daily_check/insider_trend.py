@@ -37,9 +37,9 @@ def check_insider_trend(conn: sqlite3.Connection) -> list[CheckResult]:
 
     totals: dict[str, dict[str, float]] = {t: {"bought": 0.0, "sold": 0.0} for t in tickers}
     for row in purchases or []:
-        totals[row["ticker"]]["bought"] += row["value"]
+        totals.setdefault(row["ticker"], {"bought": 0.0, "sold": 0.0})["bought"] += row["value"]
     for row in sales or []:
-        totals[row["ticker"]]["sold"] += row["value"]
+        totals.setdefault(row["ticker"], {"bought": 0.0, "sold": 0.0})["sold"] += row["value"]
 
     results: list[CheckResult] = []
     for ticker, amounts in totals.items():
