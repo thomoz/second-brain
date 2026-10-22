@@ -4,19 +4,19 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 
 | Ticker | Name | Qty | Mkt Value | Avg Price | Unrealized P&L | Bucket |
 |--------|------|-----|-----------|-----------|-----------------|--------|
-| AG |  | 40.0264 | $644.02 | $20.98 | $-195.72 | unassigned |
+| AG |  | 40.0264 | $605.20 | $20.98 | $-234.55 | unassigned |
 | BMS |  | 250.0 | — | $2.32 | — | unassigned |
-| CYL.AX |  | 200.0 | $1,060.00 | $5.86 | $-111.05 | unassigned |
-| GOLD.AX |  | 20.0 | $1,069.40 | $59.31 | $-116.85 | unassigned |
-| GXLD.AX |  | 25.0 | $1,457.50 | $61.82 | $-88.06 | unassigned |
-| LLY | Eli Lilly & Co | 0.0001 | $0.13 | $1,148.00 | +$0.01 | 1 |
-| LULU | lululemon athletica inc. | 22.0 | $2,123.66 | $113.22 | $-367.07 | 1 |
-| LYV | Live Nation Entertainment Inc | 0.4 | $69.74 | $167.29 | +$2.82 | 1 |
-| PDD |  | 10.0 | $787.20 | $92.53 | $-138.14 | unassigned |
+| CYL.AX |  | 200.0 | $1,046.00 | $5.86 | $-125.05 | unassigned |
+| GOLD.AX |  | 20.0 | $1,064.80 | $59.31 | $-121.45 | unassigned |
+| GXLD.AX |  | 25.0 | $1,453.25 | $61.82 | $-92.31 | unassigned |
+| LLY | Eli Lilly & Co | 0.0001 | $0.13 | $1,148.00 | +$0.02 | 1 |
+| LULU | lululemon athletica inc. | 22.0 | $2,289.32 | $113.22 | $-201.41 | 1 |
+| LYV | Live Nation Entertainment Inc | 0.4 | $69.80 | $167.29 | +$2.89 | 1 |
+| PDD |  | 10.0 | $791.70 | $92.53 | $-133.64 | unassigned |
 | PMGOLD.AX |  | 50.0 | $897.00 | $62.06 | $-2,206.18 | 3b |
-| SILJ |  | 25.0 | $636.00 | $32.27 | $-170.84 | unassigned |
-| SOFI |  | 50.0 | $745.00 | $19.01 | $-205.33 | unassigned |
-| UBER |  | 10.0 | $676.20 | $79.08 | $-114.56 | unassigned |
-| V | Visa Inc (Class A) | 0.1002 | $40.87 | $318.47 | +$8.96 | 1 |
+| SILJ |  | 25.0 | $591.25 | $32.27 | $-215.59 | unassigned |
+| SOFI |  | 50.0 | $738.50 | $19.01 | $-211.83 | unassigned |
+| UBER |  | 10.0 | $690.70 | $79.08 | $-100.06 | unassigned |
+| V | Visa Inc (Class A) | 0.1002 | $41.52 | $318.47 | +$9.61 | 1 |
 
-Last auto-generated: 2026-10-22.
+Last auto-generated: 2026-10-23.
