@@ -4,19 +4,19 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 
 | Ticker | Name | Qty | Mkt Value | Avg Price | Unrealized P&L | Bucket |
 |--------|------|-----|-----------|-----------|-----------------|--------|
-| AG |  | 40.0264 | $605.20 | $20.98 | $-234.55 | unassigned |
+| AG |  | 40.0264 | $591.19 | $20.98 | $-248.56 | unassigned |
 | BMS |  | 250.0 | — | $2.32 | — | unassigned |
-| CYL.AX |  | 200.0 | $1,046.00 | $5.86 | $-125.05 | unassigned |
-| GOLD.AX |  | 20.0 | $1,064.80 | $59.31 | $-121.45 | unassigned |
-| GXLD.AX |  | 25.0 | $1,453.25 | $61.82 | $-92.31 | unassigned |
-| LLY | Eli Lilly & Co | 0.0001 | $0.13 | $1,148.00 | +$0.02 | 1 |
-| LULU | lululemon athletica inc. | 22.0 | $2,289.32 | $113.22 | $-201.41 | 1 |
-| LYV | Live Nation Entertainment Inc | 0.4 | $69.80 | $167.29 | +$2.89 | 1 |
-| PDD |  | 10.0 | $791.70 | $92.53 | $-133.64 | unassigned |
+| CYL.AX |  | 200.0 | $950.00 | $5.86 | $-221.05 | unassigned |
+| GOLD.AX |  | 20.0 | $1,046.00 | $59.31 | $-140.25 | unassigned |
+| GXLD.AX |  | 25.0 | $1,425.00 | $61.82 | $-120.56 | unassigned |
+| LLY | Eli Lilly & Co | 0.0001 | $0.13 | $1,148.00 | +$0.01 | 1 |
+| LULU | lululemon athletica inc. | 22.0 | $2,178.22 | $113.22 | $-312.51 | 1 |
+| LYV | Live Nation Entertainment Inc | 0.4 | $69.38 | $167.29 | +$2.46 | 1 |
+| PDD |  | 10.0 | $790.40 | $92.53 | $-134.94 | unassigned |
 | PMGOLD.AX |  | 50.0 | $897.00 | $62.06 | $-2,206.18 | 3b |
-| SILJ |  | 25.0 | $591.25 | $32.27 | $-215.59 | unassigned |
-| SOFI |  | 50.0 | $738.50 | $19.01 | $-211.83 | unassigned |
-| UBER |  | 10.0 | $690.70 | $79.08 | $-100.06 | unassigned |
-| V | Visa Inc (Class A) | 0.1002 | $41.52 | $318.47 | +$9.61 | 1 |
+| SILJ |  | 25.0 | $578.75 | $32.27 | $-228.09 | unassigned |
+| SOFI |  | 50.0 | $730.75 | $19.01 | $-219.58 | unassigned |
+| UBER |  | 10.0 | $667.00 | $79.08 | $-123.76 | unassigned |
+| V | Visa Inc (Class A) | 0.1002 | $40.87 | $318.47 | +$8.96 | 1 |
 
-Last auto-generated: 2026-10-23.
+Last auto-generated: 2026-10-24.
