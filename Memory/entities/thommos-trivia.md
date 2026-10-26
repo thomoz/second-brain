@@ -20,3 +20,4 @@ Active
 - (Jul 08) Add this week's free answer to The Racquet Club trivia run sheet if needed
 - (Aug 07) Jason Dean flagged a Bonus Question screen change needed before next week's game
 - (Sep 08) The Racquet Club Wednesday 7pm trivia themes/answers arrived for show prep
+- (Oct 26) This week's Boyles trivia is Halloween themed; Christmas break dates are Dec 30 and Jan 6.
