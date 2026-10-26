@@ -4,19 +4,19 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 
 | Ticker | Name | Qty | Mkt Value | Avg Price | Unrealized P&L | Bucket |
 |--------|------|-----|-----------|-----------|-----------------|--------|
-| AG |  | 40.0264 | $591.19 | $20.98 | $-248.56 | unassigned |
+| AG |  | 40.0264 | $594.39 | $20.98 | $-245.36 | unassigned |
 | BMS |  | 250.0 | — | $2.32 | — | unassigned |
-| CYL.AX |  | 200.0 | $950.00 | $5.86 | $-221.05 | unassigned |
-| GOLD.AX |  | 20.0 | $1,046.00 | $59.31 | $-140.25 | unassigned |
-| GXLD.AX |  | 25.0 | $1,425.00 | $61.82 | $-120.56 | unassigned |
+| CYL.AX |  | 200.0 | $988.00 | $5.86 | $-183.05 | unassigned |
+| GOLD.AX |  | 20.0 | $1,043.80 | $59.31 | $-142.45 | unassigned |
+| GXLD.AX |  | 25.0 | $1,426.25 | $61.82 | $-119.31 | unassigned |
 | LLY | Eli Lilly & Co | 0.0001 | $0.13 | $1,148.00 | +$0.01 | 1 |
-| LULU | lululemon athletica inc. | 22.0 | $2,178.22 | $113.22 | $-312.51 | 1 |
-| LYV | Live Nation Entertainment Inc | 0.4 | $69.38 | $167.29 | +$2.46 | 1 |
-| PDD |  | 10.0 | $790.40 | $92.53 | $-134.94 | unassigned |
+| LULU | lululemon athletica inc. | 22.0 | $2,264.02 | $113.22 | $-226.71 | 1 |
+| LYV | Live Nation Entertainment Inc | 0.4 | $69.03 | $167.29 | +$2.12 | 1 |
+| PDD |  | 10.0 | $781.30 | $92.53 | $-144.04 | unassigned |
 | PMGOLD.AX |  | 50.0 | $897.00 | $62.06 | $-2,206.18 | 3b |
-| SILJ |  | 25.0 | $578.75 | $32.27 | $-228.09 | unassigned |
-| SOFI |  | 50.0 | $730.75 | $19.01 | $-219.58 | unassigned |
-| UBER |  | 10.0 | $667.00 | $79.08 | $-123.76 | unassigned |
-| V | Visa Inc (Class A) | 0.1002 | $40.87 | $318.47 | +$8.96 | 1 |
+| SILJ |  | 25.0 | $583.00 | $32.27 | $-223.84 | unassigned |
+| SOFI |  | 50.0 | $723.00 | $19.01 | $-227.33 | unassigned |
+| UBER |  | 10.0 | $661.30 | $79.08 | $-129.46 | unassigned |
+| V | Visa Inc (Class A) | 0.1002 | $40.50 | $318.47 | +$8.59 | 1 |
 
-Last auto-generated: 2026-10-26.
+Last auto-generated: 2026-10-27.
