@@ -137,6 +137,7 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 | CF | 4 | Cyclical commodity compounder, -76.7pct/-54.1pct historical drawdowns, strong fundamentals |
 | CRWD | 4 | Already proved a fast full recovery -- 2024 outage, -40pct then fully recovered within months |
 | INTC | 4 | Turnaround + historically severe amplifier, highest risk/reward in semis |
+| KO | 4 | Genuinely defensive Dividend King -- cushions crashes instead of amplifying them (2022 -16.7pct vs S&P -25pct), unlike the rest of the A-Team |
 | LULU | 4 | Most extreme drawdowns in the group (-92pct/-47pct/-46pct) but cheap now, opportunity signal fired 3x |
 | META | 4 | 2022 crash to AI-earnings all-time highs -- archetypal sharp-bottom bounce |
 | NET | 4 | -77pct in 2022, earliest-stage growth runway of the three new adds |
