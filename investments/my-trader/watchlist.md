@@ -48,8 +48,8 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 | Ticker | Bucket(s) | Why |
 |--------|-----------|-----|
 | BATT | unassigned | Alternative Energy Transport theme, 5% allocation |
+| DRIV | unassigned | Alternative Energy Transport theme, 30 percent allocation |
 | DTG.DE | unassigned | Alternative Energy Transport theme, 15% allocation |
-| HAIL | unassigned | Alternative Energy Transport theme, 30% allocation |
 | KARS | unassigned | Alternative Energy Transport theme, 35% allocation |
 | VOLV-B.ST | 4 | Alternative Energy Transport theme, 15% allocation (also Bucket 4 crash-discount) |
 
@@ -68,6 +68,7 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 | DG | Dollar General | stock | 1 | 1.86% | +55% | Not yet discussed. Dollar-store category |
 | DLTR | Dollar Tree | stock | 1 | — | +32% | Not yet discussed. Dollar-store category |
 | DOLLARAMA | Dollarama Inc | stock | 1 | — | — | Not yet discussed. Dollar-store category — "taking over reject shop" |
+| DRIV | iShares Self-Driving EV and Tech ETF | etf | unassigned | — | — | Alternative Energy Transport theme, 30 percent allocation |
 | DTG.DE | Daimler Truck Holding AG | stock | unassigned | — | — | Alternative Energy Transport theme, 15% allocation |
 | EQT | EQT Corporation | stock | unassigned | — | — | Rick Rule holds this. PE 12.0 (cheap), dividend growing +4.4%, low leverage -- but current ratio 0.67 flags a real liquidity strain. Opportunity signal suppressed by that flag per tool's own gating rule. |
 | FIVE | Five Below | stock | 1 | — | +306% | Not yet discussed. Dollar-store category |
@@ -76,7 +77,6 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 | GOLD | Barrick Gold Corp | stock | 2 | 2.07% | +534% | Not yet discussed. Individual gold miner |
 | GOOG | Alphabet Inc (Class C) | stock | unassigned | — | — | Class C, no voting rights - distinct from GOOGL already on watchlist |
 | GRID | First Trust NASDAQ Clean Edge Smart Grid ETF | etf | unassigned | 0.75% | +441% | Not yet discussed. Sector/thematic |
-| HAIL | SmartETFs Smart Transportation and Technology ETF | etf | unassigned | — | — | Alternative Energy Transport theme, 30% allocation |
 | ICLN | iShares Global Clean Energy ETF | etf | unassigned | — | — | Clean energy ETF, added 2026-09-24. |
 | IHI | iShares U.S. Medical Devices ETF | etf | unassigned | — | — | Medical devices ETF |
 | IVV | iShares Core S&P 500 ETF | etf | 1 | — | — | Core S&P 500 index ETF. Expense ratio 0.03% -- cheaper than SPY's 0.0945% for identical index exposure, matches VOO/VTI already in bucket 1. PE 26.9, no valuation/balance-sheet flags. Crash resilience roughly tracks the broad market by construction (2008 -55.2%, 2022 -24.5%) since it IS the broad market. Principles fit avg 35/100 -- expected and not meaningful for a diversified index fund (Buffett/Graham/Lynch/Fisher frameworks are built to grade single operating businesses, not baskets). |
