@@ -4,23 +4,23 @@ What this is: 14 historical market-crash warning markers, checked daily so an ea
 
 Auto-generated daily -- overwritten every run. Advisor notes only; no trade action is ever suggested here (see SOUL.md). Per-marker source: investments/my-trader/14-signals-crash-warning-handoff.md.
 
-## Run: 2026-10-28
+## Run: 2026-10-29
 
 ## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)
 Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 mega-cap constituents -- never hardcoded to a fixed ticker list.
 
 | Rank | Ticker | Sector | Market Cap |
 |------|--------|--------|------------|
-| 1 | NVDA | Technology | $5263B |
-| 2 | AAPL | Technology | $5066B |
-| 3 | MSFT | Technology | $3945B |
-| 4 | AMZN | Consumer Discretionary | $2730B |
-| 5 | AVGO | Technology | $1634B |
-| 6 | TSLA | Consumer Discretionary | $1611B |
-| 7 | LLY | Health Care | $1143B |
-| 8 | MU | Technology | $1051B |
-| 9 | WMT | Consumer Staples | $950B |
-| 10 | AMD | Technology | $915B |
+| 1 | NVDA | Technology | $5201B |
+| 2 | AAPL | Technology | $5018B |
+| 3 | MSFT | Technology | $3943B |
+| 4 | AMZN | Consumer Discretionary | $2746B |
+| 5 | AVGO | Technology | $1679B |
+| 6 | TSLA | Consumer Discretionary | $1598B |
+| 7 | LLY | Health Care | $1149B |
+| 8 | MU | Technology | $1112B |
+| 9 | WMT | Consumer Staples | $945B |
+| 10 | AMD | Technology | $944B |
 
 ## Markers
 
@@ -50,8 +50,8 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (WMT) | ok | WMT: Free Cash Flow $+14.9B, Capital Expenditure $26.6B (period ending 2026-01-31) |
 | 4 | Capex outruns cash flow (AMD) | ok | AMD: Free Cash Flow $+6.7B, Capital Expenditure $1.0B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.48T as of 2026-09-01, +31.4% YoY vs 2025-09-01 |
-| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 168 filing(s) in the trailing 30d vs 254 in the same window a year ago (0.66x); 424B4 (priced IPO): 22 filing(s) in the trailing 30d vs 48 in the same window a year ago (0.46x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.60 (z=0.31 vs trailing 67d mean 0.58) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 172 filing(s) in the trailing 30d vs 260 in the same window a year ago (0.66x); 424B4 (priced IPO): 22 filing(s) in the trailing 30d vs 49 in the same window a year ago (0.45x) |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.59 (z=0.16 vs trailing 68d mean 0.58) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (NVDA) | flag | NVDA: $1,867,951,168 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (AAPL) | flag | AAPL: $208,234,072 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (MSFT) | flag | MSFT: $100,274,637 sold vs $3,436,971 bought, trailing 365 days |
@@ -62,11 +62,11 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 8 | Insider selling (MU) | flag | MU: $246,511,451 sold vs $7,821,723 bought, trailing 365 days |
 | 8 | Insider selling (WMT) | flag | WMT: $2,946,762,004 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (AMD) | flag | AMD: $378,082,091 sold vs $0 bought, trailing 365 days |
-| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (110 day(s) away) -- ad-share content is not automatable, nothing to check yet |
-| 10 | Most-valuable-company milestone | flag | NVDA is the largest company in the current hot-sector watchlist ($5.26T, most recently crossed the $5.0T rung) |
+| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (109 day(s) away) -- ad-share content is not automatable, nothing to check yet |
+| 10 | Most-valuable-company milestone | flag | NVDA is the largest company in the current hot-sector watchlist ($5.20T, most recently crossed the $5.0T rung) |
 | 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
 | 12 | Credit turns in the hot sector while broad market stays calm (AAPL) | unknown | AAPL: bond CUSIP 037833EY2 found, but no live or manually-entered yield reading available -- run `record-bond-yield AAPL <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (AMZN) | unknown | AMZN: bond CUSIP 023135EA0 found, but no live or manually-entered yield reading available -- run `record-bond-yield AMZN <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (MU) | unknown | MU: bond CUSIP 595112CG6 found, but no live or manually-entered yield reading available -- run `record-bond-yield MU <yield_pct>` |
-| 13 | Funding markets start choking | ok | CP-Treasury spread (DCPN3M-DTB3) 0.00pp (z=-1.06 vs trailing 365d) |
-| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.30pp (as of 2026-10-26); 0 consecutive day(s) at/above 3.5pp (needs 21 to flag) -- WATCH: within 0.3pp of the flag threshold (WATCH) |
+| 13 | Funding markets start choking | ok | CP-Treasury spread (DCPN3M-DTB3) 0.00pp (z=-1.05 vs trailing 365d) |
+| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.18pp (as of 2026-10-27); 0 consecutive day(s) at/above 3.5pp (needs 21 to flag) |
