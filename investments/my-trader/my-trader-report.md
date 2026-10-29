@@ -19,9 +19,9 @@ Bottom line: Nothing notable this run.
 - OPEN ALERT (earnings_watch_guidance, since 2026-09-17): First Majestic’s most recent reported quarter showed a meaningful consensus miss, and while 2026 production guidance was raised, management also raised AISC and capital-spending guidance, which could pressure margins/free cash flow versus expectations. I did not find demand-softening commentary or monthly operating metrics indicating a slowdown. (Q2 2026 adjusted EPS missed consensus: $0.21 vs. $0.25, and revenue missed: about $415.5M vs. $496M consensus (MarketBeat/TipRanks).; Company raised 2026 production guidance, but also raised 2026 AISC guidance to $27.69-$28.77/AgEq oz from $26.15-$27.91 and lifted capex guidance 47% to $318M-$344M from $213M-$236M (First Majestic July 2026 release: https://firstmajestic.com/investors/news-releases/first-majestic-reports-q2-2026-production-results-announces-updated-2026-production-and-cost-guidance-and-q2-conference-call-details).; Q2 costs rose year over year: cash costs +20% and AISC +22%; management cited Mexican peso strength, higher contractor/haulage/maintenance/reagent costs, royalties/taxes, and temporary disruptions at Los Gatos and San Dimas, though the disruptions were described as resolved (SEC Q2 release: https://www.sec.gov/Archives/edgar/data/1308648/000162828026050781/ag-2026q2financialnrxex995.htm).)
 - [info] company_profile: First Majestic Silver Corp. engages in the acquisition, exploration, development, and production of mineral properties in North America.
 - [ok] dividend: Dividend grew 150.0% vs prior 12 months
-- [ok] valuation: PE 22.6 within normal range -- lower is generally cheaper (5/10 — fair)
+- [ok] valuation: PE 22.3 within normal range -- lower is generally cheaper (6/10 — good)
 - [ok] balance_sheet: Debt/Equity 9.8 -- lower is generally safer (9/10 — very good), Current Ratio 2.57 -- higher is generally safer, up to a point (10/10 — excellent) — within thresholds
-- [info] fx: USD-denominated; AUD/USD 3mo move: +1.0%
+- [info] fx: USD-denominated; AUD/USD 3mo move: +1.2%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Basic Materials is 13.9% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: No standout positive signal this run
@@ -49,25 +49,25 @@ Open alerts: none
 - [unknown] going_concern: No market data available
 
 **CYL.AX** (None, No strategic bucket assigned yet)
-200.0 @ avg $5.86 | now $5.19 | P&L $-133.05 (-11.4%) | 10.0% of tracked portfolio
+200.0 @ avg $5.86 | now $5.28 | P&L $-115.05 (-9.8%) | 10.2% of tracked portfolio
 Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - OPEN ALERT (earnings_watch_guidance, since 2026-10-25): Management’s September commentary indicates timing risk to the production growth ramp, potentially weakening near-term earnings versus the earlier trajectory. FY26 profit also missed one broker’s estimate, although recent quarterly production strengthened. (At the 28 September 2026 Mining Forum, the CEO targeted 200,000oz annual production over the next two years and cautioned that development timing would move around, indicating risk of a slower ramp: [management presentation](https://americas.miningforum.com/webcasts/2026/catalyst-metals-cyl).; FNArena’s 2 September broker summary reported FY26 NPAT of A$171m, 12% below Canaccord Genuity’s estimate because of higher depreciation; this was a full-year miss, not a verified quarterly consensus miss: [broker summary](https://fnarena.com/stock-price-analysis/gold-silver/CYL/).; Offsetting evidence: June-quarter production reached a record 31,886oz, and FY26 production met guidance. No fresh guidance cut or monthly/weekly operating slowdown was verified: [quarterly report summary](https://www.fool.com.au/2026/07/31/catalyst-metals-posts-record-gold-output-drives-strong-cash-growth/).)
 - OPEN ALERT (earnings_watch_trend, since 2026-10-08): EPS estimate down 3.0% over the trailing 30 days (1.01 -> 0.98); corroborating: 4 analyst downward revisions vs 1 upward in the last 30 days
 - [info] company_profile: Catalyst Metals Limited engages in the mineral exploration and evaluation in Australia. The company explores for gold and silver deposits.
 - [info] dividend: No dividend history
-- [ok] valuation: PE 7.9 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
+- [ok] valuation: PE 8.0 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
 - [ok] balance_sheet: Debt/Equity 3.7 -- lower is generally safer (10/10 — excellent), Current Ratio 3.02 -- higher is generally safer, up to a point (10/10 — excellent) — within thresholds
 - [info] fx: AUD-denominated, no FX exposure
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Basic Materials is 13.9% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
-- [interesting] opportunity: Graham [PE 7.9 x P/B 1.93 = 15.2, below 22.5]; Buffett/Smith [ROE 29.2% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -11.0% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
-- [info] price_action: 1mo -8.3%, 3mo -11.0%
+- [interesting] opportunity: Graham [PE 8.0 x P/B 1.97 = 15.7, below 22.5]; Buffett/Smith [ROE 29.2% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
+- [info] price_action: 1mo -10.1%, 3mo -9.5%
 - [info] crash_resilience: 2008 financial crisis -85.0%; Dec 2018 correction -15.4%; COVID crash (2020) -40.1%; 2022 bear market -49.8%
-- [info] technical_levels: Price $5.19 vs 50DMA $6.07 (below, -14.5%); 150DMA $5.90 (below, -12.1%); 200DMA $6.36 (below, -18.3%)
+- [info] technical_levels: Price $5.28 vs 50DMA $6.05 (below, -12.8%); 150DMA $5.90 (below, -10.6%); 200DMA $6.34 (below, -16.8%)
 - [ok] going_concern: Free Cash Flow positive ($14M) -- cash-generative, no bankruptcy/cash-runway risk from this signal
 
 **GOLD.AX** (None, No strategic bucket assigned yet)
-20.0 @ avg $59.31 | now $52.39 | P&L $-138.45 (-11.7%) | 10.1% of tracked portfolio
+20.0 @ avg $59.31 | now $52.32 | P&L $-139.85 (-11.8%) | 10.1% of tracked portfolio
 Bottom line: Nothing notable this run.
 Open alerts: none
 - [unknown] company_profile: No business summary available
@@ -78,13 +78,13 @@ Open alerts: none
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: No sector data for candidate
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: No standout positive signal this run
-- [info] price_action: 1mo -3.8%, 3mo -1.3%
+- [info] price_action: 1mo -3.4%, 3mo -1.3%
 - [info] crash_resilience: 2008 financial crisis -7.2%; Dec 2018 correction -0.2%; COVID crash (2020) -1.6%; 2022 bear market -13.4%
-- [info] technical_levels: Price $52.39 vs 50DMA $55.42 (below, -5.5%); 150DMA $56.34 (below, -7.0%); 200DMA $58.49 (below, -10.4%)
+- [info] technical_levels: Price $52.32 vs 50DMA $55.31 (below, -5.4%); 150DMA $56.29 (below, -7.0%); 200DMA $58.44 (below, -10.5%)
 - [unknown] going_concern: Total Cash and/or Free Cash Flow unavailable -- cannot assess bankruptcy/cash-runway risk
 
 **GXLD.AX** (None, No strategic bucket assigned yet)
-25.0 @ avg $61.82 | now $57.25 | P&L $-114.31 (-7.4%) | 13.8% of tracked portfolio
+25.0 @ avg $61.82 | now $57.10 | P&L $-118.06 (-7.6%) | 13.8% of tracked portfolio
 Bottom line: Nothing notable this run.
 Open alerts: none
 - [unknown] company_profile: No business summary available
@@ -96,9 +96,9 @@ Open alerts: none
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [info] etf_mechanics: Expense ratio unavailable, AUM $768,494,208
 - [ok] opportunity: No standout positive signal this run
-- [info] price_action: 1mo -3.6%, 3mo -1.1%
+- [info] price_action: 1mo -3.2%, 3mo -1.2%
 - [info] crash_resilience: No historical crash-window data available (likely IPO'd after all tracked windows)
-- [info] technical_levels: Price $57.25 vs 50DMA $60.43 (below, -5.3%); 150DMA $61.40 (below, -6.8%); 200DMA $63.74 (below, -10.2%)
+- [info] technical_levels: Price $57.10 vs 50DMA $60.32 (below, -5.3%); 150DMA $61.34 (below, -6.9%); 200DMA $63.68 (below, -10.3%)
 - [unknown] going_concern: Total Cash and/or Free Cash Flow unavailable -- cannot assess bankruptcy/cash-runway risk
 
 **LLY** (Eli Lilly & Co, Long-term hold — never timed, dips are expected and not a reason to act alone)
@@ -109,9 +109,9 @@ Bottom line: 2 flag(s) active (valuation, balance_sheet) — worth a look.
 - OPEN ALERT (valuation, since 2026-09-28): PE 39.7 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
 - [info] company_profile: Eli Lilly and Company discovers, develops, manufactures, and markets human pharmaceutical products in the United States, Europe, China, Japan, and internationally. The company offers cardiometabolic health products, including Basaglar, Humalog, Humalog Mix 75/25, Humalog U-100, Humalog U-200, Humalog Mix 50/50, insulin lispro, insulin lispro protamine, insulin lispro mix 75/25, Humulin, Humulin...
 - [ok] dividend: Dividend grew 15.3% vs prior 12 months
-- [flag] valuation: PE 43.2 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
+- [flag] valuation: PE 43.0 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
 - [flag] balance_sheet: Debt/Equity 162.1 >= 150.0 -- lower is generally safer (0/10 — poor)
-- [info] fx: USD-denominated; AUD/USD 3mo move: +1.0%
+- [info] fx: USD-denominated; AUD/USD 3mo move: +1.2%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Healthcare is 0.0% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: Active risk flag(s) present elsewhere this run — not calling this an opportunity regardless of price or valuation
@@ -126,12 +126,12 @@ Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - OPEN ALERT (earnings_watch_guidance, since 2026-09-17): Material deterioration signals found: lululemon’s Sep. 3, 2026 Q2 release cut FY2026 revenue/EPS guidance well below prior guidance, reported a revenue miss, and showed worsening comps/traffic pressure. Management commentary pointed to pressured traffic, negative conversion, inconsistent product launches, weaker brand sentiment in North America/China, and Q3 revenue expected down 10%-11%. (FY2026 revenue guide cut to $10.35B-$10.50B from $11.00B-$11.15B; EPS guide cut to $9.48-$9.73 from $10.95-$11.15. Source: https://corporate.lululemon.com/newsroom/press-releases/2026/09-03-2026-210528733; Q2 revenue of about $2.42B missed consensus of about $2.46B; comparable sales fell 9% reported/10% constant currency, with Americas comps down 12%. Sources: https://corporate.lululemon.com/newsroom/press-releases/2026/09-03-2026-210528733 and https://www.marketbeat.com/earnings/reports/2026-9-3-lululemon-athletica-inc-stock/; Management said Q3 began slowly and guided Q3 revenue down 10%-11%; commentary cited traffic pressure, negative conversion, inconsistent product response, China brand-sentiment issues, leggings down about 20%, and accessories down 13%. Source: https://www.fool.com/earnings/call-transcripts/2026/09/09/lululemon-lulu-q2-2026-earnings-call-transcript/)
 - [info] company_profile: lululemon athletica inc., together with its subsidiaries, designs, distributes, and retails technical athletic apparel, footwear, and accessories for women and men under the lululemon brand in the United States, Canada, Mexico, China, Hong Kong, Taiwan, Macau, Greece, and internationally. It offers pants, shorts, tops, and jackets for athletic activities, such as yoga, running, training, and ot...
 - [info] dividend: No dividend history
-- [ok] valuation: PE 8.7 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
+- [ok] valuation: PE 8.6 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
 - [ok] balance_sheet: Debt/Equity 44.7 -- lower is generally safer (7/10 — good), Current Ratio 2.19 -- higher is generally safer, up to a point (10/10 — excellent) — within thresholds
-- [info] fx: USD-denominated; AUD/USD 3mo move: +1.0%
+- [info] fx: USD-denominated; AUD/USD 3mo move: +1.2%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Consumer Cyclical is 23.6% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
-- [interesting] opportunity: Graham [PE 8.7 x P/B 2.45 = 21.2, below 22.5]; Buffett/Smith [ROE 30.9% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -11.6% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
+- [interesting] opportunity: Graham [PE 8.6 x P/B 2.45 = 21.1, below 22.5]; Buffett/Smith [ROE 30.9% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -11.6% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
 - [info] price_action: 1mo +8.6%, 3mo -11.6%
 - [info] crash_resilience: 2008 financial crisis -92.3%; Dec 2018 correction -30.3%; COVID crash (2020) -47.3%; 2022 bear market -46.1%
 - [info] technical_levels: Price $105.22 vs 50DMA $103.41 (above, +1.8%); 150DMA $120.62 (below, -12.8%); 200DMA $134.78 (below, -21.9%)
@@ -146,7 +146,7 @@ Bottom line: 2 flag(s) active (valuation, balance_sheet) — worth a look.
 - [info] dividend: No dividend history
 - [flag] valuation: PE 90.7 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
 - [flag] balance_sheet: Debt/Equity 620.2 >= 150.0 -- lower is generally safer (0/10 — poor); Current Ratio 0.85 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
-- [info] fx: USD-denominated; AUD/USD 3mo move: +1.0%
+- [info] fx: USD-denominated; AUD/USD 3mo move: +1.2%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Communication Services is 0.5% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: Active risk flag(s) present elsewhere this run — not calling this an opportunity regardless of price or valuation
@@ -161,19 +161,19 @@ Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - OPEN ALERT (earnings_watch_guidance, since 2026-09-17): PDD’s most recent quarter showed a revenue miss, profit decline, and management commentary pointing to heavier ecosystem investments, intense competition, regulatory/trade challenges, and lower cross-border fulfillment efficiency/higher costs in affected markets. I found no company guidance cut or published monthly operating metric slowdown, but the Q2 miss and commentary are material deterioration signals. (Q2 2026 revenue of RMB112.4B/$16.6B missed consensus estimates, while non-GAAP EPS beat.; Q2 net income fell 12% YoY and non-GAAP net income fell 13% YoY despite 8% revenue growth; non-GAAP operating margin narrowed to 26% from 27%.; Management said competition remained intense and that platform/ecosystem investments partly weighed on performance.; Management said the first-party brand rollout over the prior six months was slower than expected due to external factors.; Management noted evolving trade/regulatory conditions and said affected cross-border orders face lower fulfillment efficiency and higher costs.)
 - [info] company_profile: PDD Holdings Inc., a multinational commerce group that owns and operates a portfolio of businesses. The company operates Pinduoduo platform, which provides various product categories and interactive shopping experiences; and Temu, an online platform, which enables merchants to streamline their manufacturing and commercial operations.
 - [info] dividend: No dividend history
-- [ok] valuation: PE 8.7 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
+- [ok] valuation: PE 8.8 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
 - [ok] balance_sheet: Debt/Equity 1.1 -- lower is generally safer (10/10 — excellent), Current Ratio 2.62 -- higher is generally safer, up to a point (10/10 — excellent) — within thresholds
-- [info] fx: USD-denominated; AUD/USD 3mo move: +1.0%
+- [info] fx: USD-denominated; AUD/USD 3mo move: +1.2%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Consumer Cyclical is 23.6% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
-- [interesting] opportunity: Graham [PE 8.7 x P/B 1.63 = 14.2, below 22.5]; Lynch [PEG 0.68 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 22.7% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -12.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (4 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
+- [interesting] opportunity: Graham [PE 8.8 x P/B 1.63 = 14.3, below 22.5]; Lynch [PEG 0.68 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 22.7% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -12.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (4 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
 - [info] price_action: 1mo -0.0%, 3mo -12.3%
 - [info] crash_resilience: Dec 2018 correction -42.8%; COVID crash (2020) +0.0%; 2022 bear market -74.6%
-- [info] technical_levels: Price $77.46 vs 50DMA $80.73 (below, -4.0%); 150DMA $87.35 (below, -11.3%); 200DMA $91.37 (below, -15.2%)
+- [info] technical_levels: Price $77.47 vs 50DMA $80.73 (below, -4.0%); 150DMA $87.35 (below, -11.3%); 200DMA $91.37 (below, -15.2%)
 - [ok] going_concern: Free Cash Flow positive ($74,635M) -- cash-generative, no bankruptcy/cash-runway risk from this signal
 
 **PMGOLD.AX** (None, Gold tactical — timed sleeve, evaluate against your entry thesis)
-50.0 @ avg $62.06 | now $17.94 | P&L $-2,206.18 (-71.1%) | 8.7% of tracked portfolio
+50.0 @ avg $62.06 | now $17.94 | P&L $-2,206.18 (-71.1%) | 8.6% of tracked portfolio
 Bottom line: Nothing notable this run.
 Open alerts: none
 - [unknown] company_profile: No business summary available
@@ -185,7 +185,7 @@ Open alerts: none
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [info] etf_mechanics: Expense ratio unavailable, AUM $2,219,378,944
 - [ok] opportunity: No standout positive signal this run
-- [info] price_action: 1mo -3.6%, 3mo -1.2%
+- [info] price_action: 1mo -3.1%, 3mo -1.0%
 - [info] crash_resilience: Dec 2018 correction +0.0%; COVID crash (2020) +0.0%; 2022 bear market -13.1%
 - [info] technical_levels: Price $57.02 vs 50DMA $60.23 (below, -5.3%); 150DMA $61.19 (below, -6.8%); 200DMA $63.51 (below, -10.2%)
 - [unknown] going_concern: Total Cash and/or Free Cash Flow unavailable -- cannot assess bankruptcy/cash-runway risk
@@ -199,7 +199,7 @@ Bottom line: 1 flag(s) active (dividend) — worth a look.
 - [flag] dividend: Dividend declined -23.2% vs prior 12 months
 - [ok] valuation: PE 16.3 within normal range -- lower is generally cheaper (8/10 — very good)
 - [unknown] balance_sheet: No balance sheet data available
-- [info] fx: USD-denominated; AUD/USD 3mo move: +1.0%
+- [info] fx: USD-denominated; AUD/USD 3mo move: +1.2%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: No sector data for candidate
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [info] etf_mechanics: Expense ratio 0.69%, AUM $3,552,283,904 — top holdings: Hecla Mining Co (10.5%), Coeur Mining Inc (10.3%), First Majestic Silver Corp (10.2%); dominant sector: Basic Materials (100%)
@@ -217,10 +217,10 @@ Bottom line: 1 flag(s) active (going_concern) — worth a look.
 - [info] dividend: No dividend history
 - [ok] valuation: PE 31.2 within normal range -- lower is generally cheaper (2/10 — below average)
 - [ok] balance_sheet: Debt/Equity 35.2 -- lower is generally safer (8/10 — very good), Current Ratio 1.09 -- higher is generally safer, up to a point (1/10 — poor) — within thresholds
-- [info] fx: USD-denominated; AUD/USD 3mo move: +1.0%
+- [info] fx: USD-denominated; AUD/USD 3mo move: +1.2%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Financial Services is 6.8% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
-- [interesting] opportunity: Lynch [PEG 0.51 at/below 1.0 — growth at a reasonable price] (you already hold this — reads as an add-to-position signal, not a new-buy signal)
+- [interesting] opportunity: Lynch [PEG 0.58 at/below 1.0 — growth at a reasonable price] (you already hold this — reads as an add-to-position signal, not a new-buy signal)
 - [info] price_action: 1mo +7.7%, 3mo +12.4%
 - [info] crash_resilience: 2022 bear market -81.5%
 - [info] technical_levels: Price $17.14 vs 50DMA $16.62 (above, +3.2%); 150DMA $16.97 (above, +1.0%); 200DMA $17.88 (below, -4.2%)
@@ -233,9 +233,9 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - OPEN ALERT (balance_sheet, since 2026-09-28): Current Ratio 0.84 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
 - [info] company_profile: Uber Technologies, Inc. develops and operates proprietary technology applications in the United States, Canada, Latin America, Europe, the Middle East, Africa, and the Asia Pacific.
 - [info] dividend: No dividend history
-- [ok] valuation: PE 14.3 within normal range -- lower is generally cheaper (9/10 — very good)
+- [ok] valuation: PE 14.4 within normal range -- lower is generally cheaper (9/10 — very good)
 - [flag] balance_sheet: Current Ratio 0.84 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
-- [info] fx: USD-denominated; AUD/USD 3mo move: +1.0%
+- [info] fx: USD-denominated; AUD/USD 3mo move: +1.2%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Technology is 5.5% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: Active risk flag(s) present elsewhere this run — not calling this an opportunity regardless of price or valuation
@@ -247,13 +247,12 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 **V** (Visa Inc (Class A), Long-term hold — never timed, dips are expected and not a reason to act alone)
 0.1002 @ avg $318.47 | now $400.60 | P&L +$8.23 (+25.8%) | 0.4% of tracked portfolio
 Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
-- OPEN ALERT (earnings_watch_guidance, since 2026-10-28): Visa’s October 27 FY2027 outlook was reported as weaker than expected, with adjusted EPS growth guided to low double digits–low teens. Management flagged faster client-incentive growth and foreign-exchange volatility headwinds, although current payment activity remains strong. (FY2027 outlook signals slower earnings growth; Q4 adjusted EPS of $3.48 exceeded $3.44 consensus, so the latest quarter was not an earnings miss. [Results and outlook](https://sg.finance.yahoo.com/news/visa-shares-fall-weak-2027-204231023.html/); Management expects renewals covering approximately 25% of payment volume to accelerate incentive growth in FY2027; lower currency volatility also creates a revenue headwind, with Q2 expected to have the weakest revenue growth. [Management commentary](https://www.benzinga.com/news/26/10/62641564/visa-q4-2026-earnings-call-transcript); No operating slowdown evident through October 21: U.S. payment volume grew 10%, cross-border volume excluding intra-Europe grew 15%, and processed transactions grew 10%. [Operating update](https://www.benzinga.com/news/26/10/62641564/visa-q4-2026-earnings-call-transcript))
 - OPEN ALERT (balance_sheet, since 2026-09-28): Current Ratio 0.98 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
 - [info] company_profile: Visa Inc. operates as a payment technology company in the United States and internationally.
 - [ok] dividend: Dividend grew 13.6% vs prior 12 months
-- [ok] valuation: PE 32.5 within normal range -- lower is generally cheaper (1/10 — poor)
+- [ok] valuation: PE 32.6 within normal range -- lower is generally cheaper (1/10 — poor)
 - [flag] balance_sheet: Current Ratio 0.98 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
-- [info] fx: USD-denominated; AUD/USD 3mo move: +1.0%
+- [info] fx: USD-denominated; AUD/USD 3mo move: +1.2%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Financial Services is 6.8% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: Active risk flag(s) present elsewhere this run — not calling this an opportunity regardless of price or valuation
@@ -263,11 +262,10 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - [ok] going_concern: Free Cash Flow positive ($20,404M) -- cash-generative, no bankruptcy/cash-runway risk from this signal
 
 ### New Alerts This Run
-- **DRIV** (watchlist) — dividend: Dividend declined -52.6% vs prior 12 months
+No new material changes.
 
 ### All Open Alerts
 - **DRIV** (watchlist) — dividend: Dividend declined -52.6% vs prior 12 months (first flagged 2026-10-28)
-- **V** (holdings) — earnings_watch_guidance: Visa’s October 27 FY2027 outlook was reported as weaker than expected, with adjusted EPS growth guided to low double digits–low teens. Management flagged faster client-incentive growth and foreign-exchange volatility headwinds, although current payment activity remains strong. (FY2027 outlook signals slower earnings growth; Q4 adjusted EPS of $3.48 exceeded $3.44 consensus, so the latest quarter was not an earnings miss. [Results and outlook](https://sg.finance.yahoo.com/news/visa-shares-fall-weak-2027-204231023.html/); Management expects renewals covering approximately 25% of payment volume to accelerate incentive growth in FY2027; lower currency volatility also creates a revenue headwind, with Q2 expected to have the weakest revenue growth. [Management commentary](https://www.benzinga.com/news/26/10/62641564/visa-q4-2026-earnings-call-transcript); No operating slowdown evident through October 21: U.S. payment volume grew 10%, cross-border volume excluding intra-Europe grew 15%, and processed transactions grew 10%. [Operating update](https://www.benzinga.com/news/26/10/62641564/visa-q4-2026-earnings-call-transcript)) (first flagged 2026-10-28)
 - **ROSY.TO** (watchlist) — etf_mechanics: AUM $17,173,188 below $50,000,000 closure-risk threshold (0/10 — poor) (first flagged 2026-10-27)
 - **ARKQ** (watchlist) — valuation: PE 35.6 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-10-27)
 - **UBER** (holdings) — earnings_watch_guidance: Uber’s August 5 Q3 outlook signaled modest earnings downside versus then-current analyst expectations, while Q2 revenue narrowly missed estimates. No subsequent guidance cut or credible monthly/weekly operating slowdown was identified through October 27. (Q3 non-GAAP EPS guidance of $0.84–$0.88 fell below contemporaneous consensus at the midpoint: [earnings outlook report](https://ca.investing.com/news/earnings/uber-currentquarter-earnings-guidance-misses-estimates-shares-dip-premarket-4777046).; Q2 revenue of $14.19 billion missed $14.24 billion consensus; adjusted EPS of $0.81 beat $0.80. Q3 bookings guidance midpoint of $59.25 billion slightly missed $59.37 billion consensus: [MT Newswires](https://ca.finance.yahoo.com/news/uber-apos-shares-fall-second-163033349.html).; Management reported strengthening demand and expanding profitability, limiting evidence of broader deterioration: [Q2 prepared remarks](https://investor.uber.com/files/doc_earnings/2026/q2/transcript/Uber-Q2-26-Prepared-Remarks.pdf).) (first flagged 2026-10-27)
@@ -343,38 +341,39 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **MACRO** (macro) — uk_cpi: UK headline CPI 3.1% YoY (reference month 2026-08-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone (first flagged 2026-09-16)
 
 ### Watchlist Opportunities (this run)
-- **3750.HK** — Buffett/Smith [ROE 24.4% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -42.5% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
+- **3750.HK** — Buffett/Smith [ROE 24.4% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -45.2% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **AEM** — Buffett/Smith [ROE 23.0% at/above 15.0% (10/10 — excellent), not richly valued]
-- **ASML** — Crash-discount fit [ROE 65.6% at/above 15.0% (10/10 — excellent), but currently rich (PE 40.9) — quality worth watching for a crash-driven discount rather than buying at today's price]
+- **ASML** — Crash-discount fit [ROE 65.6% at/above 15.0% (10/10 — excellent), but currently rich (PE 40.2) — quality worth watching for a crash-driven discount rather than buying at today's price]
 - **CEG** — Buffett/Smith [ROE 15.1% at/above 15.0% (10/10 — excellent), not richly valued]
 - **CF** — Graham [PE 8.9 at/below cheap threshold (12.0), P/B unavailable/implausible]; Lynch [PEG 0.52 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 29.9% at/above 15.0% (10/10 — excellent), not richly valued] (3 independent signals)
 - **COUR** — Graham [PE 5.7 x P/B 1.11 = 6.3, below 22.5]; Marks/Neilson [down -23.9% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **CPRT** — Buffett/Smith [ROE 16.2% at/above 15.0% (10/10 — excellent), not richly valued]
-- **DTG.DE** — Lynch [PEG 0.31 at/below 1.0 — growth at a reasonable price]; Marks/Neilson [down -15.6% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
+- **DTG.DE** — Lynch [PEG 0.30 at/below 1.0 — growth at a reasonable price]; Marks/Neilson [down -16.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **GOOG** — Buffett/Smith [ROE 48.7% at/above 15.0% (10/10 — excellent), not richly valued]
 - **GOOGL** — Buffett/Smith [ROE 48.7% at/above 15.0% (10/10 — excellent), not richly valued]
 - **GROW.L** — Graham [PE 10.0 x P/B 0.82 = 8.2, below 22.5]
-- **JNJ** — Crash-discount fit [ROE 20.0% at/above 15.0% (10/10 — excellent), but currently rich (PE 41.1) — quality worth watching for a crash-driven discount rather than buying at today's price]
+- **JNJ** — Crash-discount fit [ROE 20.0% at/above 15.0% (10/10 — excellent), but currently rich (PE 40.8) — quality worth watching for a crash-driven discount rather than buying at today's price]
 - **KO** — Buffett/Smith [ROE 40.6% at/above 15.0% (10/10 — excellent), not richly valued]
 - **KSPI** — Graham [PE 8.4 at/below cheap threshold (12.0), P/B unavailable/implausible]; Buffett/Smith [ROE 44.8% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
 - **LEN** — Graham [PE 15.8 x P/B 0.92 = 14.6, below 22.5]
-- **LULU** — Graham [PE 8.7 x P/B 2.45 = 21.2, below 22.5]; Buffett/Smith [ROE 30.9% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -11.6% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
-- **META** — Lynch [PEG 0.82 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 32.3% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
+- **LULU** — Graham [PE 8.6 x P/B 2.45 = 21.1, below 22.5]; Buffett/Smith [ROE 30.9% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -11.6% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
+- **META** — Lynch [PEG 0.81 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 32.3% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
 - **MLM** — Marks/Neilson [down -10.3% over 3 months with no other flags — possible overreaction, not a fundamental problem]
 - **MPL.AX** — Buffett/Smith [ROE 27.2% at/above 15.0% (10/10 — excellent), not richly valued]
 - **MSFT** — Buffett/Smith [ROE 34.0% at/above 15.0% (10/10 — excellent), not richly valued]
 - **MX** — Marks/Neilson [down -12.6% over 3 months with no other flags — possible overreaction, not a fundamental problem]
 - **NEM** — Buffett/Smith [ROE 27.3% at/above 15.0% (10/10 — excellent), not richly valued]
-- **NFLX** — Buffett/Smith [ROE 53.5% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -15.8% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
+- **NFLX** — Lynch [PEG 0.99 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 53.5% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -15.8% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
 - **NHF.AX** — Buffett/Smith [ROE 16.4% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -11.9% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
-- **NU** — Lynch [PEG 0.58 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 31.6% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -14.7% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
-- **PDD** — Graham [PE 8.7 x P/B 1.63 = 14.2, below 22.5]; Lynch [PEG 0.68 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 22.7% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -12.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (4 independent signals)
+- **NU** — Lynch [PEG 0.57 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 31.6% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -14.7% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
+- **PDD** — Graham [PE 8.8 x P/B 1.63 = 14.3, below 22.5]; Lynch [PEG 0.68 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 22.7% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -12.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (4 independent signals)
 - **QXO** — Graham [PE 20.3 x P/B 0.85 = 17.2, below 22.5]; Marks/Neilson [down -19.0% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **RACE** — Crash-discount fit [ROE 45.4% at/above 15.0% (10/10 — excellent), but currently rich (PE 36.5) — quality worth watching for a crash-driven discount rather than buying at today's price]
-- **SHOP** — Crash-discount fit [ROE 15.5% at/above 15.0% (10/10 — excellent), but currently rich (PE 113.7) — quality worth watching for a crash-driven discount rather than buying at today's price]
+- **SHOP** — Crash-discount fit [ROE 15.5% at/above 15.0% (10/10 — excellent), but currently rich (PE 112.1) — quality worth watching for a crash-driven discount rather than buying at today's price]
 - **SII.TO** — Buffett/Smith [ROE 27.3% at/above 15.0% (10/10 — excellent), not richly valued]
 - **VLGEA** — Graham [PE 12.2 x P/B 1.21 = 14.8, below 22.5]
 - **VRTX** — Buffett/Smith [ROE 23.5% at/above 15.0% (10/10 — excellent), not richly valued]
+- **XRO.AX** — Marks/Neilson [down -10.5% over 3 months with no other flags — possible overreaction, not a fundamental problem]
 
 ### Macro Indicators (this run)
 - **move_index** [ok] — MOVE index (bond market volatility) at 94.5, below the flag threshold
@@ -387,8 +386,8 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **us_cpi** [flag] — US headline CPI 3.72% YoY (as of 2026-09-01), outside the 1-3% tolerance band around the Fed's 2% target — inflation running hotter than the Fed's comfort zone
 - **uk_cpi** [flag] — UK headline CPI 3.5% YoY (reference month 2026-09-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone
 - **real_yields** [flag] — 10Y real yield +2.64% (as of 2026-10-27), above the 2.0% threshold -- elevated real yields historically pressure gold hard
-- **dollar_index** [ok] — Broad USD index 121.3, +0.5% over the past 30 days
-- **gold_trend** [info] — GC=F $4,081 (50DMA $4,319, 200DMA $4,526, -9.8% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $57.02 AUD; AUD/USD 3mo move +1.0%
+- **dollar_index** [ok] — Broad USD index 121.3, +0.2% over the past 30 days
+- **gold_trend** [info] — GC=F $4,061 (50DMA $4,319, 200DMA $4,526, -10.3% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $57.02 AUD; AUD/USD 3mo move +1.2%
 - **gold_silver_ratio** [ok] — Gold/silver ratio at 75.5
 - **vix** [ok] — VIX at 16.9, below the flag threshold
 
