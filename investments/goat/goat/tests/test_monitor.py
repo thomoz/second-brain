@@ -334,6 +334,26 @@ def test_run_sector_scan_stages_new_candidate_on_fresh_breakout(db_conn, monkeyp
     assert goat_db.get_goat_pending_candidate(db_conn, "XLK") is not None
 
 
+def test_run_sector_scan_clears_never_reviewed_candidate_from_previous_run(db_conn, monkeypatch):
+    """Added 2026-10-29 alongside the restage fix above -- the clear is scoped to this
+    source only, mirroring dma_breakout_scan's own version of this test."""
+    goat_db.insert_goat_pending_candidate(
+        db_conn, ticker="PRIOR_RUN", sector_label="Technology", signal_detail="old",
+        source="goat_sector_rotation",
+    )
+    goat_db.insert_goat_pending_candidate(
+        db_conn, ticker="OTHERSCAN", sector_label="Technology", signal_detail="old",
+        source="goat_industry_rotation",
+    )
+    _patch_sector_universe(monkeypatch)
+    _patch_sector_fetch(monkeypatch, breakout_ticker="NONE")
+
+    monitor.run_sector_scan(db_conn)
+
+    assert goat_db.get_goat_pending_candidate(db_conn, "PRIOR_RUN") is None
+    assert goat_db.get_goat_pending_candidate(db_conn, "OTHERSCAN") is not None
+
+
 def test_run_sector_scan_skips_ticker_already_a_holding(db_conn, monkeypatch):
     _patch_sector_universe(monkeypatch)
     _patch_sector_fetch(monkeypatch)
@@ -360,13 +380,20 @@ def test_run_sector_scan_skips_ticker_already_in_watchlist(db_conn, monkeypatch)
     assert goat_db.get_goat_pending_candidate(db_conn, "XLK") is None
 
 
-def test_run_sector_scan_stays_quiet_on_repeat_run(db_conn, monkeypatch):
+def test_run_sector_scan_restages_same_ticker_on_repeat_run_without_duplicating(db_conn, monkeypatch):
+    """Changed 2026-10-29, matching dma_breakout_scan's 2026-10-20 fresh-start-every-run
+    fix: a ticker that's still genuinely interesting gets re-staged each run (cleared and
+    reinserted, not suppressed as "already pending from last time") -- but never
+    duplicated. Without this, a never-reviewed candidate's stale row permanently blocks
+    get_goat_pending_candidate's dedup, silently swallowing any later GENUINELY NEW
+    breakout on the same ticker (confirmed live on PHO 2026-10-29)."""
     _patch_sector_universe(monkeypatch)
     _patch_sector_fetch(monkeypatch)
 
     monitor.run_sector_scan(db_conn)
     result = monitor.run_sector_scan(db_conn)
-    assert result["new_candidates"] == []
+    assert len(result["new_candidates"]) == 1
+    assert result["new_candidates"][0]["ticker"] == "XLK"
     assert len(result["pending_candidates"]) == 1
 
 
@@ -563,13 +590,36 @@ def test_run_industry_scan_stages_new_candidate_on_fresh_breakout(db_conn, monke
     assert "ITA" in result["heartbeat_gate"]
 
 
-def test_run_industry_scan_stays_quiet_on_repeat_run(db_conn, monkeypatch):
+def test_run_industry_scan_clears_never_reviewed_candidate_from_previous_run(db_conn, monkeypatch):
+    """Added 2026-10-29 -- see test_run_sector_scan_clears_never_reviewed_candidate_
+    from_previous_run's docstring for the full rationale (identical fix, industry twin)."""
+    goat_db.insert_goat_pending_candidate(
+        db_conn, ticker="PRIOR_RUN", sector_label="Aerospace & Defense", signal_detail="old",
+        source="goat_industry_rotation",
+    )
+    goat_db.insert_goat_pending_candidate(
+        db_conn, ticker="OTHERSCAN", sector_label="Technology", signal_detail="old",
+        source="goat_sector_rotation",
+    )
+    _patch_industry_universe(monkeypatch)
+    _patch_industry_fetch(monkeypatch, breakout_ticker="NONE")
+
+    monitor.run_industry_scan(db_conn)
+
+    assert goat_db.get_goat_pending_candidate(db_conn, "PRIOR_RUN") is None
+    assert goat_db.get_goat_pending_candidate(db_conn, "OTHERSCAN") is not None
+
+
+def test_run_industry_scan_restages_same_ticker_on_repeat_run_without_duplicating(db_conn, monkeypatch):
+    """Changed 2026-10-29 -- see test_run_sector_scan_restages_same_ticker_on_repeat_run_
+    without_duplicating's docstring for the full rationale (identical fix, industry twin)."""
     _patch_industry_universe(monkeypatch)
     _patch_industry_fetch(monkeypatch)
 
     monitor.run_industry_scan(db_conn)
     result = monitor.run_industry_scan(db_conn)
-    assert result["new_candidates"] == []
+    assert len(result["new_candidates"]) == 1
+    assert result["new_candidates"][0]["ticker"] == "ITA"
     assert len(result["pending_candidates"]) == 1
 
 

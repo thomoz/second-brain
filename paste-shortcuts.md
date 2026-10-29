@@ -3,7 +3,7 @@
 
 claude --dangerously-skip-permissions
 
-go ahead and create the structured plan, asking me questions if you need to, for the handoff file 
+go ahead and create the structured plan, asking me questions if you need to, for the handoff file .investments/goat/dma-breakout-industry-filter-handoff.md
 
 
 ready for execution: .agent\plans\volume-spike-earnings-scanner.md
@@ -14,8 +14,8 @@ Market Wizards sector rotation tool (paste as one block into Powershell):
 Set-Location "O:\AI\Dynamous\Courses\second-brain-workshop\investments\market_wizards_flow"
 python -m streamlit run app.py
 
-Rotation Watch prompt:
-refresh the Rotation Watch dashboard artifact
+Rotation Watch (updated by roughly 9am Sydney time):
+O:/AI/Dynamous/Courses/second-brain-workshop/investments/goat/rotation-watch.html
 
 
 ## Market Hours:

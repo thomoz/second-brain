@@ -280,6 +280,20 @@ def capture_rotation_snapshot(
 
 
 def run_sector_scan(conn: sqlite3.Connection) -> dict[str, Any]:
+    # Each run starts fresh -- same fix as dma_breakout_scan's 2026-10-20 change
+    # (db.delete_pending_candidates_for_source's own docstring). Without this, a
+    # never-reviewed candidate's row blocks get_goat_pending_candidate's dedup
+    # forever, so a later GENUINELY NEW breakout on the same ticker (price fell
+    # back below the 50DMA, then crossed again) is silently swallowed -- the stale
+    # row's presence, not the new cross, is what get_goat_pending_candidate sees.
+    # Confirmed live 2026-10-29 on PHO (industry_rotation's twin of this function)
+    # -- see goat-industry-rotation PHO investigation. A still-interesting ticker
+    # gets re-staged fresh within the same run below, so nothing real is lost.
+    cleared = db.delete_pending_candidates_for_source(conn, "goat_sector_rotation")
+    if cleared:
+        print(f"[goat-sector-scan] cleared {cleared} never-reviewed candidate(s) from "
+              f"the previous run -- starting fresh")
+
     closes = sector_rotation.fetch_all_sector_closes()
     ranking = sector_rotation.rank_sectors(closes)
 
@@ -395,6 +409,13 @@ def run_industry_scan(conn: sqlite3.Connection) -> dict[str, Any]:
     """Gained a required `conn` param (was no-conn/pure-compute) -- brings the
     industry level to full parity with run_sector_scan (ranking + breakout +
     staging), per .agent/plans/goat-industry-pipeline.md Part B-1."""
+    # Each run starts fresh -- see run_sector_scan's identical clear call for the
+    # full rationale (same dedup-starvation bug, confirmed live on PHO 2026-10-29).
+    cleared = db.delete_pending_candidates_for_source(conn, "goat_industry_rotation")
+    if cleared:
+        print(f"[goat-industry-scan] cleared {cleared} never-reviewed candidate(s) from "
+              f"the previous run -- starting fresh")
+
     closes = industry_rotation.fetch_all_industry_closes()
     ranking = industry_rotation.rank_industries(closes)
     not_covered = sorted(

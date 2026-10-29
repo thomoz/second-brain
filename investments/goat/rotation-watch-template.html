@@ -88,6 +88,7 @@
   }
   h1 { font-size: 26px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
   .sub { color: var(--text-secondary); font-size: 14px; margin: 0; max-width: 640px; line-height: 1.5; }
+  .updated { color: var(--text-muted); font-size: 12px; margin: 8px 0 0; }
 
   .controls {
     display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
@@ -269,6 +270,7 @@
     <p class="sub">How each sector/industry's price has moved, built on demand from
       <code>goat_rotation_snapshots</code> &mdash; not a scheduled report, and not saved anywhere
       after this view.</p>
+    <p class="updated" id="updatedAt"></p>
   </header>
 
   <div class="controls">
@@ -1810,6 +1812,14 @@
   document.addEventListener("keydown", function (ev) {
     if (ev.key === "Escape") closeEtfModal();
   });
+
+  (function setUpdatedAt() {
+    var latest = [DATES[DATES.length - 1], FULL_DATES[FULL_DATES.length - 1]].sort()[1];
+    if (!latest) return;
+    var d = new Date(latest + "T00:00:00");
+    var label = d.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+    document.getElementById("updatedAt").textContent = "Updated through " + label;
+  })();
 
   render();
 })();
