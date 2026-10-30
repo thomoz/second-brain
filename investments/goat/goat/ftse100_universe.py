@@ -7,6 +7,7 @@ shape exactly (closest precedent: also DB-cached, also goat-only)."""
 
 from __future__ import annotations
 
+import re
 import sqlite3
 from datetime import datetime, timedelta, timezone
 
@@ -16,11 +17,38 @@ from . import config, db
 
 _HEADERS = {"User-Agent": config.GOAT_FTSE100_USER_AGENT}
 
+_FOOTNOTE_RE = re.compile(r"\[.*?\]")
+
+
+def _header_index(headers: list[str], *, contains: str) -> int | None:
+    """First header whose footnote-stripped, lowercased text contains `contains`
+    -- e.g. "FTSE industry classification benchmark sector[35]" matches
+    contains="sector" even if Wikipedia's exact wording or footnote number
+    changes, same tolerance-for-wording-drift posture as the SEC/ASX filing
+    heading-search heuristics elsewhere in this codebase."""
+    for i, h in enumerate(headers):
+        if contains in _FOOTNOTE_RE.sub("", h).strip().lower():
+            return i
+    return None
+
 
 def fetch_ftse100_constituents() -> list[dict[str, str]] | None:
     """Scrapes the current FTSE 100 constituent list from Wikipedia. Returns None
-    on any fetch/parse failure (network error, missing table, wrong column
-    count) -- same graceful-degradation contract as fetch_sp500_constituents."""
+    on any fetch/parse failure (network error, no matching table, missing
+    expected columns) -- same graceful-degradation contract as
+    fetch_sp500_constituents.
+
+    Picks the table by its header row (must contain both "company" and
+    "ticker" columns), not by `.find("table", {"class": "wikitable"})` taking
+    the first match -- confirmed live 2026-10-30 that the Wikipedia page now
+    has 4 wikitable-class tables (an index-contract-size table, an all-time-highs
+    table, a historical-levels-by-year table, THEN the 101-row constituents
+    table), so blindly taking the first one silently returned the wrong table
+    every single run (9 rows, not 100) with zero error -- the goat_ftse100_
+    constituents cache has had 0 rows since this scan existed as a result.
+    Column positions are looked up by header name for the same reason, not
+    hardcoded indices -- the real table now has an ISIN column between Ticker
+    and the ICB sector column that didn't exist when cells[2] was written."""
     import requests
     from bs4 import BeautifulSoup
 
@@ -29,7 +57,21 @@ def fetch_ftse100_constituents() -> list[dict[str, str]] | None:
         if r.status_code != 200:
             return None
         soup = BeautifulSoup(r.text, "html.parser")
-        table = soup.find("table", {"class": "wikitable"})
+
+        table = None
+        company_idx = ticker_idx = sector_idx = None
+        for candidate in soup.find_all("table", {"class": "wikitable"}):
+            trs = candidate.find_all("tr")
+            if not trs:
+                continue
+            header_cells = trs[0].find_all(["th", "td"])
+            header_texts = [c.get_text(strip=True) for c in header_cells]
+            c_idx = _header_index(header_texts, contains="company")
+            t_idx = _header_index(header_texts, contains="ticker")
+            s_idx = _header_index(header_texts, contains="sector")
+            if c_idx is not None and t_idx is not None and s_idx is not None:
+                table, company_idx, ticker_idx, sector_idx = candidate, c_idx, t_idx, s_idx
+                break
         if table is None:
             return None
 
@@ -37,11 +79,11 @@ def fetch_ftse100_constituents() -> list[dict[str, str]] | None:
         trs = table.find_all("tr")
         for tr in trs[1:]:  # skip header row
             cells = tr.find_all("td")
-            if len(cells) < 3:
+            if len(cells) <= max(company_idx, ticker_idx, sector_idx):
                 continue
-            company = cells[0].get_text(strip=True)
-            ticker = cells[1].get_text(strip=True)
-            icb_sector = cells[2].get_text(strip=True)
+            company = cells[company_idx].get_text(strip=True)
+            ticker = cells[ticker_idx].get_text(strip=True)
+            icb_sector = cells[sector_idx].get_text(strip=True)
             if not company or not ticker or not icb_sector:
                 continue
             rows.append({

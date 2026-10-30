@@ -32,6 +32,42 @@ def test_fetch_ftse100_constituents_parses_table_and_normalizes_tickers(monkeypa
     assert row["icb_sector"] == "Insurance"
 
 
+_FAKE_HTML_MULTI_TABLE = """
+<table class="wikitable">
+<tr><th>Contract size</th></tr>
+<tr><td>10 GBP x index points</td></tr>
+</table>
+<table class="wikitable">
+<tr><th>Category</th><th>All-time highs</th></tr>
+<tr><td>Closing</td><td>9999</td></tr>
+</table>
+<table class="wikitable">
+<tr><th>Company</th><th>Ticker</th><th>ISIN[34]</th>
+    <th>FTSE industry classification benchmark sector[35]</th></tr>
+<tr><td>3i</td><td>III</td><td>GB00B1YW4409</td><td>Financial services</td></tr>
+<tr><td>Admiral Group</td><td>ADM</td><td>GB00B02J6398</td><td>Insurance</td></tr>
+</table>
+"""
+
+
+def test_fetch_ftse100_constituents_finds_real_table_among_decoy_tables(monkeypatch):
+    """Reproduces the real 2026-10-30 failure: Wikipedia's FTSE 100 page has
+    several wikitable-class tables before the actual 100-row constituents
+    table (a contract-size table, an all-time-highs table, ...), plus an ISIN
+    column now sits between Ticker and the ICB sector column. Taking the
+    first wikitable / a hardcoded cells[2] silently parsed the wrong table
+    every run with zero error -- the cache had 0 rows as a result. This test
+    pins both: picking the table by header content, and looking up the
+    sector column by name rather than a fixed index."""
+    monkeypatch.setattr("requests.get", lambda *a, **k: _FakeResponse(_FAKE_HTML_MULTI_TABLE))
+    rows = ftse100_universe.fetch_ftse100_constituents()
+    assert rows is not None
+    assert {r["ticker"] for r in rows} == {"III", "ADM"}
+    row = next(r for r in rows if r["ticker"] == "ADM")
+    assert row["company"] == "Admiral Group"
+    assert row["icb_sector"] == "Insurance"  # not the ISIN column
+
+
 def test_fetch_ftse100_constituents_returns_none_on_missing_table(monkeypatch):
     monkeypatch.setattr("requests.get", lambda *a, **k: _FakeResponse("<html>no table</html>"))
     assert ftse100_universe.fetch_ftse100_constituents() is None
