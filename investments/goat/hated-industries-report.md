@@ -10,7 +10,7 @@ Hated since: 2026-09-28
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -16.5% | -29.5% | -19.8pp | -37.1pp | -44.3% |
+| -17.8% | -27.0% | -22.2pp | -36.1pp | -44.6% |
 
 **Narrative:** The dominant negative narrative is US policy uncertainty: expiring solar tax credits, new tariffs and import restrictions threaten project economics and future demand, with higher financing costs adding pressure. The selloff has affected equipment suppliers, panel manufacturers and residential solar companies broadly. [S&P Global](https://www.spglobal.com/market-intelligence/en/news-insights/articles/2026/9/solar-stocks-stumble-over-stroke-of-a-pen-105648067)
 **Systemic read:** industry-wide -- The evidence supports a sector-wide policy and financing overhang rather than one or two constituents' company-specific problems, although exposure varies and some domestic manufacturers may benefit from trade protection. TAN's five largest holdings below are reported as of October 27, 2026, with weights of 11.36%, 9.67%, 8.36%, 5.80% and 5.27%, respectively. [Holdings](https://stockanalysis.com/etf/tan/holdings/)
@@ -25,6 +25,27 @@ Representative constituents (read-only — not staged as candidates):
 | FSLR | First Solar, Inc. | -3.7% | +23.3% | growing |
 | ENPH | Enphase Energy, Inc. | -28.5% | -65.2% | declining |
 | HASI | HA Sustainable Infrastructure Capital, Inc. | +804.4% | +24.5% | growing |
+
+## Utilities - Renewable (ICLN)
+
+Hated since: 2026-10-30
+
+| 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
+|------------|------------|--------------|--------------|---------------------|
+| -10.9% | -22.3% | -15.3pp | -31.4pp | -33.5% |
+
+**Narrative:** The dominant negative narrative is higher-for-longer financing costs undermining renewable-project economics and valuations, compounded by US clean-energy subsidy retrenchment, tariff uncertainty and residential-solar weakness. These pressures affect multiple businesses, although their severity varies substantially across technologies and countries ([L&G analysis](https://blog.landg.com/categories/investment-strategy/where-next-for-clean-energy-equities/)).
+**Systemic read:** industry-wide -- The evidence supports broad financing and policy headwinds rather than one or two constituents' company-specific problems; systemic does not mean uniform exposure, with US residential solar particularly weak and European wind, utility-scale solar and grid infrastructure more resilient. The holdings below are the five largest as of October 27, 2026, weighing 8.43%, 7.82%, 6.76%, 6.47% and 5.68%, respectively ([holdings and tickers](https://companiesmarketcap.com/ishares-global-clean-energy-etf/holdings/)); ICLN spans equipment manufacturers and utilities, so it is an imperfect proxy for renewable utilities alone.
+
+**Fundamentals-divergence read:** fundamentals still growing despite the price decline
+
+Representative constituents (read-only — not staged as candidates):
+
+| Ticker | Name | Revenue growth | Earnings growth | Read |
+|--------|------|-----------------|-------------------|------|
+| FSLR | First Solar, Inc. | -3.7% | +23.3% | growing |
+| NXT | Nextpower Inc. | +8.2% | +2.9% | growing |
+| BE | Bloom Energy Corporation Class A | +138.1% | — | growing |
 
 
 Last auto-generated: 2026-10-30.
