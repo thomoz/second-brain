@@ -49,8 +49,8 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (XOM) | ok | XOM: Free Cash Flow $+23.6B, Capital Expenditure $28.4B (period ending 2025-12-31) |
 | 4 | Capex outruns cash flow (JNJ) | ok | JNJ: Free Cash Flow $+19.3B, Capital Expenditure $5.2B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.48T as of 2026-09-01, +31.4% YoY vs 2025-09-01 |
-| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 167 filing(s) in the trailing 30d vs 230 in the same window a year ago (0.73x); 424B4 (priced IPO): 23 filing(s) in the trailing 30d vs 43 in the same window a year ago (0.53x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.66 (z=1.21 vs trailing 72d mean 0.58) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 156 filing(s) in the trailing 30d vs 220 in the same window a year ago (0.71x); 424B4 (priced IPO): 22 filing(s) in the trailing 30d vs 36 in the same window a year ago (0.61x) |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.66 (z=1.19 vs trailing 73d mean 0.58) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (AAPL) | flag | AAPL: $209,057,793 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (NVDA) | flag | NVDA: $1,877,876,037 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (MSFT) | flag | MSFT: $120,242,344 sold vs $3,436,971 bought, trailing 365 days |
@@ -61,7 +61,7 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 8 | Insider selling (AMD) | flag | AMD: $378,082,091 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (XOM) | flag | XOM: $2,395,656 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (JNJ) | flag | JNJ: $150,667,262 sold vs $257,688 bought, trailing 365 days |
-| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (105 day(s) away) -- ad-share content is not automatable, nothing to check yet |
+| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (104 day(s) away) -- ad-share content is not automatable, nothing to check yet |
 | 10 | Most-valuable-company milestone | flag | AAPL is the largest company in the current hot-sector watchlist ($5.03T, most recently crossed the $5.0T rung) |
 | 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
 | 12 | Credit turns in the hot sector while broad market stays calm (AAPL) | unknown | AAPL: bond CUSIP 037833EY2 found, but no live or manually-entered yield reading available -- run `record-bond-yield AAPL <yield_pct>` |
