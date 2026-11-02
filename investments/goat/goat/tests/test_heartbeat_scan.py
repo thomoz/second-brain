@@ -133,12 +133,37 @@ def test_run_heartbeat_scan_skips_ticker_already_in_watchlist(db_conn, monkeypat
     assert goat_db.get_goat_pending_candidate(db_conn, "AAPL") is None
 
 
-def test_run_heartbeat_scan_stays_quiet_on_repeat_run(db_conn, monkeypatch):
+def test_run_heartbeat_scan_restages_same_ticker_on_repeat_run_without_duplicating(db_conn, monkeypatch):
+    """Changed 2026-11-02, matching monitor.run_sector_scan/run_industry_scan's
+    2026-10-29 fix (same rationale, heartbeat twin): a ticker that's still
+    genuinely interesting gets re-staged each run (cleared and reinserted, not
+    suppressed as "already pending from last time") -- but never duplicated."""
     _patch_common(monkeypatch)
     heartbeat_scan.run_heartbeat_scan(db_conn)
     result = heartbeat_scan.run_heartbeat_scan(db_conn)
-    assert result["new_candidates"] == []
+    assert len(result["new_candidates"]) == 1
+    assert result["new_candidates"][0]["ticker"] == "AAPL"
     assert len(result["pending_candidates"]) == 1
+
+
+def test_run_heartbeat_scan_clears_never_reviewed_candidate_from_previous_run(db_conn, monkeypatch):
+    """Added 2026-11-02 alongside the restage fix above -- the clear is scoped to
+    this source only, mirroring monitor.py's and dma_breakout_scan's own version
+    of this test."""
+    goat_db.insert_goat_pending_candidate(
+        db_conn, ticker="PRIOR_RUN", sector_label="Technology", signal_detail="old",
+        source="goat_heartbeat_scan",
+    )
+    goat_db.insert_goat_pending_candidate(
+        db_conn, ticker="OTHERSCAN", sector_label="Technology", signal_detail="old",
+        source="goat_sector_rotation",
+    )
+    _patch_common(monkeypatch, constituents=[])
+
+    heartbeat_scan.run_heartbeat_scan(db_conn)
+
+    assert goat_db.get_goat_pending_candidate(db_conn, "PRIOR_RUN") is None
+    assert goat_db.get_goat_pending_candidate(db_conn, "OTHERSCAN") is not None
 
 
 def test_run_heartbeat_scan_suppresses_staging_on_insolvency_risk(db_conn, monkeypatch):

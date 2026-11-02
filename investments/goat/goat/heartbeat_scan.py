@@ -35,6 +35,16 @@ def _today_sydney() -> str:
 
 
 def run_heartbeat_scan(conn: sqlite3.Connection) -> dict[str, Any]:
+    # Each run starts fresh -- same fix as monitor.run_sector_scan/run_industry_scan
+    # (2026-10-29) and dma_breakout_scan (2026-10-20): a never-reviewed candidate's
+    # row otherwise blocks get_goat_pending_candidate's dedup forever, silently
+    # swallowing any later genuinely-new heartbeat signal on the same ticker. A
+    # still-interesting ticker gets re-staged fresh within this same run below.
+    cleared = db.delete_pending_candidates_for_source(conn, "goat_heartbeat_scan")
+    if cleared:
+        print(f"[goat-heartbeat-scan] cleared {cleared} never-reviewed candidate(s) from "
+              f"the previous run -- starting fresh")
+
     closes = sector_rotation.fetch_all_sector_closes()
     ranking = sector_rotation.rank_sectors(closes)
     rising_etf_labels = {row["sector_label"] for row in ranking if row["rising"]}
