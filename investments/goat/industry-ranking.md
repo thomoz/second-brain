@@ -42,10 +42,10 @@ All 39 covered industries.
 | 13 | ITB | Residential Construction | +7.3% | Yes |
 | 14 | ESPO | Electronic Gaming & Multimedia | +6.1% | Yes |
 | 15 | KBWB | Banks - Diversified | +6.1% | Yes |
-| 16 | INDS | REIT - Industrial | +4.6% | Yes |
-| 17 | XHB | Building Products & Equipment | +3.9% | Yes |
-| 18 | EVX | Waste Management | +3.7% | Yes |
-| 19 | IAI | Capital Markets | +2.7% | Yes |
+| 16 | XHB | Building Products & Equipment | +3.9% | Yes |
+| 17 | EVX | Waste Management | +3.7% | Yes |
+| 18 | IAI | Capital Markets | +2.7% | Yes |
+| 19 | INDS | REIT - Industrial | +0.9% | Yes |
 | 20 | ITA | Aerospace & Defense | +0.3% | Yes |
 | 21 | SMH | Semiconductors | +0.3% | Yes |
 | 22 | MOO | Agricultural Inputs | -1.6% | No |
