@@ -1,4 +1,4 @@
-> DEGRADED - Yahoo Finance rate-limited the fundamentals pass (only 0/200 ASX names returned data) (2026-11-03) - showing the last good run below.
+> DEGRADED - Yahoo Finance rate-limited the fundamentals pass (only 0/200 ASX names returned data) (2026-11-04) - showing the last good run below.
 
 # Cash-Value Scan
 
