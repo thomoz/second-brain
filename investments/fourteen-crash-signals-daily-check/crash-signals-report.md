@@ -4,7 +4,7 @@ What this is: 14 historical market-crash warning markers, checked daily so an ea
 
 Auto-generated daily -- overwritten every run. Advisor notes only; no trade action is ever suggested here (see SOUL.md). Per-marker source: investments/my-trader/14-signals-crash-warning-handoff.md.
 
-## Run: 2026-11-03
+## Run: 2026-11-04
 
 ## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)
 Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 mega-cap constituents -- never hardcoded to a fixed ticker list.
@@ -21,11 +21,11 @@ No hot-watchlist companies resolved this run (no rising sectors, or data unavail
 | 4 | Capex outruns cash flow | ok | No hot-watchlist tickers with a resolvable cash-flow statement this run. |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.48T as of 2026-09-01, +31.4% YoY vs 2025-09-01 |
 | 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 160 filing(s) in the trailing 30d vs 214 in the same window a year ago (0.75x); 424B4 (priced IPO): 22 filing(s) in the trailing 30d vs 37 in the same window a year ago (0.59x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.67 (z=1.32 vs trailing 74d mean 0.58) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.67 (z=1.30 vs trailing 75d mean 0.58) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (aggregate trend) | ok | No hot-watchlist tickers with insider activity this run. |
 | 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (103 day(s) away) -- ad-share content is not automatable, nothing to check yet |
 | 10 | Most-valuable-company milestone | unknown | hot-company watchlist is empty this run (no rising sectors, or data unavailable) |
 | 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
 | 12 | Credit turns in the hot sector while broad market stays calm | ok | No hot-watchlist tickers with a resolvable bond CUSIP this run. |
 | 13 | Funding markets start choking | ok | CP-Treasury spread (DCPN3M-DTB3) 0.00pp (z=-1.01 vs trailing 365d) |
-| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.44pp (as of 2026-10-30); 0 consecutive day(s) at/above 3.5pp (needs 21 to flag) -- WATCH: within 0.3pp of the flag threshold (WATCH) |
+| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.43pp (as of 2026-11-02); 0 consecutive day(s) at/above 3.5pp (needs 21 to flag) -- WATCH: within 0.3pp of the flag threshold (WATCH) |
