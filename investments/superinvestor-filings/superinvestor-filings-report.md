@@ -16,6 +16,7 @@ No new fast-disclosure filings since the last run.
 
 | Source | Investor | Form | Issuer | % / Shares | Crossing | Filed |
 |--------|----------|------|--------|------------|----------|-------|
+| US EDGAR | Warren Buffett / Berkshire Hathaway | Form 4 | SIRIUS XM HOLDINGS INC. (SIRI) | 924,281 @ USD 30.23 | - | 2026-11-03 |
 | US EDGAR | David Abrams / Abrams Capital | Form 4 | Loar Holdings Inc. (LOAR) | - | - | 2026-11-03 |
 | US EDGAR | John Paulson / Paulson & Co | Form 4 | Bausch & Lomb Corp (BLCO) | - | - | 2026-11-02 |
 | US EDGAR | Warren Buffett / Berkshire Hathaway | Form 4 | DAVITA INC. (DVA) | 382,563 @ USD 180.43 | - | 2026-10-29 |
@@ -43,4 +44,4 @@ No new fast-disclosure filings since the last run.
 
 For a passive concentrated filer like Pabrai the high-value events are **threshold crossings** (5%, 10%, exit) and **Form 4s on any name where they're already > 10%**. Ordinary position sizing inside 5-10% mostly still waits for the quarterly cycle -- set expectations accordingly so the alert isn't oversold. Deadlines: 13D = 5 business days after crossing 5%; 13G (passive) = 5 business days after crossing 5%; Form 4 = 2 business days for any trade once a > 10% owner; SEBI SAST Reg 29 = 2 working days for a 5% crossing or any >= 2% change past 5%.
 
-Last auto-generated: 2026-11-04 13:32 AEDT.
+Last auto-generated: 2026-11-04 13:35 AEDT.
