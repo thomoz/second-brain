@@ -97,6 +97,86 @@ def test_fetch_ticker_data_falls_back_to_asx_when_bare_lookup_is_placeholder(mon
     assert data.info["quoteType"] == "ETF"
 
 
+def _patch_real_yfinance_ticker(monkeypatch, fake_ticker_cls):
+    """Patches yfinance.Ticker on the REAL installed yfinance module, rather than
+    substituting a fake module into sys.modules the way
+    test_fetch_ticker_data_falls_back_to_asx_when_bare_lookup_is_placeholder
+    does -- that whole-module-swap pattern is already broken in this
+    environment (yf_retry.call's `from yfinance.exceptions import
+    YFRateLimitError` has nothing to import against a bare
+    types.ModuleType stub), a pre-existing issue unrelated to this fix."""
+    import yfinance as yf
+
+    monkeypatch.setattr(yf, "Ticker", fake_ticker_cls)
+
+
+def test_fetch_ticker_data_survives_news_failure_when_info_and_dividends_succeed(monkeypatch):
+    """Real outage caught live 2026-11-04: Yahoo's news endpoint alone raised
+    YFDataException for LKQ while info/dividends both succeeded -- the whole
+    fetch must not be discarded over a field no check actually requires."""
+    class _FakeTicker:
+        def __init__(self, symbol):
+            pass
+
+        info = {"regularMarketPrice": 19.26, "quoteType": "EQUITY", "longName": "LKQ Corporation"}
+        dividends = "real-dividends-series"
+        calendar = {"some": "calendar"}
+
+        @property
+        def news(self):
+            raise Exception("*** YAHOO! FINANCE IS CURRENTLY DOWN! ***")
+
+    _patch_real_yfinance_ticker(monkeypatch, _FakeTicker)
+
+    data = market_data.fetch_ticker_data("LKQ")
+    assert data is not None
+    assert data.info["longName"] == "LKQ Corporation"
+    assert data.dividends == "real-dividends-series"
+    assert data.news == []  # degraded default, not a None-propagated failure
+    assert data.calendar == {"some": "calendar"}
+
+
+def test_fetch_ticker_data_survives_calendar_failure_independently_of_news(monkeypatch):
+    class _FakeTicker:
+        def __init__(self, symbol):
+            pass
+
+        info = {"regularMarketPrice": 19.26, "quoteType": "EQUITY"}
+        dividends = "real-dividends-series"
+        news = ["real", "news"]
+
+        @property
+        def calendar(self):
+            raise Exception("calendar endpoint down")
+
+    _patch_real_yfinance_ticker(monkeypatch, _FakeTicker)
+
+    data = market_data.fetch_ticker_data("LKQ")
+    assert data is not None
+    assert data.news == ["real", "news"]
+    assert data.calendar == {}  # degraded default
+
+
+def test_fetch_ticker_data_still_fails_when_info_itself_fails(monkeypatch):
+    """Unlike news/calendar, info is required -- a failure there means no usable
+    data at all, so the whole fetch must still return None."""
+    class _FakeTicker:
+        def __init__(self, symbol):
+            pass
+
+        @property
+        def info(self):
+            raise Exception("info endpoint down")
+
+        dividends = "real-dividends-series"
+        news = []
+        calendar = {}
+
+    _patch_real_yfinance_ticker(monkeypatch, _FakeTicker)
+
+    assert market_data.fetch_ticker_data("LKQ") is None
+
+
 def test_fetch_current_price_returns_none_when_no_data(monkeypatch):
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
     assert market_data.fetch_current_price("VRTX") is None

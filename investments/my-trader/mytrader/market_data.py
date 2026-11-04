@@ -50,6 +50,16 @@ def _looks_valid(info: dict[str, Any]) -> bool:
 
 
 def _fetch_one(ticker: str) -> TickerData | None:
+    """info/dividends are required -- a failure on either means no usable data
+    for this ticker at all, so the whole fetch fails (None, same as before).
+    news/calendar are each fetched independently and degrade to their default
+    (empty list/dict) on their own failure, rather than taking the whole
+    fetch down with them -- real outage caught live 2026-11-04: Yahoo's news
+    endpoint alone raised YFDataException("YAHOO! FINANCE IS CURRENTLY
+    DOWN!") for LKQ while info/dividends both succeeded fine, but the single
+    broad try/except this replaced discarded everything (every check showed
+    "No market data available") over a field no check in this codebase
+    actually requires."""
     import yfinance as yf
 
     try:
@@ -57,15 +67,20 @@ def _fetch_one(ticker: str) -> TickerData | None:
         info = yf_retry.call(lambda: t.info) or {}
         if not _looks_valid(info):
             return None
-        return TickerData(
-            ticker=ticker,
-            info=info,
-            dividends=yf_retry.call(lambda: t.dividends),
-            news=yf_retry.call(lambda: t.news) or [],
-            calendar=yf_retry.call(lambda: t.calendar) or {},
-        )
+        dividends = yf_retry.call(lambda: t.dividends)
     except Exception:
         return None
+
+    try:
+        news = yf_retry.call(lambda: t.news) or []
+    except Exception:
+        news = []
+    try:
+        calendar = yf_retry.call(lambda: t.calendar) or {}
+    except Exception:
+        calendar = {}
+
+    return TickerData(ticker=ticker, info=info, dividends=dividends, news=news, calendar=calendar)
 
 
 def fetch_ticker_data(ticker: str) -> TickerData | None:
