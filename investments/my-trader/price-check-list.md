@@ -10,3 +10,4 @@ tracking that ticker on the next run.
 |--------|---------------|------|
 | ORLY | 87.50 | O'Reilly Automotive |
 | AEM | 160 | Agnico Eagle Mines (USD) |
+| FNV | 185 | Franco-Nevada Corporation (USD) |
