@@ -38,7 +38,6 @@ Flagged via `watchlist-watch` — these still appear in their normal bucket tabl
 | PRS.OL | unassigned | Rebel Capitalist recommendation |
 | ROSY.TO | unassigned | New TSX macro fund, too new for data - watching for price history/AUM to build up |
 | STNG | unassigned | George Gammon long trade |
-| VLGEA | unassigned | Felix watching -- waiting for a break above recent highs. |
 | WPM | unassigned | Precious metals |
 
 ### 👁 Alternative Energy Transport
@@ -114,7 +113,6 @@ Flagged via `watchlist-watch --group` — these still appear in their normal buc
 | VDC | Vanguard Consumer Staples ETF | etf | 1 | 2.13% | +107% | Not yet discussed. Fee 0.09% |
 | VGS | Vanguard MSCI World ETF (ASX, AU-domiciled) | etf | 1 | — | +267% | Not yet discussed. Broad index option — pick one (paired with VAS), depends on broker/domicile |
 | VGT | Vanguard Information Technology ETF | etf | unassigned | — | — | Added at Shaun request 2026-09-01. Broad US tech-sector ETF. Watching alongside XLK/SMH tech-rotation strength. |
-| VLGEA | Village Super Market, Inc. | stock | unassigned | — | — | Felix added it to his watchlist -- waiting for it to beat recent highs. |
 | VOO | Vanguard S&P 500 ETF | etf | 1 | 0.79% | +306% | Not yet discussed. Broad index option — pick one (paired with VTI), depends on broker/domicile |
 | VT | Vanguard Total World Stock ETF | etf | unassigned | 1.58% | +219% | Not yet discussed. Broad world exposure |
 | VTI | Vanguard Total US Market ETF | etf | 1 | 0.76% | +289% | Not yet discussed. Broad index option — pick one (paired with VOO), depends on broker/domicile |
