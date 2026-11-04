@@ -381,38 +381,17 @@ def cmd_scan_earnings_watch(args) -> None:
     )
 
 
-def cmd_price_check_add(args) -> None:
-    from .price_check import add_price_check
-    from .tickers import normalize
-
-    conn = _open_conn()
-    add_price_check(normalize(args.ticker), args.price, args.name, conn)
-    conn.close()
-    print(f"Set price check: {normalize(args.ticker)} @ {args.price:,.2f}. "
-          f"First run establishes a baseline (no alert); a ping fires once the price crosses it.")
-
-
-def cmd_price_check_remove(args) -> None:
-    from .price_check import remove_price_check
-    from .tickers import normalize
-
-    conn = _open_conn()
-    count = remove_price_check(normalize(args.ticker), conn)
-    conn.close()
-    if count:
-        print(f"Removed price check for {normalize(args.ticker)}.")
-    else:
-        print(f"No price check found for {normalize(args.ticker)}.")
-
-
 def cmd_price_check_list(args) -> None:
+    """Read-only status view -- price-check-list.md (not this command) is how a
+    ticker gets added/removed/changed; run scan-price-check (or wait for the
+    4-hourly timer) to pick up an edit."""
     from . import db
 
     conn = _open_conn()
     rows = db.get_all_price_checks(conn)
     conn.close()
     if not rows:
-        print("No price checks set. Add one with: price-check-add --ticker X --price Y")
+        print("No price checks tracked. Add a row to investments/my-trader/price-check-list.md.")
         return
     for r in rows:
         side = r["last_side"] or "not yet checked"
@@ -538,25 +517,15 @@ def main() -> None:
              "guidance search (writes earnings-watch-report.md)",
     )
 
-    p_price_check_add = subparsers.add_parser(
-        "price-check-add",
-        help="Set (or update) an ad-hoc ticker/target-price watch, pinged every "
-             "4 hours when the price crosses it",
+    subparsers.add_parser(
+        "price-check-list", help="List current price checks and their status (read-only -- "
+                                  "edit price-check-list.md to add/remove/change a ticker)",
     )
-    p_price_check_add.add_argument("--ticker", required=True)
-    p_price_check_add.add_argument("--price", type=float, required=True)
-    p_price_check_add.add_argument("--name", default=None)
-
-    p_price_check_remove = subparsers.add_parser(
-        "price-check-remove", help="Remove a ticker from the price-check watch list",
-    )
-    p_price_check_remove.add_argument("--ticker", required=True)
-
-    subparsers.add_parser("price-check-list", help="List current price checks and their status")
     subparsers.add_parser(
         "scan-price-check",
-        help="Check every tracked ticker's price against its target, pinging "
-             "WhatsApp on any crossing (writes price-check-report.md)",
+        help="Sync price-check-list.md, then check every tracked ticker's price "
+             "against its target, pinging WhatsApp on any crossing "
+             "(writes price-check-report.md)",
     )
 
     p_promote = subparsers.add_parser(
@@ -604,8 +573,6 @@ def main() -> None:
         "gold-backtest": cmd_gold_backtest,
         "cash-value-scan": cmd_cash_value_scan,
         "scan-earnings-watch": cmd_scan_earnings_watch,
-        "price-check-add": cmd_price_check_add,
-        "price-check-remove": cmd_price_check_remove,
         "price-check-list": cmd_price_check_list,
         "scan-price-check": cmd_scan_price_check,
         "promote-candidate": cmd_promote_candidate,

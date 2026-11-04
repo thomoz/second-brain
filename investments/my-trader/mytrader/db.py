@@ -752,10 +752,11 @@ def touch_checked(
 
 # --- Price Check (ad-hoc 4-hourly crossed-a-level watch) --------------------
 # Deliberately separate from watchlist/holdings -- Shaun's own "set a price and
-# ping me when it's crossed" list, not tied to bucket/status semantics. One row
-# per ticker; re-running price-check-add on an existing ticker updates its
-# target_price and re-baselines last_side (see price_check.py's module
-# docstring for why a baseline reset is required on every target-price change).
+# ping me when it's crossed" list, not tied to bucket/status semantics. This
+# table is purely derived sync state from the hand-edited price-check-list.md
+# (see price_check.sync_price_checks_from_list) -- never written to directly
+# except by that sync. One row per ticker; a target_price change re-baselines
+# last_side (see price_check.py's module docstring for why).
 
 
 def get_price_check(conn: sqlite3.Connection, ticker: str) -> sqlite3.Row | None:
@@ -795,3 +796,12 @@ def update_price_check_side(conn: sqlite3.Connection, ticker: str, *, side: str,
             "UPDATE price_checks SET last_side = ?, last_price = ?, last_checked_at = ? WHERE ticker = ?",
             (side, price, _now(), ticker),
         )
+
+
+def update_price_check_name(conn: sqlite3.Connection, ticker: str, name: str | None) -> None:
+    """Updates only the display name -- deliberately does NOT touch
+    last_side/last_price, unlike upsert_price_check's full re-baseline. A
+    name-only edit in price-check-list.md (the ticker/target_price are
+    unchanged) must not wipe an already-established crossing baseline."""
+    with conn:
+        conn.execute("UPDATE price_checks SET name = ? WHERE ticker = ?", (name, ticker))

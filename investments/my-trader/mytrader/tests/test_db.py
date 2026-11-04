@@ -513,3 +513,14 @@ def test_update_price_check_side_persists_side_and_price(db_conn):
     assert row["last_side"] == "below"
     assert row["last_price"] == 195.5
     assert row["last_checked_at"] is not None
+
+
+def test_update_price_check_name_does_not_touch_side_or_price(db_conn):
+    db.upsert_price_check(db_conn, ticker="AAPL", name="Apple", target_price=200.0)
+    db.update_price_check_side(db_conn, "AAPL", side="above", price=210.0)
+
+    db.update_price_check_name(db_conn, "AAPL", "Apple Inc.")
+    row = db.get_price_check(db_conn, "AAPL")
+    assert row["name"] == "Apple Inc."
+    assert row["last_side"] == "above"
+    assert row["last_price"] == 210.0

@@ -774,12 +774,22 @@ EARNINGS_WATCH_SUMMARY_MODEL = "sonnet"  # mirrors SEC_FILING_SUMMARY_MODEL/
                                             # already-locked-in tier.
 
 # ---------------------------------------------------------------------------
-# Price Check -- mytrader/price_check.py. Ad-hoc, user-maintained list of
-# ticker/target-price pairs, checked every 4 hours by its own systemd timer
+# Price Check -- mytrader/price_check.py. Ad-hoc ticker/target-price watch,
+# checked every 4 hours by its own systemd timer
 # (second-brain-mytrader-pricecheck.timer), pinging WhatsApp the moment a
 # ticker's price crosses its set target in either direction. Deliberately
 # separate from watchlist/holdings -- Shaun's own request 2026-11-04, not tied
 # to bucket/status semantics. Cheap (one market_data.fetch_current_price call
 # per tracked ticker, no LLM), so a 4-hourly cadence is fine cost-wise.
+#
+# Changed 2026-11-04 (same session) from a CLI-add/remove-driven DB list to a
+# plain hand-edited markdown file, PRICE_CHECK_LIST_PATH -- Shaun: "I just
+# want to have an md file that I have you add stocks to and prices over which
+# if the stock price crosses I get a whatsapp ping." That file is now the
+# single source of truth (same pattern as industry-etf-reference.md ->
+# ETF_REFERENCE); the price_checks DB table is purely derived sync state
+# (crossing-detection baseline), rewritten from the list on every run by
+# sync_price_checks_from_list -- never hand-edited directly.
 # ---------------------------------------------------------------------------
+PRICE_CHECK_LIST_PATH = MY_TRADER_DIR / "price-check-list.md"
 PRICE_CHECK_REPORT_PATH = MY_TRADER_DIR / "price-check-report.md"
