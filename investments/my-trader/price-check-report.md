@@ -6,7 +6,7 @@ What this is: tracks `price-check-list.md` (edit that file directly, or ask Shau
 
 | Ticker | Name | Target | Current Price | Side |
 |--------|------|--------|----------------|------|
-| AAPL | Apple Inc. | 200.00 | 331.90 | above |
+| — | price-check-list.md is empty — add a row to start tracking | — | — | — |
 
 ### Crossed This Run
 No crossings this run.
