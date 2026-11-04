@@ -9,3 +9,4 @@ tracking that ticker on the next run.
 | Ticker | Target Price | Name |
 |--------|---------------|------|
 | ORLY | 87.50 | O'Reilly Automotive |
+| AEM | 160 | Agnico Eagle Mines (USD) |
