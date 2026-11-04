@@ -1,0 +1,10 @@
+[Unit]
+Description=my-trader Price Check Timer
+Requires=second-brain-mytrader-pricecheck.service
+
+[Timer]
+OnCalendar=*-*-* 0/4:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

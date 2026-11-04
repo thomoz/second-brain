@@ -5,8 +5,7 @@ Six packages share `investments/briefs-finance/data/investments.db` (VPS-only si
 **my-trader**, **briefs-finance**, **goat**, **fourteen-crash-signals-daily-check**,
 **superinvestor-filings**, **ai-resistant-moat-scanner**.
 
-Last updated 2026-10-20 (Goat Full-Coverage Industry Ranking + Rotation History
-Export/Rotation Watch Page Rebuild added) — update this file whenever a tool's
+Last updated 2026-11-04 (Price Check added) — update this file whenever a tool's
 schedule, command, or output path changes; it isn't regenerated automatically.
 
 ## Daily Read
@@ -31,6 +30,7 @@ Freshest reports worth actually opening most days:
 | [investments/superinvestor-filings/superinvestor-filings-report.md](superinvestor-filings/superinvestor-filings-report.md) | Superinvestor Filings Scanner — US EDGAR leg (daily, 02:35 UTC) + India BSE SAST leg (daily, 12:30 UTC) | [→](#superinvestor-filings) |
 | [investments/ai-resistant-moat-scanner/moat-candidates-pending-review.md](ai-resistant-moat-scanner/moat-candidates-pending-review.md) | AI-Resistant Moat Scan (daily, 23:30 UTC) | [→](#ai-moat-scan) |
 | [investments/my-trader/earnings-watch-report.md](my-trader/earnings-watch-report.md) | Earnings Deterioration Watch (daily, 23:55 UTC) | [→](#earnings-watch) |
+| [investments/my-trader/price-check-report.md](my-trader/price-check-report.md) | Price Check — ad-hoc ticker/target-price watch list (every 4 hours) | [→](#price-check) |
 
 Staging files (only worth checking when you want to review pending candidates, not a
 daily habit): `investments/my-trader/synced-candidates-pending-review.md`,
@@ -59,6 +59,7 @@ alerts/discoveries as they fire — these files are for batch review, not discov
 | [↑](#daily-read) **Superinvestor Filings Scanner** — India BSE SEBI SAST leg | Polls BSE's "Insider Trading / SAST" feed for Regulation 29(1)/(2) disclosures, name-matches the acquirer against each tracked investor's `india_aliases`, same seen-log + grouped WhatsApp digest as the EDGAR leg. Catches Pabrai's India-only FPI positions (Rain Industries etc.) that never touch EDGAR. NSE is blocked for the VPS IP so this is BSE-only (SAST disclosures are dual-filed). The exact % is in a (usually scanned) PDF — the alert links to it rather than parsing it. | VPS systemd (`second-brain-superinvestor-sast.timer`) | Daily, 12:30 UTC (~22:30 AEST / ~18:00 IST) | same shared report (`superinvestor-filings-report.md` shows the full both-leg seen-log) |
 | <a id="ai-moat-scan"></a>[↑](#daily-read) **AI-Resistant Moat Scan** ([details + tuning ↓](#ai-moat-scan-how)) | Ranks US-listed firms by how AI-durable their embedded-software moat is (Salesforce-style lock-in). Scores 1/5 of a Finviz sector-screen → industry-allow-list universe (rotating by date) + all seed names + all staged names; blended 0–100 (50% quant yfinance margins/Rule-of-40/revenue-durability, 50% an LLM 6-part rubric against the latest 10-K, cached per accession). Stages fresh names ≥ 80 into `moat_pending_candidates`, one WhatsApp + toast "AI-Resistant Moat Alert" on a fresh name, silent on zero. Advisor notes only. | VPS systemd (`second-brain-ai-moat-scan.timer`) | Daily, 23:30 UTC (after the 22:45 Goat Heartbeat) | `moat-scan-report.md` (full ranked table) + `moat-candidates-pending-review.md` (fresh ≥ 80) |
 | <a id="earnings-watch"></a>[↑](#daily-read) **Earnings Deterioration Watch** | Daily early-warning check on **holdings only** (never watchlist) for signs earnings may be deteriorating before the next 10-Q/10-K confirms it — analyst estimate-revision trend (daily-recorded `yfinance` eps_trend/estimate/revisions history), earnings-relevant SEC 8-Ks (Item-code allowlist filter before any document fetch), and a guidance/management-commentary web search. Also wired as an always-on opt-in check into `find --ticker X`. Advisor notes only, never a sell verdict. | VPS systemd (`second-brain-mytrader-earnings-watch.timer`) | Daily, 23:55 UTC (after the 23:50 Goat Hated Industries Scan) | `investments/my-trader/earnings-watch-report.md` |
+| <a id="price-check"></a>[↑](#daily-read) **Price Check** | Ad-hoc, user-maintained ticker/target-price watch list (`price-check-add`/`-remove`/`-list`) — direction-agnostic: pings WhatsApp the moment a tracked ticker's price crosses its set target in either direction, every time it crosses (not a one-time alert like the breakout scans). Separate from watchlist/holdings. First check after adding a ticker just establishes a baseline side (no alert). | VPS systemd (`second-brain-mytrader-pricecheck.timer`) | Every 4 hours (00:00/04:00/08:00/12:00/16:00/20:00 UTC) | `investments/my-trader/price-check-report.md` |
 
 ## Manual / on-demand only
 
@@ -77,6 +78,8 @@ undoing the 2026-08-23 fix.
 | **my-trader gold-backtest** | Force a fresh gold backtest | `-Package my-trader -Command "gold-backtest"` | `investments/my-trader/gold-outlook.md` |
 | **Cash-Value Scan (on-demand)** | Same US + ASX net-cash screen (net cash ≥ 50% of market cap + positive operating cash flow), right now | `-Package my-trader -Command "cash-value-scan"` | `investments/my-trader/cash-value-report.md` |
 | **Earnings Deterioration Watch (on-demand)** | Same daily holdings-only earnings-deterioration check, right now | `-Package my-trader -Command "scan-earnings-watch"` | `investments/my-trader/earnings-watch-report.md` |
+| **my-trader price-check ops** | Set/update, remove, or list ad-hoc ticker/target-price watches | `-Package my-trader -Command "price-check-add --ticker X --price Y [--name '...'] / price-check-remove --ticker X / price-check-list"` | DB row only — `price-check-report.md` regenerates on the next `scan-price-check` run (scheduled or on-demand) |
+| **Price Check (on-demand)** | Same 4-hourly price-crossed check, right now | `-Package my-trader -Command "scan-price-check"` | `investments/my-trader/price-check-report.md` |
 | **my-trader IBKR sync** | Diff real IB Gateway positions against tracked holdings — fetch is local (IB Gateway only runs here), diff/write happens on the VPS | `uv run --directory investments/my-trader python -m mytrader.main sync-ibkr [--apply]` (this one stays local — see `ibkr-setup-guide.md`) | Terminal report; `--apply` writes DB corrections + stages new positions |
 | **Goat sector scan (on-demand)** | Same sector-rotation ranking, without the 150DMA holdings check | `-Package goat -Command "scan-sectors"` | `investments/goat/sector-ranking.md`, `sector-candidates-pending-review.md` |
 | **Goat industry scan (on-demand)** | Same industry-rotation ranking + breakout candidate staging (39 of 143 Finviz industries with a dedicated ETF, 6-month window), right now | `-Package goat -Command "scan-industries"` | `investments/goat/industry-ranking.md`, `industry-candidates-pending-review.md` |

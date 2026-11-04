@@ -181,6 +181,16 @@ def init_mytrader_tables(conn: sqlite3.Connection) -> None:
                 detail              TEXT NOT NULL,
                 fetched_at          TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS price_checks (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticker          TEXT NOT NULL UNIQUE,
+                name            TEXT,
+                target_price    REAL NOT NULL,
+                last_side       TEXT,
+                last_price      REAL,
+                last_checked_at TEXT,
+                added_at        TEXT NOT NULL
+            );
         """)
     _ensure_watchlist_return_columns(conn)
 
@@ -738,3 +748,50 @@ def touch_checked(
                 f"UPDATE {table} SET last_checked_at = ? WHERE ticker = ? AND bucket = ?",
                 (now, ticker, bucket),
             )
+
+
+# --- Price Check (ad-hoc 4-hourly crossed-a-level watch) --------------------
+# Deliberately separate from watchlist/holdings -- Shaun's own "set a price and
+# ping me when it's crossed" list, not tied to bucket/status semantics. One row
+# per ticker; re-running price-check-add on an existing ticker updates its
+# target_price and re-baselines last_side (see price_check.py's module
+# docstring for why a baseline reset is required on every target-price change).
+
+
+def get_price_check(conn: sqlite3.Connection, ticker: str) -> sqlite3.Row | None:
+    return conn.execute("SELECT * FROM price_checks WHERE ticker = ?", (ticker,)).fetchone()
+
+
+def get_all_price_checks(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute("SELECT * FROM price_checks ORDER BY ticker").fetchall()
+
+
+def upsert_price_check(
+    conn: sqlite3.Connection, *, ticker: str, name: str | None, target_price: float,
+) -> None:
+    """Resets last_side/last_price to NULL on every call (including an update to
+    an existing ticker's target_price) -- see price_check.py's module docstring
+    for why re-baselining is required whenever the target itself changes."""
+    with conn:
+        conn.execute(
+            """INSERT INTO price_checks (ticker, name, target_price, last_side, last_price, last_checked_at, added_at)
+               VALUES (?, ?, ?, NULL, NULL, NULL, ?)
+               ON CONFLICT(ticker) DO UPDATE SET
+                   name = excluded.name, target_price = excluded.target_price,
+                   last_side = NULL, last_price = NULL, last_checked_at = NULL""",
+            (ticker, name, target_price, _now()),
+        )
+
+
+def delete_price_check(conn: sqlite3.Connection, ticker: str) -> int:
+    with conn:
+        cur = conn.execute("DELETE FROM price_checks WHERE ticker = ?", (ticker,))
+        return cur.rowcount
+
+
+def update_price_check_side(conn: sqlite3.Connection, ticker: str, *, side: str, price: float) -> None:
+    with conn:
+        conn.execute(
+            "UPDATE price_checks SET last_side = ?, last_price = ?, last_checked_at = ? WHERE ticker = ?",
+            (side, price, _now(), ticker),
+        )

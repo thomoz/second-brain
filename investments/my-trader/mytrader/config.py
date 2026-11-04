@@ -772,3 +772,14 @@ EARNINGS_WATCH_GUIDANCE_CACHE_HOURS = 20.0  # mirrors NEWS_EVENTS_CACHE_HOURS ex
 EARNINGS_WATCH_SUMMARY_MODEL = "sonnet"  # mirrors SEC_FILING_SUMMARY_MODEL/
                                             # NEWS_EVENTS_SUMMARY_MODEL's
                                             # already-locked-in tier.
+
+# ---------------------------------------------------------------------------
+# Price Check -- mytrader/price_check.py. Ad-hoc, user-maintained list of
+# ticker/target-price pairs, checked every 4 hours by its own systemd timer
+# (second-brain-mytrader-pricecheck.timer), pinging WhatsApp the moment a
+# ticker's price crosses its set target in either direction. Deliberately
+# separate from watchlist/holdings -- Shaun's own request 2026-11-04, not tied
+# to bucket/status semantics. Cheap (one market_data.fetch_current_price call
+# per tracked ticker, no LLM), so a 4-hourly cadence is fine cost-wise.
+# ---------------------------------------------------------------------------
+PRICE_CHECK_REPORT_PATH = MY_TRADER_DIR / "price-check-report.md"

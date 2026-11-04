@@ -32,6 +32,7 @@ $TIMERS = @(
     "second-brain-mytrader-cashvalue-scan.timer",
     "second-brain-mytrader-earnings-watch.timer",
     "second-brain-mytrader-monitor.timer",
+    "second-brain-mytrader-pricecheck.timer",
     "second-brain-superinvestor-edgar.timer",
     "second-brain-superinvestor-sast.timer",
     "second-brain-volume-earnings-scan.timer"

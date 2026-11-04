@@ -467,3 +467,49 @@ def test_get_portfolio_value_history_sums_across_tickers_per_day(db_conn):
         {"date": "2026-08-01", "total_mkt_value": 604.0},
         {"date": "2026-08-02", "total_mkt_value": 34.5},
     ]
+
+
+def test_upsert_price_check_inserts_new_row_with_null_baseline(db_conn):
+    db.upsert_price_check(db_conn, ticker="AAPL", name="Apple Inc.", target_price=200.0)
+    row = db.get_price_check(db_conn, "AAPL")
+    assert row["ticker"] == "AAPL"
+    assert row["name"] == "Apple Inc."
+    assert row["target_price"] == 200.0
+    assert row["last_side"] is None
+    assert row["last_price"] is None
+
+
+def test_upsert_price_check_updates_and_resets_baseline(db_conn):
+    db.upsert_price_check(db_conn, ticker="AAPL", name="Apple Inc.", target_price=200.0)
+    db.update_price_check_side(db_conn, "AAPL", side="above", price=210.0)
+
+    # Changing the target must re-baseline -- a new target has no established
+    # "side" yet, so an old side value would risk a false crossing next run.
+    db.upsert_price_check(db_conn, ticker="AAPL", name="Apple Inc.", target_price=250.0)
+    row = db.get_price_check(db_conn, "AAPL")
+    assert row["target_price"] == 250.0
+    assert row["last_side"] is None
+    assert row["last_price"] is None
+
+
+def test_get_all_price_checks_sorted_by_ticker(db_conn):
+    db.upsert_price_check(db_conn, ticker="MSFT", name=None, target_price=400.0)
+    db.upsert_price_check(db_conn, ticker="AAPL", name=None, target_price=200.0)
+    rows = db.get_all_price_checks(db_conn)
+    assert [r["ticker"] for r in rows] == ["AAPL", "MSFT"]
+
+
+def test_delete_price_check_removes_row_and_reports_count(db_conn):
+    db.upsert_price_check(db_conn, ticker="AAPL", name=None, target_price=200.0)
+    assert db.delete_price_check(db_conn, "AAPL") == 1
+    assert db.get_price_check(db_conn, "AAPL") is None
+    assert db.delete_price_check(db_conn, "AAPL") == 0
+
+
+def test_update_price_check_side_persists_side_and_price(db_conn):
+    db.upsert_price_check(db_conn, ticker="AAPL", name=None, target_price=200.0)
+    db.update_price_check_side(db_conn, "AAPL", side="below", price=195.5)
+    row = db.get_price_check(db_conn, "AAPL")
+    assert row["last_side"] == "below"
+    assert row["last_price"] == 195.5
+    assert row["last_checked_at"] is not None

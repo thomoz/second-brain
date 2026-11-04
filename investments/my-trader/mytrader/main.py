@@ -381,6 +381,59 @@ def cmd_scan_earnings_watch(args) -> None:
     )
 
 
+def cmd_price_check_add(args) -> None:
+    from .price_check import add_price_check
+    from .tickers import normalize
+
+    conn = _open_conn()
+    add_price_check(normalize(args.ticker), args.price, args.name, conn)
+    conn.close()
+    print(f"Set price check: {normalize(args.ticker)} @ {args.price:,.2f}. "
+          f"First run establishes a baseline (no alert); a ping fires once the price crosses it.")
+
+
+def cmd_price_check_remove(args) -> None:
+    from .price_check import remove_price_check
+    from .tickers import normalize
+
+    conn = _open_conn()
+    count = remove_price_check(normalize(args.ticker), conn)
+    conn.close()
+    if count:
+        print(f"Removed price check for {normalize(args.ticker)}.")
+    else:
+        print(f"No price check found for {normalize(args.ticker)}.")
+
+
+def cmd_price_check_list(args) -> None:
+    from . import db
+
+    conn = _open_conn()
+    rows = db.get_all_price_checks(conn)
+    conn.close()
+    if not rows:
+        print("No price checks set. Add one with: price-check-add --ticker X --price Y")
+        return
+    for r in rows:
+        side = r["last_side"] or "not yet checked"
+        last_price = f", last price {r['last_price']:,.2f}" if r["last_price"] is not None else ""
+        print(f"{r['ticker']:<8} target {r['target_price']:>10,.2f}  ({side}{last_price})")
+
+
+def cmd_scan_price_check(args) -> None:
+    from .price_check import maybe_notify, run_price_check, write_report
+
+    conn = _open_conn()
+    result = run_price_check(conn)
+    conn.close()
+    write_report(result)
+    maybe_notify(result)
+    print(
+        f"Price check complete: checked {len(result['checked'])} ticker(s), "
+        f"{len(result['crossed'])} crossed. See investments/my-trader/price-check-report.md"
+    )
+
+
 def cmd_monitor(args) -> None:
     from .monitor import maybe_notify, run_monitor, write_report
 
@@ -485,6 +538,27 @@ def main() -> None:
              "guidance search (writes earnings-watch-report.md)",
     )
 
+    p_price_check_add = subparsers.add_parser(
+        "price-check-add",
+        help="Set (or update) an ad-hoc ticker/target-price watch, pinged every "
+             "4 hours when the price crosses it",
+    )
+    p_price_check_add.add_argument("--ticker", required=True)
+    p_price_check_add.add_argument("--price", type=float, required=True)
+    p_price_check_add.add_argument("--name", default=None)
+
+    p_price_check_remove = subparsers.add_parser(
+        "price-check-remove", help="Remove a ticker from the price-check watch list",
+    )
+    p_price_check_remove.add_argument("--ticker", required=True)
+
+    subparsers.add_parser("price-check-list", help="List current price checks and their status")
+    subparsers.add_parser(
+        "scan-price-check",
+        help="Check every tracked ticker's price against its target, pinging "
+             "WhatsApp on any crossing (writes price-check-report.md)",
+    )
+
     p_promote = subparsers.add_parser(
         "promote-candidate", help="Move a pending synced candidate into the real watchlist",
     )
@@ -530,6 +604,10 @@ def main() -> None:
         "gold-backtest": cmd_gold_backtest,
         "cash-value-scan": cmd_cash_value_scan,
         "scan-earnings-watch": cmd_scan_earnings_watch,
+        "price-check-add": cmd_price_check_add,
+        "price-check-remove": cmd_price_check_remove,
+        "price-check-list": cmd_price_check_list,
+        "scan-price-check": cmd_scan_price_check,
         "promote-candidate": cmd_promote_candidate,
         "dismiss-candidate": cmd_dismiss_candidate,
         "refresh-watchlist-data": cmd_refresh_watchlist_data,
