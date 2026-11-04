@@ -8,3 +8,4 @@ tracking that ticker on the next run.
 
 | Ticker | Target Price | Name |
 |--------|---------------|------|
+| AAPL | 200 | Apple Inc. |
