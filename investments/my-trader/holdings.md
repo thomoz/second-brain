@@ -4,19 +4,19 @@ Auto-generated from the shared database by my-trader — edits here are overwrit
 
 | Ticker | Name | Qty | Mkt Value | Avg Price | Unrealized P&L | Bucket |
 |--------|------|-----|-----------|-----------|-----------------|--------|
-| AG |  | 40.0264 | $616.01 | $20.98 | $-223.74 | unassigned |
+| AG |  | 40.0264 | $595.99 | $20.98 | $-243.76 | unassigned |
 | BMS |  | 250.0 | — | $2.32 | — | unassigned |
-| CYL.AX |  | 200.0 | $756.00 | $5.86 | $-415.05 | unassigned |
-| GOLD.AX |  | 20.0 | $1,059.60 | $59.31 | $-126.65 | unassigned |
-| GXLD.AX |  | 25.0 | $1,444.75 | $61.82 | $-100.81 | unassigned |
-| LLY | Eli Lilly & Co | 0.0001 | $0.14 | $1,148.00 | +$0.03 | 1 |
-| LULU | lululemon athletica inc. | 22.0 | $2,465.32 | $113.22 | $-25.41 | 1 |
-| LYV | Live Nation Entertainment Inc | 0.4 | $73.27 | $167.29 | +$6.36 | 1 |
-| PDD |  | 10.0 | $821.50 | $92.53 | $-103.84 | unassigned |
+| CYL.AX |  | 200.0 | $826.00 | $5.86 | $-345.05 | unassigned |
+| GOLD.AX |  | 20.0 | $1,077.40 | $59.31 | $-108.85 | unassigned |
+| GXLD.AX |  | 25.0 | $1,470.75 | $61.82 | $-74.81 | unassigned |
+| LLY | Eli Lilly & Co | 0.0001 | $0.14 | $1,148.00 | +$0.02 | 1 |
+| LULU | lululemon athletica inc. | 22.0 | $2,458.94 | $113.22 | $-31.79 | 1 |
+| LYV | Live Nation Entertainment Inc | 0.4 | $72.50 | $167.29 | +$5.59 | 1 |
+| PDD |  | 10.0 | $839.50 | $92.53 | $-85.84 | unassigned |
 | PMGOLD.AX |  | 50.0 | $897.00 | $62.06 | $-2,206.18 | 3b |
-| SILJ |  | 25.0 | $610.25 | $32.27 | $-196.59 | unassigned |
-| SOFI |  | 50.0 | $869.00 | $19.01 | $-81.33 | unassigned |
-| UBER |  | 10.0 | $698.70 | $79.08 | $-92.06 | unassigned |
-| V | Visa Inc (Class A) | 0.1002 | $43.74 | $318.47 | +$11.83 | 1 |
+| SILJ |  | 25.0 | $600.25 | $32.27 | $-206.59 | unassigned |
+| SOFI |  | 50.0 | $802.00 | $19.01 | $-148.33 | unassigned |
+| UBER |  | 10.0 | $687.80 | $79.08 | $-102.96 | unassigned |
+| V | Visa Inc (Class A) | 0.1002 | $42.34 | $318.47 | +$10.43 | 1 |
 
-Last auto-generated: 2026-11-05.
+Last auto-generated: 2026-11-06.
