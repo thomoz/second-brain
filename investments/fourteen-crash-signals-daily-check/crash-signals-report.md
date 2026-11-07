@@ -4,7 +4,7 @@ What this is: 14 historical market-crash warning markers, checked daily so an ea
 
 Auto-generated daily -- overwritten every run. Advisor notes only; no trade action is ever suggested here (see SOUL.md). Per-marker source: investments/my-trader/14-signals-crash-warning-handoff.md.
 
-## Run: 2026-11-07
+## Run: 2026-11-08
 
 ## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)
 Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 mega-cap constituents -- never hardcoded to a fixed ticker list.
@@ -49,8 +49,8 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (PG) | ok | PG: Free Cash Flow $+15.1B, Capital Expenditure $4.4B (period ending 2026-06-30) |
 | 4 | Capex outruns cash flow (MRK) | ok | MRK: Free Cash Flow $+12.4B, Capital Expenditure $4.1B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.48T as of 2026-09-01, +31.4% YoY vs 2025-09-01 |
-| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 160 filing(s) in the trailing 30d vs 219 in the same window a year ago (0.73x); 424B4 (priced IPO): 25 filing(s) in the trailing 30d vs 43 in the same window a year ago (0.58x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.89 (z=4.54 vs trailing 77d mean 0.58) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 155 filing(s) in the trailing 30d vs 216 in the same window a year ago (0.72x); 424B4 (priced IPO): 25 filing(s) in the trailing 30d vs 43 in the same window a year ago (0.58x) |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.59 (z=0.06 vs trailing 78d mean 0.59) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (LLY) | flag | LLY: $310,345,848 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (WMT) | flag | WMT: $2,967,673,609 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (XOM) | flag | XOM: $2,395,656 sold vs $0 bought, trailing 365 days |
@@ -61,7 +61,7 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 8 | Insider selling (KO) | flag | KO: $261,211,978 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (PG) | flag | PG: $87,440,489 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (MRK) | flag | MRK: $71,293,772 sold vs $0 bought, trailing 365 days |
-| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (100 day(s) away) -- ad-share content is not automatable, nothing to check yet |
+| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (99 day(s) away) -- ad-share content is not automatable, nothing to check yet |
 | 10 | Most-valuable-company milestone | flag | LLY is the largest company in the current hot-sector watchlist ($1.21T, most recently crossed the $1.0T rung) |
 | 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
 | 12 | Credit turns in the hot sector while broad market stays calm (JNJ) | unknown | JNJ: bond CUSIP 478160CY8 found, but no live or manually-entered yield reading available -- run `record-bond-yield JNJ <yield_pct>` |
