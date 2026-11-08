@@ -8,7 +8,7 @@ Scanned 742 ticker(s) across the combined universe.
 
 | Ticker | Company | Exchange | Industry | Signal | Flagged |
 |--------|---------|----------|----------|--------|---------|
-| CMM.AX | Capricorn Metals | ASX | Gold | CMM.AX (Materials): crossed above its 150-day MA 1 trading day(s) ago, now +0.9% above it (MA currently rising) -- DMA breakout discovery signal; survival context: debt/equity 1.4 (below flag threshold), N/A — cash generative, gross margin 59.4%, operating margin 56.4%, revenue growth +26.1% YoY, cash-generating | 2026-11-07 |
-| QAN.AX | Qantas | ASX | Airlines | QAN.AX (Industrials): crossed above its 150-day MA 1 trading day(s) ago, now +2.9% above it (MA currently rising) -- DMA breakout discovery signal; survival context: debt/equity 688.3 (at/above flag threshold), cash runway 7.5 years (cash-burning), gross margin 31.3%, operating margin 6.1%, revenue growth +7.9% YoY, cash-generating | 2026-11-07 |
+| CMM.AX | Capricorn Metals | ASX | Gold | CMM.AX (Materials): crossed above its 150-day MA 1 trading day(s) ago, now +0.9% above it (MA currently rising) -- DMA breakout discovery signal; survival context: debt/equity 1.4 (below flag threshold), N/A — cash generative, gross margin 59.4%, operating margin 56.4%, revenue growth +26.1% YoY, cash-generating | 2026-11-08 |
+| QAN.AX | Qantas | ASX | Airlines | QAN.AX (Industrials): crossed above its 150-day MA 1 trading day(s) ago, now +2.9% above it (MA currently rising) -- DMA breakout discovery signal; survival context: debt/equity 688.3 (at/above flag threshold), cash runway 7.5 years (cash-burning), gross margin 31.3%, operating margin 6.1%, revenue growth +7.9% YoY, cash-generating | 2026-11-08 |
 
-Last auto-generated: 2026-11-08.
+Last auto-generated: 2026-11-09.
