@@ -23,7 +23,7 @@ Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - [ok] dividend: Dividend grew 150.0% vs prior 12 months
 - [ok] valuation: PE 19.2 within normal range -- lower is generally cheaper (7/10 — good)
 - [ok] balance_sheet: Debt/Equity 9.7 -- lower is generally safer (9/10 — very good), Current Ratio 2.51 -- higher is generally safer, up to a point (10/10 — excellent) — within thresholds
-- [info] fx: USD-denominated; AUD/USD 3mo move: -2.2%
+- [info] fx: USD-denominated; AUD/USD 3mo move: -2.4%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Basic Materials is 13.9% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [interesting] opportunity: Marks/Neilson [down -17.5% over 3 months with no other flags — possible overreaction, not a fundamental problem] (you already hold this — reads as an add-to-position signal, not a new-buy signal)
@@ -35,7 +35,7 @@ Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 **BMS** (None, No strategic bucket assigned yet)
 250.0 @ avg $2.32 | current price unavailable
 Bottom line: Nothing notable this run.
-- OPEN ALERT (earnings_watch_guidance, since 2026-11-07): Bristol Myers Squibb (BMY) shows an early product-level warning: Cobenfy prescription growth slowed sharply, and management acknowledged challenges with patient starts and repeat prescribing. This suggests downside risk to launch expectations, although company-wide Q3 results beat estimates and revenue guidance increased. (On October 29, management reported Cobenfy total prescriptions grew only 3–4% sequentially and said new patient starts and repeat prescribing need improvement; dose escalation and early nausea/vomiting remain challenges. [Q3 call transcript](https://stockanalysis.com/stocks/bmy/transcripts/660055-q3-2026/); Cobenfy prescription growth slowed from roughly 15% sequentially previously to 3–4%, an early demand warning rather than evidence of a company-wide earnings miss. [Earnings Whispers analysis](https://www.earningswhispers.com/article/BMY/r731); FY2026 EPS guidance fell to $6.35–$6.55 from $6.75–$7.00 because of acquired R&D/licensing charges; revenue guidance increased to $49.75–$50.25 billion and gross-margin guidance remained unchanged. [Company filing](https://www.sec.gov/Archives/edgar/data/14272/000001427226000022/a2026q3ex991-filing.htm); Q3 revenue of $13.1 billion and adjusted EPS of $1.35 exceeded analyst estimates; no separate public monthly/weekly operating series establishing broader deterioration was found. [Reuters](https://www.investing.com/news/stock-market-news/bristol-myers-raises-2026-revenue-forecast-lowers-eps-due-to-charge-4982774))
+Open alerts: none
 - [unknown] company_profile: No market data available
 - [unknown] dividend: No market data available
 - [unknown] valuation: No market data available
@@ -112,7 +112,7 @@ Bottom line: 1 flag(s) active (valuation) — worth a look.
 - [ok] dividend: Dividend grew 15.3% vs prior 12 months
 - [flag] valuation: PE 43.9 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
 - [ok] balance_sheet: Debt/Equity 122.9 -- lower is generally safer (2/10 — below average), Current Ratio 1.39 -- higher is generally safer, up to a point (4/10 — fair) — within thresholds
-- [info] fx: USD-denominated; AUD/USD 3mo move: -2.2%
+- [info] fx: USD-denominated; AUD/USD 3mo move: -2.4%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Healthcare is 0.0% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [interesting] opportunity: Crash-discount fit [ROE 86.0% at/above 15.0% (10/10 — excellent), but currently rich (PE 43.9) — quality worth watching for a crash-driven discount rather than buying at today's price] (you already hold this — reads as an add-to-position signal, not a new-buy signal)
@@ -129,7 +129,7 @@ Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - [info] dividend: No dividend history
 - [ok] valuation: PE 9.1 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
 - [ok] balance_sheet: Debt/Equity 44.7 -- lower is generally safer (7/10 — good), Current Ratio 2.19 -- higher is generally safer, up to a point (10/10 — excellent) — within thresholds
-- [info] fx: USD-denominated; AUD/USD 3mo move: -2.2%
+- [info] fx: USD-denominated; AUD/USD 3mo move: -2.4%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Consumer Cyclical is 23.6% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [interesting] opportunity: Graham [PE 9.1 at/below cheap threshold (12.0), P/B unavailable/implausible]; Buffett/Smith [ROE 30.9% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -13.8% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
@@ -147,7 +147,7 @@ Bottom line: 2 flag(s) active (valuation, balance_sheet) — worth a look.
 - [info] dividend: No dividend history
 - [flag] valuation: PE 90.0 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
 - [flag] balance_sheet: Debt/Equity 510.0 >= 150.0 -- lower is generally safer (0/10 — poor); Current Ratio 0.95 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
-- [info] fx: USD-denominated; AUD/USD 3mo move: -2.2%
+- [info] fx: USD-denominated; AUD/USD 3mo move: -2.4%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Communication Services is 0.5% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: Active risk flag(s) present elsewhere this run — not calling this an opportunity regardless of price or valuation
@@ -164,7 +164,7 @@ Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - [info] dividend: No dividend history
 - [ok] valuation: PE 9.3 at/below cheap threshold (12.0) -- lower is generally cheaper (10/10 — excellent)
 - [ok] balance_sheet: Debt/Equity 1.1 -- lower is generally safer (10/10 — excellent), Current Ratio 2.62 -- higher is generally safer, up to a point (10/10 — excellent) — within thresholds
-- [info] fx: USD-denominated; AUD/USD 3mo move: -2.2%
+- [info] fx: USD-denominated; AUD/USD 3mo move: -2.4%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Consumer Cyclical is 23.6% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [interesting] opportunity: Graham [PE 9.3 x P/B 1.74 = 16.3, below 22.5]; Lynch [PEG 0.72 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 22.7% at/above 15.0% (10/10 — excellent), not richly valued] (3 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
@@ -200,7 +200,7 @@ Bottom line: 1 flag(s) active (dividend) — worth a look.
 - [flag] dividend: Dividend declined -23.2% vs prior 12 months
 - [ok] valuation: PE 19.9 within normal range -- lower is generally cheaper (7/10 — good)
 - [unknown] balance_sheet: No balance sheet data available
-- [info] fx: USD-denominated; AUD/USD 3mo move: -2.2%
+- [info] fx: USD-denominated; AUD/USD 3mo move: -2.4%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: No sector data for candidate
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [info] etf_mechanics: Expense ratio 0.69%, AUM $2,912,534,784 — top holdings: Hecla Mining Co (10.1%), First Majestic Silver Corp (10.0%), Coeur Mining Inc (9.2%); dominant sector: Basic Materials (100%)
@@ -218,7 +218,7 @@ Bottom line: 1 flag(s) active (going_concern) — worth a look.
 - [info] dividend: No dividend history
 - [ok] valuation: PE 29.5 within normal range -- lower is generally cheaper (2/10 — below average)
 - [ok] balance_sheet: Debt/Equity 35.3 -- lower is generally safer (8/10 — very good), Current Ratio 1.09 -- higher is generally safer, up to a point (1/10 — poor) — within thresholds
-- [info] fx: USD-denominated; AUD/USD 3mo move: -2.2%
+- [info] fx: USD-denominated; AUD/USD 3mo move: -2.4%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Financial Services is 6.8% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [interesting] opportunity: Lynch [PEG 0.50 at/below 1.0 — growth at a reasonable price]; Marks/Neilson [down -11.8% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
@@ -237,7 +237,7 @@ Bottom line: 1 flag(s) active (valuation) — worth a look.
 - [info] dividend: No dividend history
 - [flag] valuation: PE 40.3 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
 - [ok] balance_sheet: Debt/Equity 61.2 -- lower is generally safer (6/10 — good), Current Ratio 1.23 -- higher is generally safer, up to a point (2/10 — below average) — within thresholds
-- [info] fx: USD-denominated; AUD/USD 3mo move: -2.2%
+- [info] fx: USD-denominated; AUD/USD 3mo move: -2.4%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Technology is 5.5% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: PE 40.3 rich and no ROE signal strong enough to call this a crash-discount candidate
@@ -254,7 +254,7 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - [ok] dividend: Dividend grew 13.6% vs prior 12 months
 - [ok] valuation: PE 34.3 within normal range -- lower is generally cheaper (0/10 — poor)
 - [flag] balance_sheet: Current Ratio 0.96 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
-- [info] fx: USD-denominated; AUD/USD 3mo move: -2.2%
+- [info] fx: USD-denominated; AUD/USD 3mo move: -2.4%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Financial Services is 6.8% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: Active risk flag(s) present elsewhere this run — not calling this an opportunity regardless of price or valuation
@@ -268,7 +268,6 @@ No new material changes.
 
 ### All Open Alerts
 - **UBER** (holdings) — earnings_watch_trend: EPS estimate down 17.3% over the trailing 30 days (3.18 -> 2.63); corroborating: 3 analyst downward revisions vs 1 upward in the last 30 days (first flagged 2026-11-08)
-- **BMS** (holdings) — earnings_watch_guidance: Bristol Myers Squibb (BMY) shows an early product-level warning: Cobenfy prescription growth slowed sharply, and management acknowledged challenges with patient starts and repeat prescribing. This suggests downside risk to launch expectations, although company-wide Q3 results beat estimates and revenue guidance increased. (On October 29, management reported Cobenfy total prescriptions grew only 3–4% sequentially and said new patient starts and repeat prescribing need improvement; dose escalation and early nausea/vomiting remain challenges. [Q3 call transcript](https://stockanalysis.com/stocks/bmy/transcripts/660055-q3-2026/); Cobenfy prescription growth slowed from roughly 15% sequentially previously to 3–4%, an early demand warning rather than evidence of a company-wide earnings miss. [Earnings Whispers analysis](https://www.earningswhispers.com/article/BMY/r731); FY2026 EPS guidance fell to $6.35–$6.55 from $6.75–$7.00 because of acquired R&D/licensing charges; revenue guidance increased to $49.75–$50.25 billion and gross-margin guidance remained unchanged. [Company filing](https://www.sec.gov/Archives/edgar/data/14272/000001427226000022/a2026q3ex991-filing.htm); Q3 revenue of $13.1 billion and adjusted EPS of $1.35 exceeded analyst estimates; no separate public monthly/weekly operating series establishing broader deterioration was found. [Reuters](https://www.investing.com/news/stock-market-news/bristol-myers-raises-2026-revenue-forecast-lowers-eps-due-to-charge-4982774)) (first flagged 2026-11-07)
 - **AG** (holdings) — earnings_watch_trend: EPS estimate down 7.2% over the trailing 30 days (0.93 -> 0.86); corroborating: 2 analyst downward revisions vs 1 upward in the last 30 days (first flagged 2026-11-07)
 - **MLPX** (watchlist) — dividend: Dividend declined -20.1% vs prior 12 months (first flagged 2026-11-07)
 - **VRTX** (watchlist) — valuation: PE 35.2 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-11-06)
@@ -400,7 +399,7 @@ No new material changes.
 - **uk_cpi** [flag] — UK headline CPI 3.5% YoY (reference month 2026-09-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone
 - **real_yields** [flag] — 10Y real yield +2.60% (as of 2026-11-05), above the 2.0% threshold -- elevated real yields historically pressure gold hard
 - **dollar_index** [ok] — Broad USD index 121.7, +0.1% over the past 30 days
-- **gold_trend** [info] — GC=F $4,075 (50DMA $4,230, 200DMA $4,501, -9.5% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $58.36 AUD; AUD/USD 3mo move -2.2%
+- **gold_trend** [info] — GC=F $4,075 (50DMA $4,230, 200DMA $4,501, -9.5% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $58.36 AUD; AUD/USD 3mo move -2.4%
 - **gold_silver_ratio** [ok] — Gold/silver ratio at 78.5
 - **vix** [ok] — VIX at 25.6, below the flag threshold
 
