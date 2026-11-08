@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import date, timedelta
+
 from goat import db
 
 
@@ -313,3 +315,144 @@ def test_get_price_outcomes_for_pattern_analysis_excludes_holdings_watch(db_conn
     )
     rows = db.get_price_outcomes_for_pattern_analysis(db_conn)
     assert rows == []
+
+
+def test_get_insider_buy_filings_in_window_returns_rows_regardless_of_kind(db_conn):
+    today = date.today().isoformat()
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=today, trade_date=today,
+        insider_name="Jane Doe", trade_type="P", value=30_000.0, kind="discovery",
+    )
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k2", ticker="ACME", filing_date=today, trade_date=today,
+        insider_name="John Smith", trade_type="P", value=40_000.0, kind="holdings_watch",
+    )
+    rows = db.get_insider_buy_filings_in_window(db_conn, "ACME", today, today)
+    assert {r["dedup_key"] for r in rows} == {"k1", "k2"}
+
+
+def test_get_insider_buy_filings_in_window_excludes_rows_outside_window(db_conn):
+    today = date.today()
+    old = (today - timedelta(days=20)).isoformat()
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=old, trade_date=old,
+        insider_name="Jane Doe", trade_type="P", value=30_000.0, kind="discovery",
+    )
+    window_start = (today - timedelta(days=5)).isoformat()
+    window_end = today.isoformat()
+    rows = db.get_insider_buy_filings_in_window(db_conn, "ACME", window_start, window_end)
+    assert rows == []
+
+
+def test_get_insider_buy_filings_in_window_excludes_sells(db_conn):
+    today = date.today().isoformat()
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=today, trade_date=today,
+        insider_name="Jane Doe", trade_type="S", value=30_000.0, kind="discovery_sell",
+    )
+    rows = db.get_insider_buy_filings_in_window(db_conn, "ACME", today, today)
+    assert rows == []
+
+
+def test_mark_insider_filings_cluster_alert_fired_sets_flag_on_given_keys(db_conn):
+    today = date.today().isoformat()
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=today, trade_date=today,
+        insider_name="Jane Doe", trade_type="P", value=30_000.0, kind="discovery",
+    )
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k2", ticker="ACME", filing_date=today, trade_date=today,
+        insider_name="John Smith", trade_type="P", value=30_000.0, kind="discovery",
+    )
+    db.mark_insider_filings_cluster_alert_fired(db_conn, ["k1"])
+    rows = {r["dedup_key"]: r["cluster_alert_fired"] for r in db.get_insider_buy_filings_in_window(db_conn, "ACME", today, today)}
+    assert rows["k1"] == 1
+    assert rows["k2"] == 0
+
+
+def test_mark_insider_filings_cluster_alert_fired_noops_on_empty_list(db_conn):
+    db.mark_insider_filings_cluster_alert_fired(db_conn, [])  # must not raise
+
+
+def test_get_most_recent_insider_sale_returns_most_recent_qualifying_sale(db_conn):
+    today = date.today()
+    older = (today - timedelta(days=60)).isoformat()
+    newer = (today - timedelta(days=30)).isoformat()
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=older, trade_date=older,
+        insider_name="John Smith", trade_type="S", value=30_000.0, kind="discovery_sell",
+    )
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k2", ticker="ACME", filing_date=newer, trade_date=newer,
+        insider_name="John Smith", trade_type="S", value=40_000.0, kind="discovery_sell",
+    )
+    row = db.get_most_recent_insider_sale(
+        db_conn, ticker="ACME", insider_name="John Smith",
+        since_date=(today - timedelta(days=90)).isoformat(), before_date=today.isoformat(),
+    )
+    assert row["dedup_key"] == "k2"
+
+
+def test_get_most_recent_insider_sale_excludes_different_insider(db_conn):
+    today = date.today()
+    sale_date = (today - timedelta(days=30)).isoformat()
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=sale_date, trade_date=sale_date,
+        insider_name="Jane Doe", trade_type="S", value=30_000.0, kind="discovery_sell",
+    )
+    row = db.get_most_recent_insider_sale(
+        db_conn, ticker="ACME", insider_name="John Smith",
+        since_date=(today - timedelta(days=90)).isoformat(), before_date=today.isoformat(),
+    )
+    assert row is None
+
+
+def test_get_most_recent_insider_sale_excludes_different_ticker(db_conn):
+    today = date.today()
+    sale_date = (today - timedelta(days=30)).isoformat()
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ZETA", filing_date=sale_date, trade_date=sale_date,
+        insider_name="John Smith", trade_type="S", value=30_000.0, kind="discovery_sell",
+    )
+    row = db.get_most_recent_insider_sale(
+        db_conn, ticker="ACME", insider_name="John Smith",
+        since_date=(today - timedelta(days=90)).isoformat(), before_date=today.isoformat(),
+    )
+    assert row is None
+
+
+def test_get_most_recent_insider_sale_excludes_sale_outside_date_range(db_conn):
+    today = date.today()
+    sale_date = (today - timedelta(days=100)).isoformat()
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=sale_date, trade_date=sale_date,
+        insider_name="John Smith", trade_type="S", value=30_000.0, kind="discovery_sell",
+    )
+    row = db.get_most_recent_insider_sale(
+        db_conn, ticker="ACME", insider_name="John Smith",
+        since_date=(today - timedelta(days=90)).isoformat(), before_date=today.isoformat(),
+    )
+    assert row is None
+
+
+def test_get_most_recent_insider_sale_returns_none_when_none_exists(db_conn):
+    row = db.get_most_recent_insider_sale(
+        db_conn, ticker="ACME", insider_name="John Smith",
+        since_date="2026-01-01", before_date="2026-12-31",
+    )
+    assert row is None
+
+
+def test_init_goat_tables_migration_is_idempotent_and_adds_cluster_alert_fired_column(db_conn):
+    from goat.db import init_goat_tables
+
+    init_goat_tables(db_conn)  # second call on the same connection must not raise
+    today = date.today().isoformat()
+    db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="k1", ticker="ACME", filing_date=today, trade_date=today,
+        insider_name="Jane Doe", trade_type="P", value=30_000.0, kind="discovery",
+    )
+    row = db_conn.execute(
+        "SELECT cluster_alert_fired FROM goat_insider_filings_seen WHERE dedup_key = ?", ("k1",)
+    ).fetchone()
+    assert row["cluster_alert_fired"] == 0

@@ -111,10 +111,78 @@ def _prior_sale_count(conn: sqlite3.Connection, ticker: str, insider_name: str, 
     )
 
 
+def _check_buy_cluster(conn: sqlite3.Connection, ticker: str, trade_date_str: str) -> dict[str, Any] | None:
+    """Returns a cluster-alert dict the first time this ticker's buy filings within
+    GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS of trade_date_str reach
+    GOAT_INSIDER_CLUSTER_MIN_DISTINCT_BUYERS distinct insiders; None if the bar
+    isn't met, or if every filing in the window already belongs to an
+    already-announced cluster (new members still get marked so they stay part of
+    the announced group, they just don't re-trigger a notification). Buy-direction
+    only, per Shaun 2026-11-08 -- distinct from and does not touch
+    insider_pattern_analysis._compute_clusters's own mixed-direction, 7-day-window
+    retrospective stat. Caller must have already inserted this ticker's own new
+    filing via insert_goat_insider_filing_seen before calling this, so it's
+    included in the window query. Called from BOTH run_holdings_watch and
+    run_discovery_scan -- see this module's "Patterns to Follow" note for why a
+    single call site would miss held-ticker clusters."""
+    try:
+        trade_date_obj = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+    window_start = (trade_date_obj - timedelta(days=config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS)).isoformat()
+    window_end = (trade_date_obj + timedelta(days=config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS)).isoformat()
+    nearby = db.get_insider_buy_filings_in_window(conn, ticker, window_start, window_end)
+    distinct_insiders = {r["insider_name"] for r in nearby}
+    if len(distinct_insiders) < config.GOAT_INSIDER_CLUSTER_MIN_DISTINCT_BUYERS:
+        return None
+    dedup_keys = [r["dedup_key"] for r in nearby]
+    already_fired = any(r["cluster_alert_fired"] for r in nearby)
+    db.mark_insider_filings_cluster_alert_fired(conn, dedup_keys)
+    if already_fired:
+        return None
+    return {
+        "ticker": ticker,
+        "insiders": sorted(distinct_insiders),
+        "titles": sorted({r["title"] for r in nearby if r["title"]}),
+        "total_value": sum(r["value"] for r in nearby),
+    }
+
+
+def _check_insider_flip(
+    conn: sqlite3.Connection, ticker: str, insider_name: str, trade_date_str: str
+) -> dict[str, Any] | None:
+    """Returns a flip-alert dict when THIS SAME insider sold this ticker within
+    GOAT_INSIDER_FLIP_WINDOW_DAYS before this new buy -- Shaun 2026-11-08: a
+    same-person reversal (sell, then buy back) is itself a signal, distinct from
+    _check_buy_cluster (which is about multiple DIFFERENT insiders). Fires exactly
+    once per qualifying buy filing (dedup is automatic -- this is only ever called
+    the moment a buy filing is first inserted, newly_seen=True, same as the
+    existing per-trade discovery alert). Called from BOTH run_holdings_watch and
+    run_discovery_scan, same reasoning as _check_buy_cluster."""
+    try:
+        buy_date = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+    since_date = (buy_date - timedelta(days=config.GOAT_INSIDER_FLIP_WINDOW_DAYS)).isoformat()
+    prior_sale = db.get_most_recent_insider_sale(
+        conn, ticker=ticker, insider_name=insider_name,
+        since_date=since_date, before_date=trade_date_str,
+    )
+    if prior_sale is None:
+        return None
+    sale_date = datetime.strptime(prior_sale["trade_date"], "%Y-%m-%d").date()
+    return {
+        "ticker": ticker, "insider_name": insider_name,
+        "sale_date": prior_sale["trade_date"], "sale_value": prior_sale["value"],
+        "buy_date": trade_date_str, "days_between": (buy_date - sale_date).days,
+    }
+
+
 def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
     held_tickers = sorted({row["ticker"] for row in mt_db.get_all_holdings(conn)})
     if not held_tickers:
-        return {"checked_holdings": 0, "new_alerts": [], "recent_filings": []}
+        return {"checked_holdings": 0, "new_alerts": [], "recent_filings": [],
+                 "new_cluster_alerts": [], "new_flip_alerts": []}
 
     purchases = openinsider.fetch_screener_filings(
         held_tickers, "P", config.GOAT_INSIDER_PURCHASE_MIN_VALUE
@@ -124,9 +192,12 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
     )
     if purchases is None and sales is None:
         print("[goat-insider-scan] OpenInsider screener fetch failed for both purchases and sales")
-        return {"checked_holdings": len(held_tickers), "new_alerts": [], "recent_filings": []}
+        return {"checked_holdings": len(held_tickers), "new_alerts": [], "recent_filings": [],
+                 "new_cluster_alerts": [], "new_flip_alerts": []}
 
     new_alerts: list[dict[str, Any]] = []
+    new_cluster_alerts: list[dict[str, Any]] = []
+    new_flip_alerts: list[dict[str, Any]] = []
     for row in (purchases or []) + (sales or []):
         if not _within_lookback(row.get("trade_date", ""), config.GOAT_INSIDER_HOLDINGS_WATCH_LOOKBACK_DAYS):
             continue
@@ -140,6 +211,16 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
         )
         if not newly_seen:
             continue
+
+        if row["trade_type_code"] == "P":
+            cluster_event = _check_buy_cluster(conn, row["ticker"], row.get("trade_date", ""))
+            if cluster_event:
+                new_cluster_alerts.append(cluster_event)
+            flip_event = _check_insider_flip(
+                conn, row["ticker"], row.get("insider_name", ""), row.get("trade_date", "")
+            )
+            if flip_event:
+                new_flip_alerts.append(flip_event)
 
         # Sales are gated on % of the insider's own position, not dollar value
         # (Shaun 2026-08-17 -- $25k/$100k floors are meaningless against a
@@ -181,6 +262,8 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
         "checked_holdings": len(held_tickers),
         "new_alerts": new_alerts,
         "recent_filings": [dict(r) for r in db.get_recent_insider_filings_seen(conn, kind="holdings_watch")],
+        "new_cluster_alerts": new_cluster_alerts,
+        "new_flip_alerts": new_flip_alerts,
     }
 
 
@@ -191,6 +274,8 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         rows = []
 
     new_candidates: list[dict[str, Any]] = []
+    new_cluster_alerts: list[dict[str, Any]] = []
+    new_flip_alerts: list[dict[str, Any]] = []
     for row in rows:
         if not _within_lookback(row.get("trade_date", ""), config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS):
             continue
@@ -201,12 +286,7 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
             row.get("insider_name", ""), row.get("title", "")
         ):
             continue
-        if mt_db.get_holding_row(conn, ticker) is not None:
-            continue
-        if mt_db.get_watchlist_row(conn, ticker) is not None:
-            continue
-        if db.get_goat_pending_candidate(conn, ticker) is not None:
-            continue
+        is_held = mt_db.get_holding_row(conn, ticker) is not None
 
         dedup_key = openinsider.build_dedup_key(row)
         newly_seen = db.insert_goat_insider_filing_seen(
@@ -219,16 +299,24 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         if not newly_seen:
             continue
 
+        cluster_event = _check_buy_cluster(conn, ticker, row.get("trade_date", ""))
+        if cluster_event:
+            new_cluster_alerts.append(cluster_event)
+        flip_event = _check_insider_flip(conn, ticker, row.get("insider_name", ""), row.get("trade_date", ""))
+        if flip_event:
+            new_flip_alerts.append(flip_event)
+
         signal_detail = (
             f"{row.get('insider_name', 'Unknown insider')} ({row.get('title', '')}) "
             f"bought ${row['value']:,.0f} of {ticker}{_pct_owned_change_clause(row)} "
             f"on {row.get('trade_date', 'unknown date')}"
         )
-        db.insert_goat_pending_candidate(
-            conn, ticker=ticker, sector_label="Insider Buy",
-            signal_detail=signal_detail, source="goat_insider_discovery",
-            trade_date=row.get("trade_date"), company_name=row.get("company_name"),
-        )
+        if not is_held:
+            db.insert_goat_pending_candidate(
+                conn, ticker=ticker, sector_label="Insider Buy",
+                signal_detail=signal_detail, source="goat_insider_discovery",
+                trade_date=row.get("trade_date"), company_name=row.get("company_name"),
+            )
         new_candidates.append({
             "ticker": ticker, "sector_label": "Insider Buy", "detail": signal_detail,
             "company": row.get("company_name"),
@@ -239,6 +327,8 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         "pending_candidates": [
             dict(r) for r in db.get_all_goat_pending_candidates(conn) if r["source"] == "goat_insider_discovery"
         ],
+        "new_cluster_alerts": new_cluster_alerts,
+        "new_flip_alerts": new_flip_alerts,
     }
 
 
@@ -521,6 +611,65 @@ def maybe_notify_price_flags(newly_flagged: list[dict[str, Any]]) -> None:
         + f"{row.get('trade_date', 'date unknown')})"
         for row in newly_flagged
     ]
+    send_whatsapp_notification("\n".join(lines))
+
+
+def maybe_notify_cluster_alerts(cluster_events: list[dict[str, Any]]) -> None:
+    """Fires once per newly-formed insider-buy cluster (see _check_buy_cluster) --
+    a WhatsApp alert distinct from, and always in addition to, the normal
+    per-trade discovery alert (Shaun 2026-11-08: multiple independent insiders
+    buying the same ticker in a short window is a stronger signal than any single
+    buy alone, so it earns its own, separate ping rather than being folded into or
+    replacing the existing one)."""
+    if not cluster_events:
+        return
+    import sys
+    from pathlib import Path
+
+    _scripts_dir = Path(__file__).resolve().parent.parent.parent.parent / ".claude" / "scripts"
+    sys.path.insert(0, str(_scripts_dir))
+    from notifications import send_toast_notification, send_whatsapp_notification
+
+    summary = f"{len(cluster_events)} new insider buy cluster(s) forming"
+    send_toast_notification(
+        "Goat Insider Scan", summary + " -- check investments/goat/insider-scan-report.md"
+    )
+    lines = [f"Goat Insider Cluster Alert: {summary}."]
+    for e in cluster_events:
+        titles = ", ".join(e["titles"]) if e["titles"] else "role unknown"
+        lines.append(
+            f"- {e['ticker']}: {len(e['insiders'])} distinct insiders bought within "
+            f"{config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS} days ({titles}), "
+            f"${e['total_value']:,.0f} combined"
+        )
+    send_whatsapp_notification("\n".join(lines))
+
+
+def maybe_notify_insider_flips(flip_events: list[dict[str, Any]]) -> None:
+    """Fires once per detected insider flip (see _check_insider_flip) -- a WhatsApp
+    alert distinct from, and always in addition to, the normal per-trade discovery
+    alert. Shaun 2026-11-08: a same-person sell-then-buy-back reversal is its own
+    signal, unrelated to whether a multi-insider cluster is also forming."""
+    if not flip_events:
+        return
+    import sys
+    from pathlib import Path
+
+    _scripts_dir = Path(__file__).resolve().parent.parent.parent.parent / ".claude" / "scripts"
+    sys.path.insert(0, str(_scripts_dir))
+    from notifications import send_toast_notification, send_whatsapp_notification
+
+    summary = f"{len(flip_events)} insider flip(s) detected"
+    send_toast_notification(
+        "Goat Insider Scan", summary + " -- check investments/goat/insider-scan-report.md"
+    )
+    lines = [f"Goat Insider Flip Alert: {summary}."]
+    for e in flip_events:
+        lines.append(
+            f"- {e['ticker']}: {e['insider_name']} sold ${e['sale_value']:,.0f} on "
+            f"{e['sale_date']}, bought back on {e['buy_date']} "
+            f"({e['days_between']}d later)"
+        )
     send_whatsapp_notification("\n".join(lines))
 
 

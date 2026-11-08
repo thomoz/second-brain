@@ -142,6 +142,11 @@ def compute_pattern_analysis(conn) -> dict[str, Any]:
     buy_vs_sell = _bucket_by(rows, lambda r: "Buy" if r["trade_type"] == "P" else "Sell")
     cluster = _bucket_by(rows, lambda r: "Clustered" if clustered.get(r["dedup_key"]) else "Isolated")
 
+    buy_rows = [r for r in rows if r["trade_type"] == "P"]
+    buy_cluster = _bucket_by(
+        buy_rows, lambda r: "Clustered" if clustered.get(r["dedup_key"]) else "Isolated"
+    )
+
     # Elapsed-time velocity: among filings whose 7d horizon already crossed the
     # tier threshold ("confirmed-early"), what fraction were also excess-positive
     # (buys) / excess-negative (sells) at 30d/90d -- does an early signal predict
@@ -176,6 +181,7 @@ def compute_pattern_analysis(conn) -> dict[str, Any]:
         "title_role": title_role,
         "buy_vs_sell": buy_vs_sell,
         "cluster": cluster,
+        "buy_cluster": buy_cluster,
         "velocity_early_confirms_later": _slice_stats(velocity_rows),
         "total_outcome_rows": len(rows),
         "total_filings": len(filings_by_key),
@@ -231,6 +237,14 @@ def render_pattern_analysis_report(analysis: dict[str, Any]) -> str:
         "Isolated single-insider trades vs. multiple distinct insiders on the same "
         f"ticker/direction within {config.GOAT_INSIDER_CLUSTER_WINDOW_DAYS} days.",
         analysis["cluster"],
+    )]
+    lines += ["", *_render_slice(
+        "By Cluster — Buys Only",
+        "Same clustering test as 'By Cluster' above, restricted to buy-direction trades "
+        "only -- isolates the buy-cluster signal from the much larger sell-cluster "
+        "population (sells vastly outnumber buys in this dataset), so a future "
+        "cluster-alert threshold can be tuned against buy-only evidence.",
+        analysis["buy_cluster"],
     )]
     lines += ["", *_render_slice(
         "By Insider Title/Role",

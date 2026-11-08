@@ -184,6 +184,17 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
             conn.execute("ALTER TABLE goat_insider_filings_seen ADD COLUMN company_name TEXT")
         except sqlite3.OperationalError:
             pass
+    # Migration for DBs created before cluster_alert_fired existed (added
+    # 2026-11-08 for the live buy-cluster WhatsApp alert -- see
+    # insider_scan._check_buy_cluster). Default 0 (not yet fired), same
+    # nullability/idempotency posture as price_flag_notified.
+    with conn:
+        try:
+            conn.execute(
+                "ALTER TABLE goat_insider_filings_seen ADD COLUMN cluster_alert_fired INTEGER NOT NULL DEFAULT 0"
+            )
+        except sqlite3.OperationalError:
+            pass
 
 
 def get_open_goat_alert(
@@ -387,6 +398,54 @@ def mark_insider_filing_price_flag_notified(conn: sqlite3.Connection, dedup_key:
         conn.execute(
             "UPDATE goat_insider_filings_seen SET price_flag_notified = 1 WHERE dedup_key = ?", (dedup_key,)
         )
+
+
+def get_insider_buy_filings_in_window(
+    conn: sqlite3.Connection, ticker: str, window_start: str, window_end: str
+) -> list[sqlite3.Row]:
+    """Buy ('P') filings on this ticker with trade_date inside
+    [window_start, window_end] (inclusive ISO date strings) -- the candidate set
+    _check_buy_cluster evaluates for cluster membership. Deliberately NO `kind`
+    filter: a buy is a buy whether it was recorded via run_holdings_watch
+    (kind='holdings_watch', for a currently-held ticker) or run_discovery_scan
+    (kind='discovery') -- see insider_scan.py's module-level "Patterns to Follow"
+    note on why both code paths must be able to see each other's filings here.
+    Mirrors count_insider_sales_since's ISO-string range-query style."""
+    return conn.execute(
+        """SELECT * FROM goat_insider_filings_seen
+           WHERE ticker = ? AND trade_type = 'P'
+             AND trade_date >= ? AND trade_date <= ?""",
+        (ticker, window_start, window_end),
+    ).fetchall()
+
+
+def mark_insider_filings_cluster_alert_fired(conn: sqlite3.Connection, dedup_keys: list[str]) -> None:
+    if not dedup_keys:
+        return
+    with conn:
+        conn.executemany(
+            "UPDATE goat_insider_filings_seen SET cluster_alert_fired = 1 WHERE dedup_key = ?",
+            [(k,) for k in dedup_keys],
+        )
+
+
+def get_most_recent_insider_sale(
+    conn: sqlite3.Connection, *, ticker: str, insider_name: str, since_date: str, before_date: str
+) -> sqlite3.Row | None:
+    """Most recent 'S' filing by this exact insider on this exact ticker with
+    since_date <= trade_date < before_date -- the antecedent sale _check_insider_flip
+    looks for when a new buy lands. No `kind` filter for the same reason as
+    get_insider_buy_filings_in_window: a sell could have been recorded via either
+    run_holdings_watch (ticker held at time of sale) or run_discovery_sell_tracking
+    (ticker not held at time of sale) -- together those two paths cover every sell,
+    so this query must see both."""
+    return conn.execute(
+        """SELECT * FROM goat_insider_filings_seen
+           WHERE ticker = ? AND insider_name = ? AND trade_type = 'S'
+             AND trade_date >= ? AND trade_date < ?
+           ORDER BY trade_date DESC LIMIT 1""",
+        (ticker, insider_name, since_date, before_date),
+    ).fetchone()
 
 
 def count_insider_sales_since(

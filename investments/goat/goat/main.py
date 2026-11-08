@@ -254,6 +254,8 @@ def cmd_scan_insiders(args) -> None:
         compute_discovery_price_performance,
         compute_holdings_watch_price_performance,
         mature_price_outcome_snapshots,
+        maybe_notify_cluster_alerts,
+        maybe_notify_insider_flips,
         maybe_notify_price_flags,
         run_discovery_scan,
         run_discovery_sell_tracking,
@@ -293,12 +295,17 @@ def cmd_scan_insiders(args) -> None:
         + [r for r in watch_result["recent_filings"] if r.get("newly_flagged")]
     )
     maybe_notify_price_flags(newly_flagged)
+    all_cluster_alerts = watch_result.get("new_cluster_alerts", []) + discovery_result.get("new_cluster_alerts", [])
+    all_flip_alerts = watch_result.get("new_flip_alerts", []) + discovery_result.get("new_flip_alerts", [])
+    maybe_notify_cluster_alerts(all_cluster_alerts)
+    maybe_notify_insider_flips(all_flip_alerts)
     print(
         f"Insider scan complete: {len(watch_result['new_alerts'])} holdings-watch alert(s), "
         f"{len(discovery_result['new_candidates'])} new discovery candidate(s), "
         f"{len(newly_flagged)} price move(s) newly confirmed the signal, "
         f"{sell_tracking_result['tracked']} market-wide sell(s) tracked, "
-        f"{maturation_result['matured']} price-outcome snapshot(s) matured. "
+        f"{maturation_result['matured']} price-outcome snapshot(s) matured, "
+        f"{len(all_cluster_alerts)} new buy cluster(s), {len(all_flip_alerts)} insider flip(s). "
         f"See investments/goat/insider-scan-report.md and "
         f"investments/goat/insider-pattern-analysis.md"
     )

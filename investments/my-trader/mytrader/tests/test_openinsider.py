@@ -132,6 +132,68 @@ def test_fetch_discovery_purchases_returns_none_on_network_error(monkeypatch):
     assert openinsider.fetch_discovery_purchases() is None
 
 
+def test_fetch_discovery_purchases_queries_screener_without_ticker_param(monkeypatch):
+    captured = {}
+
+    def _fake_get(url, headers=None, params=None, timeout=None):
+        captured["url"] = url
+        captured["params"] = params
+        return _FakeResponse(_FAKE_HTML)
+
+    monkeypatch.setattr("requests.get", _fake_get)
+    openinsider.fetch_discovery_purchases()
+    assert "s" not in captured["params"]
+    assert captured["params"]["xp"] == "1"
+    assert captured["url"].endswith("/screener")
+
+
+def test_fetch_discovery_purchases_paginates_until_short_page(monkeypatch):
+    calls = []
+    full_page = [{"trade_type_code": "P"} for _ in range(300)]
+    short_page = [{"trade_type_code": "P"} for _ in range(50)]
+
+    def _fake_fetch(url, params=None):
+        calls.append(1)
+        return full_page if len(calls) == 1 else short_page
+
+    monkeypatch.setattr("mytrader.openinsider._fetch", _fake_fetch)
+    rows = openinsider.fetch_discovery_purchases(max_pages=5)
+    assert len(calls) == 2
+    assert len(rows) == 350
+
+
+def test_fetch_discovery_purchases_stops_at_max_pages(monkeypatch):
+    calls = []
+    full_page = [{"trade_type_code": "P"} for _ in range(300)]
+
+    def _fake_fetch(url, params=None):
+        calls.append(1)
+        return full_page
+
+    monkeypatch.setattr("mytrader.openinsider._fetch", _fake_fetch)
+    openinsider.fetch_discovery_purchases(max_pages=3)
+    assert len(calls) == 3
+
+
+def test_fetch_discovery_purchases_returns_none_on_first_page_failure(monkeypatch):
+    monkeypatch.setattr("mytrader.openinsider._fetch", lambda url, params=None: None)
+    assert openinsider.fetch_discovery_purchases() is None
+
+
+def test_fetch_discovery_purchases_returns_partial_on_later_page_failure(monkeypatch):
+    calls = []
+    full_page = [{"trade_type_code": "P"} for _ in range(300)]
+
+    def _fake_fetch(url, params=None):
+        calls.append(1)
+        return full_page if len(calls) == 1 else None
+
+    monkeypatch.setattr("mytrader.openinsider._fetch", _fake_fetch)
+    rows = openinsider.fetch_discovery_purchases(max_pages=5)
+    assert rows is not None
+    assert len(rows) == 300
+
+
 def test_fetch_screener_filings_builds_correct_params(monkeypatch):
     captured = {}
 

@@ -193,11 +193,46 @@ def fetch_screener_filings(
     return [r for r in rows if r["trade_type_code"] == trade_type]
 
 
-def fetch_discovery_purchases() -> list[dict] | None:
-    rows = _fetch(f"{config.OPENINSIDER_BASE_URL}/latest-insider-purchases-25k")
-    if rows is None:
-        return None
-    return [r for r in rows if r["trade_type_code"] == "P"]
+def fetch_discovery_purchases(
+    filing_date_days: int = 5, min_value: float = 25_000, max_pages: int = 10
+) -> list[dict] | None:
+    """Market-wide buy discovery via a tickerless /screener query -- live-confirmed
+    2026-11-08 that omitting 's' entirely (while still sending the FULL
+    _SCREENER_DEFAULT_PARAMS field set) returns a real multi-company results table,
+    not the blank-form fallback fetch_screener_filings's own comments already
+    warn about for a malformed ticker-scoped query. Paginated because a
+    volume-heavy day's results can exceed one page's cnt=300 cap -- the prior data
+    source (/latest-insider-purchases-25k, a fixed unpaginated snapshot) silently
+    truncated against exactly this with no backfill (see
+    investments/goat/insider-buy-cluster-alert-handoff.md Root Cause 2; confirmed
+    live via goat_insider_filings_seen having zero rows for any of UPBD's 6
+    Nov 2-3 2026 buys despite a clean daily run).
+
+    filing_date_days defaults to 5 (not 1) deliberately -- a daily job that only
+    ever asks for "today" has no backfill if a run is ever missed (VPS downtime,
+    etc.), which is the same failure mode as Root Cause 2 itself. 5 matches
+    GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS's existing safety-net value in goat/config.py
+    (not imported here -- mytrader must not depend on goat, see this module's
+    top-of-file docstring -- so this default is a literal, same convention as
+    fetch_screener_filings's own filing_date_days=7 literal default above)."""
+    params = dict(_SCREENER_DEFAULT_PARAMS)
+    params["vl"] = str(int(min_value / 1000))
+    params["xp"] = "1"
+    params["fd"] = str(filing_date_days)
+    all_rows: list[dict] = []
+    for page in range(1, max_pages + 1):
+        params["page"] = str(page)
+        rows = _fetch(f"{config.OPENINSIDER_BASE_URL}/screener", params=params)
+        if rows is None:
+            if page == 1:
+                return None
+            print(f"[openinsider] discovery pagination stopped early at page {page} (fetch failed) "
+                  f"-- returning {len(all_rows)} row(s) gathered so far")
+            break
+        all_rows.extend(r for r in rows if r["trade_type_code"] == "P")
+        if len(rows) < int(params["cnt"]):
+            break
+    return all_rows
 
 
 def fetch_discovery_sales() -> list[dict] | None:

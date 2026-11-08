@@ -175,7 +175,10 @@ def test_run_holdings_watch_skips_fetch_when_no_holdings(db_conn, monkeypatch):
     )
     result = insider_scan.run_holdings_watch(db_conn)
     assert calls == []
-    assert result == {"checked_holdings": 0, "new_alerts": [], "recent_filings": []}
+    assert result == {
+        "checked_holdings": 0, "new_alerts": [], "recent_filings": [],
+        "new_cluster_alerts": [], "new_flip_alerts": [],
+    }
 
 
 def test_run_holdings_watch_handles_total_fetch_failure_gracefully(db_conn, monkeypatch):
@@ -226,18 +229,18 @@ def test_run_discovery_scan_candidate_detail_includes_pct_owned_change(db_conn, 
     assert "(45% of position)" in result["new_candidates"][0]["detail"]
 
 
-def test_run_discovery_scan_skips_ticker_already_a_holding(db_conn, monkeypatch):
+def test_run_discovery_scan_alerts_on_held_ticker_but_skips_pending_insert(db_conn, monkeypatch):
     _seed_holding(db_conn, ticker="ACME")
     monkeypatch.setattr(
         "goat.insider_scan.openinsider.fetch_discovery_purchases",
         lambda: [_purchase_row(ticker="ACME")],
     )
     result = insider_scan.run_discovery_scan(db_conn)
-    assert result["new_candidates"] == []
+    assert len(result["new_candidates"]) == 1
     assert goat_db.get_goat_pending_candidate(db_conn, "ACME") is None
 
 
-def test_run_discovery_scan_skips_ticker_already_in_watchlist(db_conn, monkeypatch):
+def test_run_discovery_scan_alerts_and_inserts_for_watchlisted_ticker(db_conn, monkeypatch):
     mt_db.upsert_watchlist_row(
         db_conn, ticker="ACME", name="Acme Corp", asset_type="stock", bucket="unassigned",
     )
@@ -246,8 +249,8 @@ def test_run_discovery_scan_skips_ticker_already_in_watchlist(db_conn, monkeypat
         lambda: [_purchase_row(ticker="ACME")],
     )
     result = insider_scan.run_discovery_scan(db_conn)
-    assert result["new_candidates"] == []
-    assert goat_db.get_goat_pending_candidate(db_conn, "ACME") is None
+    assert len(result["new_candidates"]) == 1
+    assert goat_db.get_goat_pending_candidate(db_conn, "ACME") is not None
 
 
 def test_run_discovery_scan_skips_banned_ticker(db_conn, monkeypatch):
@@ -348,6 +351,186 @@ def test_run_discovery_scan_handles_fetch_failure_gracefully(db_conn, monkeypatc
     )
     result = insider_scan.run_discovery_scan(db_conn)  # must not raise
     assert result["new_candidates"] == []
+
+
+def test_check_buy_cluster_fires_on_second_distinct_insider(db_conn, monkeypatch):
+    today = date.today()
+    row_a = _purchase_row(ticker="ACME", trade_date=today)
+    row_a["insider_name"] = "John Smith"
+    row_b = _purchase_row(ticker="ACME", trade_date=today - timedelta(days=3))
+    row_b["insider_name"] = "Jane Doe"
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [row_a, row_b],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert len(result["new_cluster_alerts"]) == 1
+    assert set(result["new_cluster_alerts"][0]["insiders"]) == {"John Smith", "Jane Doe"}
+
+
+def test_check_buy_cluster_catches_a_slow_two_week_formation(db_conn, monkeypatch):
+    # The older leg is seeded directly into goat_insider_filings_seen (as if
+    # captured by a prior day's run when it was still fresh) rather than
+    # returned from today's fetch_discovery_purchases mock -- a 13-day-old row
+    # would never survive run_discovery_scan's own 5-day freshness lookback
+    # (GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS), which is a separate concern from
+    # _check_buy_cluster's 14-day cluster window.
+    today = date.today()
+    old_date = today - timedelta(days=13)
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="slow-cluster-key", ticker="ACME", filing_date=old_date.isoformat(),
+        trade_date=old_date.isoformat(), insider_name="Jane Doe", trade_type="P",
+        value=30_000.0, kind="discovery",
+    )
+    row_a = _purchase_row(ticker="ACME", trade_date=today)
+    row_a["insider_name"] = "John Smith"
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [row_a],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert len(result["new_cluster_alerts"]) == 1
+
+
+def test_check_buy_cluster_does_not_refire_on_third_insider(db_conn, monkeypatch):
+    today = date.today()
+    row_a = _purchase_row(ticker="ACME", trade_date=today)
+    row_a["insider_name"] = "John Smith"
+    row_b = _purchase_row(ticker="ACME", trade_date=today)
+    row_b["insider_name"] = "Jane Doe"
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [row_a, row_b],
+    )
+    first_result = insider_scan.run_discovery_scan(db_conn)
+    assert len(first_result["new_cluster_alerts"]) == 1
+
+    row_c = _purchase_row(ticker="ACME", trade_date=today)
+    row_c["insider_name"] = "Sam Third"
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [row_c],
+    )
+    second_result = insider_scan.run_discovery_scan(db_conn)
+    assert len(second_result["new_cluster_alerts"]) == 0
+
+
+def test_check_buy_cluster_ignores_filings_outside_window(db_conn, monkeypatch):
+    # Older leg seeded directly, same reasoning as the slow-formation test above
+    # -- it's older than the discovery scan's own 5-day freshness lookback too.
+    today = date.today()
+    old_date = today - timedelta(days=goat_config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS + 1)
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="outside-window-key", ticker="ACME", filing_date=old_date.isoformat(),
+        trade_date=old_date.isoformat(), insider_name="Jane Doe", trade_type="P",
+        value=30_000.0, kind="discovery",
+    )
+    row_a = _purchase_row(ticker="ACME", trade_date=today)
+    row_a["insider_name"] = "John Smith"
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [row_a],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert result["new_cluster_alerts"] == []
+
+
+def test_check_buy_cluster_does_not_count_sells(db_conn, monkeypatch):
+    today = date.today()
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="sell-key", ticker="ACME", filing_date=today.isoformat(),
+        trade_date=today.isoformat(), insider_name="Jane Doe", trade_type="S",
+        value=50_000.0, kind="discovery_sell",
+    )
+    row_a = _purchase_row(ticker="ACME", trade_date=today)
+    row_a["insider_name"] = "John Smith"
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [row_a],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert result["new_cluster_alerts"] == []
+
+
+def test_check_buy_cluster_fires_for_held_ticker_via_holdings_watch(db_conn, monkeypatch):
+    _seed_holding(db_conn, ticker="ACME")
+    today = date.today()
+    row_a = _purchase_row(ticker="ACME", trade_date=today)
+    row_a["insider_name"] = "John Smith"
+    row_b = _purchase_row(ticker="ACME", trade_date=today - timedelta(days=3))
+    row_b["insider_name"] = "Jane Doe"
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_screener_filings",
+        lambda tickers_list, trade_type, min_value: [row_a, row_b] if trade_type == "P" else [],
+    )
+    result = insider_scan.run_holdings_watch(db_conn)
+    assert len(result["new_cluster_alerts"]) == 1
+
+
+def test_check_insider_flip_fires_on_buyback_within_window(db_conn, monkeypatch):
+    today = date.today()
+    sale_date = (today - timedelta(days=30)).isoformat()
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="flip-sale-key", ticker="ACME", filing_date=sale_date,
+        trade_date=sale_date, insider_name="John Smith", trade_type="S",
+        value=50_000.0, kind="discovery_sell",
+    )
+    row = _purchase_row(ticker="ACME", trade_date=today)
+    row["insider_name"] = "John Smith"
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [row],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert len(result["new_flip_alerts"]) == 1
+    assert result["new_flip_alerts"][0]["days_between"] == 30
+
+
+def test_check_insider_flip_ignores_sale_outside_window(db_conn, monkeypatch):
+    today = date.today()
+    sale_date = (today - timedelta(days=goat_config.GOAT_INSIDER_FLIP_WINDOW_DAYS + 1)).isoformat()
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="flip-old-sale-key", ticker="ACME", filing_date=sale_date,
+        trade_date=sale_date, insider_name="John Smith", trade_type="S",
+        value=50_000.0, kind="discovery_sell",
+    )
+    row = _purchase_row(ticker="ACME", trade_date=today)
+    row["insider_name"] = "John Smith"
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [row],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert result["new_flip_alerts"] == []
+
+
+def test_check_insider_flip_requires_same_insider(db_conn, monkeypatch):
+    today = date.today()
+    sale_date = (today - timedelta(days=30)).isoformat()
+    goat_db.insert_goat_insider_filing_seen(
+        db_conn, dedup_key="flip-other-sale-key", ticker="ACME", filing_date=sale_date,
+        trade_date=sale_date, insider_name="Jane Doe", trade_type="S",
+        value=50_000.0, kind="discovery_sell",
+    )
+    row = _purchase_row(ticker="ACME", trade_date=today)
+    row["insider_name"] = "John Smith"
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [row],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert result["new_flip_alerts"] == []
+
+
+def test_check_insider_flip_ignores_a_buy_with_no_prior_sale(db_conn, monkeypatch):
+    row = _purchase_row(ticker="ACME", trade_date=date.today())
+    row["insider_name"] = "John Smith"
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [row],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert result["new_flip_alerts"] == []
 
 
 def test_render_insider_scan_report_lists_alerts_and_pending_candidates():

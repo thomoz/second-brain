@@ -102,6 +102,7 @@ def test_compute_pattern_analysis_single_insider_is_isolated_not_clustered(db_co
 def test_render_pattern_analysis_report_includes_disclaimer():
     analysis = {
         "trade_size": {}, "pct_owned": {}, "title_role": {}, "buy_vs_sell": {}, "cluster": {},
+        "buy_cluster": {},
         "velocity_early_confirms_later": {"status": "insufficient_data", "n": 0},
         "total_outcome_rows": 0, "total_filings": 0,
     }
@@ -114,8 +115,25 @@ def test_render_pattern_analysis_report_shows_insufficient_data_fallback():
     analysis = {
         "trade_size": {"<$50k": {"status": "insufficient_data", "n": 5}},
         "pct_owned": {}, "title_role": {}, "buy_vs_sell": {}, "cluster": {},
+        "buy_cluster": {},
         "velocity_early_confirms_later": {"status": "insufficient_data", "n": 0},
         "total_outcome_rows": 5, "total_filings": 5,
     }
     report = ipa.render_pattern_analysis_report(analysis)
     assert "not enough data yet (n=5" in report
+
+
+def test_compute_pattern_analysis_buy_cluster_excludes_sell_clusters(db_conn, monkeypatch):
+    monkeypatch.setattr(goat_config, "GOAT_INSIDER_PATTERN_MIN_SAMPLE", 1)
+    today = date.today().isoformat()
+    _seed_outcome(db_conn, dedup_key="buy1", ticker="ACME", trade_type="P",
+                  trade_date=today, insider_name="Jane Doe")
+    _seed_outcome(db_conn, dedup_key="buy2", ticker="ACME", trade_type="P",
+                  trade_date=today, insider_name="John Smith")
+    _seed_outcome(db_conn, dedup_key="sell1", ticker="ZETA", trade_type="S",
+                  trade_date=today, insider_name="Sam Sell")
+    _seed_outcome(db_conn, dedup_key="sell2", ticker="ZETA", trade_type="S",
+                  trade_date=today, insider_name="Pat Peddle")
+    analysis = ipa.compute_pattern_analysis(db_conn)
+    assert analysis["buy_cluster"]["Clustered"]["n"] == 2
+    assert "Isolated" not in analysis["buy_cluster"]

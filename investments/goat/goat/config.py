@@ -754,6 +754,31 @@ GOAT_INSIDER_CLUSTER_WINDOW_DAYS = 7  # multiple distinct insiders on the same
     # v1/tunable, rounded up slightly from the GOAT_INSIDER_HOLDINGS_WATCH_
     # LOOKBACK_DAYS/GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS precedent (5 days).
 
+GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS = 14  # LIVE buy-cluster WhatsApp alert window
+    # -- deliberately separate from and wider than GOAT_INSIDER_CLUSTER_WINDOW_DAYS
+    # (7, used only by insider_pattern_analysis's retrospective stat). Shaun
+    # 2026-11-08: a cluster can build slowly ("multiple directors buy, but over a
+    # two-week period") rather than within a single week, and he explicitly wants
+    # the live alert to still catch that. v1/tunable.
+GOAT_INSIDER_CLUSTER_MIN_DISTINCT_BUYERS = 2  # live buy-cluster WhatsApp alert fires
+    # the moment a ticker's distinct-insider buy count within
+    # GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS reaches this many -- Shaun's explicit
+    # call 2026-11-08, matching insider_pattern_analysis._compute_clusters's
+    # existing retrospective bar (also 2) rather than setting a stricter live-only
+    # threshold. Deliberately NO minimum combined or per-insider dollar value --
+    # Shaun 2026-11-08: two directors buying $5k each should alert the same as two
+    # buying $500k each. Own constant (not a reuse of _compute_clusters's hardcoded
+    # ">= 2") so the live path can be tuned independently later without touching the
+    # retrospective report's bar.
+GOAT_INSIDER_FLIP_WINDOW_DAYS = 90  # same insider selling, then buying BACK into the
+    # same ticker, within this many days -- Shaun 2026-11-08: "people who buy not
+    # long after they've sold" is itself significant, a same-person reversal signal
+    # distinct from the multi-insider buy-cluster above. 90 chosen to match two
+    # existing precedents in this file for "still a meaningful signal" windows --
+    # GOAT_INSIDER_SALE_LOOKBACK_DAYS (repeated-sale pattern detection) and
+    # GOAT_INSIDER_PRICE_STALE_DAYS (price move no longer attributable to the
+    # trade), both also 90. v1/tunable.
+
 GOAT_INSIDER_PATTERN_ANALYSIS_PATH = GOAT_DIR / "insider-pattern-analysis.md"
 
 GOAT_INSIDER_PRICE_STALE_DAYS = 90  # matches GOAT_INSIDER_SALE_LOOKBACK_DAYS's window --
