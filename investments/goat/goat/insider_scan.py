@@ -181,9 +181,17 @@ def _check_buy_cluster(conn: sqlite3.Connection, ticker: str, trade_date_str: st
         return None
     return {
         "ticker": ticker,
+        "company_name": next((r["company_name"] for r in nearby if r["company_name"]), None),
         "insiders": sorted(distinct_insiders),
         "titles": sorted({r["title"] for r in nearby if r["title"]}),
         "total_value": sum(r["value"] for r in nearby),
+        # Per-buy detail, same shape/fields as a discovery candidate's
+        # signal_detail (Shaun 2026-11-10: the cluster WhatsApp alert should let
+        # him assess significance in an instant, same as the report already
+        # does -- an aggregate insider/title/total-value blob hides whether
+        # it's one $5k director nibble plus one $500k CEO buy, or six $5k
+        # nibbles) -- sorted oldest-first so the alert reads as a timeline.
+        "rows": sorted((dict(r) for r in nearby), key=lambda r: r["trade_date"]),
     }
 
 
@@ -794,12 +802,21 @@ def maybe_notify_cluster_alerts(cluster_events: list[dict[str, Any]]) -> None:
     )
     lines = [f"Goat Insider Cluster Alert: {summary}."]
     for e in cluster_events:
-        titles = ", ".join(e["titles"]) if e["titles"] else "role unknown"
+        company = f" ({e['company_name']})" if e.get("company_name") else ""
         lines.append(
-            f"- {e['ticker']}: {len(e['insiders'])} distinct insiders bought within "
-            f"{config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS} days ({titles}), "
-            f"${e['total_value']:,.0f} combined"
+            f"- {e['ticker']}{company}: {len(e['insiders'])} distinct insiders bought within "
+            f"{config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS} days, ${e['total_value']:,.0f} combined"
         )
+        # Per-buy detail, same shape as a discovery candidate's signal_detail
+        # (Shaun 2026-11-10) -- lets him judge significance instantly instead of
+        # having to go check the report (one $500k CEO buy reads very
+        # differently than six $5k director nibbles, even at the same total).
+        for r in e.get("rows", []):
+            lines.append(
+                f"   - {r.get('insider_name', 'Unknown insider')} ({r.get('title') or 'role unknown'}) "
+                f"bought ${r['value']:,.0f} of {e['ticker']}{_pct_owned_change_clause(r)} "
+                f"on {r.get('trade_date', 'unknown date')}"
+            )
     send_whatsapp_notification("\n".join(lines))
 
 

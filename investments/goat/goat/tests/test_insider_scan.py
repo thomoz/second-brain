@@ -823,6 +823,35 @@ def test_maybe_notify_price_flags_sends_whatsapp_with_ticker_and_note(monkeypatc
     assert "2026-08-20" in message
 
 
+def test_maybe_notify_cluster_alerts_includes_per_buy_detail(monkeypatch):
+    # Shaun 2026-11-10: the aggregate insiders/titles/total_value summary alone
+    # hid whether a cluster is one big CEO buy plus a token director nibble, or
+    # several meaningfully-sized buys -- the alert needs the same per-buy detail
+    # as a discovery candidate's signal_detail so he can judge significance from
+    # the WhatsApp message alone, without having to check the report.
+    import sys
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+
+    insider_scan.maybe_notify_cluster_alerts([{
+        "ticker": "UPBD", "company_name": "Upbound Group, Inc.",
+        "insiders": ["John Smith", "Jane Doe"], "titles": ["CEO", "Dir"],
+        "total_value": 150000.0,
+        "rows": [
+            {"insider_name": "John Smith", "title": "CEO", "value": 100000.0,
+             "trade_date": "2026-11-02", "pct_owned_change": 11.0},
+            {"insider_name": "Jane Doe", "title": "Dir", "value": 50000.0,
+             "trade_date": "2026-11-03", "pct_owned_change": None},
+        ],
+    }])
+    assert len(whatsapp_calls) == 1
+    (message,), _kwargs = whatsapp_calls[0]
+    assert "UPBD" in message
+    assert "Upbound Group, Inc." in message
+    assert "John Smith (CEO) bought $100,000 of UPBD (11% of position) on 2026-11-02" in message
+    assert "Jane Doe (Dir) bought $50,000 of UPBD on 2026-11-03" in message
+
+
 def test_threshold_for_days_boundaries():
     cases = [
         (7, 2.5), (8, 5.0), (14, 5.0), (15, 7.5), (21, 7.5),
