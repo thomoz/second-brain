@@ -264,7 +264,7 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - [ok] going_concern: Free Cash Flow positive ($20,983M) -- cash-generative, no bankruptcy/cash-runway risk from this signal
 
 ### New Alerts This Run
-- **ARKQ** (watchlist) — valuation: PE 35.8 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
+No new material changes.
 
 ### All Open Alerts
 - **ARKQ** (watchlist) — valuation: PE 35.8 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-11-09)
@@ -349,7 +349,7 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **MACRO** (macro) — uk_cpi: UK headline CPI 3.1% YoY (reference month 2026-08-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone (first flagged 2026-09-16)
 
 ### Watchlist Opportunities (this run)
-- **3750.HK** — Buffett/Smith [ROE 24.4% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -40.7% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
+- **3750.HK** — Buffett/Smith [ROE 24.4% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -42.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **AEM** — Buffett/Smith [ROE 23.2% at/above 15.0% (10/10 — excellent), not richly valued]
 - **ASML** — Crash-discount fit [ROE 65.6% at/above 15.0% (10/10 — excellent), but currently rich (PE 37.2) — quality worth watching for a crash-driven discount rather than buying at today's price]
 - **CEG** — Buffett/Smith [ROE 15.1% at/above 15.0% (10/10 — excellent), not richly valued]
@@ -388,16 +388,16 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **move_index** [ok] — MOVE index (bond market volatility) at 86.0, below the flag threshold
 - **housing_affordability** [ok] — Housing price-to-income ratio at 4.5x (price as of 2026-07-01, income as of 2025-01-01, higher = less affordable)
 - **consumer_sentiment** [flag] — UMich consumer sentiment at 48.1 (as of 2026-09-01), at/below the 50 stress threshold — readings this low have historically coincided with households pulling back on spending
-- **recession_signal** [ok] — 10Y-2Y spread +0.35pp (as of 2026-11-06), recession probability 0.4% (as of 2026-09-01) — higher probability means the market is pricing more chance of a downturn within the next year; 10Y-3M spread +0.67pp (as of 2026-11-06); bear steepener (long rates rising — inflation/debt-concern driven, historically the more concerning pattern)
-- **inflation_expectations** [ok] — 10Y breakeven 2.23% (as of 2026-11-06), 5Y5Y forward 2.17% (as of 2026-11-06) — breakevens reflect market demand for inflation protection, not a literal CPI forecast; a wide gap between the 10Y breakeven and the 5Y5Y forward often signals a short-term supply shock rather than durable inflation
+- **recession_signal** [ok] — 10Y-2Y spread +0.32pp (as of 2026-11-09), recession probability 0.4% (as of 2026-09-01) — higher probability means the market is pricing more chance of a downturn within the next year; 10Y-3M spread +0.64pp (as of 2026-11-09); bear steepener (long rates rising — inflation/debt-concern driven, historically the more concerning pattern)
+- **inflation_expectations** [ok] — 10Y breakeven 2.22% (as of 2026-11-09), 5Y5Y forward 2.19% (as of 2026-11-09) — breakevens reflect market demand for inflation protection, not a literal CPI forecast; a wide gap between the 10Y breakeven and the 5Y5Y forward often signals a short-term supply shock rather than durable inflation
 - **credit_spreads** [ok] — ICE BofA US HY OAS at 3.42pp (as of 2026-11-06, tighter = less credit stress priced in)
 - **australia_cpi** [flag] — Australia headline CPI 4.3% YoY (reference month 2026-09-01), outside the RBA's 2-3% target band — inflation running hotter than the RBA's comfort zone
 - **us_cpi** [flag] — US headline CPI 3.72% YoY (as of 2026-09-01), outside the 1-3% tolerance band around the Fed's 2% target — inflation running hotter than the Fed's comfort zone
 - **uk_cpi** [flag] — UK headline CPI 3.5% YoY (reference month 2026-09-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone
 - **real_yields** [flag] — 10Y real yield +2.63% (as of 2026-11-06), above the 2.0% threshold -- elevated real yields historically pressure gold hard
 - **dollar_index** [ok] — Broad USD index 121.9, +0.2% over the past 30 days
-- **gold_trend** [info] — GC=F $4,148 (50DMA $4,223, 200DMA $4,497, -7.8% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $59.38 AUD; AUD/USD 3mo move -1.9%
-- **gold_silver_ratio** [ok] — Gold/silver ratio at 77.8
+- **gold_trend** [info] — GC=F $4,150 (50DMA $4,223, 200DMA $4,497, -7.7% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $59.38 AUD; AUD/USD 3mo move -1.9%
+- **gold_silver_ratio** [ok] — Gold/silver ratio at 77.6
 - **vix** [ok] — VIX at 19.9, below the flag threshold
 
 ### Gold Outlook
