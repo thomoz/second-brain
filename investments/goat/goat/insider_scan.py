@@ -60,6 +60,28 @@ def _within_lookback(date_str: str, lookback_days: int) -> bool:
     return (date.today() - parsed_date).days <= lookback_days
 
 
+def _filed_promptly(filing_date_str: str, trade_date_str: str, max_gap_days: int) -> bool:
+    """True when the Form 4 was filed within max_gap_days of the trade itself --
+    the legal requirement is 2 US business days, so max_gap_days (the same
+    lookback constant used for _within_lookback's own filing_date check, chosen
+    there for exactly this "2 days + weekend/holiday slack" reasoning) is already
+    a generous cap, not a new invented number. Distinct from _within_lookback's
+    filing_date check: that one asks "is this filing fresh enough for THIS RUN
+    to bother with"; this one asks "was the filing itself prompt, or is this a
+    months-late catch-up filing that isn't a timely signal any more." Shaun
+    2026-11-09: a filing that's current (fresh filing_date) but reports a trade
+    from months ago -- confirmed live for VISM (78/217 days late), YPF (103),
+    TRAD (204/251), VRNS (259) -- is not the UPBD case (filed 2-3 days late)
+    this fix was built for -- a filer that routinely files this late isn't giving
+    a real-time conviction signal."""
+    try:
+        filing = datetime.strptime(filing_date_str.split(" ")[0], "%Y-%m-%d").date()
+        traded = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError, AttributeError):
+        return True
+    return (filing - traded).days <= max_gap_days
+
+
 _INSTITUTIONAL_NAME_RE = re.compile(
     r"\b(?:" + "|".join(config.GOAT_INSIDER_INSTITUTIONAL_NAME_RE_PARTS) + r")\b",
     re.IGNORECASE,
@@ -262,6 +284,13 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
         # just-filed-but-traded-a-while-ago Form 4 before it's ever recorded.
         if not _within_lookback(row.get("filing_date", ""), config.GOAT_INSIDER_HOLDINGS_WATCH_LOOKBACK_DAYS):
             continue
+        # Also require the filing itself to have been prompt (Shaun 2026-11-09) --
+        # otherwise a months-late catch-up filing (not a real-time signal) rides
+        # in on a fresh filing_date alone.
+        if not _filed_promptly(
+            row.get("filing_date", ""), row.get("trade_date", ""), config.GOAT_INSIDER_HOLDINGS_WATCH_LOOKBACK_DAYS
+        ):
+            continue
         dedup_key = openinsider.build_dedup_key(row)
         newly_seen = db.insert_goat_insider_filing_seen(
             conn, dedup_key=dedup_key, ticker=row["ticker"],
@@ -379,6 +408,14 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         # >5 days old by the time it got filed and scraped.
         if not _within_lookback(row.get("filing_date", ""), config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS):
             continue
+        # Also require the filing itself to have been prompt (Shaun 2026-11-09,
+        # confirmed live: VISM 78/217 days late, YPF 103, TRAD 204/251, VRNS 259)
+        # -- otherwise a months-late catch-up filing (not a real-time signal)
+        # rides in on a fresh filing_date alone.
+        if not _filed_promptly(
+            row.get("filing_date", ""), row.get("trade_date", ""), config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS
+        ):
+            continue
         ticker = row["ticker"]
         if ticker in config.GOAT_BANNED_TICKERS:
             continue
@@ -464,6 +501,10 @@ def run_discovery_sell_tracking(conn: sqlite3.Connection) -> dict[str, Any]:
         # late-filed sale with an old trade_date would otherwise get dropped the
         # moment it actually becomes visible.
         if not _within_lookback(row.get("filing_date", ""), config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS):
+            continue
+        if not _filed_promptly(
+            row.get("filing_date", ""), row.get("trade_date", ""), config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS
+        ):
             continue
         if row["ticker"] in held_tickers:
             continue

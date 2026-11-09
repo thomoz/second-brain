@@ -211,19 +211,42 @@ def config_lookback_plus_one() -> int:
 def test_run_holdings_watch_includes_late_filed_old_trade(db_conn, monkeypatch):
     # Shaun 2026-11-09: the lookback gate must check filing_date, not trade_date
     # -- fetch_screener_filings's own fd= param is filing-date-scoped, so a Form 4
-    # filed today about a trade from over a week ago (late filing, past the legal
-    # 2-business-day window) must still get through. Checking trade_date here
-    # silently dropped exactly this case (the UPBD regression).
+    # filed a few days late (past the legal 2-business-day window, same shape as
+    # the UPBD regression -- filed 2-3 days after trading) must still get
+    # through, even though the trade itself is now older than the lookback
+    # window measured from today. Checking trade_date here silently dropped
+    # exactly this case.
     _seed_holding(db_conn, ticker="VRTX")
-    old_trade_date = date.today() - timedelta(days=config_lookback_plus_one())
+    lookback = goat_config.GOAT_INSIDER_HOLDINGS_WATCH_LOOKBACK_DAYS
+    filing_date = date.today() - timedelta(days=lookback)  # filing itself still fresh
+    old_trade_date = filing_date - timedelta(days=2)  # traded 2 days before filing (prompt)
     row = _sale_row(ticker="VRTX", trade_date=old_trade_date)
-    row["filing_date"] = date.today().isoformat()  # filed today, traded long ago
+    row["filing_date"] = filing_date.isoformat()
     monkeypatch.setattr(
         "goat.insider_scan.openinsider.fetch_screener_filings",
         lambda tickers_list, trade_type, min_value: ([row] if trade_type == "S" else []),
     )
     result = insider_scan.run_holdings_watch(db_conn)
     assert len(result["new_alerts"]) == 1
+
+
+def test_run_holdings_watch_excludes_months_late_catch_up_filing(db_conn, monkeypatch):
+    # Shaun 2026-11-09: "don't they have to file within 48 hours?" -- a filing
+    # that's fresh (within the lookback) but reports a trade from months ago is
+    # not the UPBD case (filed 2-3 days late), it's a chronically-late filer
+    # whose "signal" isn't real-time any more. Confirmed live: VISM (78/217 days
+    # late), YPF (103), TRAD (204/251), VRNS (259).
+    _seed_holding(db_conn, ticker="VRTX")
+    filing_date = date.today()
+    months_late_trade_date = filing_date - timedelta(days=120)
+    row = _sale_row(ticker="VRTX", trade_date=months_late_trade_date)
+    row["filing_date"] = filing_date.isoformat()
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_screener_filings",
+        lambda tickers_list, trade_type, min_value: ([row] if trade_type == "S" else []),
+    )
+    result = insider_scan.run_holdings_watch(db_conn)
+    assert result["new_alerts"] == []
 
 
 def test_run_discovery_scan_stages_new_purchase_candidate(db_conn, monkeypatch):
@@ -242,16 +265,34 @@ def test_run_discovery_scan_includes_late_filed_old_trade(db_conn, monkeypatch):
     # Same reasoning as test_run_holdings_watch_includes_late_filed_old_trade --
     # fetch_discovery_purchases's fd= param is filing-date-scoped specifically to
     # backfill late filings, so the freshness gate downstream must check
-    # filing_date too, not trade_date.
-    old_trade_date = date.today() - timedelta(days=goat_config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS + 3)
+    # filing_date too, not trade_date -- but the filing must still have been
+    # prompt (traded only 2 days before filing, same shape as UPBD).
+    filing_date = date.today() - timedelta(days=goat_config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS)
+    old_trade_date = filing_date - timedelta(days=2)
     row = _purchase_row(ticker="ACME", trade_date=old_trade_date)
-    row["filing_date"] = date.today().isoformat()
+    row["filing_date"] = filing_date.isoformat()
     monkeypatch.setattr(
         "goat.insider_scan.openinsider.fetch_discovery_purchases",
         lambda: [row],
     )
     result = insider_scan.run_discovery_scan(db_conn)
     assert len(result["new_candidates"]) == 1
+
+
+def test_run_discovery_scan_excludes_months_late_catch_up_filing(db_conn, monkeypatch):
+    # Shaun 2026-11-09: a fresh filing_date alone isn't enough -- a trade from
+    # months ago, only now catching up on paperwork, isn't a real-time signal.
+    # Confirmed live: VISM (78/217 days late), YPF (103), TRAD (204/251), VRNS (259).
+    filing_date = date.today()
+    months_late_trade_date = filing_date - timedelta(days=120)
+    row = _purchase_row(ticker="ACME", trade_date=months_late_trade_date)
+    row["filing_date"] = filing_date.isoformat()
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_purchases",
+        lambda: [row],
+    )
+    result = insider_scan.run_discovery_scan(db_conn)
+    assert result["new_candidates"] == []
 
 
 def test_run_discovery_scan_candidate_detail_includes_pct_owned_change(db_conn, monkeypatch):
@@ -871,16 +912,31 @@ def test_run_discovery_sell_tracking_respects_lookback_window(db_conn, monkeypat
 def test_run_discovery_sell_tracking_includes_late_filed_old_trade(db_conn, monkeypatch):
     # Same reasoning as the two late-filing tests above -- fetch_discovery_sales's
     # "latest" results are filing-date ordered, so the freshness gate must check
-    # filing_date, not trade_date.
-    old_trade_date = date.today() - timedelta(days=goat_config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS + 3)
+    # filing_date, not trade_date -- but the filing must still have been prompt.
+    filing_date = date.today() - timedelta(days=goat_config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS)
+    old_trade_date = filing_date - timedelta(days=2)
     row = _sell_row(trade_date=old_trade_date)
-    row["filing_date"] = date.today().isoformat()
+    row["filing_date"] = filing_date.isoformat()
     monkeypatch.setattr(
         "goat.insider_scan.openinsider.fetch_discovery_sales",
         lambda: [row],
     )
     result = insider_scan.run_discovery_sell_tracking(db_conn)
     assert result["tracked"] == 1
+
+
+def test_run_discovery_sell_tracking_excludes_months_late_catch_up_filing(db_conn, monkeypatch):
+    # Shaun 2026-11-09: same promptness requirement as the buy-side gates.
+    filing_date = date.today()
+    months_late_trade_date = filing_date - timedelta(days=120)
+    row = _sell_row(trade_date=months_late_trade_date)
+    row["filing_date"] = filing_date.isoformat()
+    monkeypatch.setattr(
+        "goat.insider_scan.openinsider.fetch_discovery_sales",
+        lambda: [row],
+    )
+    result = insider_scan.run_discovery_sell_tracking(db_conn)
+    assert result["tracked"] == 0
 
 
 def test_run_discovery_sell_tracking_handles_fetch_failure_gracefully(db_conn, monkeypatch):
