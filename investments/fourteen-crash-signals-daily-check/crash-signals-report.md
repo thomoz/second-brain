@@ -26,7 +26,6 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 
 | # | Marker | Status | Detail |
 |---|--------|--------|--------|
-| 1 | Record debt issuance, hot sector (LLY) | ok | LLY: 0 debt-prospectus filing(s) in the trailing 180d (own 730d average: 2.2/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (WMT) | flag | WMT: 6 debt-prospectus filing(s) in the trailing 180d (own 730d average: 3.0/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (XOM) | flag | XOM: 2 debt-prospectus filing(s) in the trailing 180d (own 730d average: 0.5/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (JNJ) | ok | JNJ: 0 debt-prospectus filing(s) in the trailing 180d (own 730d average: 1.5/period) -- counts filing events, not dollar principal |
@@ -35,7 +34,6 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 1 | Record debt issuance, hot sector (CVX) | ok | CVX: 0 debt-prospectus filing(s) in the trailing 180d (own 730d average: 2.2/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (KO) | ok | KO: 0 debt-prospectus filing(s) in the trailing 180d (own 730d average: 0.0/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (PG) | ok | PG: 8 debt-prospectus filing(s) in the trailing 180d (own 730d average: 4.7/period) -- counts filing events, not dollar principal |
-| 1 | Record debt issuance, hot sector (MRK) | ok | MRK: 3 debt-prospectus filing(s) in the trailing 180d (own 730d average: 2.2/period) -- counts filing events, not dollar principal |
 | 2 | Debt moves off balance sheet | ok | No hot-watchlist tickers with a resolvable lease-commitment reading this run. |
 | 3 | Seller finances buyer | unknown | No automatable source exists for vendor/circular-financing deals -- periodically news-scan the current hot watchlist yourself: LLY, WMT, XOM, JNJ, ABBV, COST, CVX, KO, PG, MRK |
 | 4 | Capex outruns cash flow (LLY) | ok | LLY: Free Cash Flow $+6.0B, Capital Expenditure $10.8B (period ending 2025-12-31) |
@@ -50,7 +48,7 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (MRK) | ok | MRK: Free Cash Flow $+12.4B, Capital Expenditure $4.1B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.48T as of 2026-09-01, +31.4% YoY vs 2025-09-01 |
 | 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 133 filing(s) in the trailing 30d vs 203 in the same window a year ago (0.66x); 424B4 (priced IPO): 19 filing(s) in the trailing 30d vs 37 in the same window a year ago (0.51x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.59 (z=0.06 vs trailing 80d mean 0.59) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.59 (z=0.05 vs trailing 81d mean 0.59) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (LLY) | flag | LLY: $310,345,848 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (WMT) | flag | WMT: $2,967,673,609 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (XOM) | flag | XOM: $2,395,656 sold vs $0 bought, trailing 365 days |
