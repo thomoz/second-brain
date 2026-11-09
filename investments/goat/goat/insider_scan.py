@@ -111,6 +111,20 @@ def _prior_sale_count(conn: sqlite3.Connection, ticker: str, insider_name: str, 
     )
 
 
+def _cluster_window_rows(conn: sqlite3.Connection, ticker: str, trade_date_str: str) -> list[sqlite3.Row]:
+    """Buy filings for ticker within GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS of
+    trade_date_str (both directions) -- the raw candidate set for cluster
+    membership, shared by _check_buy_cluster (gated, WhatsApp notification) and
+    _cluster_history_rows (ungated, report display context)."""
+    try:
+        trade_date_obj = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return []
+    window_start = (trade_date_obj - timedelta(days=config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS)).isoformat()
+    window_end = (trade_date_obj + timedelta(days=config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS)).isoformat()
+    return db.get_insider_buy_filings_in_window(conn, ticker, window_start, window_end)
+
+
 def _check_buy_cluster(conn: sqlite3.Connection, ticker: str, trade_date_str: str) -> dict[str, Any] | None:
     """Returns a cluster-alert dict the first time this ticker's buy filings within
     GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS of trade_date_str reach
@@ -125,13 +139,7 @@ def _check_buy_cluster(conn: sqlite3.Connection, ticker: str, trade_date_str: st
     included in the window query. Called from BOTH run_holdings_watch and
     run_discovery_scan -- see this module's "Patterns to Follow" note for why a
     single call site would miss held-ticker clusters."""
-    try:
-        trade_date_obj = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
-    except (ValueError, TypeError):
-        return None
-    window_start = (trade_date_obj - timedelta(days=config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS)).isoformat()
-    window_end = (trade_date_obj + timedelta(days=config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS)).isoformat()
-    nearby = db.get_insider_buy_filings_in_window(conn, ticker, window_start, window_end)
+    nearby = _cluster_window_rows(conn, ticker, trade_date_str)
     distinct_insiders = {r["insider_name"] for r in nearby}
     if len(distinct_insiders) < config.GOAT_INSIDER_CLUSTER_MIN_DISTINCT_BUYERS:
         return None
@@ -146,6 +154,19 @@ def _check_buy_cluster(conn: sqlite3.Connection, ticker: str, trade_date_str: st
         "titles": sorted({r["title"] for r in nearby if r["title"]}),
         "total_value": sum(r["value"] for r in nearby),
     }
+
+
+def _cluster_history_rows(conn: sqlite3.Connection, ticker: str, trade_date_str: str) -> list[dict[str, Any]]:
+    """Full set of this ticker's cluster-window buy filings, for REPORT DISPLAY
+    only -- unlike _check_buy_cluster, never gated by cluster_alert_fired, so the
+    report keeps showing the whole trade history behind a cluster every run it's
+    still current, not just the run the WhatsApp alert first fired. Returns []
+    when the window doesn't actually reach GOAT_INSIDER_CLUSTER_MIN_DISTINCT_BUYERS
+    distinct insiders (i.e. it isn't a cluster)."""
+    nearby = _cluster_window_rows(conn, ticker, trade_date_str)
+    if len({r["insider_name"] for r in nearby}) < config.GOAT_INSIDER_CLUSTER_MIN_DISTINCT_BUYERS:
+        return []
+    return [dict(r) for r in nearby]
 
 
 def _check_insider_flip(
@@ -178,11 +199,30 @@ def _check_insider_flip(
     }
 
 
+def _flip_history_row(
+    conn: sqlite3.Connection, ticker: str, insider_name: str, trade_date_str: str
+) -> dict[str, Any] | None:
+    """The antecedent sale behind this insider's flip, for REPORT DISPLAY only --
+    same lookup as _check_insider_flip but never gated, so the report keeps
+    showing the sell/buy pair for as long as the buy itself is still displayed,
+    not just the run the flip notification first fired."""
+    try:
+        buy_date = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+    since_date = (buy_date - timedelta(days=config.GOAT_INSIDER_FLIP_WINDOW_DAYS)).isoformat()
+    prior_sale = db.get_most_recent_insider_sale(
+        conn, ticker=ticker, insider_name=insider_name,
+        since_date=since_date, before_date=trade_date_str,
+    )
+    return dict(prior_sale) if prior_sale else None
+
+
 def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
     held_tickers = sorted({row["ticker"] for row in mt_db.get_all_holdings(conn)})
     if not held_tickers:
         return {"checked_holdings": 0, "new_alerts": [], "recent_filings": [],
-                 "new_cluster_alerts": [], "new_flip_alerts": []}
+                 "new_cluster_alerts": [], "new_flip_alerts": [], "context_rows": []}
 
     purchases = openinsider.fetch_screener_filings(
         held_tickers, "P", config.GOAT_INSIDER_PURCHASE_MIN_VALUE
@@ -193,11 +233,20 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
     if purchases is None and sales is None:
         print("[goat-insider-scan] OpenInsider screener fetch failed for both purchases and sales")
         return {"checked_holdings": len(held_tickers), "new_alerts": [], "recent_filings": [],
-                 "new_cluster_alerts": [], "new_flip_alerts": []}
+                 "new_cluster_alerts": [], "new_flip_alerts": [], "context_rows": []}
 
     new_alerts: list[dict[str, Any]] = []
     new_cluster_alerts: list[dict[str, Any]] = []
     new_flip_alerts: list[dict[str, Any]] = []
+    # Report display is this run's own newly-seen filings only (Shaun 2026-11-09:
+    # the report should show the latest day's trade data scraped, not an
+    # unbounded "most recent 20 ever seen" query that can surface weeks-old
+    # filings on a quiet ticker) -- replaces the old post-hoc
+    # get_recent_insider_filings_seen query. Full history still lives in
+    # goat_insider_filings_seen regardless of what's displayed here.
+    recent_filings: list[dict[str, Any]] = []
+    context_rows: list[dict[str, Any]] = []
+    seen_cluster_tickers: set[str] = set()
     for row in (purchases or []) + (sales or []):
         if not _within_lookback(row.get("trade_date", ""), config.GOAT_INSIDER_HOLDINGS_WATCH_LOOKBACK_DAYS):
             continue
@@ -211,6 +260,12 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
         )
         if not newly_seen:
             continue
+        recent_filings.append({
+            "ticker": row["ticker"], "trade_type": row["trade_type_code"], "value": row["value"],
+            "trade_date": row.get("trade_date", ""), "dedup_key": dedup_key,
+            "company_name": row.get("company_name"), "insider_name": row.get("insider_name", ""),
+            "title": row.get("title", ""),
+        })
 
         if row["trade_type_code"] == "P":
             cluster_event = _check_buy_cluster(conn, row["ticker"], row.get("trade_date", ""))
@@ -221,6 +276,18 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
             )
             if flip_event:
                 new_flip_alerts.append(flip_event)
+
+            if row["ticker"] not in seen_cluster_tickers:
+                cluster_rows = _cluster_history_rows(conn, row["ticker"], row.get("trade_date", ""))
+                if cluster_rows:
+                    seen_cluster_tickers.add(row["ticker"])
+                    context_rows.append({"kind": "cluster", "ticker": row["ticker"], "rows": cluster_rows})
+            flip_row = _flip_history_row(conn, row["ticker"], row.get("insider_name", ""), row.get("trade_date", ""))
+            if flip_row:
+                context_rows.append({
+                    "kind": "flip", "ticker": row["ticker"], "insider_name": row.get("insider_name", ""),
+                    "sale": flip_row, "buy_trade_date": row.get("trade_date", ""), "buy_value": row["value"],
+                })
 
         # Sales are gated on % of the insider's own position, not dollar value
         # (Shaun 2026-08-17 -- $25k/$100k floors are meaningless against a
@@ -261,13 +328,26 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
     return {
         "checked_holdings": len(held_tickers),
         "new_alerts": new_alerts,
-        "recent_filings": [dict(r) for r in db.get_recent_insider_filings_seen(conn, kind="holdings_watch")],
+        "recent_filings": recent_filings,
         "new_cluster_alerts": new_cluster_alerts,
         "new_flip_alerts": new_flip_alerts,
+        "context_rows": context_rows,
     }
 
 
 def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
+    # Each run starts fresh -- Shaun 2026-11-09, same precedent as
+    # dma_breakout_scan.run_dma_breakout_scan (see db.delete_pending_candidates_for_source).
+    # The report should show the latest day's trade data scraped, not an
+    # accumulating backlog of never-reviewed candidates; a genuine signal that's
+    # still live gets re-staged fresh by this same run anyway (newly_seen is keyed
+    # on filing identity in goat_insider_filings_seen, which is NEVER wiped -- full
+    # history survives regardless of what's staged here).
+    cleared = db.delete_pending_candidates_for_source(conn, "goat_insider_discovery")
+    if cleared:
+        print(f"[goat-insider-scan] cleared {cleared} never-reviewed discovery candidate(s) from "
+              f"the previous run -- starting fresh")
+
     rows = openinsider.fetch_discovery_purchases()
     if rows is None:
         print("[goat-insider-scan] OpenInsider discovery fetch failed")
@@ -276,6 +356,8 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
     new_candidates: list[dict[str, Any]] = []
     new_cluster_alerts: list[dict[str, Any]] = []
     new_flip_alerts: list[dict[str, Any]] = []
+    context_rows: list[dict[str, Any]] = []
+    seen_cluster_tickers: set[str] = set()
     for row in rows:
         if not _within_lookback(row.get("trade_date", ""), config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS):
             continue
@@ -306,6 +388,18 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         if flip_event:
             new_flip_alerts.append(flip_event)
 
+        if ticker not in seen_cluster_tickers:
+            cluster_rows = _cluster_history_rows(conn, ticker, row.get("trade_date", ""))
+            if cluster_rows:
+                seen_cluster_tickers.add(ticker)
+                context_rows.append({"kind": "cluster", "ticker": ticker, "rows": cluster_rows})
+        flip_row = _flip_history_row(conn, ticker, row.get("insider_name", ""), row.get("trade_date", ""))
+        if flip_row:
+            context_rows.append({
+                "kind": "flip", "ticker": ticker, "insider_name": row.get("insider_name", ""),
+                "sale": flip_row, "buy_trade_date": row.get("trade_date", ""), "buy_value": row["value"],
+            })
+
         signal_detail = (
             f"{row.get('insider_name', 'Unknown insider')} ({row.get('title', '')}) "
             f"bought ${row['value']:,.0f} of {ticker}{_pct_owned_change_clause(row)} "
@@ -329,6 +423,7 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         ],
         "new_cluster_alerts": new_cluster_alerts,
         "new_flip_alerts": new_flip_alerts,
+        "context_rows": context_rows,
     }
 
 
@@ -712,6 +807,49 @@ _HOLDINGS_HEADER = ["| Ticker | Action | Value | Trade Date | Price Since Trade 
                      "|--------|--------|-------|------------|--------------------|"]
 
 
+def _render_context_rows(all_context_rows: list[dict[str, Any]]) -> list[str]:
+    """Renders every historical trade behind today's qualifying cluster/flip buys
+    (Shaun 2026-11-09: 'show every historical trade', not just the one that tipped
+    the threshold) -- deduped by ticker (cluster) / ticker+insider+buy-date (flip)
+    since the same ticker can independently surface from both run_holdings_watch
+    and run_discovery_scan's context_rows lists."""
+    if not all_context_rows:
+        return ["No active buy clusters or insider flips right now.", ""]
+    lines: list[str] = []
+    seen_clusters: set[str] = set()
+    seen_flips: set[tuple[str, str, str]] = set()
+    for ctx in all_context_rows:
+        if ctx["kind"] == "cluster":
+            if ctx["ticker"] in seen_clusters:
+                continue
+            seen_clusters.add(ctx["ticker"])
+            rows_sorted = sorted(ctx["rows"], key=lambda r: r["trade_date"])
+            n_insiders = len({r["insider_name"] for r in rows_sorted})
+            lines.append(
+                f"### {ctx['ticker']} — Buy Cluster "
+                f"({n_insiders} insiders within {config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS} days)"
+            )
+            lines.append("")
+            for r in rows_sorted:
+                lines.append(
+                    f"- {r['trade_date']}: {r['insider_name']} ({r.get('title') or 'role unknown'}) "
+                    f"bought ${r['value']:,.0f}"
+                )
+            lines.append("")
+        elif ctx["kind"] == "flip":
+            key = (ctx["ticker"], ctx["insider_name"], ctx["buy_trade_date"])
+            if key in seen_flips:
+                continue
+            seen_flips.add(key)
+            sale = ctx["sale"]
+            lines.append(f"### {ctx['ticker']} — Insider Flip ({ctx['insider_name']})")
+            lines.append("")
+            lines.append(f"- {sale['trade_date']}: sold ${sale['value']:,.0f}")
+            lines.append(f"- {ctx['buy_trade_date']}: bought ${ctx['buy_value']:,.0f} (new)")
+            lines.append("")
+    return lines or ["No active buy clusters or insider flips right now.", ""]
+
+
 def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: dict[str, Any]) -> str:
     lines = [
         "# Insider Trading Scan — OpenInsider",
@@ -724,6 +862,19 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
         "",
         f"## Run: {_today_sydney()}",
         "",
+        "## Cluster & Flip Context",
+        "Every historical trade behind today's buy clusters (2+ distinct insiders on "
+        "the same ticker within "
+        f"{config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS} days) and insider flips (same "
+        f"person selling, then buying back within {config.GOAT_INSIDER_FLIP_WINDOW_DAYS} "
+        "days) -- shown in full for context; everything below this only shows the "
+        "latest day's trade data scraped.",
+        "",
+    ]
+    all_context_rows = (watch_result.get("context_rows") or []) + (discovery_result.get("context_rows") or [])
+    lines += _render_context_rows(all_context_rows)
+
+    lines += [
         "## Holdings Watch",
         f"Checked {watch_result['checked_holdings']} held ticker(s) for open-market "
         "P/S insider filings.",
@@ -738,10 +889,12 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
     lines += [
         "",
         "## Discovery Candidates — Pending Review",
-        "Market-wide $25k+ open-market insider purchases, staged for explicit review. "
+        "Market-wide $25k+ open-market insider purchases from the latest day's trade "
+        "data scraped (the full history lives in the database regardless -- this "
+        "table is cleared and re-staged fresh every run, it never carries a backlog). "
         "Review each one and either `promote-candidate` (writes it into my-trader's "
         "real watchlist, labeled Goat-approved) or `dismiss-candidate` (discards it). "
-        "Edits here are overwritten on the next `scan-insiders` run. The bracketed "
+        "The bracketed "
         "`[...]` tag on Price Since Trade shows where price sits vs its 50/150/200-day "
         "MAs right now, so a raw % move never has to be judged alone -- a name up 17% "
         "since the trade that just reclaimed its 150/200DMA reads very differently "
@@ -813,12 +966,13 @@ def render_insider_scan_report(watch_result: dict[str, Any], discovery_result: d
         "No candidates have moved down since their trade yet."
     ]
 
-    recent_filings = (watch_result.get("recent_filings") or [])[:20]
+    recent_filings = watch_result.get("recent_filings") or []
     lines += [
         "",
         "## Stocks You Own That Have Had Price Moves Since Insider Buy/Sell Activity",
-        "Price move since trade date for P/S filings seen on your holdings "
-        "(most recent 20, including ones below the alert threshold). "
+        "Price move since trade date for P/S filings seen on your holdings in the "
+        "latest day's trade data scraped (including ones below the alert threshold; "
+        "the database keeps the full history regardless of what's shown here). "
         "\U0001F6A9 marks a move that confirms the insider's signal direction "
         "(buy -> price rose, sale -> price fell) past a time-aware threshold "
         f"({_tiered_threshold_description()}).",

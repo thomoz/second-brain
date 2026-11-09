@@ -177,7 +177,7 @@ def test_run_holdings_watch_skips_fetch_when_no_holdings(db_conn, monkeypatch):
     assert calls == []
     assert result == {
         "checked_holdings": 0, "new_alerts": [], "recent_filings": [],
-        "new_cluster_alerts": [], "new_flip_alerts": [],
+        "new_cluster_alerts": [], "new_flip_alerts": [], "context_rows": [],
     }
 
 
@@ -340,8 +340,12 @@ def test_run_discovery_scan_stays_quiet_on_repeat_run(db_conn, monkeypatch):
     )
     insider_scan.run_discovery_scan(db_conn)
     result = insider_scan.run_discovery_scan(db_conn)
+    # Each run clears + re-stages pending_candidates from scratch (Shaun 2026-11-09,
+    # same precedent as dma_breakout_scan) -- an already-seen filing isn't newly_seen
+    # on the second run, so it isn't re-staged. Report shows the latest day's trade
+    # data scraped, not an accumulating backlog of never-reviewed candidates.
     assert result["new_candidates"] == []
-    assert len(result["pending_candidates"]) == 1
+    assert result["pending_candidates"] == []
 
 
 def test_run_discovery_scan_handles_fetch_failure_gracefully(db_conn, monkeypatch):
