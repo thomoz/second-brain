@@ -43,12 +43,21 @@ def _today_sydney() -> str:
     return datetime.now(ZoneInfo(config.GOAT_ASX_TZ)).date().isoformat()
 
 
-def _within_lookback(trade_date_str: str, lookback_days: int) -> bool:
+def _within_lookback(date_str: str, lookback_days: int) -> bool:
+    """Generic recency gate -- callers pass whichever date field matches what was
+    actually fetched (filing_date for the three "is this filing fresh enough for
+    THIS run to process" gates below, since every discovery/holdings-watch fetch
+    is itself filing-date-scoped; trade_date for mature_price_outcome_snapshots,
+    which cares about elapsed time since the real-world trade, not the paperwork).
+    Shaun 2026-11-09: checking trade_date against a filing-date-scoped fetch
+    silently dropped any Form 4 filed late (past the legal 2-business-day window)
+    -- exactly what happened to UPBD's Nov 2 cluster even after this morning's
+    pagination fix, since that fix only widened the FETCH, not this gate."""
     try:
-        trade_date = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
-    except (ValueError, TypeError):
+        parsed_date = datetime.strptime(date_str.split(" ")[0], "%Y-%m-%d").date()
+    except (ValueError, TypeError, AttributeError):
         return True
-    return (date.today() - trade_date).days <= lookback_days
+    return (date.today() - parsed_date).days <= lookback_days
 
 
 _INSTITUTIONAL_NAME_RE = re.compile(
@@ -248,7 +257,10 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
     context_rows: list[dict[str, Any]] = []
     seen_cluster_tickers: set[str] = set()
     for row in (purchases or []) + (sales or []):
-        if not _within_lookback(row.get("trade_date", ""), config.GOAT_INSIDER_HOLDINGS_WATCH_LOOKBACK_DAYS):
+        # filing_date, not trade_date -- fetch_screener_filings's own fd= param
+        # is filing-date-scoped, so gating on trade_date here could drop a
+        # just-filed-but-traded-a-while-ago Form 4 before it's ever recorded.
+        if not _within_lookback(row.get("filing_date", ""), config.GOAT_INSIDER_HOLDINGS_WATCH_LOOKBACK_DAYS):
             continue
         dedup_key = openinsider.build_dedup_key(row)
         newly_seen = db.insert_goat_insider_filing_seen(
@@ -359,7 +371,13 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
     context_rows: list[dict[str, Any]] = []
     seen_cluster_tickers: set[str] = set()
     for row in rows:
-        if not _within_lookback(row.get("trade_date", ""), config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS):
+        # filing_date, not trade_date -- fetch_discovery_purchases's fd= param is
+        # filing-date-scoped by design (so a late-filed Form 4 still gets picked
+        # up), so gating on trade_date here would undo that and drop it anyway.
+        # Confirmed live 2026-11-09: this was silently dropping UPBD's Nov 2
+        # cluster even after the pagination fix, since trade_date was already
+        # >5 days old by the time it got filed and scraped.
+        if not _within_lookback(row.get("filing_date", ""), config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS):
             continue
         ticker = row["ticker"]
         if ticker in config.GOAT_BANNED_TICKERS:
@@ -441,7 +459,11 @@ def run_discovery_sell_tracking(conn: sqlite3.Connection) -> dict[str, Any]:
 
     tracked = 0
     for row in rows:
-        if not _within_lookback(row.get("trade_date", ""), config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS):
+        # filing_date, not trade_date -- same reasoning as run_discovery_scan:
+        # fetch_discovery_sales's "latest" endpoint is filing-date ordered, so a
+        # late-filed sale with an old trade_date would otherwise get dropped the
+        # moment it actually becomes visible.
+        if not _within_lookback(row.get("filing_date", ""), config.GOAT_INSIDER_DISCOVERY_LOOKBACK_DAYS):
             continue
         if row["ticker"] in held_tickers:
             continue
