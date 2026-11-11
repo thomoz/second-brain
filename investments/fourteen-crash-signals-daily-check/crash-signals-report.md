@@ -49,8 +49,8 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (XOM) | ok | XOM: Free Cash Flow $+23.6B, Capital Expenditure $28.4B (period ending 2025-12-31) |
 | 4 | Capex outruns cash flow (MA) | ok | MA: Free Cash Flow $+16.4B, Capital Expenditure $1.2B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.48T as of 2026-09-01, +31.4% YoY vs 2025-09-01 |
-| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 148 filing(s) (no prior-year comparison available); 424B4 (priced IPO): 19 filing(s) in the trailing 30d vs 39 in the same window a year ago (0.49x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.56 (z=-0.35 vs trailing 81d mean 0.59) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 149 filing(s) in the trailing 30d vs 189 in the same window a year ago (0.79x); 424B4 (priced IPO): 19 filing(s) in the trailing 30d vs 39 in the same window a year ago (0.49x) |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.77 (z=2.49 vs trailing 82d mean 0.59) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (AMZN) | flag | AMZN: $448,721,928 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (TSLA) | flag | TSLA: $87,688,429 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (LLY) | flag | LLY: $310,345,848 sold vs $0 bought, trailing 365 days |
@@ -62,9 +62,9 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 8 | Insider selling (XOM) | flag | XOM: $2,395,656 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (MA) | flag | MA: $73,363,034 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (BRK-A) | flag | BRK-A: $19,972,776 sold vs $0 bought, trailing 365 days |
-| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (96 day(s) away) -- ad-share content is not automatable, nothing to check yet |
+| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (95 day(s) away) -- ad-share content is not automatable, nothing to check yet |
 | 10 | Most-valuable-company milestone | flag | AMZN is the largest company in the current hot-sector watchlist ($2.93T, most recently crossed the $2.5T rung) |
-| 11 | Regulators sound the alarm | flag | SEC Announces Enforcement Annual Results for Fiscal Year 2026 (https://www.sec.gov/newsroom/press-releases/2026-113-sec-announces-enforcement-annual-results-fiscal-year-2026) |
+| 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
 | 12 | Credit turns in the hot sector while broad market stays calm (AMZN) | unknown | AMZN: bond CUSIP 023135EA0 found, but no live or manually-entered yield reading available -- run `record-bond-yield AMZN <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (BRK-B) | unknown | BRK-B: bond CUSIP 084670EB0 found, but no live or manually-entered yield reading available -- run `record-bond-yield BRK-B <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (JPM) | unknown | JPM: bond CUSIP 46661MCB8 found, but no live or manually-entered yield reading available -- run `record-bond-yield JPM <yield_pct>` |
