@@ -45,7 +45,7 @@ All 39 covered industries.
 | 16 | XHB | Building Products & Equipment | +3.9% | Yes |
 | 17 | EVX | Waste Management | +3.6% | Yes |
 | 18 | IAI | Capital Markets | +3.0% | Yes |
-| 19 | INDS | REIT - Industrial | +2.5% | Yes |
+| 19 | INDS | REIT - Industrial | +2.8% | Yes |
 | 20 | FDN | Internet Content & Information | +1.9% | Yes |
 | 21 | MOO | Agricultural Inputs | +1.4% | Yes |
 | 22 | WOOD | Lumber & Wood Production | -1.2% | No |
