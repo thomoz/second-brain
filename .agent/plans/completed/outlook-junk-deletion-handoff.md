@@ -1,6 +1,19 @@
 # Handoff: Wire Up Outlook Junk Folder Deletion
 
-## Status: Not started — scan-only tool is live, deletion is intentionally not built yet
+## Status: Decisions made 2026-11-09, wording + confirmation mechanism approved 2026-11-11 — ready for /plan-feature, not yet built
+
+**Resolved (Shaun, 2026-11-09):**
+- Delete type: **soft delete** (Graph API default `DELETE` → Deleted Items, recoverable)
+- Trigger model: **heartbeat-detects, asks first** — daily automatic scan surfaces matches (WhatsApp/log), Shaun confirms, then deletion fires
+
+**Resolved (Shaun, 2026-11-11):**
+- SOUL.md carve-out wording approved as drafted: `Never delete anything, anywhere, except
+  Outlook Junk folder messages matching configured keyword rules in outlook_junk_rules.json.`
+- Confirmation round-trip: **WhatsApp** — heartbeat sends matches via WhatsApp, Shaun replies
+  to confirm, reply triggers deletion
+- Future intent (not in scope for this build): once the WhatsApp confirm flow has been tested
+  and proven reliable, revisit removing the confirmation step and letting heartbeat delete
+  matches fully automatically. Do not build this now — note it for a later phase.
 
 ## Context
 
@@ -94,6 +107,10 @@ uv run --project .claude/scripts pytest .claude/scripts/tests -q
 
 ## Open Questions for Shaun (resolve before implementing)
 
-1. Soft delete (Deleted Items, recoverable) or permanent delete?
-2. On-demand command, full heartbeat automation, or heartbeat-detects-then-confirms?
-3. Exact SOUL.md wording for the carve-out.
+1. ~~Soft delete or permanent?~~ RESOLVED 2026-11-09: soft delete.
+2. ~~Trigger model?~~ RESOLVED 2026-11-09: heartbeat-detects, asks first.
+3. ~~Exact SOUL.md wording for the carve-out?~~ RESOLVED 2026-11-11: approved as drafted
+   (see Status section above).
+4. ~~Confirmation round-trip mechanism?~~ RESOLVED 2026-11-11: WhatsApp reply. Fully
+   automated (no confirmation) is a later-phase idea, once WhatsApp flow is proven — not
+   part of this build.

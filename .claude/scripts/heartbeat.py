@@ -51,6 +51,7 @@ from config import (
     HEARTBEAT_STATE_FILE,
     HEARTBEAT_TIMEZONE,
     LOCAL_TZ,
+    OUTLOOK_JUNK_PENDING_STATE_FILE,
     OWNER_NAME,
     USER_FILE,
     ensure_directories,
@@ -511,6 +512,48 @@ def reset_habits_if_new_day(state: dict) -> bool:
     return True
 
 
+def run_outlook_junk_scan(state: dict) -> None:
+    """Once-per-day Outlook Junk folder scan: stage matches and alert via WhatsApp.
+
+    Deterministic — never deletes. Deletion only happens when Shaun replies "yes"
+    on WhatsApp (see engine.py:_check_junk_confirm).
+    """
+    today_str = now_local().strftime("%Y-%m-%d")
+    if state.get("last_junk_scan_date") == today_str:
+        return
+    state["last_junk_scan_date"] = today_str
+
+    from integrations.outlook import scan_junk_folder
+
+    try:
+        matches = scan_junk_folder()
+    except Exception as e:
+        print(f"[{now_local()}] Outlook junk scan failed (non-fatal): {e}")
+        return
+
+    if not matches:
+        return
+
+    message_ids = [msg.id for msg, _keyword in matches]
+    lines = [f"- [{keyword}] {msg.subject} — {msg.sender}" for msg, keyword in matches]
+    body = (
+        f"Outlook Junk: {len(matches)} message(s) matched your cleanup rules:\n"
+        + "\n".join(lines)
+        + f'\n\nReply "yes" to delete all {len(matches)} (soft delete, recoverable '
+        "from Deleted Items)."
+    )
+
+    pending_state = {
+        "pending": True,
+        "message_ids": message_ids,
+        "staged_at": now_local().isoformat(),
+    }
+    save_state(OUTLOOK_JUNK_PENDING_STATE_FILE, pending_state)
+
+    send_whatsapp_notification(body)
+    append_to_daily_log(f"**[Outlook Junk]** Staged {len(matches)} match(es) for WhatsApp confirmation.")
+
+
 # =============================================================================
 # LLM HEARTBEAT CALL
 # =============================================================================
@@ -610,6 +653,11 @@ def run_heartbeat(dry_run: bool = False, force: bool = False, skip_guardrail: bo
         print(f"Habits delta: {diff['habits_delta']}")
         print(f"First run: {diff['is_first_run']}")
         return
+
+    try:
+        run_outlook_junk_scan(state)
+    except Exception as e:
+        print(f"[{now_local()}] Outlook junk scan error (non-fatal): {e}")
 
     # Build system context for LLM
     heartbeat_checklist = ""

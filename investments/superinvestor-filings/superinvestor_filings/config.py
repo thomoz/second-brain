@@ -209,6 +209,19 @@ SUPERINVESTOR_TRACKED: dict[str, dict] = {
         "edgar_ciks": ["923093"],   # TUDOR INVESTMENT CORP ET AL
         "india_aliases": [],
     },
+    "bertarelli": {
+        "display": "Ernesto Bertarelli",
+        # Swiss biotech billionaire (ex-Serono, sold to Merck 2006), now invests
+        # through Waypoint Capital. Added on request 2026-11-08. Verified same day:
+        # individual CIK 1137404 carries 6 SCHEDULE 13G/A + 1 SCHEDULE 13G (active
+        # to 2026-11-04), 1 Form 4 (2026-08-27), 1 Form 3 (2026-05-01) in the recent
+        # window -- squarely in the tracked fast-disclosure form set. His family
+        # office, Waypoint Capital Advisors, LLC (CIK 1905662), is 13F-HR/N-PX only
+        # (last 13F-HR 2024-10-18) -- deliberately not added, same rule as the dead
+        # Klarman/Jones individual CIKs above (13F-only or dormant doesn't qualify).
+        "edgar_ciks": ["1137404"],   # BERTARELLI ERNESTO (individual)
+        "india_aliases": [],
+    },
 
     # --- India / SEBI SAST only (no SEC EDGAR presence) ------------------------
     # These disclose SAST Reg 29 on BSE, not with the SEC, so edgar_ciks is empty.

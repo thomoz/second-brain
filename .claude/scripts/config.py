@@ -101,7 +101,7 @@ for _key, _val in _os.environ.items():
 OUTLOOK_CLIENT_ID = _os.getenv("OUTLOOK_CLIENT_ID", "")
 OUTLOOK_TENANT_ID = _os.getenv("OUTLOOK_TENANT_ID", "consumers")
 OUTLOOK_TOKEN_FILE = INTEGRATIONS_DIR / "outlook_token.json"
-OUTLOOK_SCOPES = ["Mail.Read"]
+OUTLOOK_SCOPES = ["Mail.ReadWrite"]
 OUTLOOK_JUNK_FOLDER = "junkemail"  # Graph API well-known folder id
 OUTLOOK_JUNK_RULES_FILE = DATA_DIR / "outlook_junk_rules.json"
 
@@ -142,6 +142,7 @@ CODEX_HEALTH_STATE_FILE = STATE_DIR / "codex-health-state.json"
 # Tracks which handoff entries have already been surfaced in a session's context
 # (separate from handoff_check.py's own seen_hashes, which gates the hourly toast).
 HANDOFF_SURFACED_STATE_FILE = STATE_DIR / "handoff-surfaced-state.json"
+OUTLOOK_JUNK_PENDING_STATE_FILE = STATE_DIR / "outlook-junk-pending-state.json"
 
 # WhatsApp bot's own stdout/stderr log (path set via the systemd unit's
 # StandardOutput/StandardError=append: directives, not written by Python directly —
@@ -154,6 +155,7 @@ DRAFTS_EXPIRED_DIR = DRAFTS_DIR / "expired"
 DRAFTS_SENT_DIR = DRAFTS_DIR / "sent"
 DRAFT_EXPIRY_HOURS = int(_os.getenv("DRAFT_EXPIRY_HOURS", "24"))
 EXPIRED_DRAFT_RETENTION_DAYS = int(_os.getenv("EXPIRED_DRAFT_RETENTION_DAYS", "30"))
+OUTLOOK_JUNK_CONFIRM_EXPIRY_HOURS = int(_os.getenv("OUTLOOK_JUNK_CONFIRM_EXPIRY_HOURS", "24"))
 
 # WhatsApp outbound (GREEN-API) — inbound polling is Phase 7
 WHATSAPP_INSTANCE_ID = _os.getenv("WHATSAPP_INSTANCE_ID", "")

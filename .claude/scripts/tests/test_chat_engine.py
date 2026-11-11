@@ -181,6 +181,123 @@ async def test_ask_me_questions_resets_thread(engine, store):
 
 
 # ---------------------------------------------------------------------------
+# _check_junk_confirm / junk-delete WhatsApp confirmation tests
+# ---------------------------------------------------------------------------
+
+
+def _stage_junk_state(tmp_path, monkeypatch, staged_at=None, message_ids=None, pending=True):
+    from shared import save_state
+
+    if staged_at is None:
+        from config import now_local
+        staged_at = now_local()
+    state_file = tmp_path / "junk-pending.json"
+    monkeypatch.setattr("config.OUTLOOK_JUNK_PENDING_STATE_FILE", state_file)
+    save_state(
+        state_file,
+        {
+            "pending": pending,
+            "message_ids": message_ids if message_ids is not None else ["msg-1", "msg-2"],
+            "staged_at": staged_at.isoformat(),
+        },
+    )
+    return state_file
+
+
+def test_check_junk_confirm_no_pending_returns_none(tmp_path, monkeypatch):
+    monkeypatch.setattr("config.OUTLOOK_JUNK_PENDING_STATE_FILE", tmp_path / "no-such-file.json")
+    assert engine_module._check_junk_confirm(PROJECT_ROOT, "yes") is None
+
+
+def test_check_junk_confirm_exact_yes_deletes_pending(tmp_path, monkeypatch):
+    _stage_junk_state(tmp_path, monkeypatch, message_ids=["msg-1", "msg-2"])
+    monkeypatch.setattr("integrations.outlook.delete_junk_message", lambda mid: True)
+
+    result = engine_module._check_junk_confirm(PROJECT_ROOT, "yes")
+    assert result == "Deleted 2 junk message(s)."
+
+
+def test_check_junk_confirm_single_letter_y_matches(tmp_path, monkeypatch):
+    _stage_junk_state(tmp_path, monkeypatch, message_ids=["msg-1"])
+    monkeypatch.setattr("integrations.outlook.delete_junk_message", lambda mid: True)
+
+    result = engine_module._check_junk_confirm(PROJECT_ROOT, "y")
+    assert result == "Deleted 1 junk message(s)."
+
+
+def test_check_junk_confirm_mixed_case_trailing_punctuation_matches(tmp_path, monkeypatch):
+    _stage_junk_state(tmp_path, monkeypatch, message_ids=["msg-1"])
+    monkeypatch.setattr("integrations.outlook.delete_junk_message", lambda mid: True)
+
+    result = engine_module._check_junk_confirm(PROJECT_ROOT, "Yes.")
+    assert result == "Deleted 1 junk message(s)."
+
+
+def test_check_junk_confirm_non_exact_match_falls_through(tmp_path, monkeypatch):
+    _stage_junk_state(tmp_path, monkeypatch, message_ids=["msg-1"])
+    assert engine_module._check_junk_confirm(PROJECT_ROOT, "yes please") is None
+    assert engine_module._check_junk_confirm(PROJECT_ROOT, "yes I think so") is None
+
+
+def test_check_junk_confirm_expired_falls_through_and_clears_pending(tmp_path, monkeypatch):
+    from datetime import timedelta
+    from config import now_local
+
+    state_file = _stage_junk_state(
+        tmp_path, monkeypatch, staged_at=now_local() - timedelta(hours=25), message_ids=["msg-1"]
+    )
+    result = engine_module._check_junk_confirm(PROJECT_ROOT, "yes")
+    assert result is None
+
+    from shared import load_state
+    assert load_state(state_file).get("pending") is False
+
+
+def test_check_junk_confirm_partial_failure_reports_count(tmp_path, monkeypatch):
+    _stage_junk_state(tmp_path, monkeypatch, message_ids=["msg-1", "msg-2"])
+    monkeypatch.setattr(
+        "integrations.outlook.delete_junk_message",
+        lambda mid: mid == "msg-1",
+    )
+
+    result = engine_module._check_junk_confirm(PROJECT_ROOT, "yes")
+    assert result == "Deleted 1/2 junk message(s) — some failed, check the logs."
+
+
+@pytest.mark.asyncio
+async def test_junk_confirm_no_pending_falls_through_to_llm(engine, store, tmp_path, monkeypatch):
+    """Bare 'yes' with no pending batch falls through to normal LLM chat."""
+    monkeypatch.setattr("config.OUTLOOK_JUNK_PENDING_STATE_FILE", tmp_path / "no-such-file.json")
+    with patch("engine.query") as mock_query:
+        async for _ in engine.handle_message(_make_incoming("yes")):
+            pass
+    mock_query.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_junk_confirm_deletes_when_pending(engine, store):
+    """Bare 'yes' with a pending batch deletes it and short-circuits before the LLM."""
+    with patch("engine._check_junk_confirm", return_value="Deleted 3 junk message(s)."):
+        with patch("engine.query") as mock_query:
+            responses = []
+            async for msg in engine.handle_message(_make_incoming("yes")):
+                responses.append(msg)
+    assert len(responses) == 1
+    assert "Deleted 3" in responses[0].text
+    mock_query.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_junk_confirm_non_exact_match_falls_through_to_llm(engine, store, monkeypatch):
+    """'yes I think so' is not an exact match — must not trigger a delete."""
+    with patch("engine._check_and_clear_profile_timeout", return_value=False):
+        with patch("engine.query") as mock_query:
+            async for _ in engine.handle_message(_make_incoming("yes I think so")):
+                pass
+    mock_query.assert_called()
+
+
+# ---------------------------------------------------------------------------
 # _load_assistant_commands tests
 # ---------------------------------------------------------------------------
 

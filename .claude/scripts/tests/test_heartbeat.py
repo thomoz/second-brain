@@ -19,6 +19,7 @@ from heartbeat import (
     expire_old_drafts,
     parse_and_write_drafts,
     reset_habits_if_new_day,
+    run_outlook_junk_scan,
 )
 
 
@@ -169,6 +170,68 @@ def test_reset_habits_if_new_day_resets_on_new_day(tmp_path, monkeypatch):
     assert result is True
     content = habits_file.read_text(encoding="utf-8")
     assert "- [ ]" in content
+
+
+# =============================================================================
+# run_outlook_junk_scan tests
+# =============================================================================
+
+
+def test_run_outlook_junk_scan_skips_same_day(monkeypatch):
+    import heartbeat
+    from config import now_local
+
+    today = now_local().strftime("%Y-%m-%d")
+    state = {"last_junk_scan_date": today}
+    called = {"scan": False}
+    monkeypatch.setattr(
+        "integrations.outlook.scan_junk_folder",
+        lambda: called.update(scan=True) or [],
+    )
+    run_outlook_junk_scan(state)
+    assert called["scan"] is False
+
+
+def test_run_outlook_junk_scan_no_matches_stays_silent(monkeypatch, tmp_path):
+    import heartbeat
+
+    monkeypatch.setattr("integrations.outlook.scan_junk_folder", lambda: [])
+    state_file = tmp_path / "pending.json"
+    monkeypatch.setattr(heartbeat, "OUTLOOK_JUNK_PENDING_STATE_FILE", state_file)
+    sent = {"called": False}
+    monkeypatch.setattr(heartbeat, "send_whatsapp_notification", lambda *a, **k: sent.update(called=True))
+    run_outlook_junk_scan({})
+    assert sent["called"] is False
+    assert not state_file.exists()
+
+
+def test_run_outlook_junk_scan_stages_and_alerts_on_matches(monkeypatch, tmp_path):
+    import heartbeat
+    from integrations.outlook import OutlookMessage
+
+    msg = OutlookMessage(
+        id="msg-1",
+        subject="Claim your prize",
+        sender="AARP Offer",
+        sender_email="x@spam.example.com",
+        date=datetime.now(timezone.utc),
+        snippet="",
+        is_unread=False,
+        thread_id="t1",
+    )
+    monkeypatch.setattr("integrations.outlook.scan_junk_folder", lambda: [(msg, "AARP")])
+    state_file = tmp_path / "pending.json"
+    monkeypatch.setattr(heartbeat, "OUTLOOK_JUNK_PENDING_STATE_FILE", state_file)
+    sent = {}
+    monkeypatch.setattr(
+        heartbeat,
+        "send_whatsapp_notification",
+        lambda body, **k: sent.update(body=body) or True,
+    )
+    run_outlook_junk_scan({})
+    assert "msg-1" in state_file.read_text()
+    assert "AARP" in sent["body"]
+    assert 'Reply "yes"' in sent["body"]
 
 
 # =============================================================================

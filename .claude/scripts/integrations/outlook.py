@@ -259,6 +259,28 @@ def scan_junk_folder(max_results: int = 50) -> list[tuple[OutlookMessage, str]]:
     return matches
 
 
+def delete_junk_message(message_id: str) -> bool:
+    """Soft-delete one message via Graph API (moves to Deleted Items, recoverable).
+
+    Returns False on any failure instead of raising, so a caller deleting a batch
+    can count partial success instead of aborting on the first error.
+    """
+    import requests
+
+    token = get_access_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    def _do() -> None:
+        resp = requests.delete(f"{GRAPH_BASE}/me/messages/{message_id}", headers=headers)
+        resp.raise_for_status()
+
+    try:
+        with_retry(_do)
+        return True
+    except Exception:
+        return False
+
+
 def get_unread_count() -> int:
     """Get count of unread messages in Outlook inbox."""
     import requests
@@ -304,7 +326,9 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Outlook integration")
-    parser.add_argument("command", choices=["auth", "list", "unread", "junk-scan"])
+    parser.add_argument(
+        "command", choices=["auth", "list", "unread", "junk-scan", "junk-delete-pending"]
+    )
     parser.add_argument("--max", type=int, default=10)
     parser.add_argument("--hours", type=int, default=None)
     args = parser.parse_args()
@@ -330,3 +354,17 @@ if __name__ == "__main__":
             f"\nRules file: {OUTLOOK_JUNK_RULES_FILE}"
             " — edit subject_contains / sender_contains to tune matches."
         )
+    elif args.command == "junk-delete-pending":
+        from config import OUTLOOK_JUNK_PENDING_STATE_FILE
+        from shared import load_state, save_state
+
+        state = load_state(OUTLOOK_JUNK_PENDING_STATE_FILE)
+        message_ids = state.get("message_ids", [])
+        if not message_ids:
+            print("No pending junk messages staged.")
+        else:
+            deleted = sum(1 for mid in message_ids if delete_junk_message(mid))
+            print(f"Deleted {deleted}/{len(message_ids)} staged junk message(s).")
+            state["pending"] = False
+            state["message_ids"] = []
+            save_state(OUTLOOK_JUNK_PENDING_STATE_FILE, state)

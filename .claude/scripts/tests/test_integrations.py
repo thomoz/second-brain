@@ -119,3 +119,28 @@ class TestOutlookJunkRules:
         msg = self._make_message(subject="Invoice attached", sender="Real Vendor", sender_email="x@vendor.com")
         rules = {"subject_contains": ["free prize"], "sender_contains": ["spam.example.com"]}
         assert find_rule_match(msg, rules) is None
+
+    def test_delete_junk_message_success(self, monkeypatch) -> None:
+        import integrations.outlook as outlook
+
+        monkeypatch.setattr(outlook, "get_access_token", lambda: "fake-token")
+
+        class _FakeResponse:
+            def raise_for_status(self) -> None:
+                return None
+
+        monkeypatch.setattr("requests.delete", lambda *a, **k: _FakeResponse())
+        assert outlook.delete_junk_message("msg-id-1") is True
+
+    def test_delete_junk_message_failure_returns_false(self, monkeypatch) -> None:
+        import integrations.outlook as outlook
+
+        monkeypatch.setattr(outlook, "get_access_token", lambda: "fake-token")
+
+        class _FakeResponse:
+            def raise_for_status(self) -> None:
+                raise RuntimeError("500 server error")
+
+        monkeypatch.setattr("requests.delete", lambda *a, **k: _FakeResponse())
+        monkeypatch.setattr(outlook, "with_retry", lambda fn, **k: fn())
+        assert outlook.delete_junk_message("msg-id-1") is False

@@ -120,6 +120,51 @@ def _is_new_sydney_day(session_created_at: datetime) -> bool:
     return session_created_at.astimezone(now.tzinfo).date() != now.date()
 
 
+def _check_junk_confirm(project_root: Path, text: str) -> str | None:
+    """If an Outlook junk-delete batch is pending and `text` is a bare yes/y confirmation,
+    delete the staged batch and return the confirmation reply text.
+
+    Returns None if nothing should happen here (falls through to normal LLM chat) — no
+    pending batch, the batch expired, or the text isn't an exact yes/y match. Exact-match
+    only (not substring) so an ordinary conversational "yes" never triggers a delete.
+    """
+    stripped = text.strip().lower().rstrip(".!")
+    if stripped not in ("yes", "y"):
+        return None
+
+    from config import OUTLOOK_JUNK_CONFIRM_EXPIRY_HOURS, OUTLOOK_JUNK_PENDING_STATE_FILE, now_local
+    from shared import append_to_daily_log, load_state, save_state
+
+    state = load_state(OUTLOOK_JUNK_PENDING_STATE_FILE)
+    if not state.get("pending"):
+        return None
+
+    staged_at = datetime.fromisoformat(state["staged_at"])
+    now = now_local()
+    if staged_at.tzinfo is None:
+        staged_at = staged_at.replace(tzinfo=now.tzinfo)
+    if (now - staged_at).total_seconds() > OUTLOOK_JUNK_CONFIRM_EXPIRY_HOURS * 3600:
+        state["pending"] = False
+        save_state(OUTLOOK_JUNK_PENDING_STATE_FILE, state)
+        return None
+
+    from integrations.outlook import delete_junk_message
+
+    message_ids = state.get("message_ids", [])
+    deleted = sum(1 for mid in message_ids if delete_junk_message(mid))
+
+    state["pending"] = False
+    state["message_ids"] = []
+    save_state(OUTLOOK_JUNK_PENDING_STATE_FILE, state)
+    append_to_daily_log(
+        f"**[Outlook Junk]** Confirmed via WhatsApp — deleted {deleted}/{len(message_ids)} message(s)."
+    )
+
+    if deleted == len(message_ids):
+        return f"Deleted {deleted} junk message(s)."
+    return f"Deleted {deleted}/{len(message_ids)} junk message(s) — some failed, check the logs."
+
+
 def _profile_session_state_path(project_root: Path) -> Path:
     return project_root / ".claude" / "data" / "state" / "profile-session.json"
 
@@ -229,6 +274,16 @@ class ConversationEngine:
         if injection_flags:
             names = ", ".join(f[0] for f in injection_flags)
             print(f"[{datetime.now()}] [SECURITY] WhatsApp injection patterns detected: {names}")
+
+        # Outlook junk-delete confirmation (deterministic, no LLM call)
+        _junk_confirm_reply = _check_junk_confirm(self.project_root, message.text)
+        if _junk_confirm_reply is not None:
+            yield OutgoingMessage(
+                text=_junk_confirm_reply,
+                channel=message.channel,
+                thread=message.thread,
+            )
+            return
 
         # Conversation thread reset
         _reset_phrases = ["new conversation thread", "start new conversation"]
