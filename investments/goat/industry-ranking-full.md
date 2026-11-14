@@ -2,7 +2,7 @@
 
 Advisor notes only; no trade action is ever suggested here (see SOUL.md). Sourced from Finviz's own Groups performance view (finviz.com/groups.ashx?g=industry&v=140), covering all 144 Finviz industries -- not just the 39 with a dedicated, currently-trading ETF (see industry-ranking.md for that narrower, breakout-gated report). This is a pure informational ranking: no breakout signal, no candidate staging, no WhatsApp alert. Ranked throughout by Perf Week -- the nearest-term read on where money is moving into/out of an industry right now, not a longer trend (see industry-ranking.md for that).
 
-## Run: 2026-11-14
+## Run: 2026-11-15
 
 ## Top 10 Rising (by Perf Week)
 | Rank | Industry | Perf Week | Perf Month | Perf Quarter | Perf Half | Perf Year | Perf YTD |
@@ -141,7 +141,7 @@ All 144/144 industries, ranked by Perf Week.
 | 102 | Agricultural Inputs | +0.20% | -0.47% | +1.75% | -4.71% | +13.65% | +14.30% |
 | 103 | Medical Instruments & Supplies | +0.15% | +5.84% | +9.56% | +19.97% | -0.58% | -1.29% |
 | 104 | REIT - Industrial | +0.12% | +5.99% | -2.79% | +0.83% | +9.37% | +9.96% |
-| 105 | Entertainment | +0.05% | -2.09% | -5.94% | -8.93% | -24.83% | -15.27% |
+| 105 | Entertainment | +0.09% | -1.85% | -5.84% | -8.74% | -24.52% | -15.20% |
 | 106 | Restaurants | -0.01% | +9.55% | +0.93% | +2.72% | +2.99% | +1.85% |
 | 107 | Information Technology Services | -0.10% | +5.75% | +10.05% | +14.65% | -16.88% | -17.03% |
 | 108 | Paper & Paper Products | -0.19% | +14.89% | +19.11% | +15.57% | +2.31% | -0.34% |
@@ -152,7 +152,7 @@ All 144/144 industries, ranked by Perf Week.
 | 113 | REIT - Healthcare Facilities | -0.53% | +4.12% | +1.18% | +7.79% | +19.92% | +22.65% |
 | 114 | Health Information Services | -0.54% | +2.30% | +21.56% | +59.48% | +9.23% | +28.78% |
 | 115 | Furnishings, Fixtures & Appliances | -0.56% | +7.54% | +4.40% | +39.67% | +18.77% | +15.14% |
-| 116 | Travel Services | -0.67% | +4.46% | -7.44% | +14.70% | -0.06% | -5.61% |
+| 116 | Travel Services | -0.67% | +4.54% | -7.39% | +14.68% | -0.04% | -5.60% |
 | 117 | Recreational Vehicles | -0.73% | +15.18% | -2.91% | +0.70% | -5.15% | -8.03% |
 | 118 | Packaging & Containers | -1.05% | +3.31% | -4.71% | +16.12% | +11.37% | +6.27% |
 | 119 | Electronic Gaming & Multimedia | -1.06% | -0.15% | +2.82% | +5.00% | -24.94% | -18.73% |
@@ -168,7 +168,7 @@ All 144/144 industries, ranked by Perf Week.
 | 129 | Auto & Truck Dealerships | -1.48% | +9.44% | -3.84% | +7.71% | +6.92% | -7.08% |
 | 130 | Building Materials | -1.50% | +8.57% | -5.14% | -6.03% | -10.28% | -15.26% |
 | 131 | Business Equipment & Supplies | -1.82% | +0.74% | +1.70% | +22.85% | -4.04% | +15.63% |
-| 132 | Uranium | -2.16% | -15.33% | -32.08% | -37.87% | -29.84% | -28.39% |
+| 132 | Uranium | -2.16% | -15.34% | -32.10% | -37.88% | -29.94% | -28.47% |
 | 133 | Real Estate Services | -2.28% | +0.95% | -7.45% | +1.77% | -21.37% | -20.40% |
 | 134 | Financial Conglomerates | -2.70% | -5.30% | -9.72% | -0.39% | +24.94% | +20.39% |
 | 135 | Airports & Air Services | -3.51% | +12.72% | -2.17% | -14.72% | -25.46% | -25.68% |
@@ -183,56 +183,13 @@ All 144/144 industries, ranked by Perf Week.
 | 144 | Solar | -12.57% | +0.91% | -17.01% | -35.77% | -30.92% | -26.85% |
 
 ### Rotation Flow
-5 newly rising, 1 newly falling since the prior snapshot (81 still rising, 57 still falling unchanged).
+0 newly rising, 0 newly falling since the prior snapshot (86 still rising, 58 still falling unchanged).
 
-| Ticker | Label | From | To |
-|--------|-------|------|----|
-| Utilities - Regulated Gas | Utilities - Regulated Gas | Falling | Rising |
-| Utilities - Regulated Electric | Utilities - Regulated Electric | Falling | Rising |
-| REIT - Industrial | REIT - Industrial | Falling | Rising |
-| Apparel Retail | Apparel Retail | Rising | Falling |
-| Recreational Vehicles | Recreational Vehicles | Falling | Rising |
-| Real Estate Services | Real Estate Services | Falling | Rising |
+No transitions since the prior snapshot.
 
 ### Short-Window Flow (1-Week)
-26 newly rising, 9 newly falling since the prior snapshot (79 still rising, 30 still falling unchanged).
+0 newly rising, 0 newly falling since the prior snapshot (105 still rising, 39 still falling unchanged).
 
-| Ticker | Label | From | To |
-|--------|-------|------|----|
-| Department Stores | Department Stores | Falling | Rising |
-| Grocery Stores | Grocery Stores | Falling | Rising |
-| Household & Personal Products | Household & Personal Products | Falling | Rising |
-| Beverages - Wineries & Distilleries | Beverages - Wineries & Distilleries | Falling | Rising |
-| Home Improvement Retail | Home Improvement Retail | Falling | Rising |
-| Tobacco | Tobacco | Falling | Rising |
-| Consulting Services | Consulting Services | Falling | Rising |
-| Confectioners | Confectioners | Falling | Rising |
-| Insurance Brokers | Insurance Brokers | Falling | Rising |
-| Software - Application | Software - Application | Falling | Rising |
-| Beverages - Brewers | Beverages - Brewers | Falling | Rising |
-| Utilities - Regulated Electric | Utilities - Regulated Electric | Falling | Rising |
-| Staffing & Employment Services | Staffing & Employment Services | Falling | Rising |
-| Gambling | Gambling | Falling | Rising |
-| Packaged Foods | Packaged Foods | Falling | Rising |
-| REIT - Diversified | REIT - Diversified | Falling | Rising |
-| Specialty Business Services | Specialty Business Services | Falling | Rising |
-| Resorts & Casinos | Resorts & Casinos | Falling | Rising |
-| Medical Care Facilities | Medical Care Facilities | Falling | Rising |
-| Luxury Goods | Luxury Goods | Falling | Rising |
-| Medical Devices | Medical Devices | Falling | Rising |
-| Personal Services | Personal Services | Falling | Rising |
-| Credit Services | Credit Services | Falling | Rising |
-| Medical Instruments & Supplies | Medical Instruments & Supplies | Falling | Rising |
-| REIT - Industrial | REIT - Industrial | Falling | Rising |
-| Entertainment | Entertainment | Falling | Rising |
-| Paper & Paper Products | Paper & Paper Products | Rising | Falling |
-| Utilities - Renewable | Utilities - Renewable | Rising | Falling |
-| Health Information Services | Health Information Services | Rising | Falling |
-| Electronic Gaming & Multimedia | Electronic Gaming & Multimedia | Rising | Falling |
-| Other Industrial Metals & Mining | Other Industrial Metals & Mining | Rising | Falling |
-| Copper | Copper | Rising | Falling |
-| Airlines | Airlines | Rising | Falling |
-| Biotechnology | Biotechnology | Rising | Falling |
-| Uranium | Uranium | Rising | Falling |
+No transitions since the prior snapshot.
 
-Last auto-generated: 2026-11-14.
+Last auto-generated: 2026-11-15.
