@@ -50,7 +50,7 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (MA) | ok | MA: Free Cash Flow $+16.4B, Capital Expenditure $1.2B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-10-01, +22.4% YoY vs 2025-10-01 |
 | 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 142 filing(s) in the trailing 30d vs 190 in the same window a year ago (0.75x); 424B4 (priced IPO): 20 filing(s) in the trailing 30d vs 51 in the same window a year ago (0.39x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.63 (z=0.53 vs trailing 86d mean 0.59) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.63 (z=0.52 vs trailing 87d mean 0.59) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (AMZN) | flag | AMZN: $448,721,928 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (TSLA) | flag | TSLA: $87,688,429 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (LLY) | flag | LLY: $17,949,383 sold vs $0 bought, trailing 365 days |
