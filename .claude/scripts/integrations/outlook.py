@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import sys
+import unicodedata
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -230,15 +231,18 @@ def find_rule_match(msg: OutlookMessage, rules: dict[str, list[str]]) -> str | N
 
     Case-insensitive substring match: subject_contains checks the subject line;
     sender_contains checks both the sender's display name and email address.
+    NFKC-normalizes both sides first so spam using stylized Unicode lookalikes
+    (e.g. Mathematical Alphanumeric Symbols rendering as "𝘽𝙡𝙪𝙚𝙇𝙪𝙢𝙚") still
+    matches a plain-ASCII keyword like "BlueLume".
     """
-    subject_lower = msg.subject.lower()
+    subject_lower = unicodedata.normalize("NFKC", msg.subject).lower()
     for keyword in rules.get("subject_contains", []):
-        if keyword.lower() in subject_lower:
+        if unicodedata.normalize("NFKC", keyword).lower() in subject_lower:
             return keyword
 
-    sender_blob = f"{msg.sender} {msg.sender_email}".lower()
+    sender_blob = unicodedata.normalize("NFKC", f"{msg.sender} {msg.sender_email}").lower()
     for keyword in rules.get("sender_contains", []):
-        if keyword.lower() in sender_blob:
+        if unicodedata.normalize("NFKC", keyword).lower() in sender_blob:
             return keyword
 
     return None
