@@ -244,7 +244,7 @@ def find_rule_match(msg: OutlookMessage, rules: dict[str, list[str]]) -> str | N
     return None
 
 
-def scan_junk_folder(max_results: int = 50) -> list[tuple[OutlookMessage, str]]:
+def scan_junk_folder(max_results: int = 500) -> list[tuple[OutlookMessage, str]]:
     """Scan the Junk folder against configured keyword rules.
 
     Read-only — reports matches for review, does not delete or move anything.
@@ -329,7 +329,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "command", choices=["auth", "list", "unread", "junk-scan", "junk-delete-pending"]
     )
-    parser.add_argument("--max", type=int, default=10)
+    parser.add_argument("--max", type=int, default=None)
     parser.add_argument("--hours", type=int, default=None)
     args = parser.parse_args()
 
@@ -337,12 +337,15 @@ if __name__ == "__main__":
         get_access_token()
         print("Outlook authentication successful!")
     elif args.command == "list":
-        msgs = list_messages(max_results=args.max, hours_ago=args.hours)
+        kwargs = {"hours_ago": args.hours}
+        if args.max is not None:
+            kwargs["max_results"] = args.max
+        msgs = list_messages(**kwargs)
         print(format_messages_for_context(msgs))
     elif args.command == "unread":
         print(f"Unread Outlook messages: {get_unread_count()}")
     elif args.command == "junk-scan":
-        matches = scan_junk_folder(max_results=args.max)
+        matches = scan_junk_folder(max_results=args.max) if args.max is not None else scan_junk_folder()
         if not matches:
             print("No Junk folder messages matched the configured rules.")
         else:
