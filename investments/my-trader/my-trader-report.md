@@ -33,7 +33,7 @@ Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 **BMS** (None, No strategic bucket assigned yet)
 250.0 @ avg $2.32 | current price unavailable
 Bottom line: Nothing notable this run.
-Open alerts: none
+- OPEN ALERT (earnings_watch_guidance, since 2026-11-15): Bristol Myers Squibb’s October 29 earnings call flagged Cobenfy adoption problems and margin pressure that pose downside risk to future results, although Q3 beat estimates and revenue guidance increased. The EPS guidance cut primarily reflected acquisition-related charges rather than weaker operations. (Cobenfy prescription volume grew only approximately 3–4% sequentially; management said new patient starts and repeat prescribing need improvement, citing dosing and tolerability challenges. [Earnings call](https://stockanalysis.com/stocks/bmy/transcripts/660055-q3-2026/); Q3 adjusted gross margin was 68.4%, reflecting product mix and a one-time contract termination expense; full-year margin guidance remained unchanged. [Earnings call](https://www.fool.com/earnings/call-transcripts/2026/10/29/bristol-myers-squibb-bmy-q3-2026-earnings-call-transcript/); Full-year adjusted EPS guidance fell from $6.75–$7.00 to $6.35–$6.55 as acquisition-related charges increased; revenue guidance rose to $49.75–$50.25 billion. [Company release](https://www.sec.gov/Archives/edgar/data/14272/000001427226000022/a2026q3ex991-filing.htm); Q3 revenue of $13.1 billion exceeded the $12.75 billion consensus, and adjusted EPS of $1.35 beat expectations by $0.21. [Reuters](https://www.investing.com/news/stock-market-news/bristol-myers-raises-2026-revenue-forecast-lowers-eps-due-to-charge-4982774))
 - [unknown] company_profile: No market data available
 - [unknown] dividend: No market data available
 - [unknown] valuation: No market data available
@@ -264,6 +264,7 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 No new material changes.
 
 ### All Open Alerts
+- **BMS** (holdings) — earnings_watch_guidance: Bristol Myers Squibb’s October 29 earnings call flagged Cobenfy adoption problems and margin pressure that pose downside risk to future results, although Q3 beat estimates and revenue guidance increased. The EPS guidance cut primarily reflected acquisition-related charges rather than weaker operations. (Cobenfy prescription volume grew only approximately 3–4% sequentially; management said new patient starts and repeat prescribing need improvement, citing dosing and tolerability challenges. [Earnings call](https://stockanalysis.com/stocks/bmy/transcripts/660055-q3-2026/); Q3 adjusted gross margin was 68.4%, reflecting product mix and a one-time contract termination expense; full-year margin guidance remained unchanged. [Earnings call](https://www.fool.com/earnings/call-transcripts/2026/10/29/bristol-myers-squibb-bmy-q3-2026-earnings-call-transcript/); Full-year adjusted EPS guidance fell from $6.75–$7.00 to $6.35–$6.55 as acquisition-related charges increased; revenue guidance rose to $49.75–$50.25 billion. [Company release](https://www.sec.gov/Archives/edgar/data/14272/000001427226000022/a2026q3ex991-filing.htm); Q3 revenue of $13.1 billion exceeded the $12.75 billion consensus, and adjusted EPS of $1.35 beat expectations by $0.21. [Reuters](https://www.investing.com/news/stock-market-news/bristol-myers-raises-2026-revenue-forecast-lowers-eps-due-to-charge-4982774)) (first flagged 2026-11-15)
 - **CF** (watchlist) — dividend: Dividend declined -36.0% vs prior 12 months (first flagged 2026-11-14)
 - **XRO.AX** (watchlist) — balance_sheet: Current Ratio 0.75 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-11-13)
 - **KMI** (watchlist) — balance_sheet: Current Ratio 0.67 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-11-11)
@@ -347,7 +348,6 @@ No new material changes.
 - **ASML** — Crash-discount fit [ROE 65.6% at/above 15.0% (10/10 — excellent), but currently rich (PE 36.8) — quality worth watching for a crash-driven discount rather than buying at today's price]
 - **CEG** — Buffett/Smith [ROE 18.3% at/above 15.0% (10/10 — excellent), not richly valued]
 - **COUR** — Graham [PE 6.3 x P/B 0.86 = 5.4, below 22.5]; Marks/Neilson [down -39.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
-- **CPRT** — Buffett/Smith [ROE 16.2% at/above 15.0% (10/10 — excellent), not richly valued]
 - **CROX** — Buffett/Smith [ROE 49.1% at/above 15.0% (10/10 — excellent), not richly valued]
 - **DTG.DE** — Lynch [PEG 0.32 at/below 1.0 — growth at a reasonable price]
 - **FNV** — Buffett/Smith [ROE 20.1% at/above 15.0% (10/10 — excellent), not richly valued]
