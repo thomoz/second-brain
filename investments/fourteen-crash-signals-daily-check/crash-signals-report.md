@@ -4,22 +4,22 @@ What this is: 14 historical market-crash warning markers, checked daily so an ea
 
 Auto-generated daily -- overwritten every run. Advisor notes only; no trade action is ever suggested here (see SOUL.md). Per-marker source: investments/my-trader/14-signals-crash-warning-handoff.md.
 
-## Run: 2026-11-16
+## Run: 2026-11-17
 
 ## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)
 Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 mega-cap constituents -- never hardcoded to a fixed ticker list.
 
 | Rank | Ticker | Sector | Market Cap |
 |------|--------|--------|------------|
-| 1 | AMZN | Consumer Discretionary | $2883B |
-| 2 | TSLA | Consumer Discretionary | $1542B |
-| 3 | LLY | Health Care | $1286B |
+| 1 | AMZN | Consumer Discretionary | $2787B |
+| 2 | TSLA | Consumer Discretionary | $1501B |
+| 3 | LLY | Health Care | $1275B |
 | 4 | BRK-B | Financials | $1260B |
-| 5 | WMT | Consumer Staples | $1019B |
-| 6 | JPM | Financials | $919B |
-| 7 | V | Financials | $794B |
-| 8 | XOM | Energy | $696B |
-| 9 | JNJ | Health Care | $688B |
+| 5 | WMT | Consumer Staples | $1022B |
+| 6 | JPM | Financials | $898B |
+| 7 | V | Financials | $796B |
+| 8 | XOM | Energy | $681B |
+| 9 | JNJ | Health Care | $680B |
 | 10 | MA | Financials | $576B |
 
 ## Markers
@@ -49,7 +49,7 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (JNJ) | ok | JNJ: Free Cash Flow $+19.3B, Capital Expenditure $5.2B (period ending 2025-12-31) |
 | 4 | Capex outruns cash flow (MA) | ok | MA: Free Cash Flow $+16.4B, Capital Expenditure $1.2B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-10-01, +22.4% YoY vs 2025-10-01 |
-| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 142 filing(s) in the trailing 30d vs 190 in the same window a year ago (0.75x); 424B4 (priced IPO): 20 filing(s) in the trailing 30d vs 51 in the same window a year ago (0.39x) |
+| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 135 filing(s) in the trailing 30d vs 179 in the same window a year ago (0.75x); 424B4 (priced IPO): 21 filing(s) in the trailing 30d vs 50 in the same window a year ago (0.42x) |
 | 7 | Retail piles into leverage | ok | Equity put/call ratio 0.63 (z=0.52 vs trailing 87d mean 0.59) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (AMZN) | flag | AMZN: $448,721,928 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (TSLA) | flag | TSLA: $87,688,429 sold vs $0 bought, trailing 365 days |
@@ -62,13 +62,13 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 8 | Insider selling (JNJ) | flag | JNJ: $154,384,808 sold vs $257,688 bought, trailing 365 days |
 | 8 | Insider selling (MA) | flag | MA: $73,363,034 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (BRK-A) | flag | BRK-A: $19,972,776 sold vs $0 bought, trailing 365 days |
-| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (91 day(s) away) -- ad-share content is not automatable, nothing to check yet |
-| 10 | Most-valuable-company milestone | flag | AMZN is the largest company in the current hot-sector watchlist ($2.88T, most recently crossed the $2.5T rung) |
-| 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
+| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (90 day(s) away) -- ad-share content is not automatable, nothing to check yet |
+| 10 | Most-valuable-company milestone | flag | AMZN is the largest company in the current hot-sector watchlist ($2.79T, most recently crossed the $2.5T rung) |
+| 11 | Regulators sound the alarm | flag | Barr, Some Potential Financial Stability Implications of Artificial Intelligence (https://www.federalreserve.gov/newsevents/speech/barr20261116a.htm) |
 | 12 | Credit turns in the hot sector while broad market stays calm (AMZN) | unknown | AMZN: bond CUSIP 023135EA0 found, but no live or manually-entered yield reading available -- run `record-bond-yield AMZN <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (BRK-B) | unknown | BRK-B: bond CUSIP 084670EB0 found, but no live or manually-entered yield reading available -- run `record-bond-yield BRK-B <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (JPM) | unknown | JPM: bond CUSIP 46661MCB8 found, but no live or manually-entered yield reading available -- run `record-bond-yield JPM <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (JNJ) | unknown | JNJ: bond CUSIP 478160CY8 found, but no live or manually-entered yield reading available -- run `record-bond-yield JNJ <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (MA) | unknown | MA: bond CUSIP 57636QBH6 found, but no live or manually-entered yield reading available -- run `record-bond-yield MA <yield_pct>` |
 | 13 | Funding markets start choking | ok | CP-Treasury spread (DCPN3M-DTB3) 0.11pp (z=1.06 vs trailing 365d) |
-| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.20pp (as of 2026-11-12); 0 consecutive day(s) at/above 3.5pp (needs 21 to flag) -- WATCH: within 0.3pp of the flag threshold (WATCH) |
+| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.23pp (as of 2026-11-13); 0 consecutive day(s) at/above 3.5pp (needs 21 to flag) -- WATCH: within 0.3pp of the flag threshold (WATCH) |
