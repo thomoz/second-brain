@@ -138,6 +138,7 @@ Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 **LYV** (Live Nation Entertainment Inc, Long-term hold — never timed, dips are expected and not a reason to act alone)
 0.4 @ avg $167.29 | now $176.30 | P&L +$3.61 (+5.4%) | 0.7% of tracked portfolio
 Bottom line: 2 flag(s) active (valuation, balance_sheet) — worth a look.
+- OPEN ALERT (earnings_watch_guidance, since 2026-11-17): LYV's November 5 earnings-call commentary flagged Q4 margin risk from lower-margin stadium mix, rising venue preopening costs and increased year-end advertising write-offs. These suggest potential earnings pressure despite a Q3 earnings/revenue beat, stronger attendance guidance and an upgraded Ticketing outlook. (Management highlighted Q4 advertising write-offs, with prepaid advertising up double digits, and approximately $50 million in 2026 venue preopening costs versus $25 million in 2025. [Call transcript](https://goodmoat.com/stocks/lyv/transcripts/2026-year/3-quarter); Concerts AOI grew only 4% through September against a maintained double-digit full-year target, increasing reliance on Q4 improvement; consolidated Q3 AOI margin contracted approximately 50 basis points. [Company results](https://news.livenationentertainment.com/news/live-nation-entertainment-reports-third-quarter-2026-results); No demand slowdown or guidance cut found: October ticket sales rose over 20%, full-year attendance expectations increased, and Ticketing AOI guidance rose to high-single-digit growth. [Company results](https://news.livenationentertainment.com/news/live-nation-entertainment-reports-third-quarter-2026-results))
 - OPEN ALERT (balance_sheet, since 2026-11-04): Debt/Equity 620.2 >= 150.0 -- lower is generally safer (0/10 — poor); Current Ratio 0.85 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
 - OPEN ALERT (valuation, since 2026-11-04): PE 94.0 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
 - [info] company_profile: Live Nation Entertainment, Inc. operates as a live entertainment company worldwide.
@@ -183,9 +184,9 @@ Open alerts: none
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [info] etf_mechanics: Expense ratio unavailable, AUM $2,219,378,944
 - [ok] opportunity: No standout positive signal this run
-- [info] price_action: 1mo -4.7%, 3mo -7.7%
+- [info] price_action: 1mo -4.3%, 3mo -7.4%
 - [info] crash_resilience: Dec 2018 correction +0.0%; COVID crash (2020) +0.0%; 2022 bear market -13.1%
-- [info] technical_levels: Price $56.78 vs 50DMA $58.89 (below, -3.6%); 150DMA $60.38 (below, -6.0%); 200DMA $62.60 (below, -9.3%)
+- [info] technical_levels: Price $57.00 vs 50DMA $58.82 (below, -3.1%); 150DMA $60.31 (below, -5.5%); 200DMA $62.54 (below, -8.9%)
 - [unknown] going_concern: Total Cash and/or Free Cash Flow unavailable -- cannot assess bankruptcy/cash-runway risk
 
 **SILJ** (None, No strategic bucket assigned yet)
@@ -265,6 +266,7 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 No new material changes.
 
 ### All Open Alerts
+- **LYV** (holdings) — earnings_watch_guidance: LYV's November 5 earnings-call commentary flagged Q4 margin risk from lower-margin stadium mix, rising venue preopening costs and increased year-end advertising write-offs. These suggest potential earnings pressure despite a Q3 earnings/revenue beat, stronger attendance guidance and an upgraded Ticketing outlook. (Management highlighted Q4 advertising write-offs, with prepaid advertising up double digits, and approximately $50 million in 2026 venue preopening costs versus $25 million in 2025. [Call transcript](https://goodmoat.com/stocks/lyv/transcripts/2026-year/3-quarter); Concerts AOI grew only 4% through September against a maintained double-digit full-year target, increasing reliance on Q4 improvement; consolidated Q3 AOI margin contracted approximately 50 basis points. [Company results](https://news.livenationentertainment.com/news/live-nation-entertainment-reports-third-quarter-2026-results); No demand slowdown or guidance cut found: October ticket sales rose over 20%, full-year attendance expectations increased, and Ticketing AOI guidance rose to high-single-digit growth. [Company results](https://news.livenationentertainment.com/news/live-nation-entertainment-reports-third-quarter-2026-results)) (first flagged 2026-11-17)
 - **MACRO** (macro) — gold_silver_ratio: Gold/silver ratio at 82.1, at/above the 80 historical-extreme-high level — gold is expensive relative to silver, a level some see as a mean-reversion setup (contested signal) (first flagged 2026-11-16)
 - **GWRE** (watchlist) — valuation: PE 95.1 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-11-16)
 - **EQT** (watchlist) — balance_sheet: Current Ratio 0.71 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-11-16)
@@ -342,7 +344,7 @@ No new material changes.
 - **MACRO** (macro) — uk_cpi: UK headline CPI 3.1% YoY (reference month 2026-08-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone (first flagged 2026-09-16)
 
 ### Watchlist Opportunities (this run)
-- **3750.HK** — Buffett/Smith [ROE 24.4% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -43.8% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
+- **3750.HK** — Buffett/Smith [ROE 24.4% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -43.7% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **AEM** — Buffett/Smith [ROE 23.2% at/above 15.0% (10/10 — excellent), not richly valued]
 - **ARKQ** — Marks/Neilson [down -19.3% over 3 months with no other flags — possible overreaction, not a fundamental problem]
 - **ASML** — Lynch [PEG 0.75 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 65.6% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -23.2% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
@@ -386,15 +388,15 @@ No new material changes.
 - **move_index** [ok] — MOVE index (bond market volatility) at 101.9, below the flag threshold
 - **housing_affordability** [ok] — Housing price-to-income ratio at 4.5x (price as of 2026-07-01, income as of 2025-01-01, higher = less affordable)
 - **consumer_sentiment** [flag] — UMich consumer sentiment at 48.1 (as of 2026-09-01), at/below the 50 stress threshold — readings this low have historically coincided with households pulling back on spending
-- **recession_signal** [ok] — 10Y-2Y spread +0.29pp (as of 2026-11-16), recession probability 0.4% (as of 2026-09-01) — higher probability means the market is pricing more chance of a downturn within the next year; 10Y-3M spread +0.78pp (as of 2026-11-16); bear steepener (long rates rising — inflation/debt-concern driven, historically the more concerning pattern)
-- **inflation_expectations** [ok] — 10Y breakeven 2.20% (as of 2026-11-16), 5Y5Y forward 2.15% (as of 2026-11-16) — breakevens reflect market demand for inflation protection, not a literal CPI forecast; a wide gap between the 10Y breakeven and the 5Y5Y forward often signals a short-term supply shock rather than durable inflation
+- **recession_signal** [ok] — 10Y-2Y spread +0.30pp (as of 2026-11-17), recession probability 0.4% (as of 2026-09-01) — higher probability means the market is pricing more chance of a downturn within the next year; 10Y-3M spread +0.77pp (as of 2026-11-17); bear steepener (long rates rising — inflation/debt-concern driven, historically the more concerning pattern)
+- **inflation_expectations** [ok] — 10Y breakeven 2.21% (as of 2026-11-17), 5Y5Y forward 2.16% (as of 2026-11-17) — breakevens reflect market demand for inflation protection, not a literal CPI forecast; a wide gap between the 10Y breakeven and the 5Y5Y forward often signals a short-term supply shock rather than durable inflation
 - **credit_spreads** [ok] — ICE BofA US HY OAS at 3.34pp (as of 2026-11-16, tighter = less credit stress priced in)
 - **australia_cpi** [flag] — Australia headline CPI 4.3% YoY (reference month 2026-09-01), outside the RBA's 2-3% target band — inflation running hotter than the RBA's comfort zone
 - **us_cpi** [unknown] — FRED US CPI data unavailable (FRED_API_KEY not set, or series unavailable)
 - **uk_cpi** [flag] — UK headline CPI 3.5% YoY (reference month 2026-09-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone
 - **real_yields** [flag] — 10Y real yield +2.92% (as of 2026-11-16), above the 2.0% threshold -- elevated real yields historically pressure gold hard
 - **dollar_index** [ok] — Broad USD index 122.7, +1.0% over the past 30 days
-- **gold_trend** [info] — GC=F $3,856 (50DMA $4,157, 200DMA $4,464, -13.6% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $57.00 AUD; AUD/USD 3mo move -4.9%
+- **gold_trend** [info] — GC=F $3,852 (50DMA $4,157, 200DMA $4,464, -13.7% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $57.00 AUD; AUD/USD 3mo move -4.9%
 - **gold_silver_ratio** [flag] — Gold/silver ratio at 81.5, at/above the 80 historical-extreme-high level — gold is expensive relative to silver, a level some see as a mean-reversion setup (contested signal)
 - **vix** [ok] — VIX at 25.5, below the flag threshold
 
