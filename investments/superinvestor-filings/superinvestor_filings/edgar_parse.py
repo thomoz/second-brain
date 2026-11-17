@@ -28,6 +28,37 @@ _AGG_AMOUNT_RE = re.compile(
 _ISSUER_NAME_RE = re.compile(
     r"name\s+of\s+issuer[^:\n]{0,15}:\s*([^\n]{2,90})", re.IGNORECASE
 )
+# Schedule 13D/G's "Date of Event Which Requires Filing of this Statement" -- the
+# closest thing 13D/G discloses to a purchase date (it's the date the reporting
+# person's stake crossed the disclosure threshold, not an itemized per-trade list
+# the way Form 4's transactionDate is). Pre-2024 text filings render this label
+# on the cover page followed by a MM/DD/YYYY date.
+_EVENT_DATE_RE = re.compile(
+    r"date\s+of\s+event[^:\n]{0,80}:\s*([0-9]{1,2}[/-][0-9]{1,2}[/-][0-9]{2,4})",
+    re.IGNORECASE,
+)
+
+
+def _normalize_mmddyyyy(raw: str | None) -> str | None:
+    """SEC's structured 13D/G XML ships dateOfEvent as MM/DD/YYYY (verified against
+    a live 2026-10-08 Schedule 13D/A); the rest of this codebase's date fields
+    (filed_date, Form 4's transactionDate) are already ISO YYYY-MM-DD. Normalize so
+    the two are comparable/sortable. Returns the raw string unparsed rather than
+    None if the format doesn't match -- still worth showing Shaun even if this
+    function's own normalization can't make sense of it."""
+    if raw is None:
+        return None
+    for sep in ("/", "-"):
+        parts = raw.split(sep)
+        if len(parts) == 3:
+            month, day, year = parts
+            if len(year) == 2:
+                year = f"20{year}"
+            try:
+                return f"{int(year):04d}-{int(month):02d}-{int(day):02d}"
+            except ValueError:
+                continue
+    return raw
 
 
 def _strip_ns(tag: str) -> str:
@@ -165,6 +196,7 @@ def _parse_13dg_structured(xml_text: str) -> dict[str, Any] | None:
     pct_owned = _to_float(
         _first_matching("percent", "class") or _first_matching("percentofclass")
     )
+    event_date = _normalize_mmddyyyy(_first_matching("dateofevent"))
 
     if not any([issuer_name, issuer_cik, cusip, shares is not None, pct_owned is not None]):
         return None
@@ -174,6 +206,7 @@ def _parse_13dg_structured(xml_text: str) -> dict[str, Any] | None:
         "cusip": cusip[:9] if cusip else None,
         "shares": shares,
         "pct_owned": pct_owned,
+        "event_date": event_date,
     }
 
 
@@ -199,6 +232,7 @@ def parse_schedule_13dg(doc_text: str) -> dict[str, Any] | None:
     agg_match = _AGG_AMOUNT_RE.search(collapsed)
     cusip_match = _CUSIP_RE.search(collapsed)
     issuer_match = _ISSUER_NAME_RE.search(text)  # newline-anchored -- not the collapsed form
+    event_date_match = _EVENT_DATE_RE.search(collapsed)
 
     pct_owned = _to_float(pct_match.group(1)) if pct_match else None
     shares = _to_float(agg_match.group(1)) if agg_match else None
@@ -206,6 +240,7 @@ def parse_schedule_13dg(doc_text: str) -> dict[str, Any] | None:
     issuer_name = None
     if issuer_match:
         issuer_name = issuer_match.group(1).strip().rstrip(".").strip() or None
+    event_date = _normalize_mmddyyyy(event_date_match.group(1)) if event_date_match else None
 
     if pct_owned is None and shares is None and cusip is None and issuer_name is None:
         return None
@@ -215,6 +250,7 @@ def parse_schedule_13dg(doc_text: str) -> dict[str, Any] | None:
         "cusip": cusip,
         "shares": shares,
         "pct_owned": pct_owned,
+        "event_date": event_date,
     }
 
 

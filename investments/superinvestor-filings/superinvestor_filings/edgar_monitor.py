@@ -215,6 +215,7 @@ def _process_schedule(
 
     pct_owned = parsed.get("pct_owned") if parsed else None
     shares = parsed.get("shares") if parsed else None
+    event_date = parsed.get("event_date") if parsed else None
 
     prior_pct = db.get_last_pct_owned(conn, filer_key, issuer_label)
     material_crossing = edgar_parse.classify_material_crossing(form_type, pct_owned, prior_pct)
@@ -225,7 +226,7 @@ def _process_schedule(
         conn, dedup_key=dedup_key, source="edgar", filer_key=filer_key,
         filer_display=filer_display, form_type=form_type, issuer=issuer_label,
         issuer_name=issuer_name, issuer_ticker=issuer_ticker, accession=accession,
-        event_date=None, filed_date=filed_date, shares=shares, pct_owned=pct_owned,
+        event_date=event_date, filed_date=filed_date, shares=shares, pct_owned=pct_owned,
         pct_owned_change=pct_change, material_crossing=material_crossing,
         transaction_code=None,
         raw_url=_archive_url(cik, accession, filing["primary_document"]),
@@ -239,13 +240,16 @@ def _process_schedule(
     if shares is not None:
         bits.append(f"{shares:,.0f} sh")
     detail = ", ".join(bits) if bits else "details in filing"
-    line = f"{form_type} on {issuer_display} ({detail}, filed {filed_date})"
+    line = f"{form_type} on {issuer_display} ({detail}"
+    if event_date:
+        line += f", bought/crossed {event_date}"
+    line += f", filed {filed_date})"
     if material_crossing:
         line += f" [{material_crossing}]"
     return {
         "filer_key": filer_key, "filer_display": filer_display,
         "form_type": form_type, "issuer": issuer_label, "issuer_name": issuer_name,
-        "issuer_ticker": issuer_ticker, "filed_date": filed_date, "event_date": None,
+        "issuer_ticker": issuer_ticker, "filed_date": filed_date, "event_date": event_date,
         "material_crossing": material_crossing, "summary": line,
         "raw_url": _archive_url(cik, accession, filing["primary_document"]),
     }

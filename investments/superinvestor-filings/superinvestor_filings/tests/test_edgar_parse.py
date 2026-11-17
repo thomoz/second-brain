@@ -37,6 +37,7 @@ def test_parse_schedule_13g_structured():
     assert parsed["shares"] == 2750000.0
     assert parsed["issuer_cik"] == "0000866787"
     assert parsed["cusip"] == "123456789"
+    assert parsed["event_date"] == "2026-10-08"
 
 
 def test_parse_schedule_13g_text_fallback():
@@ -47,6 +48,14 @@ def test_parse_schedule_13g_text_fallback():
     assert parsed["shares"] == 1234567.0
     assert parsed["cusip"] == "987654321"
     assert parsed["issuer_name"] == "Frontier Coal Holdings Corp"
+    assert parsed["event_date"] == "2026-03-14"
+
+
+def test_normalize_mmddyyyy_variants():
+    assert edgar_parse._normalize_mmddyyyy("10/08/2026") == "2026-10-08"
+    assert edgar_parse._normalize_mmddyyyy("3-14-26") == "2026-03-14"
+    assert edgar_parse._normalize_mmddyyyy(None) is None
+    assert edgar_parse._normalize_mmddyyyy("not a date") == "not a date"
 
 
 def test_parse_schedule_13dg_returns_none_when_nothing_parseable():

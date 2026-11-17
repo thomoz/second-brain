@@ -106,6 +106,8 @@ def test_first_run_seeds_silently_then_alerts_on_next_new_filing(db_conn, monkey
     assert run2["first_seed"] is False
     assert len(run2["new_filings"]) == 1
     assert "5% cross" in run2["new_filings"][0]["summary"]
+    assert run2["new_filings"][0]["event_date"] == "2026-10-08"
+    assert "bought/crossed 2026-10-08" in run2["new_filings"][0]["summary"]
 
 
 def test_first_seed_watermark_set_even_when_no_filings(db_conn, monkeypatch):
