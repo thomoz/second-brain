@@ -832,6 +832,7 @@ def test_maybe_notify_cluster_alerts_includes_per_buy_detail(monkeypatch):
     import sys
     toast_calls, whatsapp_calls = [], []
     monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+    monkeypatch.setattr(insider_scan, "_brief_company_description", lambda ticker: "Rents furniture and electronics to consumers.")
 
     insider_scan.maybe_notify_cluster_alerts([{
         "ticker": "UPBD", "company_name": "Upbound Group, Inc.",
@@ -848,8 +849,43 @@ def test_maybe_notify_cluster_alerts_includes_per_buy_detail(monkeypatch):
     (message,), _kwargs = whatsapp_calls[0]
     assert "UPBD" in message
     assert "Upbound Group, Inc." in message
+    assert "Rents furniture and electronics to consumers." in message
     assert "John Smith (CEO) bought $100,000 of UPBD (11% of position) on 2026-11-02" in message
     assert "Jane Doe (Dir) bought $50,000 of UPBD on 2026-11-03" in message
+
+
+def test_brief_company_description_uses_first_sentence_of_summary(monkeypatch):
+    from mytrader.market_data import TickerData
+
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(
+            ticker=ticker,
+            info={"longBusinessSummary": "Newmont is a gold miner. It also produces copper and silver."},
+            dividends=None,
+        ),
+    )
+    assert insider_scan._brief_company_description("NEM") == "Newmont is a gold miner."
+
+
+def test_brief_company_description_falls_back_to_sector_industry(monkeypatch):
+    from mytrader.market_data import TickerData
+
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(
+            ticker=ticker, info={"sector": "Basic Materials", "industry": "Gold"}, dividends=None,
+        ),
+    )
+    assert insider_scan._brief_company_description("NEM") == "Basic Materials / Gold"
+
+
+def test_brief_company_description_returns_none_on_fetch_failure(monkeypatch):
+    def _raise(ticker):
+        raise RuntimeError("yfinance unavailable")
+
+    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", _raise)
+    assert insider_scan._brief_company_description("NEM") is None
 
 
 def test_threshold_for_days_boundaries():

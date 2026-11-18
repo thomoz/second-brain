@@ -780,6 +780,34 @@ def maybe_notify_price_flags(newly_flagged: list[dict[str, Any]]) -> None:
     send_whatsapp_notification("\n".join(lines))
 
 
+def _brief_company_description(ticker: str) -> str | None:
+    """One-sentence plain-English description of what the company does, for the
+    cluster-alert WhatsApp message (Shaun 2026-11-18: wants company name plus a
+    brief one-sentence description, e.g. "gold miner" -- the ticker/company_name
+    alone don't say what the business actually does). Sourced from yfinance's
+    longBusinessSummary, first sentence only -- company_profile.py's own check()
+    keeps two sentences for the Find deep-dive flow, but a WhatsApp alert needs to
+    stay terser than that. Falls back to sector/industry when no summary exists.
+    Never raises -- a description-fetch failure must not break the cluster alert
+    itself, same policy as every other best-effort enrichment in this file."""
+    try:
+        from mytrader import market_data
+
+        data = market_data.fetch_ticker_data(ticker)
+        if data is None:
+            return None
+        summary = data.info.get("longBusinessSummary")
+        if summary:
+            first_sentence = summary.strip().split(". ")[0].strip()
+            if not first_sentence.endswith("."):
+                first_sentence += "."
+            return first_sentence
+        parts = [p for p in (data.info.get("sector"), data.info.get("industry")) if p]
+        return " / ".join(parts) if parts else None
+    except Exception:
+        return None
+
+
 def maybe_notify_cluster_alerts(cluster_events: list[dict[str, Any]]) -> None:
     """Fires once per newly-formed insider-buy cluster (see _check_buy_cluster) --
     a WhatsApp alert distinct from, and always in addition to, the normal
@@ -803,8 +831,10 @@ def maybe_notify_cluster_alerts(cluster_events: list[dict[str, Any]]) -> None:
     lines = [f"Goat Insider Cluster Alert: {summary}."]
     for e in cluster_events:
         company = f" ({e['company_name']})" if e.get("company_name") else ""
+        description = _brief_company_description(e["ticker"])
+        desc_clause = f" — {description}" if description else ""
         lines.append(
-            f"- {e['ticker']}{company}: {len(e['insiders'])} distinct insiders bought within "
+            f"- {e['ticker']}{company}{desc_clause}: {len(e['insiders'])} distinct insiders bought within "
             f"{config.GOAT_INSIDER_CLUSTER_ALERT_WINDOW_DAYS} days, ${e['total_value']:,.0f} combined"
         )
         # Per-buy detail, same shape as a discovery candidate's signal_detail
