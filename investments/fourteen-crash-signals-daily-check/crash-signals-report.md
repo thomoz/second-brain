@@ -49,8 +49,8 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (PG) | ok | PG: Free Cash Flow $+15.1B, Capital Expenditure $4.4B (period ending 2026-06-30) |
 | 4 | Capex outruns cash flow (MRK) | ok | MRK: Free Cash Flow $+12.4B, Capital Expenditure $4.1B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-10-01, +22.4% YoY vs 2025-10-01 |
-| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 144 filing(s) in the trailing 30d vs 184 in the same window a year ago (0.78x); 424B4 (priced IPO): 21 filing(s) in the trailing 30d vs 49 in the same window a year ago (0.43x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.73 (z=1.84 vs trailing 88d mean 0.59) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 144 filing(s) in the trailing 30d vs 194 in the same window a year ago (0.74x) |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.73 (z=1.80 vs trailing 88d mean 0.59) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
 | 8 | Insider selling (LLY) | flag | LLY: $15,883,587 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (WMT) | flag | WMT: $2,967,673,609 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (XOM) | flag | XOM: $2,395,656 sold vs $0 bought, trailing 365 days |
@@ -61,7 +61,7 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 8 | Insider selling (CVX) | flag | CVX: $677,056,564 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (PG) | flag | PG: $93,911,490 sold vs $0 bought, trailing 365 days |
 | 8 | Insider selling (MRK) | flag | MRK: $79,289,252 sold vs $0 bought, trailing 365 days |
-| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (89 day(s) away) -- ad-share content is not automatable, nothing to check yet |
+| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (88 day(s) away) -- ad-share content is not automatable, nothing to check yet |
 | 10 | Most-valuable-company milestone | flag | LLY is the largest company in the current hot-sector watchlist ($1.26T, most recently crossed the $1.0T rung) |
 | 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
 | 12 | Credit turns in the hot sector while broad market stays calm (JNJ) | unknown | JNJ: bond CUSIP 478160CY8 found, but no live or manually-entered yield reading available -- run `record-bond-yield JNJ <yield_pct>` |
