@@ -18,7 +18,6 @@ No new material changes.
 - **KSPI** (watchlist) -- KSPI: now 0.8% below its 150-day MA as of today's close; has stayed >=0% below for 1+ consecutive trading day(s) -- 150DMA exit-rule threshold triggered (first flagged 2026-11-17)
 - **IBM** (watchlist) -- IBM: now 4.2% below its 150-day MA as of today's close; has stayed >=0% below for 1+ consecutive trading day(s) -- 150DMA exit-rule threshold triggered (first flagged 2026-11-17)
 - **GWRE** (watchlist) -- GWRE: now 4.0% below its 150-day MA as of today's close; has stayed >=0% below for 1+ consecutive trading day(s) -- 150DMA exit-rule threshold triggered (first flagged 2026-11-17)
-- **DTG.DE** (watchlist) -- DTG.DE: now 1.9% below its 150-day MA as of today's close; has stayed >=0% below for 1+ consecutive trading day(s) -- 150DMA exit-rule threshold triggered (first flagged 2026-11-17)
 - **CEG** (watchlist) -- CEG: now 1.4% below its 150-day MA as of today's close; has stayed >=0% below for 1+ consecutive trading day(s) -- 150DMA exit-rule threshold triggered (first flagged 2026-11-17)
 - **ADBE** (watchlist) -- ADBE: now 3.6% below its 150-day MA as of today's close; has stayed >=0% below for 1+ consecutive trading day(s) -- 150DMA exit-rule threshold triggered (first flagged 2026-11-17)
 - **WPM** (watchlist) -- WPM: now 2.9% below its 150-day MA as of today's close; has stayed >=0% below for 1+ consecutive trading day(s) -- 150DMA exit-rule threshold triggered (first flagged 2026-11-16)
