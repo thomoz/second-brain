@@ -837,7 +837,8 @@ def test_maybe_notify_cluster_alerts_includes_per_buy_detail(monkeypatch):
     import sys
     toast_calls, whatsapp_calls = [], []
     monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
-    monkeypatch.setattr(insider_scan, "_brief_company_description", lambda ticker: "Rents furniture and electronics to consumers.")
+    monkeypatch.setattr(insider_scan, "_fetch_cluster_ticker_data", lambda ticker: None)
+    monkeypatch.setattr(insider_scan, "_brief_company_description", lambda data: "Rents furniture and electronics to consumers.")
 
     insider_scan.maybe_notify_cluster_alerts([{
         "ticker": "UPBD", "company_name": "Upbound Group, Inc.",
@@ -905,59 +906,44 @@ def test_run_discovery_scan_buy_persists_pct_owned_change(db_conn, monkeypatch):
     assert stored["pct_owned_change"] == 12.5
 
 
-def test_brief_company_description_uses_first_sentence_of_summary(monkeypatch):
+def test_brief_company_description_uses_first_sentence_of_summary():
     from mytrader.market_data import TickerData
 
-    monkeypatch.setattr(
-        "mytrader.market_data.fetch_ticker_data",
-        lambda ticker: TickerData(
-            ticker=ticker,
-            info={"longBusinessSummary": "Newmont is a gold miner. It also produces copper and silver."},
-            dividends=None,
-        ),
+    data = TickerData(
+        ticker="NEM",
+        info={"longBusinessSummary": "Newmont is a gold miner. It also produces copper and silver."},
+        dividends=None,
     )
-    assert insider_scan._brief_company_description("NEM") == "Newmont is a gold miner."
+    assert insider_scan._brief_company_description(data) == "Newmont is a gold miner."
 
 
-def test_brief_company_description_falls_back_to_sector_industry(monkeypatch):
+def test_brief_company_description_falls_back_to_sector_industry():
     from mytrader.market_data import TickerData
 
-    monkeypatch.setattr(
-        "mytrader.market_data.fetch_ticker_data",
-        lambda ticker: TickerData(
-            ticker=ticker, info={"sector": "Basic Materials", "industry": "Gold"}, dividends=None,
-        ),
-    )
-    assert insider_scan._brief_company_description("NEM") == "Basic Materials / Gold"
+    data = TickerData(ticker="NEM", info={"sector": "Basic Materials", "industry": "Gold"}, dividends=None)
+    assert insider_scan._brief_company_description(data) == "Basic Materials / Gold"
 
 
-def test_brief_company_description_returns_none_on_fetch_failure(monkeypatch):
-    def _raise(ticker):
-        raise RuntimeError("yfinance unavailable")
-
-    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", _raise)
-    assert insider_scan._brief_company_description("NEM") is None
+def test_brief_company_description_returns_none_when_data_is_none():
+    assert insider_scan._brief_company_description(None) is None
 
 
-def test_brief_company_description_pulls_in_next_sentence_after_bare_corp_suffix(monkeypatch):
+def test_brief_company_description_pulls_in_next_sentence_after_bare_corp_suffix():
     # Real case caught live 2026-11-18 (STUB): the summary's first ". " split
     # falls right after "Inc", leaving just the bare company name with zero
     # actual description unless the next sentence is pulled in too.
     from mytrader.market_data import TickerData
 
-    monkeypatch.setattr(
-        "mytrader.market_data.fetch_ticker_data",
-        lambda ticker: TickerData(
-            ticker=ticker,
-            info={"longBusinessSummary": "StubHub Holdings, Inc. operates a ticketing marketplace worldwide. It was founded in 2000."},
-            dividends=None,
-        ),
+    data = TickerData(
+        ticker="STUB",
+        info={"longBusinessSummary": "StubHub Holdings, Inc. operates a ticketing marketplace worldwide. It was founded in 2000."},
+        dividends=None,
     )
-    result = insider_scan._brief_company_description("STUB")
+    result = insider_scan._brief_company_description(data)
     assert result == "StubHub Holdings, Inc. operates a ticketing marketplace worldwide."
 
 
-def test_brief_company_description_retries_once_after_rate_limit_then_succeeds(monkeypatch):
+def test_fetch_cluster_ticker_data_retries_once_after_rate_limit_then_succeeds(monkeypatch):
     # Real case caught live 2026-11-18: a cluster alert's description fetch came
     # back None for every ticker because the scan had already burned through
     # yfinance's rate limit earlier in the same run, even though the identical
@@ -969,14 +955,89 @@ def test_brief_company_description_retries_once_after_rate_limit_then_succeeds(m
     responses = iter([None, TickerData(ticker="NEM", info={"longBusinessSummary": "Newmont is a gold miner."}, dividends=None)])
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: next(responses))
 
-    assert insider_scan._brief_company_description("NEM") == "Newmont is a gold miner."
+    data = insider_scan._fetch_cluster_ticker_data("NEM")
+    assert data is not None and data.info["longBusinessSummary"] == "Newmont is a gold miner."
     assert sleep_calls == [20]
 
 
-def test_brief_company_description_returns_none_when_retry_also_fails(monkeypatch):
+def test_fetch_cluster_ticker_data_returns_none_when_retry_also_fails(monkeypatch):
     monkeypatch.setattr(insider_scan.time, "sleep", lambda s: None)
     monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
-    assert insider_scan._brief_company_description("NEM") is None
+    assert insider_scan._fetch_cluster_ticker_data("NEM") is None
+
+
+def test_fetch_cluster_ticker_data_returns_none_on_exception(monkeypatch):
+    def _raise(ticker):
+        raise RuntimeError("yfinance unavailable")
+
+    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", _raise)
+    assert insider_scan._fetch_cluster_ticker_data("NEM") is None
+
+
+def test_is_biotech_or_pharma_matches_known_industries():
+    from mytrader.market_data import TickerData
+
+    biotech = TickerData(ticker="XYZ", info={"industry": "Biotechnology"}, dividends=None)
+    drugmaker = TickerData(ticker="XYZ", info={"industry": "Drug Manufacturers - Specialty & Generic"}, dividends=None)
+    assert insider_scan._is_biotech_or_pharma(biotech) is True
+    assert insider_scan._is_biotech_or_pharma(drugmaker) is True
+
+
+def test_is_biotech_or_pharma_false_for_other_healthcare_and_missing_data():
+    from mytrader.market_data import TickerData
+
+    # Medical devices/pharmacy retail/hospitals are Healthcare-sector but NOT
+    # what Shaun asked to exclude -- only the specific biotech/pharma industries.
+    med_device = TickerData(ticker="XYZ", info={"sector": "Healthcare", "industry": "Medical Devices"}, dividends=None)
+    pharmacy_retail = TickerData(ticker="XYZ", info={"sector": "Healthcare", "industry": "Pharmaceutical Retailers"}, dividends=None)
+    assert insider_scan._is_biotech_or_pharma(med_device) is False
+    assert insider_scan._is_biotech_or_pharma(pharmacy_retail) is False
+    assert insider_scan._is_biotech_or_pharma(None) is False  # fail open, never silently hide on a fetch failure
+
+
+def test_maybe_notify_cluster_alerts_hides_biotech_but_keeps_other_tickers(monkeypatch):
+    from mytrader.market_data import TickerData
+
+    import sys
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+    fetched = {
+        "MRNA": TickerData(ticker="MRNA", info={"industry": "Biotechnology"}, dividends=None),
+        "UPBD": TickerData(ticker="UPBD", info={"industry": "Rental & Leasing Services"}, dividends=None),
+    }
+    monkeypatch.setattr(insider_scan, "_fetch_cluster_ticker_data", lambda ticker: fetched[ticker])
+
+    insider_scan.maybe_notify_cluster_alerts([
+        {"ticker": "MRNA", "company_name": "Moderna, Inc.", "insiders": ["A", "B"], "titles": [],
+         "total_value": 50000.0, "rows": []},
+        {"ticker": "UPBD", "company_name": "Upbound Group, Inc.", "insiders": ["C", "D"], "titles": [],
+         "total_value": 150000.0, "rows": []},
+    ])
+    assert len(whatsapp_calls) == 1
+    (message,), _kwargs = whatsapp_calls[0]
+    assert "MRNA" not in message
+    assert "Moderna" not in message
+    assert "UPBD" in message
+    assert "1 new insider buy cluster(s) forming" in message  # count reflects post-filter, not the raw 2
+
+
+def test_maybe_notify_cluster_alerts_silent_when_every_event_is_biotech(monkeypatch):
+    from mytrader.market_data import TickerData
+
+    import sys
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+    monkeypatch.setattr(
+        insider_scan, "_fetch_cluster_ticker_data",
+        lambda ticker: TickerData(ticker=ticker, info={"industry": "Biotechnology"}, dividends=None),
+    )
+
+    insider_scan.maybe_notify_cluster_alerts([
+        {"ticker": "MRNA", "company_name": "Moderna, Inc.", "insiders": ["A", "B"], "titles": [],
+         "total_value": 50000.0, "rows": []},
+    ])
+    assert whatsapp_calls == []
+    assert toast_calls == []
 
 
 def test_threshold_for_days_boundaries():

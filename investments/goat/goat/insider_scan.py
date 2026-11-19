@@ -851,17 +851,27 @@ def maybe_notify_price_flags(newly_flagged: list[dict[str, Any]]) -> None:
 # "first sentence" fragment so that case gets the next sentence pulled in too.
 _CORP_SUFFIXES = frozenset({"inc", "corp", "corporation", "ltd", "llc", "co", "plc", "l.p", "n.v", "s.a"})
 
+# Shaun 2026-11-19: not interested in biotech/pharma cluster alerts. Industry-
+# based (not sector) -- "Healthcare" alone would also catch medical devices,
+# hospitals, health insurers, diagnostics, none of which he asked to exclude.
+# Same Finviz/yfinance-aligned industry strings as GOAT_FINVIZ_INDUSTRIES in
+# config.py (confirmed live these two codebases' industry taxonomies match,
+# e.g. STUB -> "Internet Content & Information", a verbatim Finviz entry).
+# "Pharmaceutical Retailers" (CVS/Walgreens-style chains) deliberately excluded
+# from this set -- that's drug retailing, not the biotech/pharma R&D companies
+# Shaun means.
+_BIOTECH_PHARMA_INDUSTRIES = frozenset({
+    "Biotechnology", "Drug Manufacturers - General", "Drug Manufacturers - Specialty & Generic",
+})
 
-def _brief_company_description(ticker: str) -> str | None:
-    """One-sentence plain-English description of what the company does, for the
-    cluster-alert WhatsApp message (Shaun 2026-11-18: wants company name plus a
-    brief one-sentence description, e.g. "gold miner" -- the ticker/company_name
-    alone don't say what the business actually does). Sourced from yfinance's
-    longBusinessSummary, first sentence only -- company_profile.py's own check()
-    keeps two sentences for the Find deep-dive flow, but a WhatsApp alert needs to
-    stay terser than that. Falls back to sector/industry when no summary exists.
-    Never raises -- a description-fetch failure must not break the cluster alert
-    itself, same policy as every other best-effort enrichment in this file."""
+
+def _fetch_cluster_ticker_data(ticker: str):
+    """Shared yfinance fetch for the cluster-alert's per-ticker enrichment
+    (business description + biotech/pharma filter) -- one fetch, with one
+    retry-after-cooldown, serves both rather than two separate yfinance calls
+    per ticker at exactly the rate-limit-prone tail end of a scan run. Returns
+    None on any failure -- enrichment is always best-effort, never blocks or
+    hides the alert on a fetch failure."""
     try:
         from mytrader import market_data
 
@@ -877,22 +887,47 @@ def _brief_company_description(ticker: str) -> str | None:
             # outer level, past whatever yf_retry already exhausted internally.
             time.sleep(20)
             data = market_data.fetch_ticker_data(ticker)
-        if data is None:
-            return None
-        summary = data.info.get("longBusinessSummary")
-        if summary:
-            sentences = summary.strip().split(". ")
-            first = sentences[0].strip()
-            last_word = first.rstrip(".").split()[-1].rstrip(",").lower() if first else ""
-            if last_word in _CORP_SUFFIXES and len(sentences) > 1:
-                first = f"{first}. {sentences[1].strip()}"
-            if not first.endswith("."):
-                first += "."
-            return first
-        parts = [p for p in (data.info.get("sector"), data.info.get("industry")) if p]
-        return " / ".join(parts) if parts else None
+        return data
     except Exception:
         return None
+
+
+def _brief_company_description(data) -> str | None:
+    """One-sentence plain-English description of what the company does, for the
+    cluster-alert WhatsApp message (Shaun 2026-11-18: wants company name plus a
+    brief one-sentence description, e.g. "gold miner" -- the ticker/company_name
+    alone don't say what the business actually does). Sourced from yfinance's
+    longBusinessSummary, first sentence only -- company_profile.py's own check()
+    keeps two sentences for the Find deep-dive flow, but a WhatsApp alert needs to
+    stay terser than that. Falls back to sector/industry when no summary exists.
+    Takes an already-fetched TickerData (or None) -- see _fetch_cluster_ticker_data,
+    shared with _is_biotech_or_pharma so each ticker is only fetched once."""
+    if data is None:
+        return None
+    summary = data.info.get("longBusinessSummary")
+    if summary:
+        sentences = summary.strip().split(". ")
+        first = sentences[0].strip()
+        last_word = first.rstrip(".").split()[-1].rstrip(",").lower() if first else ""
+        if last_word in _CORP_SUFFIXES and len(sentences) > 1:
+            first = f"{first}. {sentences[1].strip()}"
+        if not first.endswith("."):
+            first += "."
+        return first
+    parts = [p for p in (data.info.get("sector"), data.info.get("industry")) if p]
+    return " / ".join(parts) if parts else None
+
+
+def _is_biotech_or_pharma(data) -> bool:
+    """True if this ticker's yfinance industry is biotech/pharma (see
+    _BIOTECH_PHARMA_INDUSTRIES) -- Shaun 2026-11-19: keep the filing recorded
+    (DB insert, cluster/flip detection, pending-candidate staging all run
+    unaffected upstream of this), just don't surface it in the WhatsApp
+    message. Fails open (False, i.e. still shown) when the industry can't be
+    determined -- never silently hide something on a data-fetch failure."""
+    if data is None:
+        return False
+    return data.info.get("industry") in _BIOTECH_PHARMA_INDUSTRIES
 
 
 def maybe_notify_cluster_alerts(cluster_events: list[dict[str, Any]]) -> None:
@@ -901,7 +936,12 @@ def maybe_notify_cluster_alerts(cluster_events: list[dict[str, Any]]) -> None:
     per-trade discovery alert (Shaun 2026-11-08: multiple independent insiders
     buying the same ticker in a short window is a stronger signal than any single
     buy alone, so it earns its own, separate ping rather than being folded into or
-    replacing the existing one)."""
+    replacing the existing one). Biotech/pharma tickers are filtered out of the
+    message here, AFTER _check_buy_cluster already ran -- Shaun 2026-11-19 wants
+    them still fully recorded (DB insert, cluster/flip detection, pending-
+    candidate staging), just not shown to him. Silent (no alert at all) if every
+    event in a run happens to be biotech/pharma, same "zero-candidate days are
+    silent" convention as every other scanner in this codebase."""
     if not cluster_events:
         return
     import sys
@@ -911,14 +951,21 @@ def maybe_notify_cluster_alerts(cluster_events: list[dict[str, Any]]) -> None:
     sys.path.insert(0, str(_scripts_dir))
     from notifications import send_toast_notification, send_whatsapp_notification
 
-    summary = f"{len(cluster_events)} new insider buy cluster(s) forming"
+    # One fetch per distinct ticker, shared between the biotech/pharma filter
+    # and the business-description enrichment below (see _fetch_cluster_ticker_data).
+    ticker_data = {e["ticker"]: _fetch_cluster_ticker_data(e["ticker"]) for e in cluster_events}
+    visible_events = [e for e in cluster_events if not _is_biotech_or_pharma(ticker_data[e["ticker"]])]
+    if not visible_events:
+        return
+
+    summary = f"{len(visible_events)} new insider buy cluster(s) forming"
     send_toast_notification(
         "Goat Insider Scan", summary + " -- check investments/goat/insider-scan-report.md"
     )
     lines = [f"Goat Insider Cluster Alert: {summary}."]
-    for e in cluster_events:
+    for e in visible_events:
         company = f" ({e['company_name']})" if e.get("company_name") else ""
-        description = _brief_company_description(e["ticker"])
+        description = _brief_company_description(ticker_data[e["ticker"]])
         desc_clause = f" — {description}" if description else ""
         lines.append(
             f"- {e['ticker']}{company}{desc_clause}: {len(e['insiders'])} distinct insiders bought within "
