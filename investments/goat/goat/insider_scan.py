@@ -780,6 +780,15 @@ def maybe_notify_price_flags(newly_flagged: list[dict[str, Any]]) -> None:
     send_whatsapp_notification("\n".join(lines))
 
 
+# Corporate-form suffixes that can end a sentence fragment with their own
+# "." immediately before the sentence actually describing the business (e.g.
+# "StubHub Holdings, Inc. operates ticketing marketplace..." splits on ". "
+# right after "Inc", leaving just the bare name with no description content --
+# confirmed live 2026-11-18). Checked against the trailing word of the
+# "first sentence" fragment so that case gets the next sentence pulled in too.
+_CORP_SUFFIXES = frozenset({"inc", "corp", "corporation", "ltd", "llc", "co", "plc", "l.p", "n.v", "s.a"})
+
+
 def _brief_company_description(ticker: str) -> str | None:
     """One-sentence plain-English description of what the company does, for the
     cluster-alert WhatsApp message (Shaun 2026-11-18: wants company name plus a
@@ -795,13 +804,28 @@ def _brief_company_description(ticker: str) -> str | None:
 
         data = market_data.fetch_ticker_data(ticker)
         if data is None:
+            # market_data.fetch_ticker_data already retries internally on a
+            # YFRateLimitError (yf_retry.py, up to ~65s of backoff), but by the
+            # time this runs the scan has already made a heavy burst of other
+            # yfinance calls (chart setup scoring, price-performance checks for
+            # every candidate) -- confirmed live 2026-11-18: all 4 tickers in one
+            # cluster-alert run came back None here despite succeeding instantly
+            # seconds later outside that run. One more wait-and-retry at this
+            # outer level, past whatever yf_retry already exhausted internally.
+            time.sleep(20)
+            data = market_data.fetch_ticker_data(ticker)
+        if data is None:
             return None
         summary = data.info.get("longBusinessSummary")
         if summary:
-            first_sentence = summary.strip().split(". ")[0].strip()
-            if not first_sentence.endswith("."):
-                first_sentence += "."
-            return first_sentence
+            sentences = summary.strip().split(". ")
+            first = sentences[0].strip()
+            last_word = first.rstrip(".").split()[-1].rstrip(",").lower() if first else ""
+            if last_word in _CORP_SUFFIXES and len(sentences) > 1:
+                first = f"{first}. {sentences[1].strip()}"
+            if not first.endswith("."):
+                first += "."
+            return first
         parts = [p for p in (data.info.get("sector"), data.info.get("industry")) if p]
         return " / ".join(parts) if parts else None
     except Exception:

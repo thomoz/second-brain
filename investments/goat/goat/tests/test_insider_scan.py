@@ -888,6 +888,46 @@ def test_brief_company_description_returns_none_on_fetch_failure(monkeypatch):
     assert insider_scan._brief_company_description("NEM") is None
 
 
+def test_brief_company_description_pulls_in_next_sentence_after_bare_corp_suffix(monkeypatch):
+    # Real case caught live 2026-11-18 (STUB): the summary's first ". " split
+    # falls right after "Inc", leaving just the bare company name with zero
+    # actual description unless the next sentence is pulled in too.
+    from mytrader.market_data import TickerData
+
+    monkeypatch.setattr(
+        "mytrader.market_data.fetch_ticker_data",
+        lambda ticker: TickerData(
+            ticker=ticker,
+            info={"longBusinessSummary": "StubHub Holdings, Inc. operates a ticketing marketplace worldwide. It was founded in 2000."},
+            dividends=None,
+        ),
+    )
+    result = insider_scan._brief_company_description("STUB")
+    assert result == "StubHub Holdings, Inc. operates a ticketing marketplace worldwide."
+
+
+def test_brief_company_description_retries_once_after_rate_limit_then_succeeds(monkeypatch):
+    # Real case caught live 2026-11-18: a cluster alert's description fetch came
+    # back None for every ticker because the scan had already burned through
+    # yfinance's rate limit earlier in the same run, even though the identical
+    # call succeeded seconds later outside that run.
+    from mytrader.market_data import TickerData
+
+    sleep_calls = []
+    monkeypatch.setattr(insider_scan.time, "sleep", lambda s: sleep_calls.append(s))
+    responses = iter([None, TickerData(ticker="NEM", info={"longBusinessSummary": "Newmont is a gold miner."}, dividends=None)])
+    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: next(responses))
+
+    assert insider_scan._brief_company_description("NEM") == "Newmont is a gold miner."
+    assert sleep_calls == [20]
+
+
+def test_brief_company_description_returns_none_when_retry_also_fails(monkeypatch):
+    monkeypatch.setattr(insider_scan.time, "sleep", lambda s: None)
+    monkeypatch.setattr("mytrader.market_data.fetch_ticker_data", lambda ticker: None)
+    assert insider_scan._brief_company_description("NEM") is None
+
+
 def test_threshold_for_days_boundaries():
     cases = [
         (7, 2.5), (8, 5.0), (14, 5.0), (15, 7.5), (21, 7.5),
