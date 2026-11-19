@@ -28,8 +28,8 @@ def _sale_row(ticker="VRTX", trade_date=None, value=2_000_000.0, pct_owned_chang
     }
 
 
-def _purchase_row(ticker="ACME", trade_date=None, value=30_000.0, pct_owned_change=None):
-    return {
+def _purchase_row(ticker="ACME", trade_date=None, value=30_000.0, pct_owned_change=None, owned=None, price=None):
+    row = {
         "ticker": ticker,
         "filing_date": (trade_date or date.today()).isoformat(),
         "trade_date": (trade_date or date.today()).isoformat(),
@@ -39,6 +39,11 @@ def _purchase_row(ticker="ACME", trade_date=None, value=30_000.0, pct_owned_chan
         "value": value,
         "pct_owned_change": pct_owned_change,
     }
+    if owned is not None:
+        row["owned"] = owned
+    if price is not None:
+        row["price"] = price
+    return row
 
 
 def test_run_holdings_watch_alerts_on_new_sale_filing(db_conn, monkeypatch):
@@ -840,18 +845,64 @@ def test_maybe_notify_cluster_alerts_includes_per_buy_detail(monkeypatch):
         "total_value": 150000.0,
         "rows": [
             {"insider_name": "John Smith", "title": "CEO", "value": 100000.0,
-             "trade_date": "2026-11-02", "pct_owned_change": 11.0},
+             "trade_date": "2026-11-02", "pct_owned_change": 11.0, "pct_of_position_value": 23.0},
             {"insider_name": "Jane Doe", "title": "Dir", "value": 50000.0,
-             "trade_date": "2026-11-03", "pct_owned_change": None},
+             "trade_date": "2026-11-03", "pct_owned_change": None, "pct_of_position_value": None},
         ],
     }])
     assert len(whatsapp_calls) == 1
     (message,), _kwargs = whatsapp_calls[0]
     assert "UPBD" in message
+    assert "John Smith (CEO) bought $100,000 of UPBD (11% of position, 23% of their total stake) on 2026-11-02" in message
+    assert "Jane Doe (Dir) bought $50,000 of UPBD on 2026-11-03" in message
     assert "Upbound Group, Inc." in message
     assert "Rents furniture and electronics to consumers." in message
-    assert "John Smith (CEO) bought $100,000 of UPBD (11% of position) on 2026-11-02" in message
-    assert "Jane Doe (Dir) bought $50,000 of UPBD on 2026-11-03" in message
+
+
+def test_position_size_clause_combines_delta_and_total_stake():
+    assert insider_scan._position_size_clause(
+        {"pct_owned_change": 11.0, "pct_of_position_value": 23.0}
+    ) == " (11% of position, 23% of their total stake)"
+
+
+def test_position_size_clause_omits_missing_pieces():
+    assert insider_scan._position_size_clause({"pct_owned_change": None, "pct_of_position_value": 23.0}) == " (23% of their total stake)"
+    assert insider_scan._position_size_clause({"pct_owned_change": 11.0, "pct_of_position_value": None}) == " (11% of position)"
+    assert insider_scan._position_size_clause({"pct_owned_change": None, "pct_of_position_value": None}) == ""
+
+
+def test_pct_of_position_value_computes_trade_share_of_total_stake():
+    # $100k buy, 10,000 shares owned after at $50/share = $500k total stake -> 20%
+    row = {"owned": "10,000", "price": "$50.00", "value": 100_000.0}
+    assert insider_scan._pct_of_position_value(row) == 20.0
+
+
+def test_pct_of_position_value_well_defined_for_brand_new_position():
+    # Unlike OpenInsider's own ΔOwn ("New" -> undefined), a brand-new position
+    # is by definition 100% of the insider's current stake.
+    row = {"owned": "1,000", "price": "$10.00", "value": 10_000.0}
+    assert insider_scan._pct_of_position_value(row) == 100.0
+
+
+def test_pct_of_position_value_none_when_fields_missing_or_unparsable():
+    assert insider_scan._pct_of_position_value({"owned": None, "price": "$50.00", "value": 100_000.0}) is None
+    assert insider_scan._pct_of_position_value({"owned": "10,000", "price": None, "value": 100_000.0}) is None
+    assert insider_scan._pct_of_position_value({"owned": "10,000", "price": "$50.00", "value": None}) is None
+    assert insider_scan._pct_of_position_value({"owned": "n/a", "price": "$50.00", "value": 100_000.0}) is None
+
+
+def test_run_discovery_scan_buy_persists_pct_owned_change(db_conn, monkeypatch):
+    # Pre-existing gap fixed 2026-11-19 alongside pct_of_position_value: the
+    # discovery-scan buy insert never passed pct_owned_change through, so any
+    # buy first recorded via discovery (not holdings_watch) always stored NULL
+    # here even though OpenInsider reported a real ΔOwn for it.
+    row = _purchase_row(pct_owned_change=12.5)
+    monkeypatch.setattr("goat.insider_scan.openinsider.fetch_discovery_purchases", lambda: [row])
+    insider_scan.run_discovery_scan(db_conn)
+    stored = db_conn.execute(
+        "SELECT pct_owned_change FROM goat_insider_filings_seen WHERE ticker = 'ACME'"
+    ).fetchone()
+    assert stored["pct_owned_change"] == 12.5
 
 
 def test_brief_company_description_uses_first_sentence_of_summary(monkeypatch):

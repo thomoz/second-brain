@@ -195,6 +195,17 @@ def init_goat_tables(conn: sqlite3.Connection) -> None:
             )
         except sqlite3.OperationalError:
             pass
+    # Migration for DBs created before pct_of_position_value existed (added
+    # 2026-11-19 -- Shaun wanted the cluster alert's per-buy line to show this
+    # trade's $ value as a % of the insider's total position value in the
+    # company, not just OpenInsider's own ΔOwn share-count-vs-prior-holding
+    # delta -- see insider_scan._pct_of_position_value). NULL for filings
+    # recorded before this existed, same nullability posture as pct_owned_change.
+    with conn:
+        try:
+            conn.execute("ALTER TABLE goat_insider_filings_seen ADD COLUMN pct_of_position_value REAL")
+        except sqlite3.OperationalError:
+            pass
 
 
 def get_open_goat_alert(
@@ -363,7 +374,7 @@ def insert_goat_insider_filing_seen(
     conn: sqlite3.Connection, *, dedup_key: str, ticker: str, filing_date: str,
     trade_date: str, insider_name: str, trade_type: str, value: float, kind: str,
     pct_owned_change: float | None = None, title: str = "",
-    company_name: str | None = None,
+    company_name: str | None = None, pct_of_position_value: float | None = None,
 ) -> bool:
     """Returns True if this filing was newly seen (inserted), False if it's a
     duplicate of a filing already alerted/staged in a prior run. Every sale
@@ -373,9 +384,9 @@ def insert_goat_insider_filing_seen(
     with conn:
         cur = conn.execute(
             """INSERT OR IGNORE INTO goat_insider_filings_seen
-               (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, seen_at, pct_owned_change, title, company_name)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, _now(), pct_owned_change, title, company_name),
+               (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, seen_at, pct_owned_change, title, company_name, pct_of_position_value)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (dedup_key, ticker, filing_date, trade_date, insider_name, trade_type, value, kind, _now(), pct_owned_change, title, company_name, pct_of_position_value),
         )
         return cur.rowcount == 1
 

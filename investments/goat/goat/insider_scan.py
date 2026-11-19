@@ -127,6 +127,61 @@ def _pct_owned_change_clause(row: dict) -> str:
     return f" ({abs(pct):.0f}% of position)"
 
 
+def _parse_insider_number(text: str | None) -> float | None:
+    """Plain comma-grouped number text (OpenInsider's raw "Owned"/"Price" cell
+    text, e.g. "10,000" or "$150.00") -- these two columns are never run through
+    openinsider._parse_money/_parse_pct_owned_change the way value/pct_owned_change
+    are, so this file parses them itself for _pct_of_position_value."""
+    if not text:
+        return None
+    cleaned = text.strip().replace("$", "").replace(",", "")
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
+
+
+def _pct_of_position_value(row: dict) -> float | None:
+    """This trade's dollar value as a % of the insider's TOTAL position value in
+    the company immediately after the trade (shares owned x price) -- Shaun
+    2026-11-19: wants the cluster alert to show "what percentage that is of
+    their total share value in that company". Distinct from OpenInsider's own
+    ΔOwn (pct_owned_change), which is a share-COUNT ratio against their PRIOR
+    holding and comes back undefined ("New") with no prior reported stake --
+    this metric stays well-defined even then (a brand-new position is, by
+    definition, 100% of their current stake). Operates on the raw scrape row
+    (owned/price/value as OpenInsider's own column names), not a DB row."""
+    owned = _parse_insider_number(row.get("owned"))
+    price = _parse_insider_number(row.get("price"))
+    value = row.get("value")
+    if owned is None or price is None or value is None:
+        return None
+    total_value = owned * price
+    if total_value <= 0:
+        return None
+    return (value / total_value) * 100
+
+
+def _position_size_clause(row: dict) -> str:
+    """Combined '(X% of position, Y% of their total stake)' parenthetical for the
+    cluster-alert per-buy line specifically -- Shaun 2026-11-19 asked to add the
+    total-stake-value percentage, keeping it alongside the existing ΔOwn-based
+    delta rather than replacing it (the ask was "include", not "swap", and the
+    two answer related but different questions). Used only by
+    maybe_notify_cluster_alerts -- the other two per-trade alert call sites
+    (run_holdings_watch, run_discovery_scan's own signal_detail) still use
+    _pct_owned_change_clause alone, unchanged, since only the Cluster Alert was
+    asked about."""
+    parts = []
+    delta = row.get("pct_owned_change")
+    if delta is not None:
+        parts.append(f"{abs(delta):.0f}% of position")
+    pct_total = row.get("pct_of_position_value")
+    if pct_total is not None:
+        parts.append(f"{pct_total:.0f}% of their total stake")
+    return f" ({', '.join(parts)})" if parts else ""
+
+
 def _prior_sale_count(conn: sqlite3.Connection, ticker: str, insider_name: str, trade_date_str: str) -> int:
     """Prior 'S' filings by this insider/ticker in the trailing
     GOAT_INSIDER_SALE_LOOKBACK_DAYS before trade_date_str -- drives which
@@ -306,6 +361,7 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
             insider_name=row.get("insider_name", ""), trade_type=row["trade_type_code"],
             value=row["value"], kind="holdings_watch", pct_owned_change=row.get("pct_owned_change"),
             title=row.get("title", ""), company_name=row.get("company_name"),
+            pct_of_position_value=_pct_of_position_value(row),
         )
         if not newly_seen:
             continue
@@ -440,6 +496,13 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
             insider_name=row.get("insider_name", ""), trade_type=row["trade_type_code"],
             value=row["value"], kind="discovery", title=row.get("title", ""),
             company_name=row.get("company_name"),
+            # pct_owned_change was missing here before 2026-11-19 (holdings_watch's
+            # own insert call already passed it, this one never did) -- a
+            # pre-existing gap noticed while wiring pct_of_position_value in
+            # alongside it; fixed here since it feeds the exact same cluster-alert
+            # display line this change touches.
+            pct_owned_change=row.get("pct_owned_change"),
+            pct_of_position_value=_pct_of_position_value(row),
         )
         if not newly_seen:
             continue
@@ -868,7 +931,7 @@ def maybe_notify_cluster_alerts(cluster_events: list[dict[str, Any]]) -> None:
         for r in e.get("rows", []):
             lines.append(
                 f"   - {r.get('insider_name', 'Unknown insider')} ({r.get('title') or 'role unknown'}) "
-                f"bought ${r['value']:,.0f} of {e['ticker']}{_pct_owned_change_clause(r)} "
+                f"bought ${r['value']:,.0f} of {e['ticker']}{_position_size_clause(r)} "
                 f"on {r.get('trade_date', 'unknown date')}"
             )
     send_whatsapp_notification("\n".join(lines))
