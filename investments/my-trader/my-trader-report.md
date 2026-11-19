@@ -49,7 +49,7 @@ Bottom line: Nothing notable this run.
 - [unknown] going_concern: No market data available
 
 **CYL.AX** (None, No strategic bucket assigned yet)
-200.0 @ avg $5.86 | now $3.77 | P&L $-416.05 (-35.5%) | 7.7% of tracked portfolio
+200.0 @ avg $5.86 | now $3.79 | P&L $-412.05 (-35.2%) | 7.7% of tracked portfolio
 Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - OPEN ALERT (earnings_watch_trend, since 2026-11-01): EPS estimate down 19.3% over the trailing 30 days (1.01 -> 0.81); corroborating: 2 analyst downward revisions vs 0 upward in the last 30 days
 - OPEN ALERT (earnings_watch_guidance, since 2026-10-25): Management’s September commentary indicates timing risk to the production growth ramp, potentially weakening near-term earnings versus the earlier trajectory. FY26 profit also missed one broker’s estimate, although recent quarterly production strengthened. (At the 28 September 2026 Mining Forum, the CEO targeted 200,000oz annual production over the next two years and cautioned that development timing would move around, indicating risk of a slower ramp: [management presentation](https://americas.miningforum.com/webcasts/2026/catalyst-metals-cyl).; FNArena’s 2 September broker summary reported FY26 NPAT of A$171m, 12% below Canaccord Genuity’s estimate because of higher depreciation; this was a full-year miss, not a verified quarterly consensus miss: [broker summary](https://fnarena.com/stock-price-analysis/gold-silver/CYL/).; Offsetting evidence: June-quarter production reached a record 31,886oz, and FY26 production met guidance. No fresh guidance cut or monthly/weekly operating slowdown was verified: [quarterly report summary](https://www.fool.com.au/2026/07/31/catalyst-metals-posts-record-gold-output-drives-strong-cash-growth/).)
@@ -60,14 +60,14 @@ Bottom line: 1 opportunity signal(s) (opportunity), no active flags.
 - [info] fx: AUD-denominated, no FX exposure
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Basic Materials is 13.9% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
-- [interesting] opportunity: Graham [PE 6.1 x P/B 1.41 = 8.6, below 22.5]; Buffett/Smith [ROE 29.2% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -41.9% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
-- [info] price_action: 1mo -31.9%, 3mo -41.9%
+- [interesting] opportunity: Graham [PE 6.1 x P/B 1.41 = 8.7, below 22.5]; Buffett/Smith [ROE 29.2% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -41.8% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
+- [info] price_action: 1mo -31.7%, 3mo -41.8%
 - [info] crash_resilience: 2008 financial crisis -85.0%; Dec 2018 correction -15.4%; COVID crash (2020) -40.1%; 2022 bear market -49.8%
-- [info] technical_levels: Price $3.78 vs 50DMA $5.24 (below, -27.9%); 150DMA $5.65 (below, -33.0%); 200DMA $5.99 (below, -36.9%)
+- [unknown] technical_levels: Not enough price history for moving-average levels
 - [ok] going_concern: Free Cash Flow positive ($14M) -- cash-generative, no bankruptcy/cash-runway risk from this signal
 
 **GOLD.AX** (None, No strategic bucket assigned yet)
-20.0 @ avg $59.31 | now $51.30 | P&L $-160.25 (-13.5%) | 10.5% of tracked portfolio
+20.0 @ avg $59.31 | now $51.32 | P&L $-159.85 (-13.5%) | 10.5% of tracked portfolio
 Bottom line: Nothing notable this run.
 Open alerts: none
 - [unknown] company_profile: No business summary available
@@ -84,7 +84,7 @@ Open alerts: none
 - [unknown] going_concern: Total Cash and/or Free Cash Flow unavailable -- cannot assess bankruptcy/cash-runway risk
 
 **GXLD.AX** (None, No strategic bucket assigned yet)
-25.0 @ avg $61.82 | now $55.95 | P&L $-146.81 (-9.5%) | 14.3% of tracked portfolio
+25.0 @ avg $61.82 | now $56.00 | P&L $-145.56 (-9.4%) | 14.3% of tracked portfolio
 Bottom line: Nothing notable this run.
 Open alerts: none
 - [unknown] company_profile: No business summary available
@@ -96,9 +96,9 @@ Open alerts: none
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [info] etf_mechanics: Expense ratio unavailable, AUM $759,208,192
 - [ok] opportunity: No standout positive signal this run
-- [info] price_action: 1mo -6.5%, 3mo -8.5%
+- [info] price_action: 1mo -6.4%, 3mo -8.4%
 - [info] crash_resilience: No historical crash-window data available (likely IPO'd after all tracked windows)
-- [info] technical_levels: Price $55.95 vs 50DMA $58.84 (below, -4.9%); 150DMA $60.38 (below, -7.3%); 200DMA $62.63 (below, -10.7%)
+- [info] technical_levels: Price $56.01 vs 50DMA $58.84 (below, -4.8%); 150DMA $60.38 (below, -7.2%); 200DMA $62.63 (below, -10.6%)
 - [unknown] going_concern: Total Cash and/or Free Cash Flow unavailable -- cannot assess bankruptcy/cash-runway risk
 
 **LLY** (Eli Lilly & Co, Long-term hold — never timed, dips are expected and not a reason to act alone)
@@ -218,10 +218,10 @@ Bottom line: 1 flag(s) active (going_concern) — worth a look.
 - [info] fx: USD-denominated; AUD/USD 3mo move: -5.8%
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Financial Services is 6.8% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
-- [interesting] opportunity: Lynch [PEG 0.44 at/below 1.0 — growth at a reasonable price]; Marks/Neilson [down -22.5% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
-- [info] price_action: 1mo -0.1%, 3mo -22.5%
+- [interesting] opportunity: Lynch [PEG 0.44 at/below 1.0 — growth at a reasonable price]; Marks/Neilson [down -23.4% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals) (you already hold this — reads as an add-to-position signal, not a new-buy signal)
+- [info] price_action: 3mo -23.4%
 - [info] crash_resilience: 2022 bear market -81.5%
-- [info] technical_levels: Price $14.28 vs 50DMA $16.03 (below, -10.9%); 150DMA $16.96 (below, -15.8%); 200DMA $17.24 (below, -17.2%)
+- [info] technical_levels: Price $14.11 vs 50DMA $15.97 (below, -11.6%); 150DMA $16.92 (below, -16.6%); 200DMA $17.21 (below, -18.0%)
 - [flag] going_concern: BANKRUPTCY RISK: Cash $2,846M / burn ~$333M per month (annual FCF) = ~8.6 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon
 
 **UBER** (None, No strategic bucket assigned yet)
@@ -238,9 +238,9 @@ Bottom line: 1 flag(s) active (valuation) — worth a look.
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Technology is 5.5% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: PE 40.4 rich and no ROE signal strong enough to call this a crash-discount candidate
-- [info] price_action: 1mo -1.6%, 3mo -11.8%
+- [info] price_action: 1mo -1.7%, 3mo -11.9%
 - [info] crash_resilience: COVID crash (2020) -64.1%; 2022 bear market -57.7%
-- [info] technical_levels: Price $68.81 vs 50DMA $69.31 (below, -0.7%); 150DMA $72.27 (below, -4.8%); 200DMA $72.55 (below, -5.2%)
+- [info] technical_levels: Price $68.76 vs 50DMA $69.27 (below, -0.7%); 150DMA $72.22 (below, -4.8%); 200DMA $72.50 (below, -5.2%)
 - [ok] going_concern: Free Cash Flow positive ($7,413M) -- cash-generative, no bankruptcy/cash-runway risk from this signal
 
 **V** (Visa Inc (Class A), Long-term hold — never timed, dips are expected and not a reason to act alone)
@@ -256,22 +256,25 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - [unknown] concentration: Berkshire: Berkshire 13F holdings list not populated (manual data entry required). Sector: Financial Services is 6.8% of holdings value
 - [ok] sector_risk: No known active geopolitical flashpoint for this sector/industry
 - [ok] opportunity: Active risk flag(s) present elsewhere this run — not calling this an opportunity regardless of price or valuation
-- [info] price_action: 1mo +3.6%, 3mo +14.2%
+- [info] price_action: 1mo +3.2%, 3mo +13.8%
 - [info] crash_resilience: 2008 financial crisis -51.9%; Dec 2018 correction -19.1%; COVID crash (2020) -36.4%; 2022 bear market -24.1%
-- [info] technical_levels: Price $416.77 vs 50DMA $391.72 (above, +6.4%); 150DMA $358.73 (above, +16.2%); 200DMA $346.75 (above, +20.2%)
+- [info] technical_levels: Price $415.22 vs 50DMA $392.69 (above, +5.7%); 150DMA $359.41 (above, +15.5%); 200DMA $347.20 (above, +19.6%)
 - [ok] going_concern: Free Cash Flow positive ($20,983M) -- cash-generative, no bankruptcy/cash-runway risk from this signal
 
 ### New Alerts This Run
-- **CRWD** (watchlist) — valuation: PE 4740.6 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
-- **CSV** (watchlist) — balance_sheet: Debt/Equity 186.8 >= 150.0 -- lower is generally safer (0/10 — poor)
-- **DIS** (watchlist) — balance_sheet: Current Ratio 0.74 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
-- **DRIV** (watchlist) — dividend: Dividend declined -52.6% vs prior 12 months
-- **ICLN** (watchlist) — dividend: Dividend declined -27.6% vs prior 12 months
-- **JNJ** (watchlist) — valuation: PE 41.4 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
+- **CRAK** (watchlist) — dividend: Dividend declined -50.9% vs prior 12 months
+- **ELVA** (watchlist) — valuation: PE 39.0 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
+- **ELVA** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $13M / burn ~$2M per month = ~7.1 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon
+- **EQT** (watchlist) — balance_sheet: Current Ratio 0.71 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor)
+- **GWRE** (watchlist) — valuation: PE 85.8 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor)
 
 ### All Open Alerts
+- **GWRE** (watchlist) — valuation: PE 85.8 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-11-19)
+- **EQT** (watchlist) — balance_sheet: Current Ratio 0.71 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-11-19)
+- **ELVA** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $13M / burn ~$2M per month = ~7.1 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-11-19)
+- **ELVA** (watchlist) — valuation: PE 39.0 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-11-19)
+- **CRAK** (watchlist) — dividend: Dividend declined -50.9% vs prior 12 months (first flagged 2026-11-19)
 - **JNJ** (watchlist) — valuation: PE 41.4 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-11-19)
-- **ICLN** (watchlist) — dividend: Dividend declined -27.6% vs prior 12 months (first flagged 2026-11-19)
 - **DRIV** (watchlist) — dividend: Dividend declined -52.6% vs prior 12 months (first flagged 2026-11-19)
 - **DIS** (watchlist) — balance_sheet: Current Ratio 0.74 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-11-19)
 - **CSV** (watchlist) — balance_sheet: Debt/Equity 186.8 >= 150.0 -- lower is generally safer (0/10 — poor) (first flagged 2026-11-19)
@@ -314,7 +317,6 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **MELI** (watchlist) — valuation: PE 45.2 above rich threshold (35.0) -- lower is generally cheaper (0/10 — poor) (first flagged 2026-11-04)
 - **KARS** (watchlist) — dividend: Dividend declined -65.6% vs prior 12 months (first flagged 2026-11-04)
 - **KAR.AX** (watchlist) — dividend: Dividend declined -41.9% vs prior 12 months (first flagged 2026-11-04)
-- **BATT** (watchlist) — dividend: Dividend declined -8.2% vs prior 12 months (first flagged 2026-11-04)
 - **ADBE** (watchlist) — balance_sheet: Current Ratio 0.77 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-11-04)
 - **1211.HK** (watchlist) — going_concern: BANKRUPTCY RISK: Cash $71,723M / burn ~$8,949M per month = ~8.0 months of runway at the current rate -- more runway is safer (0/10 — poor), inside the standard one-year going-concern horizon -- will likely need to raise capital, cut spending, or sell assets soon (first flagged 2026-11-04)
 - **1211.HK** (watchlist) — balance_sheet: Current Ratio 0.84 <= 1.0 -- higher is generally safer, up to a point (0/10 — poor) (first flagged 2026-11-04)
@@ -340,36 +342,39 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **MACRO** (macro) — uk_cpi: UK headline CPI 3.1% YoY (reference month 2026-08-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone (first flagged 2026-09-16)
 
 ### Watchlist Opportunities (this run)
-- **3750.HK** — Buffett/Smith [ROE 24.4% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -42.9% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
-- **AEM** — Buffett/Smith [ROE 23.2% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -16.5% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
-- **ARKG** — Marks/Neilson [down -15.1% over 3 months with no other flags — possible overreaction, not a fundamental problem]
-- **ARKQ** — Marks/Neilson [down -18.8% over 3 months with no other flags — possible overreaction, not a fundamental problem]
-- **ASML** — Lynch [PEG 0.73 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 65.6% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -20.9% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
+- **3750.HK** — Buffett/Smith [ROE 24.4% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -43.4% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
+- **AEM** — Buffett/Smith [ROE 23.2% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -21.9% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
+- **ARKG** — Marks/Neilson [down -13.6% over 3 months with no other flags — possible overreaction, not a fundamental problem]
+- **ARKQ** — Marks/Neilson [down -19.4% over 3 months with no other flags — possible overreaction, not a fundamental problem]
+- **CPRT** — Buffett/Smith [ROE 16.2% at/above 15.0% (10/10 — excellent), not richly valued]
 - **CROX** — Buffett/Smith [ROE 49.1% at/above 15.0% (10/10 — excellent), not richly valued]
 - **DTG.DE** — Lynch [PEG 0.32 at/below 1.0 — growth at a reasonable price]
-- **INTC** — Marks/Neilson [down -40.5% over 3 months with no other flags — possible overreaction, not a fundamental problem]
+- **FNV** — Buffett/Smith [ROE 20.1% at/above 15.0% (10/10 — excellent), not richly valued]
+- **GOOG** — Lynch [PEG 0.98 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 44.3% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -18.2% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
+- **GOOGL** — Lynch [PEG 0.99 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 44.3% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -18.0% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
+- **GROW.L** — Graham [PE 9.3 x P/B 0.77 = 7.1, below 22.5]
+- **INTC** — Marks/Neilson [down -41.1% over 3 months with no other flags — possible overreaction, not a fundamental problem]
 - **JNJ** — Crash-discount fit [ROE 20.0% at/above 15.0% (10/10 — excellent), but currently rich (PE 41.4) — quality worth watching for a crash-driven discount rather than buying at today's price]
 - **KO** — Buffett/Smith [ROE 40.6% at/above 15.0% (10/10 — excellent), not richly valued]
-- **KSPI** — Graham [PE 7.9 at/below cheap threshold (12.0), P/B unavailable/implausible]; Buffett/Smith [ROE 41.9% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -10.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
+- **KSPI** — Graham [PE 7.9 at/below cheap threshold (12.0), P/B unavailable/implausible]; Buffett/Smith [ROE 41.9% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -10.5% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
 - **LEN** — Graham [PE 15.7 x P/B 0.91 = 14.4, below 22.5]
-- **LULU** — Graham [PE 9.1 at/below cheap threshold (12.0), P/B unavailable/implausible]; Buffett/Smith [ROE 30.9% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -12.8% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
+- **LULU** — Graham [PE 9.1 at/below cheap threshold (12.0), P/B unavailable/implausible]; Buffett/Smith [ROE 30.9% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
 - **META** — Lynch [PEG 0.80 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 32.3% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
 - **MPL.AX** — Buffett/Smith [ROE 27.2% at/above 15.0% (10/10 — excellent), not richly valued]
 - **MSFT** — Buffett/Smith [ROE 34.2% at/above 15.0% (10/10 — excellent), not richly valued]
-- **MX** — Marks/Neilson [down -29.4% over 3 months with no other flags — possible overreaction, not a fundamental problem]
-- **NEM** — Buffett/Smith [ROE 27.3% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -10.9% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
-- **NEWP** — Marks/Neilson [down -28.0% over 3 months with no other flags — possible overreaction, not a fundamental problem]
+- **MX** — Marks/Neilson [down -30.9% over 3 months with no other flags — possible overreaction, not a fundamental problem]
+- **NEM** — Buffett/Smith [ROE 27.3% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -16.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
+- **NEWP** — Marks/Neilson [down -28.3% over 3 months with no other flags — possible overreaction, not a fundamental problem]
 - **NEXG.V** — Marks/Neilson [down -26.3% over 3 months with no other flags — possible overreaction, not a fundamental problem]
-- **NFLX** — Lynch [PEG 0.95 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 53.5% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -25.6% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
+- **NFLX** — Lynch [PEG 0.95 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 53.5% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -25.4% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
 - **NHF.AX** — Buffett/Smith [ROE 16.4% at/above 15.0% (10/10 — excellent), not richly valued]
-- **NU** — Lynch [PEG 0.41 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 31.5% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -15.6% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
-- **PDD** — Graham [PE 8.7 x P/B 1.62 = 14.2, below 22.5]; Lynch [PEG 0.67 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 22.7% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -14.2% over 3 months with no other flags — possible overreaction, not a fundamental problem] (4 independent signals)
-- **QXO** — Graham [PE 26.8 x P/B 0.80 = 21.4, below 22.5]; Marks/Neilson [down -21.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
+- **NU** — Lynch [PEG 0.41 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 31.5% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -17.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (3 independent signals)
+- **PDD** — Graham [PE 8.7 x P/B 1.62 = 14.2, below 22.5]; Lynch [PEG 0.67 at/below 1.0 — growth at a reasonable price]; Buffett/Smith [ROE 22.7% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -14.1% over 3 months with no other flags — possible overreaction, not a fundamental problem] (4 independent signals)
+- **QXO** — Graham [PE 26.8 x P/B 0.80 = 21.4, below 22.5]; Marks/Neilson [down -20.3% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **RACE** — Crash-discount fit [ROE 43.8% at/above 15.0% (10/10 — excellent), but currently rich (PE 37.1) — quality worth watching for a crash-driven discount rather than buying at today's price]
 - **SHOP** — Crash-discount fit [ROE 16.8% at/above 15.0% (10/10 — excellent), but currently rich (PE 85.5) — quality worth watching for a crash-driven discount rather than buying at today's price]
 - **SII.TO** — Buffett/Smith [ROE 29.1% at/above 15.0% (10/10 — excellent), not richly valued]; Marks/Neilson [down -12.6% over 3 months with no other flags — possible overreaction, not a fundamental problem] (2 independent signals)
 - **STNG** — Graham [PE 4.1 x P/B 0.95 = 3.9, below 22.5]; Buffett/Smith [ROE 27.6% at/above 15.0% (10/10 — excellent), not richly valued] (2 independent signals)
-- **VGT** — Marks/Neilson [down -10.0% over 3 months with no other flags — possible overreaction, not a fundamental problem]
 - **VRTX** — Buffett/Smith [ROE 20.8% at/above 15.0% (10/10 — excellent), not richly valued]
 - **XMET** — Marks/Neilson [down -26.6% over 3 months with no other flags — possible overreaction, not a fundamental problem]
 
@@ -385,8 +390,8 @@ Bottom line: 1 flag(s) active (balance_sheet) — worth a look.
 - **uk_cpi** [flag] — UK headline CPI 3.6% YoY (reference month 2026-10-01), outside the 1-3% tolerance band around the BoE's 2% target — inflation running hotter than the BoE's comfort zone
 - **real_yields** [flag] — 10Y real yield +2.89% (as of 2026-11-17), above the 2.0% threshold -- elevated real yields historically pressure gold hard
 - **dollar_index** [ok] — Broad USD index 122.7, +1.3% over the past 30 days
-- **gold_trend** [info] — GC=F $3,747 (50DMA $4,143, 200DMA $4,458, -15.9% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $55.90 AUD; AUD/USD 3mo move -5.7%
-- **gold_silver_ratio** [flag] — Gold/silver ratio at 82.8, at/above the 80 historical-extreme-high level — gold is expensive relative to silver, a level some see as a mean-reversion setup (contested signal)
+- **gold_trend** [info] — GC=F $3,750 (50DMA $4,143, 200DMA $4,458, -15.9% from 200DMA); crossed below 200DMA on 2026-09-04 at $4,477, no cross back since; PMGOLD $55.90 AUD; AUD/USD 3mo move -5.8%
+- **gold_silver_ratio** [flag] — Gold/silver ratio at 82.7, at/above the 80 historical-extreme-high level — gold is expensive relative to silver, a level some see as a mean-reversion setup (contested signal)
 - **vix** [ok] — VIX at 24.6, below the flag threshold
 
 ### Gold Outlook
