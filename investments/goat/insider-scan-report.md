@@ -21,21 +21,16 @@ Market-wide $25k+ open-market insider purchases from the latest day's trade data
 
 | Ticker | Sector | Signal | Trade Date | Price Since Trade | Flagged |
 |--------|--------|--------|------------|--------------------|---------|
-| XTIA | Insider Buy | Evans Allan Thomas (Dir) bought $86,874 of XTIA on 2026-11-17 | 2026-11-17 | +0.0% since trade [below 50DMA (-2.7%); below 150DMA (-37.1%); below 200DMA (-43.9%) | chart setup score 45/100 (trend 0/40 (Stage 4 (below both 150/200DMA)); entry 25/25 (bought into weakness (bottom third of its own range)); momentum 12/20 (RSI 46 -- turning, not yet confirmed); extension 8/15 (hasn't broken above a long-term MA yet, n/a))] | 2026-11-19 |
 
 ### Discovery Candidates — By Trade Date
 Same candidates, re-sorted by the insider's trade date, most recent first.
 
-| Ticker | Sector | Signal | Trade Date | Price Since Trade | Flagged |
-|--------|--------|--------|------------|--------------------|---------|
-| XTIA | Insider Buy | Evans Allan Thomas (Dir) bought $86,874 of XTIA on 2026-11-17 | 2026-11-17 | +0.0% since trade [below 50DMA (-2.7%); below 150DMA (-37.1%); below 200DMA (-43.9%) | chart setup score 45/100 (trend 0/40 (Stage 4 (below both 150/200DMA)); entry 25/25 (bought into weakness (bottom third of its own range)); momentum 12/20 (RSI 46 -- turning, not yet confirmed); extension 8/15 (hasn't broken above a long-term MA yet, n/a))] | 2026-11-19 |
+No candidates with a recorded trade date.
 
 ### Discovery Candidates — By Trade Size
 Same candidates, re-sorted by the dollar value of the insider's buy (highest first) -- not percent of their own position, which stays visible per-row in the Signal column if you'd rather judge by conviction instead.
 
-| Ticker | Sector | Signal | Trade Date | Price Since Trade | Flagged |
-|--------|--------|--------|------------|--------------------|---------|
-| XTIA | Insider Buy | Evans Allan Thomas (Dir) bought $86,874 of XTIA on 2026-11-17 | 2026-11-17 | +0.0% since trade [below 50DMA (-2.7%); below 150DMA (-37.1%); below 200DMA (-43.9%) | chart setup score 45/100 (trend 0/40 (Stage 4 (below both 150/200DMA)); entry 25/25 (bought into weakness (bottom third of its own range)); momentum 12/20 (RSI 46 -- turning, not yet confirmed); extension 8/15 (hasn't broken above a long-term MA yet, n/a))] | 2026-11-19 |
+No candidates with a parseable trade value.
 
 ### Discovery Candidates — Price Up Since Trade
 Candidates whose price has risen since the insider's buy, biggest gain first.
@@ -72,4 +67,4 @@ Filings where the price has fallen since the trade, biggest drop first.
 
 No holdings filings have moved down since their trade yet.
 
-Last auto-generated: 2026-11-19 13:17 AEDT.
+Last auto-generated: 2026-11-19 13:27 AEDT.

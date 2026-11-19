@@ -38,13 +38,7 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 1 | Record debt issuance, hot sector (UNH) | ok | UNH: 0 debt-prospectus filing(s) in the trailing 180d (own 730d average: 0.7/period) -- counts filing events, not dollar principal |
 | 2 | Debt moves off balance sheet | ok | No hot-watchlist tickers with a resolvable lease-commitment reading this run. |
 | 3 | Seller finances buyer | unknown | No automatable source exists for vendor/circular-financing deals -- periodically news-scan the current hot watchlist yourself: LLY, WMT, JNJ, XOM, ABBV, COST, KO, CVX, PG, UNH |
-| 4 | Capex outruns cash flow (LLY) | ok | LLY: Free Cash Flow $+6.0B, Capital Expenditure $10.8B (period ending 2025-12-31) |
-| 4 | Capex outruns cash flow (WMT) | ok | WMT: Free Cash Flow $+14.9B, Capital Expenditure $26.6B (period ending 2026-01-31) |
-| 4 | Capex outruns cash flow (JNJ) | ok | JNJ: Free Cash Flow $+19.3B, Capital Expenditure $5.2B (period ending 2025-12-31) |
-| 4 | Capex outruns cash flow (XOM) | ok | XOM: Free Cash Flow $+23.6B, Capital Expenditure $28.4B (period ending 2025-12-31) |
-| 4 | Capex outruns cash flow (ABBV) | ok | ABBV: Free Cash Flow $+17.8B, Capital Expenditure $1.2B (period ending 2025-12-31) |
-| 4 | Capex outruns cash flow (COST) | ok | COST: Free Cash Flow $+9.4B, Capital Expenditure $6.4B (period ending 2026-08-31) |
-| 4 | Capex outruns cash flow (KO) | ok | KO: Free Cash Flow $+5.3B, Capital Expenditure $2.1B (period ending 2025-12-31) |
+| 4 | Capex outruns cash flow | ok | No hot-watchlist tickers with a resolvable cash-flow statement this run. |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-10-01, +22.4% YoY vs 2025-10-01 |
 | 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 145 filing(s) in the trailing 30d vs 198 in the same window a year ago (0.73x); 424B4 (priced IPO): 21 filing(s) in the trailing 30d vs 52 in the same window a year ago (0.40x) |
 | 7 | Retail piles into leverage | ok | Equity put/call ratio 0.71 (z=1.47 vs trailing 89d mean 0.60) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
