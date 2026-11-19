@@ -10,7 +10,7 @@ Hated since: 2026-11-16
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -20.8% | -27.0% | -16.8pp | -26.1pp | -27.8% |
+| -21.1% | -27.0% | -16.6pp | -27.3pp | -27.5% |
 
 **Narrative:** The dominant recent narrative is weakening oil prices as recovering supply and reduced demand raise fears of renewed oversupply, threatening producer spending and demand for drilling and completion services. Middle East operational disruptions and rising costs compound the pressure: [recent oil-market reporting](https://www.axios.com/2026/11/13/oil-markets-iran-prices-trump-deal), [industry earnings coverage](https://boereport.com/2026/10/28/oilfield-services-firms-lean-on-middle-east-rebound-but-risks-persist/amp/).
 **Systemic read:** industry-wide -- These are shared industry exposures rather than evidence of one or two company-specific problems, although their severity varies by geography and business mix, with some offshore markets strengthening: [SLB results](https://investorcenter.slb.com/news-releases/news-release-details/slb-announces-third-quarter-2026-results). XES is approximately equal-weighted; its five largest holdings were each around 4% on November 16, 2026, limiting individual-company dominance and establishing the holdings order below: [State Street holdings](https://www.ssga.com/us/en/institutional/etfs/state-street-spdr-sp-oil-gas-equipment-services-etf-xes), [ticker verification](https://stockanalysis.com/etf/xes/holdings/).
@@ -27,16 +27,16 @@ Representative constituents (read-only — not staged as candidates):
 | NE | Noble Corporation plc | -9.7% | — | declining |
 | SDRL | Seadrill Limited | +14.8% | — | growing |
 
-## Silver (SIL)
+## REIT - Mortgage (REM)
 
-Hated since: 2026-11-18
+Hated since: 2026-11-19
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -31.6% | -25.5% | -27.6pp | -24.5pp | -43.4% |
+| -27.9% | -23.2% | -23.4pp | -23.5pp | -30.9% |
 
-**Narrative:** As of November 18, 2026, the dominant negative narrative is macro-driven: hawkish Fed expectations, higher yields, dollar strength and risk aversion are depressing silver prices and mining equities, compounded by weaker industrial and photovoltaic demand. Recent reporting describes continued selling rather than a resolved correction ([recent coverage](https://finance.yahoo.com/markets/commodities/articles/silver-falls-below-50-hawkish-052326954.html), [Sprott analysis](https://sprott.com/media/oz4j5a3u/sprott-mining-minerals-monthly-oct-2026-rev.pdf)).
-**Systemic read:** industry-wide -- The evidence supports a broad commodity and financial-conditions shock: silver spot fell 18.74% in October while Sprott’s silver-miner benchmark fell 19.01%, supporting an industry-wide explanation rather than problems isolated to one or two constituents; exposure varies with metal mix and business model ([Sprott](https://sprott.com/media/oz4j5a3u/sprott-mining-minerals-monthly-oct-2026-rev.pdf)). Holdings below are SIL’s three largest, with issuer-reported November 17 weights of 24.85%, 10.74% and 9.78%, respectively ([Global X](https://www.globalxetfs.com/funds/sil), [company-name confirmation](https://stockanalysis.com/etf/sil/holdings/)).
+**Narrative:** The dominant narrative is renewed rate-cycle pressure: rising yields, interest-rate volatility and mortgage-backed securities underperforming hedges are eroding leveraged mortgage REIT book values and raising concerns about funding costs and dividend sustainability. AGNC reported a 16.9% quarterly tangible book-value decline, attributing losses to mortgage assets underperforming hedges ([AGNC Q3 commentary](https://agnc.com/the-earnings-extract-q3-2026/)).
+**Systemic read:** industry-wide -- The evidence supports a shared macroeconomic shock rather than a scandal at one or two constituents: Annaly also reported book value falling from $20.15 to $17.86, although exposure varies across agency securities, commercial loans and mortgage servicing businesses ([Annaly results](https://www.annaly.com/news-insights/press-releases/2026/10-20-2026-211553064)). REM's five largest holdings below were verified as of November 16, 2026, with respective weights of 23.43%, 15.98%, 6.97%, 5.35% and 4.89% ([holdings data](https://stockanalysis.com/etf/rem/holdings/)).
 
 **Fundamentals-divergence read:** fundamentals still growing despite the price decline
 
@@ -44,9 +44,8 @@ Representative constituents (read-only — not staged as candidates):
 
 | Ticker | Name | Revenue growth | Earnings growth | Read |
 |--------|------|-----------------|-------------------|------|
-| WPM | Wheaton Precious Metals Corp. | +62.0% | +11.8% | growing |
-| PAAS | Pan American Silver Corp. | +17.7% | +95.5% | growing |
-| CDE | Coeur Mining, Inc. | +77.4% | -73.9% | growing |
+| RITM | Rithm Capital Corp. | +57.6% | +8.6% | growing |
+| EFC | Ellington Financial Inc. | +41.2% | +7.5% | growing |
 
 ## Solar (TAN)
 
@@ -54,7 +53,7 @@ Hated since: 2026-11-12
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -23.9% | -39.9% | -19.9pp | -38.9pp | -48.8% |
+| -24.5% | -37.5% | -19.9pp | -37.8pp | -48.4% |
 
 **Narrative:** The dominant current narrative is financing-driven demand weakness: rising interest rates raise solar project costs and depress valuations, compounded by U.S. tax-credit withdrawal and policy uncertainty. Global manufacturing oversupply adds margin pressure, particularly for commodity producers. [Recent selloff reporting](https://finance.yahoo.com/energy/articles/solaredge-slides-5-rising-yields-185756011.html)
 **Systemic read:** industry-wide -- The evidence supports broad sector pressures rather than one or two constituents' scandals, although exposure is uneven: residential solar is especially vulnerable, while utility-scale businesses have stronger demand. SEIA reports residential installations down 12% year-over-year versus utility-scale growth of 61%; TAN's five largest disclosed holdings below are dated November 16, 2026, weighing 12.61%, 9.09%, 8.22%, 5.91% and 5.58%, respectively. [SEIA](https://seia.org/research-resources/solar-market-insight-report-q3-2026/) [Holdings source](https://stockanalysis.com/etf/tan/holdings/)
@@ -76,7 +75,7 @@ Hated since: 2026-11-04
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -32.9% | -38.8% | -28.9pp | -37.8pp | -52.4% |
+| -33.3% | -36.4% | -28.7pp | -36.7pp | -51.4% |
 
 **Narrative:** The dominant negative narrative is higher interest rates, tighter liquidity and doubts about sustained AI infrastructure spending driving a broad repricing of uranium and nuclear equities, particularly projects requiring substantial future financing. Physical uranium prices have remained comparatively firm, undermining an oversupply explanation ([Sprott, October 2026 review](https://sprott.com/media/oz4j5a3u/sprott-mining-minerals-monthly-oct-2026-rev.pdf)).
 **Systemic read:** industry-wide -- The evidence supports sector-wide financing and valuation pressure rather than one or two constituents' problems: uranium mining equities fell broadly while spot and long-term fuel prices held firm, although developers face greater financing exposure than established producers ([November 9 analysis](https://theoregongroup.com/latest-news/uranium-sell-off-hides-tightening-supply-outlook/4/)). The holdings below are the five largest in the issuer's November 10, 2026 disclosure, also corroborated in November 16 holdings data ([Global X](https://www.globalxetfs.com/funds/ura), [Stock Analysis](https://stockanalysis.com/etf/ura/holdings/)).
