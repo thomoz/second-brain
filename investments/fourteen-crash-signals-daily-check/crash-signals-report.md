@@ -4,23 +4,23 @@ What this is: 14 historical market-crash warning markers, checked daily so an ea
 
 Auto-generated daily -- overwritten every run. Advisor notes only; no trade action is ever suggested here (see SOUL.md). Per-marker source: investments/my-trader/14-signals-crash-warning-handoff.md.
 
-## Run: 2026-11-20
+## Run: 2026-11-21
 
 ## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)
 Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 mega-cap constituents -- never hardcoded to a fixed ticker list.
 
 | Rank | Ticker | Sector | Market Cap |
 |------|--------|--------|------------|
-| 1 | LLY | Health Care | $1204B |
-| 2 | WMT | Consumer Staples | $1003B |
-| 3 | JNJ | Health Care | $643B |
-| 4 | ABBV | Health Care | $501B |
-| 5 | COST | Consumer Staples | $485B |
-| 6 | KO | Consumer Staples | $413B |
-| 7 | PG | Consumer Staples | $389B |
-| 8 | MRK | Health Care | $327B |
-| 9 | UNH | Health Care | $296B |
-| 10 | PM | Consumer Staples | $291B |
+| 1 | LLY | Health Care | $1200B |
+| 2 | WMT | Consumer Staples | $1018B |
+| 3 | JNJ | Health Care | $651B |
+| 4 | ABBV | Health Care | $506B |
+| 5 | COST | Consumer Staples | $488B |
+| 6 | KO | Consumer Staples | $417B |
+| 7 | PG | Consumer Staples | $393B |
+| 8 | MRK | Health Care | $330B |
+| 9 | UNH | Health Care | $305B |
+| 10 | PM | Consumer Staples | $287B |
 
 ## Markers
 
@@ -49,23 +49,15 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (UNH) | ok | UNH: Free Cash Flow $+16.1B, Capital Expenditure $3.6B (period ending 2025-12-31) |
 | 4 | Capex outruns cash flow (PM) | ok | PM: Free Cash Flow $+10.7B, Capital Expenditure $1.6B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-10-01, +22.4% YoY vs 2025-10-01 |
-| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 150 filing(s) in the trailing 30d vs 198 in the same window a year ago (0.76x); 424B4 (priced IPO): 24 filing(s) in the trailing 30d vs 52 in the same window a year ago (0.46x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.72 (z=1.60 vs trailing 89d mean 0.60) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
-| 8 | Insider selling (LLY) | flag | LLY: $15,871,175 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (WMT) | flag | WMT: $2,967,506,404 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (JNJ) | flag | JNJ: $154,384,808 sold vs $257,688 bought, trailing 365 days |
-| 8 | Insider selling (ABBV) | flag | ABBV: $30,847,936 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (COST) | flag | COST: $13,466,818 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (KO) | flag | KO: $256,275,557 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (PG) | flag | PG: $93,911,490 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (MRK) | flag | MRK: $79,289,252 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (UNH) | flag | UNH: $944,910 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (PM) | flag | PM: $28,819,974 sold vs $0 bought, trailing 365 days |
-| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (87 day(s) away) -- ad-share content is not automatable, nothing to check yet |
+| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 152 filing(s) in the trailing 30d vs 192 in the same window a year ago (0.79x); 424B4 (priced IPO): 25 filing(s) in the trailing 30d vs 52 in the same window a year ago (0.48x) |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.62 (z=0.31 vs trailing 88d mean 0.60) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 8 | Insider selling (?) | unknown | OpenInsider fetch failed for both purchases and sales |
+| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (86 day(s) away) -- ad-share content is not automatable, nothing to check yet |
 | 10 | Most-valuable-company milestone | flag | LLY is the largest company in the current hot-sector watchlist ($1.20T, most recently crossed the $1.0T rung) |
-| 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
+| 11 | Regulators sound the alarm | flag | SEC Issues Proposal to Restructure the Consolidated Audit Trail (https://www.sec.gov/newsroom/press-releases/2026-117-sec-issues-proposal-restructure-consolidated-audit-trail) |
+| 11 | Regulators sound the alarm | flag | SEC Charges Indianapolis-Based Backward Hat Capital and Its Co-Founders With $560 Million Dollar Offering Fraud and Obtains Emergency Relief (https://www.sec.gov/newsroom/press-releases/2026-116-sec-charges-indianapolis-based-backward-hat-capital-its-co-founders-560-million-dollar-offering) |
 | 12 | Credit turns in the hot sector while broad market stays calm (JNJ) | unknown | JNJ: bond CUSIP 478160CY8 found, but no live or manually-entered yield reading available -- run `record-bond-yield JNJ <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (ABBV) | unknown | ABBV: bond CUSIP 00287YDR7 found, but no live or manually-entered yield reading available -- run `record-bond-yield ABBV <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (MRK) | unknown | MRK: bond CUSIP 58933YCD5 found, but no live or manually-entered yield reading available -- run `record-bond-yield MRK <yield_pct>` |
 | 13 | Funding markets start choking | ok | CP-Treasury spread (DCPN3M-DTB3) 0.11pp (z=1.06 vs trailing 365d) |
-| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.47pp (as of 2026-11-18); 0 consecutive day(s) at/above 3.5pp (needs 21 to flag) -- WATCH: within 0.3pp of the flag threshold (WATCH) |
+| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.52pp (as of 2026-11-19); 1 consecutive day(s) at/above 3.5pp (needs 21 to flag) -- WATCH: within 0.3pp of the flag threshold (WATCH) |
