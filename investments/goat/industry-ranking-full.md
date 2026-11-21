@@ -2,7 +2,7 @@
 
 Advisor notes only; no trade action is ever suggested here (see SOUL.md). Sourced from Finviz's own Groups performance view (finviz.com/groups.ashx?g=industry&v=140), covering all 144 Finviz industries -- not just the 39 with a dedicated, currently-trading ETF (see industry-ranking.md for that narrower, breakout-gated report). This is a pure informational ranking: no breakout signal, no candidate staging, no WhatsApp alert. Ranked throughout by Perf Week -- the nearest-term read on where money is moving into/out of an industry right now, not a longer trend (see industry-ranking.md for that).
 
-## Run: 2026-11-21
+## Run: 2026-11-22
 
 ## Top 10 Rising (by Perf Week)
 | Rank | Industry | Perf Week | Perf Month | Perf Quarter | Perf Half | Perf Year | Perf YTD |
@@ -183,32 +183,13 @@ All 144/144 industries, ranked by Perf Week.
 | 144 | Solar | -24.00% | -20.16% | -31.66% | -52.65% | -43.55% | -44.36% |
 
 ### Rotation Flow
-2 newly rising, 12 newly falling since the prior snapshot (51 still rising, 79 still falling unchanged).
+0 newly rising, 0 newly falling since the prior snapshot (53 still rising, 91 still falling unchanged).
 
-| Ticker | Label | From | To |
-|--------|-------|------|----|
-| Residential Construction | Residential Construction | Falling | Rising |
-| Conglomerates | Conglomerates | Rising | Falling |
-| Lumber & Wood Production | Lumber & Wood Production | Rising | Falling |
-| Publishing | Publishing | Rising | Falling |
-| Integrated Freight & Logistics | Integrated Freight & Logistics | Rising | Falling |
-| REIT - Office | REIT - Office | Rising | Falling |
-| Airlines | Airlines | Rising | Falling |
-| Auto & Truck Dealerships | Auto & Truck Dealerships | Rising | Falling |
-| Banks - Regional | Banks - Regional | Rising | Falling |
-| Oil & Gas Integrated | Oil & Gas Integrated | Falling | Rising |
-| Tools & Accessories | Tools & Accessories | Rising | Falling |
-| Textile Manufacturing | Textile Manufacturing | Rising | Falling |
-| Electronics & Computer Distribution | Electronics & Computer Distribution | Rising | Falling |
-| Rental & Leasing Services | Rental & Leasing Services | Rising | Falling |
+No transitions since the prior snapshot.
 
 ### Short-Window Flow (1-Week)
-0 newly rising, 3 newly falling since the prior snapshot (0 still rising, 141 still falling unchanged).
+0 newly rising, 0 newly falling since the prior snapshot (0 still rising, 144 still falling unchanged).
 
-| Ticker | Label | From | To |
-|--------|-------|------|----|
-| Shell Companies | Shell Companies | Rising | Falling |
-| Discount Stores | Discount Stores | Rising | Falling |
-| Packaged Foods | Packaged Foods | Rising | Falling |
+No transitions since the prior snapshot.
 
-Last auto-generated: 2026-11-21.
+Last auto-generated: 2026-11-22.
