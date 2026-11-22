@@ -51,4 +51,4 @@ Among filings whose 7-day move already confirmed the signal, what fraction still
 
 n=2911: 70% still confirmed direction at 30/90d, avg excess return -6.4%
 
-Last auto-generated: 2026-11-22 08:50 AEDT.
+Last auto-generated: 2026-11-23 08:51 AEDT.
