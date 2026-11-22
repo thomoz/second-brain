@@ -8,4 +8,4 @@ Scanned 742 ticker(s) across the combined universe.
 | Ticker | Company | Exchange | Industry | Signal | Flagged |
 |--------|---------|----------|----------|--------|---------|
 
-Last auto-generated: 2026-11-22.
+Last auto-generated: 2026-11-23.
