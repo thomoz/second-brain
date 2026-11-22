@@ -87,3 +87,6 @@ _(not yet populated)_
 
 ## 2026-10-22 Update
 - (Oct 22) Shaun reports earning 5.75% on his ING savings account.
+
+## 2026-11-22 Update
+- (Nov 22) Added AbbVie (ABBV) to my-trader watchlist Bucket 4, “Crash Discount Buys.”
