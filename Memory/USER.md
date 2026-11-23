@@ -202,3 +202,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 ## 2026-10-11 Reflection
 - (Oct 11) Rotation Watch artifact URL: https://claude.ai/code/artifact/2b273c17-d4f4-4948-81b9-af0b155c6d92
 - (Oct 11) Rotation Watch source path was temp scratchpad `rotation-watch.html`.
+
+## 2026-11-23 Reflection
+- (Nov 23) Updated Outlook junk rules deployed to VPS and confirmed working.
