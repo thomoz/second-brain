@@ -4,23 +4,23 @@ What this is: 14 historical market-crash warning markers, checked daily so an ea
 
 Auto-generated daily -- overwritten every run. Advisor notes only; no trade action is ever suggested here (see SOUL.md). Per-marker source: investments/my-trader/14-signals-crash-warning-handoff.md.
 
-## Run: 2026-11-23
+## Run: 2026-11-24
 
 ## Hot Company Watchlist (shared input for markers 1-4, 8, 10-13)
 Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 mega-cap constituents -- never hardcoded to a fixed ticker list.
 
 | Rank | Ticker | Sector | Market Cap |
 |------|--------|--------|------------|
-| 1 | LLY | Health Care | $1200B |
-| 2 | WMT | Consumer Staples | $1018B |
-| 3 | JNJ | Health Care | $651B |
-| 4 | ABBV | Health Care | $506B |
-| 5 | COST | Consumer Staples | $488B |
-| 6 | KO | Consumer Staples | $417B |
+| 1 | LLY | Health Care | $1216B |
+| 2 | WMT | Consumer Staples | $1031B |
+| 3 | JNJ | Health Care | $650B |
+| 4 | ABBV | Health Care | $510B |
+| 5 | COST | Consumer Staples | $487B |
+| 6 | KO | Consumer Staples | $412B |
 | 7 | PG | Consumer Staples | $393B |
-| 8 | MRK | Health Care | $330B |
-| 9 | UNH | Health Care | $305B |
-| 10 | PM | Consumer Staples | $287B |
+| 8 | MRK | Health Care | $334B |
+| 9 | UNH | Health Care | $301B |
+| 10 | PM | Consumer Staples | $284B |
 
 ## Markers
 
@@ -29,8 +29,6 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 1 | Record debt issuance, hot sector (LLY) | ok | LLY: 0 debt-prospectus filing(s) in the trailing 180d (own 730d average: 2.2/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (WMT) | flag | WMT: 6 debt-prospectus filing(s) in the trailing 180d (own 730d average: 3.0/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (JNJ) | ok | JNJ: 0 debt-prospectus filing(s) in the trailing 180d (own 730d average: 1.5/period) -- counts filing events, not dollar principal |
-| 1 | Record debt issuance, hot sector (ABBV) | ok | ABBV: 3 debt-prospectus filing(s) in the trailing 180d (own 730d average: 2.5/period) -- counts filing events, not dollar principal |
-| 1 | Record debt issuance, hot sector (COST) | ok | COST: 0 debt-prospectus filing(s) in the trailing 180d (own 730d average: 0.0/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (KO) | ok | KO: 0 debt-prospectus filing(s) in the trailing 180d (own 730d average: 0.0/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (PG) | ok | PG: 8 debt-prospectus filing(s) in the trailing 180d (own 730d average: 4.7/period) -- counts filing events, not dollar principal |
 | 1 | Record debt issuance, hot sector (MRK) | ok | MRK: 0 debt-prospectus filing(s) in the trailing 180d (own 730d average: 2.2/period) -- counts filing events, not dollar principal |
@@ -49,23 +47,14 @@ Dynamically recomputed every run from currently-rising GICS sectors + S&P 500 me
 | 4 | Capex outruns cash flow (UNH) | ok | UNH: Free Cash Flow $+16.1B, Capital Expenditure $3.6B (period ending 2025-12-31) |
 | 4 | Capex outruns cash flow (PM) | ok | PM: Free Cash Flow $+10.7B, Capital Expenditure $1.6B (period ending 2025-12-31) |
 | 5 | Margin debt YoY growth | ok | Margin debt $1.45T as of 2026-10-01, +22.4% YoY vs 2025-10-01 |
-| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 142 filing(s) in the trailing 30d vs 180 in the same window a year ago (0.79x); 424B4 (priced IPO): 24 filing(s) in the trailing 30d vs 44 in the same window a year ago (0.55x) |
-| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.77 (z=2.14 vs trailing 88d mean 0.60) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
-| 8 | Insider selling (LLY) | flag | LLY: $15,858,540 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (WMT) | flag | WMT: $2,967,099,884 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (JNJ) | flag | JNJ: $154,384,808 sold vs $257,688 bought, trailing 365 days |
-| 8 | Insider selling (ABBV) | flag | ABBV: $30,847,936 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (COST) | flag | COST: $13,466,818 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (KO) | flag | KO: $256,275,557 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (PG) | flag | PG: $93,911,490 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (MRK) | flag | MRK: $79,289,252 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (UNH) | flag | UNH: $944,910 sold vs $0 bought, trailing 365 days |
-| 8 | Insider selling (PM) | flag | PM: $28,819,974 sold vs $0 bought, trailing 365 days |
-| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (84 day(s) away) -- ad-share content is not automatable, nothing to check yet |
-| 10 | Most-valuable-company milestone | flag | LLY is the largest company in the current hot-sector watchlist ($1.20T, most recently crossed the $1.0T rung) |
+| 6 | Record IPO/equity issuance | ok | S-1 (intent to register): 136 filing(s) in the trailing 30d vs 171 in the same window a year ago (0.80x); 424B4 (priced IPO): 24 filing(s) in the trailing 30d vs 44 in the same window a year ago (0.55x) |
+| 7 | Retail piles into leverage | ok | Equity put/call ratio 0.77 (z=2.06 vs trailing 88d mean 0.60) -- options positioning proxy, not the video's ETF/fund-flow mechanism |
+| 8 | Insider selling (?) | unknown | OpenInsider fetch failed for both purchases and sales |
+| 9 | The Super Bowl signal | unknown | Next Super Bowl is 2027-02-14 (83 day(s) away) -- ad-share content is not automatable, nothing to check yet |
+| 10 | Most-valuable-company milestone | flag | LLY is the largest company in the current hot-sector watchlist ($1.22T, most recently crossed the $1.0T rung) |
 | 11 | Regulators sound the alarm | ok | No new matching regulator statements this run. |
 | 12 | Credit turns in the hot sector while broad market stays calm (JNJ) | unknown | JNJ: bond CUSIP 478160CY8 found, but no live or manually-entered yield reading available -- run `record-bond-yield JNJ <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (ABBV) | unknown | ABBV: bond CUSIP 00287YDR7 found, but no live or manually-entered yield reading available -- run `record-bond-yield ABBV <yield_pct>` |
 | 12 | Credit turns in the hot sector while broad market stays calm (MRK) | unknown | MRK: bond CUSIP 58933YCD5 found, but no live or manually-entered yield reading available -- run `record-bond-yield MRK <yield_pct>` |
 | 13 | Funding markets start choking | ok | CP-Treasury spread (DCPN3M-DTB3) 0.11pp (z=1.06 vs trailing 365d) |
-| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.52pp (as of 2026-11-19); 1 consecutive day(s) at/above 3.5pp (needs 21 to flag) -- WATCH: within 0.3pp of the flag threshold (WATCH) |
+| 14 | High-yield credit spread streak | ok | ICE BofA US HY OAS at 3.76pp (as of 2026-11-20); 2 consecutive day(s) at/above 3.5pp (needs 21 to flag) -- WATCH: within 0.3pp of the flag threshold (WATCH) |
