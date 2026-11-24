@@ -70,6 +70,11 @@ def init_signals_tables(conn: sqlite3.Connection) -> None:
                 observed_at   TEXT PRIMARY KEY,
                 ratio         REAL NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS signals_hyoas_history (
+                observed_at   TEXT PRIMARY KEY,
+                value         REAL NOT NULL,
+                recorded_at   TEXT NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS signals_regulator_alert_seen (
                 guid          TEXT PRIMARY KEY,
                 source        TEXT NOT NULL,
@@ -204,6 +209,33 @@ def get_putcall_history(conn: sqlite3.Connection, since_days: int) -> list[sqlit
     cutoff = (date.today() - timedelta(days=since_days)).isoformat()
     return conn.execute(
         "SELECT * FROM signals_putcall_history WHERE observed_at >= ? ORDER BY observed_at",
+        (cutoff,),
+    ).fetchall()
+
+
+def record_hyoas_history(conn: sqlite3.Connection, history: list[tuple[date, float]]) -> None:
+    """Upsert the whole FRED-returned range (ascending (date, value) tuples), not just
+    today's point -- backfills our own copy up to the caller's lookback window on the
+    first run and keeps re-upserting FRED's trailing days (which can revise) on every
+    run after. Same "own the history ourselves" shape as signals_putcall_history, except
+    seeded from a source that already has deep history rather than built up one day at
+    a time -- see credit_spread.py's call site."""
+    now = _now()
+    with conn:
+        conn.executemany(
+            """INSERT INTO signals_hyoas_history (observed_at, value, recorded_at)
+               VALUES (?, ?, ?)
+               ON CONFLICT(observed_at) DO UPDATE SET value=excluded.value, recorded_at=excluded.recorded_at""",
+            [(d.isoformat(), v, now) for d, v in history],
+        )
+
+
+def get_hyoas_history(conn: sqlite3.Connection, since_days: int) -> list[sqlite3.Row]:
+    from datetime import timedelta
+
+    cutoff = (date.today() - timedelta(days=since_days)).isoformat()
+    return conn.execute(
+        "SELECT * FROM signals_hyoas_history WHERE observed_at >= ? ORDER BY observed_at",
         (cutoff,),
     ).fetchall()
 

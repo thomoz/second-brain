@@ -47,7 +47,7 @@ def cmd_daily_check(args) -> None:
 
     conn = _open_conn()
     hot_watchlist = watchlist.get_or_refresh_hot_watchlist(conn)
-    credit_spread_result = credit_spread.check_credit_spread_streak()
+    credit_spread_result = credit_spread.check_credit_spread_streak(conn)
     margin_debt_result = margin_debt.check_margin_debt_growth()
     insider_trend_results = insider_trend.check_insider_trend(conn)
     market_cap_result = market_cap_milestone.check_market_cap_milestone(hot_watchlist)

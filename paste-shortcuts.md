@@ -3,10 +3,12 @@
 
 claude --dangerously-skip-permissions
 
-go ahead and create the structured plan, asking me questions if you need to, for the handoff file O:\AI\Dynamous\Courses\second-brain-workshop\.agent\plans\outlook-junk-deletion-handoff.md
+go ahead and create the structured plan, asking me questions if you need to, for the handoff file 
 
 
-ready for execution: .agent/plans/outlook-junk-deletion.md
+
+
+ready for execution: 
 
 adds etfs to breakouts:
 

@@ -7,15 +7,16 @@ scripts.macro's low-level helpers -- see the Phase 1 plan's Design Decision #2."
 
 from __future__ import annotations
 
+import sqlite3
 from datetime import date, timedelta
 
 from mytrader.checks import CheckResult
 from scripts.macro import fred_series_range
 
-from . import config
+from . import config, db
 
 
-def check_credit_spread_streak() -> CheckResult:
+def check_credit_spread_streak(conn: sqlite3.Connection) -> CheckResult:
     today = date.today()
     history = fred_series_range(
         config.SIGNALS_CREDIT_SPREAD_SERIES,
@@ -27,6 +28,8 @@ def check_credit_spread_streak() -> CheckResult:
             name="credit_spread_streak", verdict="unknown",
             detail="FRED high-yield credit spread data unavailable (FRED_API_KEY not set, or series unavailable)",
         )
+
+    db.record_hyoas_history(conn, history)  # own copy of the trailing window, see db.py's docstring
 
     streak_days = 0
     for _, value in reversed(history):  # walk backward from most recent -- history is ascending

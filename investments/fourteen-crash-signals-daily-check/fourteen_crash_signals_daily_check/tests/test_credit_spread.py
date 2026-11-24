@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
-from fourteen_crash_signals_daily_check import config, credit_spread
+from fourteen_crash_signals_daily_check import config, credit_spread, db
 
 
 def _history(values_from_oldest_to_newest: list[float]) -> list[tuple[date, float]]:
@@ -14,82 +14,84 @@ def _history(values_from_oldest_to_newest: list[float]) -> list[tuple[date, floa
     ]
 
 
-def test_check_credit_spread_streak_unknown_when_fred_unavailable(monkeypatch):
+def test_check_credit_spread_streak_unknown_when_fred_unavailable(monkeypatch, db_conn):
     monkeypatch.setattr("fourteen_crash_signals_daily_check.credit_spread.fred_series_range", lambda series_id, start, end: None)
-    result = credit_spread.check_credit_spread_streak()
+    result = credit_spread.check_credit_spread_streak(db_conn)
     assert result.verdict == "unknown"
+    assert db.get_hyoas_history(db_conn, since_days=30) == []
 
 
-def test_check_credit_spread_streak_ok_when_below_threshold(monkeypatch):
+def test_check_credit_spread_streak_ok_when_below_threshold(monkeypatch, db_conn):
     monkeypatch.setattr(
         "fourteen_crash_signals_daily_check.credit_spread.fred_series_range",
         lambda series_id, start, end: _history([2.7, 2.7, 2.7]),
     )
-    result = credit_spread.check_credit_spread_streak()
+    result = credit_spread.check_credit_spread_streak(db_conn)
     assert result.verdict == "ok"
     assert result.data["streak_days"] == 0
+    assert [r["value"] for r in db.get_hyoas_history(db_conn, since_days=30)] == [2.7, 2.7, 2.7]
 
 
-def test_check_credit_spread_streak_ok_when_streak_too_short(monkeypatch):
+def test_check_credit_spread_streak_ok_when_streak_too_short(monkeypatch, db_conn):
     values = [3.6] * (config.SIGNALS_CREDIT_SPREAD_STREAK_TRADING_DAYS - 1)
     monkeypatch.setattr(
         "fourteen_crash_signals_daily_check.credit_spread.fred_series_range",
         lambda series_id, start, end: _history(values),
     )
-    result = credit_spread.check_credit_spread_streak()
+    result = credit_spread.check_credit_spread_streak(db_conn)
     assert result.verdict == "ok"
     assert result.data["streak_days"] == config.SIGNALS_CREDIT_SPREAD_STREAK_TRADING_DAYS - 1
 
 
-def test_check_credit_spread_streak_flags_at_exact_boundary(monkeypatch):
+def test_check_credit_spread_streak_flags_at_exact_boundary(monkeypatch, db_conn):
     values = [3.6] * config.SIGNALS_CREDIT_SPREAD_STREAK_TRADING_DAYS
     monkeypatch.setattr(
         "fourteen_crash_signals_daily_check.credit_spread.fred_series_range",
         lambda series_id, start, end: _history(values),
     )
-    result = credit_spread.check_credit_spread_streak()
+    result = credit_spread.check_credit_spread_streak(db_conn)
     assert result.verdict == "flag"
     assert result.data["streak_days"] == config.SIGNALS_CREDIT_SPREAD_STREAK_TRADING_DAYS
 
 
-def test_check_credit_spread_streak_breaks_on_a_dip_below_threshold(monkeypatch):
+def test_check_credit_spread_streak_breaks_on_a_dip_below_threshold(monkeypatch, db_conn):
     values = [3.6] * config.SIGNALS_CREDIT_SPREAD_STREAK_TRADING_DAYS + [2.0, 3.9]
     monkeypatch.setattr(
         "fourteen_crash_signals_daily_check.credit_spread.fred_series_range",
         lambda series_id, start, end: _history(values),
     )
-    result = credit_spread.check_credit_spread_streak()
+    result = credit_spread.check_credit_spread_streak(db_conn)
     assert result.data["streak_days"] == 1  # only the most recent day counts, the dip reset the streak
 
 
-def test_check_credit_spread_streak_watch_true_when_value_in_watch_band(monkeypatch):
+def test_check_credit_spread_streak_watch_true_when_value_in_watch_band(monkeypatch, db_conn):
     monkeypatch.setattr(
         "fourteen_crash_signals_daily_check.credit_spread.fred_series_range",
         lambda series_id, start, end: _history([3.3, 3.3, 3.3]),
     )
-    result = credit_spread.check_credit_spread_streak()
+    result = credit_spread.check_credit_spread_streak(db_conn)
     assert result.verdict == "ok"
     assert result.data["watch"] is True
     assert "WATCH" in result.detail
 
 
-def test_check_credit_spread_streak_watch_false_when_value_below_watch_band(monkeypatch):
+def test_check_credit_spread_streak_watch_false_when_value_below_watch_band(monkeypatch, db_conn):
     monkeypatch.setattr(
         "fourteen_crash_signals_daily_check.credit_spread.fred_series_range",
         lambda series_id, start, end: _history([2.7, 2.7, 2.7]),
     )
-    result = credit_spread.check_credit_spread_streak()
+    result = credit_spread.check_credit_spread_streak(db_conn)
     assert result.verdict == "ok"
     assert result.data["watch"] is False
     assert "WATCH" not in result.detail
 
 
-def test_check_credit_spread_streak_flag_path_unaffected_by_watch_tier(monkeypatch):
+def test_check_credit_spread_streak_flag_path_unaffected_by_watch_tier(monkeypatch, db_conn):
     values = [3.6] * config.SIGNALS_CREDIT_SPREAD_STREAK_TRADING_DAYS
     monkeypatch.setattr(
         "fourteen_crash_signals_daily_check.credit_spread.fred_series_range",
         lambda series_id, start, end: _history(values),
     )
-    result = credit_spread.check_credit_spread_streak()
+    result = credit_spread.check_credit_spread_streak(db_conn)
     assert result.verdict == "flag"
     assert "watch" not in result.data

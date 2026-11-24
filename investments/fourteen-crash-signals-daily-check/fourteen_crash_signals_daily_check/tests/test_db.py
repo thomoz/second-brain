@@ -199,6 +199,40 @@ def test_get_putcall_history_excludes_rows_older_than_since_days(db_conn):
     assert rows[0]["ratio"] == 0.65
 
 
+def test_record_and_get_hyoas_history(db_conn):
+    from datetime import date
+
+    db.record_hyoas_history(db_conn, [(date(2026, 11, 22), 3.60), (date(2026, 11, 23), 3.63)])
+    rows = db.get_hyoas_history(db_conn, since_days=30)
+    assert [(r["observed_at"], r["value"]) for r in rows] == [
+        ("2026-11-22", 3.60), ("2026-11-23", 3.63),
+    ]
+
+
+def test_record_hyoas_history_upserts_on_conflicting_date(db_conn):
+    from datetime import date
+
+    db.record_hyoas_history(db_conn, [(date(2026, 11, 23), 3.63)])
+    db.record_hyoas_history(db_conn, [(date(2026, 11, 23), 3.70)])  # FRED revised the same day's point
+    rows = db.get_hyoas_history(db_conn, since_days=30)
+    assert len(rows) == 1
+    assert rows[0]["value"] == 3.70
+
+
+def test_get_hyoas_history_excludes_rows_older_than_since_days(db_conn):
+    db_conn.execute(
+        "INSERT INTO signals_hyoas_history (observed_at, value, recorded_at) VALUES (?, ?, ?)",
+        ("2020-01-01", 3.0, "2020-01-01T00:00:00+00:00"),
+    )
+    db_conn.commit()
+    from datetime import date
+
+    db.record_hyoas_history(db_conn, [(date.today(), 3.63)])
+    rows = db.get_hyoas_history(db_conn, since_days=30)
+    assert len(rows) == 1
+    assert rows[0]["value"] == 3.63
+
+
 def test_has_seen_regulator_alert_false_before_true_after(db_conn):
     assert db.has_seen_regulator_alert(db_conn, "guid-1") is False
     db.mark_regulator_alert_seen(db_conn, guid="guid-1", source="sec", title="Statement")
