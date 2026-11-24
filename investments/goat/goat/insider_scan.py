@@ -264,7 +264,9 @@ def _cluster_history_rows(conn: sqlite3.Connection, ticker: str, trade_date_str:
 
 
 def _check_insider_flip(
-    conn: sqlite3.Connection, ticker: str, insider_name: str, trade_date_str: str
+    conn: sqlite3.Connection, ticker: str, insider_name: str, trade_date_str: str,
+    company_name: str | None = None, buy_value: float | None = None,
+    pct_of_position_value: float | None = None,
 ) -> dict[str, Any] | None:
     """Returns a flip-alert dict when THIS SAME insider sold this ticker within
     GOAT_INSIDER_FLIP_WINDOW_DAYS before this new buy -- Shaun 2026-11-08: a
@@ -273,7 +275,14 @@ def _check_insider_flip(
     once per qualifying buy filing (dedup is automatic -- this is only ever called
     the moment a buy filing is first inserted, newly_seen=True, same as the
     existing per-trade discovery alert). Called from BOTH run_holdings_watch and
-    run_discovery_scan, same reasoning as _check_buy_cluster."""
+    run_discovery_scan, same reasoning as _check_buy_cluster.
+
+    company_name/buy_value/pct_of_position_value are passed through from the
+    caller's own buy row (Shaun 2026-11-24: wants the flip WhatsApp alert to name
+    the company and show this buy-back's value as a % of the insider's total
+    position in the company -- same metric as _pct_of_position_value, computed
+    by the caller since that needs the raw scrape row's owned/price fields,
+    not available from DB args alone)."""
     try:
         buy_date = datetime.strptime(trade_date_str, "%Y-%m-%d").date()
     except (ValueError, TypeError):
@@ -287,9 +296,11 @@ def _check_insider_flip(
         return None
     sale_date = datetime.strptime(prior_sale["trade_date"], "%Y-%m-%d").date()
     return {
-        "ticker": ticker, "insider_name": insider_name,
+        "ticker": ticker, "insider_name": insider_name, "company_name": company_name,
         "sale_date": prior_sale["trade_date"], "sale_value": prior_sale["value"],
-        "buy_date": trade_date_str, "days_between": (buy_date - sale_date).days,
+        "buy_date": trade_date_str, "buy_value": buy_value,
+        "pct_of_position_value": pct_of_position_value,
+        "days_between": (buy_date - sale_date).days,
     }
 
 
@@ -377,7 +388,9 @@ def run_holdings_watch(conn: sqlite3.Connection) -> dict[str, Any]:
             if cluster_event:
                 new_cluster_alerts.append(cluster_event)
             flip_event = _check_insider_flip(
-                conn, row["ticker"], row.get("insider_name", ""), row.get("trade_date", "")
+                conn, row["ticker"], row.get("insider_name", ""), row.get("trade_date", ""),
+                company_name=row.get("company_name"), buy_value=row["value"],
+                pct_of_position_value=_pct_of_position_value(row),
             )
             if flip_event:
                 new_flip_alerts.append(flip_event)
@@ -510,7 +523,11 @@ def run_discovery_scan(conn: sqlite3.Connection) -> dict[str, Any]:
         cluster_event = _check_buy_cluster(conn, ticker, row.get("trade_date", ""))
         if cluster_event:
             new_cluster_alerts.append(cluster_event)
-        flip_event = _check_insider_flip(conn, ticker, row.get("insider_name", ""), row.get("trade_date", ""))
+        flip_event = _check_insider_flip(
+            conn, ticker, row.get("insider_name", ""), row.get("trade_date", ""),
+            company_name=row.get("company_name"), buy_value=row["value"],
+            pct_of_position_value=_pct_of_position_value(row),
+        )
         if flip_event:
             new_flip_alerts.append(flip_event)
 
@@ -1004,10 +1021,13 @@ def maybe_notify_insider_flips(flip_events: list[dict[str, Any]]) -> None:
     )
     lines = [f"Goat Insider Flip Alert: {summary}."]
     for e in flip_events:
+        company = f" ({e['company_name']})" if e.get("company_name") else ""
+        pct = e.get("pct_of_position_value")
+        pct_clause = f", {pct:.0f}% of their position in the company" if pct is not None else ""
         lines.append(
-            f"- {e['ticker']}: {e['insider_name']} sold ${e['sale_value']:,.0f} on "
-            f"{e['sale_date']}, bought back on {e['buy_date']} "
-            f"({e['days_between']}d later)"
+            f"- {e['ticker']}{company}: {e['insider_name']} sold ${e['sale_value']:,.0f} on "
+            f"{e['sale_date']}, bought back ${e['buy_value']:,.0f} on {e['buy_date']}"
+            f"{pct_clause} ({e['days_between']}d later)"
         )
     send_whatsapp_notification("\n".join(lines))
 

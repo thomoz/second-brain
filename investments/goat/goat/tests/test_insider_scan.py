@@ -559,15 +559,20 @@ def test_check_insider_flip_fires_on_buyback_within_window(db_conn, monkeypatch)
         trade_date=sale_date, insider_name="John Smith", trade_type="S",
         value=50_000.0, kind="discovery_sell",
     )
-    row = _purchase_row(ticker="ACME", trade_date=today)
+    row = _purchase_row(ticker="ACME", trade_date=today, value=92_000.0, owned="10,000", price="10.00")
     row["insider_name"] = "John Smith"
+    row["company_name"] = "Acme Corporation"
     monkeypatch.setattr(
         "goat.insider_scan.openinsider.fetch_discovery_purchases",
         lambda: [row],
     )
     result = insider_scan.run_discovery_scan(db_conn)
     assert len(result["new_flip_alerts"]) == 1
-    assert result["new_flip_alerts"][0]["days_between"] == 30
+    flip = result["new_flip_alerts"][0]
+    assert flip["days_between"] == 30
+    assert flip["company_name"] == "Acme Corporation"
+    assert flip["buy_value"] == 92_000.0
+    assert flip["pct_of_position_value"] == 92.0
 
 
 def test_check_insider_flip_ignores_sale_outside_window(db_conn, monkeypatch):
@@ -615,6 +620,45 @@ def test_check_insider_flip_ignores_a_buy_with_no_prior_sale(db_conn, monkeypatc
     )
     result = insider_scan.run_discovery_scan(db_conn)
     assert result["new_flip_alerts"] == []
+
+
+def test_maybe_notify_insider_flips_includes_company_value_and_position_pct(monkeypatch):
+    # Shaun 2026-11-24: the flip alert needs the company name, the dollar value
+    # of the buy-back, and what % of the insider's total position in the
+    # company that buy-back represents -- same metric as _pct_of_position_value.
+    import sys
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+
+    insider_scan.maybe_notify_insider_flips([{
+        "ticker": "ACME", "company_name": "Acme Corporation", "insider_name": "John Smith",
+        "sale_date": "2026-10-25", "sale_value": 50_000.0,
+        "buy_date": "2026-11-24", "buy_value": 92_000.0,
+        "pct_of_position_value": 92.0, "days_between": 30,
+    }])
+    assert len(whatsapp_calls) == 1
+    (message,), _kwargs = whatsapp_calls[0]
+    assert "ACME (Acme Corporation)" in message
+    assert "John Smith sold $50,000 on 2026-10-25" in message
+    assert "bought back $92,000 on 2026-11-24" in message
+    assert "92% of their position in the company" in message
+    assert "30d later" in message
+
+
+def test_maybe_notify_insider_flips_omits_position_pct_when_unknown(monkeypatch):
+    import sys
+    toast_calls, whatsapp_calls = [], []
+    monkeypatch.setitem(sys.modules, "notifications", _fake_notifications_module(toast_calls, whatsapp_calls))
+
+    insider_scan.maybe_notify_insider_flips([{
+        "ticker": "ACME", "company_name": None, "insider_name": "John Smith",
+        "sale_date": "2026-10-25", "sale_value": 50_000.0,
+        "buy_date": "2026-11-24", "buy_value": 92_000.0,
+        "pct_of_position_value": None, "days_between": 30,
+    }])
+    (message,), _kwargs = whatsapp_calls[0]
+    assert "of their position in the company" not in message
+    assert "ACME:" in message
 
 
 def test_render_insider_scan_report_lists_alerts_and_pending_candidates():
