@@ -10,7 +10,7 @@ Hated since: 2026-11-19
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -37.6% | -31.0% | -32.1pp | -27.7pp | -37.6% |
+| -40.4% | -32.2% | -31.0pp | -25.2pp | -41.6% |
 
 **Narrative:** The recent selloff reflects fears of weaker Chinese demand and slowing AI/data-centre investment, compounded by higher financing costs, dollar strength and possible unwinding of US tariff-driven copper stockpiles. These pressures have triggered speculative liquidation despite continuing physical supply constraints ([Saxo, November 18](https://www.home.saxo/en-gb/content/articles/commodities/copper-short-term-demand-fears-collide-with-long-term-supply-constraints-18112026)).
 **Systemic read:** industry-wide -- The evidence points to shared copper-price and macroeconomic exposure across miners, rather than one or two constituents' scandals; the impact varies with costs and diversification, so systemic does not mean identical damage. Holdings below are the five largest in Schwab's retrieved portfolio table, with exchange-qualified tickers verified against Global X ([Schwab](https://www.schwab.wallst.com/schwab/Prospect/research/etfs/schwabETF/index.asp?symbol=COPX&type=holdings), [Global X](https://www.globalxetfs.com/funds/copx)).
@@ -23,7 +23,7 @@ Hated since: 2026-11-19
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -37.6% | -29.6% | -32.1pp | -26.3pp | -45.5% |
+| -39.9% | -31.5% | -30.5pp | -24.5pp | -48.8% |
 
 **Narrative:** The dominant narrative is a macro-driven precious-metals selloff: persistent inflation and expected Fed tightening, dollar strength, and technology/AI equity weakness are pressuring silver and industrial-demand expectations, amplifying fears about miners’ earnings. [CME November update](https://www.cmegroup.com/newsletters/micro-gold-silver-and-copper-monthly-update/2026-11-micro-metals-products-update.html), [November 20 reporting](https://www.kitco.com/news/article/2026-11-20/gold-falls-toward-3500-silver-slides-stock-markets-enter-correction).
 **Systemic read:** industry-wide -- The evidence points to shared commodity-price and market pressures rather than one or two constituents’ scandals; exposure varies with costs, gold production, and royalty/streaming business models, so the impact need not be uniform. The holdings below are ranked by November 20, 2026 weights: 25.11%, 10.79%, 9.28%, 5.16%, and 4.73%, respectively. [Holdings source](https://companiesmarketcap.com/global-x-silver-miners-etf/holdings/).
@@ -44,7 +44,7 @@ Hated since: 2026-11-12
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -27.6% | -48.7% | -22.1pp | -45.4pp | -52.1% |
+| -29.7% | -48.5% | -20.3pp | -41.5pp | -54.1% |
 
 **Narrative:** Solar's dominant negative narrative is a policy-driven demand cliff from expiring U.S. tax credits and regulatory uncertainty, compounded by elevated interest rates that undermine project financing and residential affordability. These pressures explain broad selling across equipment manufacturers and installers ([S&P Global](https://www.spglobal.com/market-intelligence/en/news-insights/articles/2026/9/solar-stocks-stumble-over-stroke-of-a-pen-105648067)).
 **Systemic read:** industry-wide -- The evidence supports a systemic sector headwind rather than one or two companies' problems: multiple manufacturers, tracker suppliers and residential providers have suffered substantial declines, although exposure varies and utility-scale demand has proved stronger than residential demand. Holdings below are the five largest reported for November 20, 2026, weighted 11.17%, 9.08%, 9.01%, 6.32% and 5.48%, respectively ([holdings](https://stockanalysis.com/etf/tan/holdings/)).
@@ -66,7 +66,7 @@ Hated since: 2026-11-04
 
 | 3mo return | 6mo return | vs SPY (3mo) | vs SPY (6mo) | Drawdown from high |
 |------------|------------|--------------|--------------|---------------------|
-| -41.1% | -44.2% | -35.6pp | -40.9pp | -54.1% |
+| -41.4% | -45.3% | -31.9pp | -38.3pp | -56.7% |
 
 **Narrative:** The dominant narrative is a broad risk-off liquidity squeeze and higher-rate pressure on uranium equities’ valuations and project financing, amplified by unwinding enthusiasm for AI-related nuclear power. Uranium prices have remained firm, weakening the commodity-glut explanation. [Sprott commentary](https://sprott.com/media/oz4j5a3u/sprott-mining-minerals-monthly-oct-2026-rev.pdf)
 **Systemic read:** industry-wide -- Evidence favors sector-wide financial pressure: both uranium miners and junior miners declined despite rising October spot and long-term uranium prices, although financing sensitivity varies by company. Cameco’s operational problems add pressure but do not adequately explain the breadth of selling; Global X’s November 20, 2026 holdings rank the following positions at 21.64%, 9.24%, 6.18%, 5.58% and 4.52%, respectively. [Sector analysis](https://theoregongroup.com/latest-news/uranium-sell-off-hides-tightening-supply-outlook/) [Issuer holdings](https://www.globalxetfs.com/funds/ura)
