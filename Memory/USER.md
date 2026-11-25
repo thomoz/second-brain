@@ -205,3 +205,6 @@ Skip drafts for: Newsletters, automated notifications, spam
 
 ## 2026-11-23 Reflection
 - (Nov 23) Updated Outlook junk rules deployed to VPS and confirmed working.
+
+## 2026-11-25 Reflection
+- HY OAS history tracking deployed to VPS; daily checks record signals_hyoas_history at 22:05 UTC.
